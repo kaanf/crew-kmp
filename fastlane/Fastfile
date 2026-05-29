@@ -1,0 +1,8 @@
+platform :ios do
+  lane :ios_build do
+    build_app(
+      project: "iosApp/iosApp.xcodeproj",
+      scheme: "iosApp"
+    )
+  end
+end

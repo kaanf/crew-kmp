@@ -1,0 +1,100 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# IntelliJ IDEA / Android Studio
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Gradle / Kotlin
+.gradle/
+.kotlin/
+build/
+**/build/
+!src/**/build/
+!**/src/**/build/
+
+# Android
+local.properties
+captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# Android signing / secrets
+*.jks
+*.keystore
+*.p12
+*.pem
+*.key
+
+# Kotlin Multiplatform / Compose
+composeApp/.gradle/
+**/composeResources/generated/
+
+# Xcode / iOS
+DerivedData/
+*.xcuserstate
+*.xcscmblueprint
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/project.xcworkspace/
+!*.xcodeproj/project.xcworkspace/contents.xcworkspacedata
+!*.xcodeproj/xcshareddata/
+
+*.xcworkspace/*
+!*.xcworkspace/contents.xcworkspacedata
+
+xcuserdata/
+**/xcuserdata/
+**/xcshareddata/WorkspaceSettings.xcsettings
+
+# CocoaPods / Swift Package Manager
+Pods/
+.build/
+Package.resolved
+
+# Ruby / Bundler / Fastlane
+.bundle/
+vendor/bundle/
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/
+fastlane/test_output/
+
+# Environment files / generated credentials
+.env
+.env.*
+!.env.example
+google-services.json
+GoogleService-Info.plist
+firebase-adminsdk*.json
+service-account*.json
+fastlane/.env*
+fastlane/*.json
+fastlane/*.p12
+fastlane/*.cer
+fastlane/*.mobileprovision
+
+# Node tooling, if added for scripts or web assets
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Local assistant files
+CLAUDE.md
+.claude/

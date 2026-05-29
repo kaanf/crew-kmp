@@ -1,0 +1,51 @@
+package com.kaanf.crew
+
+import android.content.Intent
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.kaanf.crew.navigation.ExternalUriHandler
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        var isSplashScreenNeeded = true
+        installSplashScreen().setKeepOnScreenCondition {
+            isSplashScreenNeeded
+        }
+
+        enableEdgeToEdge()
+        super.onCreate(savedInstanceState)
+        // dispatchDeepLinkIntent(intent)
+
+        setContent {
+            App(
+                onAuthenticationChecked = {
+                    isSplashScreenNeeded = false
+                }
+            )
+        }
+    }
+
+    /*
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        dispatchDeepLinkIntent(intent)
+    }
+
+    private fun dispatchDeepLinkIntent(intent: Intent?) {
+        val uri = intent?.dataString ?: return
+        ExternalUriHandler.onNewUri(uri)
+    }
+     */
+}
+
+@Preview
+@Composable
+fun AppAndroidPreview() {
+    App()
+}
