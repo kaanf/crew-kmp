@@ -12,7 +12,6 @@ import com.kaanf.core.presentation.util.UIText
 import com.kaanf.core.presentation.util.toUiText
 import crew.feature.auth.presentation.generated.resources.Res
 import crew.feature.auth.presentation.generated.resources.snackbar_uplink_failure_title
-import crew.feature.auth.presentation.generated.resources.verification_mail_sent_title
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -86,16 +85,6 @@ class EmailVerificationSentViewModel(
             try {
                 when (val result = authRepository.resendVerificationMail(email)) {
                     is Result.Success -> {
-                        eventChannel.send(
-                            BaseEvent.ShowSnackbar(
-                                SnackbarMessage(
-                                    title = UIText.Resource(Res.string.verification_mail_sent_title),
-                                    description = UIText.Resource(Res.string.verification_mail_sent_title),
-                                    variant = SnackbarVariant.Success,
-                                ),
-                            ),
-                        )
-
                         startResendCountdown()
                     }
 

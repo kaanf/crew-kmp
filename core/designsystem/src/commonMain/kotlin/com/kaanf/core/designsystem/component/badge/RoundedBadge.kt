@@ -10,39 +10,45 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kaanf.core.designsystem.theme.AccessDefaults
+import com.kaanf.core.designsystem.theme.AccessShapes
 import com.kaanf.core.designsystem.theme.CrewTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun RoundedBadge(
     modifier: Modifier = Modifier,
-    title: String
+    backgroundColor: Color = AccessDefaults.SurfaceElevated,
+    borderColor: Color = AccessDefaults.BorderSoft,
+    textColor: Color = AccessDefaults.TextSecondary,
+    isLive: Boolean = false,
+    text: String
 ) {
     Box(
         modifier = modifier
             .wrapContentSize()
             .background(
-                color = AccessDefaults.SurfaceElevated,
-                shape = RoundedCornerShape(12.dp)
+                color = backgroundColor,
+                shape = AccessShapes.Medium
             )
             .border(
                 width = 1.dp,
-                color = AccessDefaults.BorderSoft,
-                shape = RoundedCornerShape(12.dp)
+                color = borderColor,
+                shape = AccessShapes.Medium
             )
             .padding(
-                horizontal = 8.dp,
-                vertical = 4.dp
+                horizontal = 10.dp,
+                vertical = 6.dp
             )
     ) {
         Text(
-            text = title,
+            text = text,
             style = MaterialTheme.typography.labelMedium.copy(
                 fontSize = 11.sp,
-                color = AccessDefaults.TextSecondary
+                color = textColor
             )
         )
     }
@@ -52,6 +58,6 @@ fun RoundedBadge(
 @Composable
 fun RoundedBadgePreview() {
     CrewTheme {
-        RoundedBadge(title = "%42 full")
+        RoundedBadge(text = "%42 full")
     }
 }

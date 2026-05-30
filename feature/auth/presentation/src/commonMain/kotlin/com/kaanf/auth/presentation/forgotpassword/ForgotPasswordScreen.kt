@@ -29,10 +29,6 @@ import com.kaanf.core.designsystem.theme.CrewTheme
 import com.kaanf.core.presentation.util.ObserveAsEvents
 import com.kaanf.core.presentation.util.clearFocusOnTap
 import crew.feature.auth.presentation.generated.resources.Res
-import crew.feature.auth.presentation.generated.resources.forgot_password_email_placeholder
-import crew.feature.auth.presentation.generated.resources.forgot_password_primary_action_send_reset_link
-import crew.feature.auth.presentation.generated.resources.forgot_password_subtitle
-import crew.feature.auth.presentation.generated.resources.forgot_password_title
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -89,34 +85,10 @@ fun ForgotPasswordScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Text(
-                text = stringResource(Res.string.forgot_password_title),
-
-            )
-
-            Text(
-                text = stringResource(Res.string.forgot_password_subtitle),
-            )
         }
 
         Spacer(
             modifier = Modifier.weight(1f),
-        )
-
-        BaseTextField(
-            state = state.emailTextState,
-            placeholder = stringResource(Res.string.forgot_password_email_placeholder),
-        )
-
-        BaseButton(
-            text = stringResource(Res.string.forgot_password_primary_action_send_reset_link),
-            onClick = {
-            },
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(top = 18.dp),
-            isLoading = state.isLoading,
         )
     }
 }

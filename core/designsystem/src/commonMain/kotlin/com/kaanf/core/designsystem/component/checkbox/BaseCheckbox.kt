@@ -25,6 +25,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kaanf.core.designsystem.theme.AccessDefaults
+import com.kaanf.core.designsystem.theme.AccessShapes
 import com.kaanf.core.designsystem.theme.CrewTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -38,7 +39,7 @@ fun BaseCheckbox(
     testTag: String? = null,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
-    val shape = RoundedCornerShape(6.dp)
+    val shape = AccessShapes.XSmall
     val indicatorColor = if (checked) AccessDefaults.Accent else AccessDefaults.SurfaceElevated
     val indicatorBorderColor = if (checked) AccessDefaults.Accent else AccessDefaults.Border
     val checkColor = AccessDefaults.Background

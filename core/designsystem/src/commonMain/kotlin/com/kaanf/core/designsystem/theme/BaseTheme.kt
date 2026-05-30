@@ -5,6 +5,8 @@ import androidx.compose.ui.graphics.Color
 object AccessDefaults {
     val Background = Color(0xFF0E0B08)
 
+    val AppBarShadow = Color(0xFF0A0806)
+
     val Surface = Color(0xFF181410)
     val SurfaceElevated = Color(0xFF211B15)
     val SurfaceHigh = Color(0xFF2C241D)

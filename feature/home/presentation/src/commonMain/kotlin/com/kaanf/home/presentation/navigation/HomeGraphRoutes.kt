@@ -8,6 +8,16 @@ sealed interface HomeGraphRoutes {
 
     @Serializable
     data object Dashboard : HomeGraphRoutes
+
     @Serializable
     data object EventDetail : HomeGraphRoutes
+
+    @Serializable
+    data object TicketQr : HomeGraphRoutes
+
+    @Serializable
+    data object EventCode : HomeGraphRoutes
+
+    @Serializable
+    data object GameLobby : HomeGraphRoutes
 }

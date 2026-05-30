@@ -59,11 +59,24 @@ class AndroidApplicationConventionPlugin: Plugin<Project> {
                 }
 
                 buildTypes {
+                    getByName("debug") {
+                        isDebuggable = true
+                    }
+
                     getByName("release") {
+                        isDebuggable = false
                         isMinifyEnabled = false
                         if (hasReleaseSigning) {
                             signingConfig = signingConfigs.getByName("release")
                         }
+                    }
+
+                    create("benchmark") {
+                        initWith(getByName("release"))
+                        signingConfig = signingConfigs.getByName("debug")
+                        isDebuggable = false
+                        isProfileable = true
+                        matchingFallbacks += listOf("release")
                     }
                 }
 

@@ -1,5 +1,5 @@
 package com.kaanf.core.presentation.model
 
 enum class AppTopBarState {
-    Title, Dashboard
+    Login, Register, Dashboard, EventDetail, TicketQr, EventCode, GameLobby
 }

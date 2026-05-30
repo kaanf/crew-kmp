@@ -22,6 +22,10 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.FlowRow
+import com.kaanf.core.designsystem.component.avatar.AvatarCircle
+import com.kaanf.core.designsystem.component.avatar.AvatarStack
+import com.kaanf.core.designsystem.component.avatar.ExtraAvatarCircle
+import com.kaanf.core.presentation.model.UserAvatar
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -30,13 +34,13 @@ fun LobbyFillingCard(
     currentCount: Int = 42,
     capacity: Int = 80,
     todayCount: Int = 9,
-    avatars: List<LobbyAvatar> = listOf(
-        LobbyAvatar("M", Color(0xFFC8FF3D)),
-        LobbyAvatar("J", Color(0xFF6FB7FF)),
-        LobbyAvatar("K", Color(0xFFFF7A5C)),
-        LobbyAvatar("R", Color(0xFF5BE0C5)),
-        LobbyAvatar("A", Color(0xFFFF5A7A)),
-        LobbyAvatar("L", Color(0xFFFFB341)),
+    avatars: List<UserAvatar> = listOf(
+        UserAvatar("M", Color(0xFFC8FF3D)),
+        UserAvatar("J", Color(0xFF6FB7FF)),
+        UserAvatar("K", Color(0xFFFF7A5C)),
+        UserAvatar("R", Color(0xFF5BE0C5)),
+        UserAvatar("A", Color(0xFFFF5A7A)),
+        UserAvatar("L", Color(0xFFFFB341)),
     )
 ) {
     val progress = currentCount / capacity.toFloat()
@@ -78,8 +82,6 @@ fun LobbyFillingCard(
                     fontWeight = FontWeight.ExtraBold
                 )
             }
-
-            TodayBadge(count = todayCount)
         }
 
         AvatarStack(
@@ -90,8 +92,6 @@ fun LobbyFillingCard(
         Column(
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            StripedProgressBar(progress = progress)
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -169,176 +169,6 @@ fun LobbyFillingCard(
         }
     }
 }
-
-data class LobbyAvatar(
-    val label: String,
-    val color: Color
-)
-
-@Composable
-private fun TodayBadge(
-    count: Int,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier
-            .wrapContentWidth()
-            .clip(RoundedCornerShape(999.dp))
-            .background(Color(0xFF23300E))
-            .border(
-                width = 1.dp,
-                color = Color(0xFF6E8F1D),
-                shape = RoundedCornerShape(999.dp)
-            )
-            .padding(horizontal = 12.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .size(10.dp)
-                .background(Color(0xFFC8FF3D), CircleShape)
-        )
-
-        Text(
-            text = "+$count today",
-            color = Color(0xFFC8FF3D),
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Bold
-        )
-    }
-}
-
-@Composable
-private fun AvatarStack(
-    avatars: List<LobbyAvatar>,
-    extraCount: Int,
-    modifier: Modifier = Modifier
-) {
-    val avatarSize = 46.dp
-    val step = 34.dp
-    val totalCount = avatars.size + 1
-
-    Box(
-        modifier = modifier
-            .height(avatarSize)
-            .width(avatarSize + step * (totalCount - 1))
-    ) {
-        avatars.forEachIndexed { index, avatar ->
-            AvatarCircle(
-                label = avatar.label,
-                color = avatar.color,
-                modifier = Modifier.offset(x = step * index)
-            )
-        }
-
-        ExtraAvatarCircle(
-            count = extraCount,
-            modifier = Modifier.offset(x = step * avatars.size)
-        )
-    }
-}
-
-@Composable
-private fun AvatarCircle(
-    label: String,
-    color: Color,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier
-            .size(46.dp)
-            .clip(CircleShape)
-            .background(color)
-            .border(2.dp, Color(0xFF14100C), CircleShape),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = label,
-            color = Color(0xFF17110D),
-            fontSize = 18.sp,
-            fontWeight = FontWeight.ExtraBold
-        )
-    }
-}
-
-@Composable
-private fun ExtraAvatarCircle(
-    count: Int,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier
-            .size(46.dp)
-            .clip(CircleShape)
-            .background(Color(0xFF312B23))
-            .border(2.dp, Color(0xFF14100C), CircleShape),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = "+$count",
-            color = Color(0xFFD3C9BA),
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Bold
-        )
-    }
-}
-
-@Composable
-private fun StripedProgressBar(
-    progress: Float,
-    modifier: Modifier = Modifier
-) {
-    val shape = RoundedCornerShape(999.dp)
-
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(28.dp)
-            .clip(shape)
-            .background(Color(0xFF282219))
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxHeight()
-                .fillMaxWidth(progress.coerceIn(0f, 1f))
-                .clip(shape)
-                .background(Color(0xFFC8FF3D))
-                .drawWithContent {
-                    drawContent()
-
-                    val stripeGap = 18.dp.toPx()
-                    val stroke = 2.dp.toPx()
-                    var x = -size.height
-
-                    while (x < size.width + size.height) {
-                        drawLine(
-                            color = Color.White.copy(alpha = 0.18f),
-                            start = Offset(x, size.height),
-                            end = Offset(x + size.height, 0f),
-                            strokeWidth = stroke
-                        )
-                        x += stripeGap
-                    }
-                }
-        )
-
-        Box(
-            modifier = Modifier
-                .fillMaxHeight()
-                .fillMaxWidth(progress.coerceIn(0f, 1f))
-                .background(
-                    Brush.horizontalGradient(
-                        colors = listOf(
-                            Color.Transparent,
-                            Color(0x55C8FF3D)
-                        )
-                    )
-                )
-        )
-    }
-}
-
 @Composable
 private fun StatPill(
     text: String,

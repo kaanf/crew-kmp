@@ -1,0 +1,57 @@
+<!-- res/drawable/ic_qr_24.xml -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <!-- Top left square -->
+    <path
+        android:pathData="M4,3h5a1,1 0,0 1,1 1v5a1,1 0,0 1,-1 1H4a1,1 0,0 1,-1 -1V4a1,1 0,0 1,1 -1z"
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="1.7"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <!-- Top right square -->
+    <path
+        android:pathData="M15,3h5a1,1 0,0 1,1 1v5a1,1 0,0 1,-1 1h-5a1,1 0,0 1,-1 -1V4a1,1 0,0 1,1 -1z"
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="1.7"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <!-- Bottom left square -->
+    <path
+        android:pathData="M4,14h5a1,1 0,0 1,1 1v5a1,1 0,0 1,-1 1H4a1,1 0,0 1,-1 -1v-5a1,1 0,0 1,1 -1z"
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="1.7"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <!-- QR detail lines -->
+    <path
+        android:pathData="M14,14h3v3M21,14v3M14,18v3h3M21,21h-3"
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="1.7"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <!-- Small dots -->
+    <path
+        android:pathData="M17,17m-0.75,0a0.75,0.75 0,1 0,1.5 0a0.75,0.75 0,1 0,-1.5 0"
+        android:fillColor="#FFFFFFFF" />
+
+    <path
+        android:pathData="M21,17m-0.75,0a0.75,0.75 0,1 0,1.5 0a0.75,0.75 0,1 0,-1.5 0"
+        android:fillColor="#FFFFFFFF" />
+
+    <path
+        android:pathData="M17,21m-0.75,0a0.75,0.75 0,1 0,1.5 0a0.75,0.75 0,1 0,-1.5 0"
+        android:fillColor="#FFFFFFFF" />
+
+</vector>

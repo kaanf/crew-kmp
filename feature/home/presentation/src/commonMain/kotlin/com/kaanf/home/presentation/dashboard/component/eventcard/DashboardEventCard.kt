@@ -1,4 +1,4 @@
-package com.kaanf.home.presentation.dashboard.component
+package com.kaanf.home.presentation.dashboard.component.eventcard
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -20,7 +20,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -28,14 +27,13 @@ import com.kaanf.core.designsystem.component.badge.RoundedBadge
 import com.kaanf.core.designsystem.component.progressbar.BaseProgressBar
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.CrewTheme
-import com.kaanf.core.domain.model.event.EventDashboard
 import com.kaanf.home.presentation.model.EventDashboardUiModel
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
-fun EventRow(
+fun DashboardEventCard(
     modifier: Modifier = Modifier,
-    onClicked: (eventId: String) -> Unit = { },
+    onClicked: (eventId: String) -> Unit,
     event: EventDashboardUiModel
 ) {
     Box(
@@ -126,8 +124,7 @@ fun EventRow(
                     )
 
                     RoundedBadge(
-                        modifier = Modifier.align(Alignment.End),
-                        title = "%${event.percentage} Full"
+                        text = "%${event.percentage} Full"
                     )
                 }
             }
@@ -141,7 +138,7 @@ fun EventRow(
 @Composable
 fun EventRowPreview() {
     CrewTheme {
-        EventRow(
+        DashboardEventCard(
             event = EventDashboardUiModel(
                 id = "1",
                 title = "Live bar games. You show up solo, leave with a story.",
@@ -149,7 +146,7 @@ fun EventRowPreview() {
                 formattedPrice = "220 CZK",
                 percentage = 42,
                 isFeatured = false,
-            )
+            ), onClicked = {}
         )
     }
 }

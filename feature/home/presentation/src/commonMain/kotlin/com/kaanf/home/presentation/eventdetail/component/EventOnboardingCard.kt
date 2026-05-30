@@ -23,7 +23,7 @@ import com.kaanf.core.designsystem.theme.CrewTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
-fun EventOnboarding() {
+fun EventOnboardingCard() {
     Column(
         modifier = Modifier
             .padding(4.dp)
@@ -142,6 +142,6 @@ private val eventOnboardingItems = listOf(
 @Preview
 fun EventOnboardingRowPreview() {
     CrewTheme {
-        EventOnboarding()
+        EventOnboardingCard()
     }
 }

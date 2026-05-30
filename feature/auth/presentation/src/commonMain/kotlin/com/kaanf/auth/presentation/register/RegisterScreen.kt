@@ -1,19 +1,12 @@
 package com.kaanf.auth.presentation.register
 
-import androidx.compose.foundation.BorderStroke
-import com.kaanf.auth.domain.model.Gender
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.verticalScroll
@@ -27,18 +20,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.kaanf.auth.domain.model.Gender
 import com.kaanf.core.designsystem.component.button.BaseButton
 import com.kaanf.core.designsystem.component.checkbox.BaseCheckbox
 import com.kaanf.core.designsystem.component.layout.AppTopBar
-import com.kaanf.core.designsystem.component.layout.LoadingOverlayLayout
 import com.kaanf.core.designsystem.component.layout.SnackbarScaffold
 import com.kaanf.core.designsystem.component.layout.showSnackbar
 import com.kaanf.core.designsystem.component.sheet.SelectionBottomSheet
@@ -50,18 +40,21 @@ import com.kaanf.core.designsystem.component.textfield.DateOutputTransformation
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.CrewTheme
 import com.kaanf.core.presentation.base.BaseEvent
+import com.kaanf.core.presentation.model.AppTopBarState
 import com.kaanf.core.presentation.util.ObserveAsEvents
-import com.kaanf.core.presentation.util.TestTags
 import com.kaanf.core.presentation.util.clearFocusOnTap
 import crew.feature.auth.presentation.generated.resources.Res
-import crew.feature.auth.presentation.generated.resources.login_email_label
-import crew.feature.auth.presentation.generated.resources.login_password_label
+import crew.feature.auth.presentation.generated.resources.auth_email_label
+import crew.feature.auth.presentation.generated.resources.auth_email_placeholder
+import crew.feature.auth.presentation.generated.resources.auth_password_label
+import crew.feature.auth.presentation.generated.resources.register_confirm_password_label
+import crew.feature.auth.presentation.generated.resources.register_confirm_password_placeholder
 import crew.feature.auth.presentation.generated.resources.register_date_of_birth_label
 import crew.feature.auth.presentation.generated.resources.register_date_of_birth_placeholder
-import crew.feature.auth.presentation.generated.resources.register_email_placeholder
+import crew.feature.auth.presentation.generated.resources.register_description
 import crew.feature.auth.presentation.generated.resources.register_full_name_label
+import crew.feature.auth.presentation.generated.resources.register_full_name_hint
 import crew.feature.auth.presentation.generated.resources.register_full_name_placeholder
-import crew.feature.auth.presentation.generated.resources.register_full_name_supporting_text
 import crew.feature.auth.presentation.generated.resources.register_gender_female
 import crew.feature.auth.presentation.generated.resources.register_gender_label
 import crew.feature.auth.presentation.generated.resources.register_gender_male
@@ -70,15 +63,11 @@ import crew.feature.auth.presentation.generated.resources.register_gender_other
 import crew.feature.auth.presentation.generated.resources.register_gender_placeholder
 import crew.feature.auth.presentation.generated.resources.register_gender_prefer_not_to_say
 import crew.feature.auth.presentation.generated.resources.register_gender_sheet_title
+import crew.feature.auth.presentation.generated.resources.register_headline
 import crew.feature.auth.presentation.generated.resources.register_password_placeholder
-import crew.feature.auth.presentation.generated.resources.register_password_supporting_text
-import crew.feature.auth.presentation.generated.resources.register_primary_action_begin_first_case
-import crew.feature.auth.presentation.generated.resources.register_re_type_password_label
-import crew.feature.auth.presentation.generated.resources.register_re_type_password_placeholder
-import crew.feature.auth.presentation.generated.resources.register_subtitle
-import crew.feature.auth.presentation.generated.resources.register_terms_agreement
-import crew.feature.auth.presentation.generated.resources.register_title
-import crew.feature.auth.presentation.generated.resources.register_top_bar_login_action
+import crew.feature.auth.presentation.generated.resources.register_password_requirements_hint
+import crew.feature.auth.presentation.generated.resources.register_primary_action_create_account
+import crew.feature.auth.presentation.generated.resources.register_terms_checkbox_label
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -111,21 +100,24 @@ fun RegisterRoot(
         }
     }
 
-    SnackbarScaffold(snackbarHostState = snackbarHostState) { innerPadding ->
-        LoadingOverlayLayout(
+    SnackbarScaffold(
+        topBar = {
+            AppTopBar(
+                state = AppTopBarState.Register,
+                onBackClick = onBackClick,
+                onRightClick = onReturnToLoginClick,
+            )
+        },
+        snackbarHostState = snackbarHostState,
+    ) { innerPadding ->
+        RegisterScreen(
             modifier =
                 Modifier
                     .padding(innerPadding)
                     .consumeWindowInsets(innerPadding),
-            isLoading = state.isRegistering,
-        ) {
-            RegisterScreen(
-                state = state,
-                onAction = viewModel::onAction,
-                onBackClick = onBackClick,
-                onReturnToLoginClick = onReturnToLoginClick,
-            )
-        }
+            state = state,
+            onAction = viewModel::onAction,
+        )
     }
 }
 
@@ -134,18 +126,15 @@ fun RegisterScreen(
     modifier: Modifier = Modifier,
     state: RegisterState,
     onAction: (RegisterAction) -> Unit,
-    onBackClick: () -> Unit,
-    onReturnToLoginClick: () -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
     val scrollState = rememberScrollState()
     var showGenderSheet by remember { mutableStateOf(false) }
 
     Box(
-        modifier =
-            modifier
-                .fillMaxSize()
-                .clearFocusOnTap(),
+        modifier = modifier
+            .fillMaxSize()
+            .clearFocusOnTap(),
     ) {
         Column(
             modifier = Modifier
@@ -153,12 +142,6 @@ fun RegisterScreen(
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            AppTopBar(
-                rightText = stringResource(Res.string.register_top_bar_login_action),
-                onBackClick = onBackClick,
-                onRightClick = onReturnToLoginClick,
-            )
-
             Column(
                 modifier =
                     Modifier
@@ -168,14 +151,14 @@ fun RegisterScreen(
                         .verticalScroll(scrollState),
             ) {
                 Text(
-                    text = stringResource(Res.string.register_title),
+                    text = stringResource(Res.string.register_headline),
                     style = MaterialTheme.typography.displaySmall.copy(
                         color = AccessDefaults.TextPrimary,
                     ),
                 )
 
                 Text(
-                    text = stringResource(Res.string.register_subtitle),
+                    text = stringResource(Res.string.register_description),
                     style = MaterialTheme.typography.bodySmall.copy(
                         color = AccessDefaults.TextMuted,
                         fontSize = 14.sp,
@@ -189,28 +172,28 @@ fun RegisterScreen(
                 ) {
                     BaseTextField(
                         state = state.emailTextState,
-                        label = stringResource(Res.string.login_email_label),
-                        placeholder = stringResource(Res.string.register_email_placeholder),
+                        label = stringResource(Res.string.auth_email_label),
+                        placeholder = stringResource(Res.string.auth_email_placeholder),
                         keyboardType = KeyboardType.Email,
                     )
 
                     BasePasswordTextField(
                         state = state.passwordTextState,
-                        label = stringResource(Res.string.login_password_label),
-                        hint = stringResource(Res.string.register_password_supporting_text),
+                        label = stringResource(Res.string.auth_password_label),
+                        hint = stringResource(Res.string.register_password_requirements_hint),
                         placeholder = stringResource(Res.string.register_password_placeholder),
                     )
 
                     BasePasswordTextField(
                         state = state.rePasswordTextState,
-                        label = stringResource(Res.string.register_re_type_password_label),
-                        placeholder = stringResource(Res.string.register_re_type_password_placeholder),
+                        label = stringResource(Res.string.register_confirm_password_label),
+                        placeholder = stringResource(Res.string.register_confirm_password_placeholder),
                     )
 
                     BaseTextField(
                         state = state.fullNameTextState,
                         label = stringResource(Res.string.register_full_name_label),
-                        hint = stringResource(Res.string.register_full_name_supporting_text),
+                        hint = stringResource(Res.string.register_full_name_hint),
                         placeholder = stringResource(Res.string.register_full_name_placeholder),
                     )
 
@@ -236,12 +219,12 @@ fun RegisterScreen(
                     BaseCheckbox(
                         checked = state.hasAcceptedTerms,
                         onCheckedChange = { onAction(RegisterAction.OnTermsToggle) },
-                        label = stringResource(Res.string.register_terms_agreement),
+                        label = stringResource(Res.string.register_terms_checkbox_label),
                         modifier = Modifier.padding(top = 8.dp),
                     )
 
                     BaseButton(
-                        text = stringResource(Res.string.register_primary_action_begin_first_case),
+                        text = stringResource(Res.string.register_primary_action_create_account),
                         onClick = {
                             focusManager.clearFocus()
                             onAction(RegisterAction.OnRegisterClick)
@@ -296,8 +279,6 @@ private fun RegisterScreenPreview() {
                     hasAcceptedTerms = true,
                 ),
             onAction = {},
-            onBackClick = {},
-            onReturnToLoginClick = {},
         )
     }
 }

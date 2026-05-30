@@ -1,4 +1,5 @@
 package com.kaanf.home.presentation.eventdetail
 
-class EventDetailAction {
+sealed interface EventDetailAction {
+    data object OnCheckoutClicked : EventDetailAction
 }

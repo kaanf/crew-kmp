@@ -30,6 +30,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kaanf.core.designsystem.theme.AccessDefaults
+import com.kaanf.core.designsystem.theme.AccessShapes
 import com.kaanf.core.designsystem.theme.CrewTheme
 import com.kaanf.core.designsystem.util.toCustomSnackbarVariant
 import com.kaanf.core.presentation.model.SnackbarMessage
@@ -125,17 +126,17 @@ internal fun CustomSnackbar(
             modifier
                 .shadow(
                     elevation = 24.dp,
-                    shape = RoundedCornerShape(12.dp),
+                    shape = AccessShapes.Medium,
                     clip = false,
                 )
                 .background(
                     color = AccessDefaults.SurfaceElevated,
-                    shape = RoundedCornerShape(12.dp),
+                    shape = AccessShapes.Medium,
                 )
                 .border(
                     width = 1.dp,
                     color = AccessDefaults.BorderSoft,
-                    shape = RoundedCornerShape(12.dp),
+                    shape = AccessShapes.Medium,
                 )
                 .padding(horizontal = 12.dp, vertical = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),

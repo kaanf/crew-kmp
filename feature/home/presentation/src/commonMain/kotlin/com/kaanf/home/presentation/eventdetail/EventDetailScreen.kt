@@ -13,9 +13,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
@@ -35,96 +35,126 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
+import com.kaanf.core.designsystem.component.button.BaseButton
 import com.kaanf.core.designsystem.component.layout.AppTopBar
-import com.kaanf.core.designsystem.component.layout.LoadingOverlayLayout
 import com.kaanf.core.designsystem.component.layout.SnackbarScaffold
 import com.kaanf.core.designsystem.theme.AccessDefaults
-import com.kaanf.core.designsystem.theme.BricolageGrotesque
 import com.kaanf.core.presentation.model.AppTopBarState
 import com.kaanf.core.presentation.util.ObserveAsEvents
-import com.kaanf.home.presentation.component.eventHeroBackground
 import com.kaanf.home.presentation.eventdetail.component.EventDetailInformationCard
-import com.kaanf.home.presentation.eventdetail.component.EventOnboarding
+import com.kaanf.home.presentation.eventdetail.component.EventOnboardingCard
 import com.kaanf.home.presentation.eventdetail.component.SafetyBadge
+import crew.feature.home.presentation.generated.resources.Res
+import crew.feature.home.presentation.generated.resources.event_detail_hero_date
+import crew.feature.home.presentation.generated.resources.event_detail_hero_title
+import crew.feature.home.presentation.generated.resources.event_detail_ticket_cta
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 
-
 @Composable
 fun EventDetailRoot(
-    viewModel: EventDetailViewModel = koinViewModel()
+    viewModel: EventDetailViewModel = koinViewModel(),
+    onBackClick: () -> Unit,
+    onCheckoutSuccess: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
+    val listState: LazyListState = rememberLazyListState()
+
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
+            EventDetailEvent.CheckoutSuccess -> {
+                onCheckoutSuccess()
+            }
         }
     }
 
-    SnackbarScaffold(snackbarHostState = snackbarHostState) { innerPadding ->
-        LoadingOverlayLayout(
-            modifier =
-                Modifier
-                    .padding(innerPadding)
-                    .consumeWindowInsets(innerPadding),
-            isLoading = false,
-        ) {
-            EventDetailScreen(
-                state = state,
-                onAction = {},
+    SnackbarScaffold(
+        topBar = {
+            AppTopBar(
+                state = AppTopBarState.EventDetail,
+                elevated = { listState.canScrollBackward },
+                onBackClick = { onBackClick() },
             )
-        }
+        },
+        snackbarHostState = snackbarHostState,
+    ) { innerPadding ->
+        EventDetailScreen(
+            modifier = Modifier
+                .padding(innerPadding)
+                .consumeWindowInsets(innerPadding),
+            listState = listState,
+            state = state,
+            onAction = {
+                when (it) {
+                    EventDetailAction.OnCheckoutClicked -> onCheckoutSuccess()
+                }
+            },
+        )
     }
 }
 
 @Composable
 fun EventDetailScreen(
+    modifier: Modifier,
+    listState: LazyListState,
     state: EventDetailState,
     onAction: (EventDetailAction) -> Unit,
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
+    Box(
+        modifier = modifier.fillMaxSize(),
     ) {
-        AppTopBar(
-            state = AppTopBarState.Title,
-            title = "Event Detail",
-        )
-
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
+            state = listState,
+            modifier = Modifier
+                .fillMaxSize(),
             contentPadding = PaddingValues(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            item {
-                Spacer(modifier = Modifier.height(1.dp))
-            }
-
             item(contentType = "hero-card") {
-                EventDetailHeroCard("", "")
+                EventDetailHeroCard()
             }
 
             item(contentType = "information-card") {
                 EventDetailInformationCard()
             }
 
-            item(contentType = "onboarding") {
-                EventOnboarding()
+            item(contentType = "onboarding-card") {
+                EventOnboardingCard()
             }
 
             item(contentType = "safety-card") {
                 SafetyBadge()
             }
+
+            item(contentType = "space-after-last-card") {
+                Spacer(modifier = Modifier.height(80.dp))
+            }
         }
+
+        BaseButton(
+            text = stringResource(Res.string.event_detail_ticket_cta),
+            onClick = {
+                onAction(EventDetailAction.OnCheckoutClicked)
+            },
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 20.dp)
+                    .align(Alignment.BottomCenter),
+            isLoading = false,
+            enabled = true,
+            filled = false,
+            animatedBorder = true,
+        )
     }
 }
 
 @Composable
-private fun EventDetailHeroCard(
-    title: String,
-    date: String
-) {
+private fun EventDetailHeroCard() {
     EventHeroBackground(
         imageUrl = "https://www.booking.com/hotel/cz/hostel-florenc.en-gb.html",
         modifier = Modifier
@@ -137,21 +167,21 @@ private fun EventDetailHeroCard(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(
                 space = 12.dp,
-                alignment = Alignment.Bottom
-            )
+                alignment = Alignment.Bottom,
+            ),
         ) {
             Text(
-                text = "SATURDAY - MAY 30",
+                text = stringResource(Res.string.event_detail_hero_date),
                 style = MaterialTheme.typography.labelSmall.copy(
                     color = AccessDefaults.TextMuted,
-                    fontSize = 12.sp
-                )
+                    fontSize = 12.sp,
+                ),
             )
 
             Text(
-                text = "One night.\nOne bar.\n80 strangers.",
+                text = stringResource(Res.string.event_detail_hero_title),
                 style = MaterialTheme.typography.displaySmall.copy(
-                    color = AccessDefaults.TextPrimary
+                    color = AccessDefaults.TextPrimary,
                 ),
             )
         }
@@ -162,6 +192,8 @@ private fun EventDetailHeroCard(
 @Preview
 fun EventDetailScreenPreview() {
     EventDetailScreen(
+        modifier = Modifier,
+        listState = rememberLazyListState(),
         state = EventDetailState(),
         onAction = {},
     )
@@ -172,7 +204,7 @@ fun EventHeroBackground(
     imageUrl: String,
     modifier: Modifier = Modifier,
     shape: Shape = RoundedCornerShape(20.dp),
-    content: @Composable BoxScope.() -> Unit
+    content: @Composable BoxScope.() -> Unit,
 ) {
     Box(
         modifier = modifier
@@ -180,20 +212,20 @@ fun EventHeroBackground(
             .border(
                 width = 1.dp,
                 color = Color.White.copy(alpha = 0.08f),
-                shape = shape
-            )
+                shape = shape,
+            ),
     ) {
         AsyncImage(
             model = "https://hostel-drunken-monkey.praguehotelsweb.com/data/Photos/OriginalPhoto/16920/1692044/1692044305/drunken-monkey-hostel-prague-photo-15.JPEG",
             contentDescription = null,
             contentScale = ContentScale.Crop,
-            modifier = Modifier.matchParentSize()
+            modifier = Modifier.matchParentSize(),
         )
 
         Box(
             modifier = Modifier
                 .matchParentSize()
-                .background(Color.Black.copy(alpha = 0.75f))
+                .background(Color.Black.copy(alpha = 0.75f)),
         )
 
         Box(
@@ -212,12 +244,12 @@ fun EventHeroBackground(
                                 color = stripeColor,
                                 start = Offset(x, 0f),
                                 end = Offset(x + size.height, size.height),
-                                strokeWidth = stripeStroke
+                                strokeWidth = stripeStroke,
                             )
                             x += stripeStep
                         }
                     }
-                }
+                },
         )
 
         content()

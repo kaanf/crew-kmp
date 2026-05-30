@@ -24,7 +24,22 @@ import androidx.compose.ui.unit.dp
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.CrewTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
-
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.drawscope.rotate
+import com.kaanf.core.designsystem.theme.AccessShapes
+import kotlin.math.hypot
 @Composable
 fun BaseButton(
     text: String,
@@ -34,22 +49,20 @@ fun BaseButton(
     isLoading: Boolean = false,
     loadingText: String = "AUTHENTICATING...",
     filled: Boolean = false,
+    animatedBorder: Boolean = false,
 ) {
-    val shape = RoundedCornerShape(14.dp)
+    val outerShape = AccessShapes.Medium
+    val borderWidth = 1.5.dp
+    val innerShape = RoundedCornerShape(12.dp - borderWidth)
     val interactionSource = remember { MutableInteractionSource() }
-    val borderColor =
-        when {
-            filled -> AccessDefaults.Accent
-            else -> AccessDefaults.Border
-        }
 
+    val borderColor = if (filled) AccessDefaults.Accent else AccessDefaults.Border
     val backgroundColor =
         when {
             isLoading -> AccessDefaults.FieldFocusedBackground
             filled -> AccessDefaults.Accent
             else -> AccessDefaults.Surface
         }
-
     val contentColor =
         when {
             isLoading -> AccessDefaults.LoadingButtonText
@@ -58,33 +71,94 @@ fun BaseButton(
             else -> AccessDefaults.TextFaint
         }
 
+    val borderAnimated = animatedBorder && enabled && !isLoading
+
     Box(
         modifier =
             modifier
                 .fillMaxWidth()
                 .height(52.dp)
                 .alpha(if (enabled) 1f else 0.5f)
-                .background(backgroundColor, shape)
-                .border(1.dp, borderColor, shape)
-                .clickable(
-                    enabled = enabled && !isLoading,
-                    interactionSource = interactionSource,
-                    indication = null,
-                    onClick = onClick,
-                )
-                .padding(horizontal = 16.dp),
+                .clip(outerShape),
         contentAlignment = Alignment.Center,
     ) {
-        Text(
-            text = if (isLoading) loadingText else text,
-            style = MaterialTheme.typography.titleSmall.copy(
-                fontWeight = FontWeight.Bold,
-                color = contentColor,
-            ),
-        )
+        if (borderAnimated) {
+            AnimatedBorderPaint(
+                modifier = Modifier.matchParentSize(),
+                color = AccessDefaults.Accent,
+            )
+        } else {
+            Box(Modifier.matchParentSize().background(borderColor))
+        }
+
+        Box(
+            modifier =
+                Modifier
+                    .matchParentSize()
+                    .padding(borderWidth)
+                    .clip(innerShape)
+                    .background(backgroundColor)
+                    .clickable(
+                        enabled = enabled && !isLoading,
+                        interactionSource = interactionSource,
+                        indication = null,
+                        onClick = onClick,
+                    )
+                    .padding(horizontal = 16.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = if (isLoading) loadingText else text,
+                style = MaterialTheme.typography.titleSmall.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = contentColor,
+                ),
+            )
+        }
     }
 }
 
+@Composable
+private fun AnimatedBorderPaint(
+    color: Color,
+    modifier: Modifier = Modifier,
+) {
+    val transition = rememberInfiniteTransition(label = "border")
+    val angle by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 2500, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart,
+        ),
+        label = "borderAngle",
+    )
+
+    Spacer(
+        modifier = modifier.drawBehind {
+            drawRect(color = color.copy(alpha = 0.15f))
+
+            val side = hypot(size.width, size.height)
+            val topLeft = Offset((size.width - side) / 2f, (size.height - side) / 2f)
+            rotate(degrees = angle) {
+                drawRect(
+                    brush = Brush.sweepGradient(
+                        colors = listOf(
+                            Color.Transparent,
+                            color.copy(alpha = 0.3f),
+                            color,
+                            color.copy(alpha = 0.3f),
+                            Color.Transparent,
+                        ),
+                        center = center,
+                    ),
+                    topLeft = topLeft,
+                    size = Size(side, side),
+                )
+            }
+        },
+    )
+}
 @Preview
 @Composable
 private fun BaseButtonPreview() {

@@ -10,8 +10,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -20,162 +22,219 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kaanf.core.designsystem.component.layout.AppTopBar
-import com.kaanf.core.designsystem.component.layout.LoadingOverlayLayout
 import com.kaanf.core.designsystem.component.layout.SnackbarScaffold
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.presentation.model.AppTopBarState
 import com.kaanf.core.presentation.util.ObserveAsEvents
-import com.kaanf.home.presentation.dashboard.component.EventRow
-import com.kaanf.home.presentation.dashboard.component.challengecard.ChallengeCardUiModel
-import com.kaanf.home.presentation.dashboard.component.challengecard.ChallengeCardVariant
+import com.kaanf.home.presentation.dashboard.component.eventcard.DashboardEventCard
 import com.kaanf.home.presentation.dashboard.component.challengecard.GradientChallengeCard
 import com.kaanf.home.presentation.dashboard.component.challengecard.MoreDeckCard
 import com.kaanf.home.presentation.dashboard.component.eventinfo.DashboardEventInfoRow
+import com.kaanf.home.presentation.dashboard.component.featuredevent.DashboardFeaturedEventCard
+import com.kaanf.home.presentation.model.EventDashboardUiModel
+import crew.feature.home.presentation.generated.resources.Res
+import crew.feature.home.presentation.generated.resources.dashboard_featured_event_date
+import crew.feature.home.presentation.generated.resources.dashboard_featured_event_price
+import crew.feature.home.presentation.generated.resources.dashboard_featured_event_section_title
+import crew.feature.home.presentation.generated.resources.dashboard_featured_event_title
+import crew.feature.home.presentation.generated.resources.dashboard_game_preview_cta
+import crew.feature.home.presentation.generated.resources.dashboard_game_preview_section_description
+import crew.feature.home.presentation.generated.resources.dashboard_game_preview_section_title
+import crew.feature.home.presentation.generated.resources.dashboard_header_description
+import crew.feature.home.presentation.generated.resources.dashboard_header_title
+import crew.feature.home.presentation.generated.resources.dashboard_upcoming_events_count
+import crew.feature.home.presentation.generated.resources.dashboard_upcoming_events_title
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun DashboardRoot(
     viewModel: DashboardViewModel = koinViewModel(),
-    onEventClicked: (eventId: String) -> Unit = { },
+    onEventClicked: (eventId: String) -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
+            else -> Unit
         }
     }
 
-    SnackbarScaffold(snackbarHostState = snackbarHostState) { innerPadding ->
-        LoadingOverlayLayout(
-            modifier =
-                Modifier
-                    .padding(innerPadding)
-                    .consumeWindowInsets(innerPadding),
-            isLoading = state.isLoading,
-        ) {
-            DashboardScreen(
-                state = state,
-                onAction = {},
-                onEventClicked
+    val listState = rememberLazyListState()
+
+    SnackbarScaffold(
+        topBar = {
+            AppTopBar(
+                state = AppTopBarState.Dashboard,
+                elevated = { listState.canScrollBackward },
+                onRightClick = {},
             )
-        }
+        },
+        snackbarHostState = snackbarHostState,
+    ) { innerPadding ->
+        DashboardScreen(
+            modifier = Modifier
+                .padding(innerPadding)
+                .consumeWindowInsets(innerPadding),
+            listState = listState,
+            state = state,
+            onAction = { action ->
+                when (action) {
+                    is DashboardAction.OnEventClicked -> onEventClicked(action.id)
+                }
+
+                viewModel.onAction(action)
+            },
+        )
     }
 }
 
 @Composable
 fun DashboardScreen(
+    modifier: Modifier,
     state: DashboardState,
     onAction: (DashboardAction) -> Unit,
-    onEventClicked: (eventId: String) -> Unit = { },
+    listState: LazyListState,
 ) {
-    val gradientCards = listOf(
-        ChallengeCardUiModel(
-            description = "Get two strangers to teach you the same word in their language. Both of them, same word.",
-            variant = ChallengeCardVariant.Social,
-            points = 20
-        ),
-        ChallengeCardUiModel(
-            description = "Walk to the loudest table and convince one of them to teach you a dance move.",
-            variant = ChallengeCardVariant.Bold,
-            points = 35
-        ),
-        ChallengeCardUiModel(
-            description = "Find someone wearing your favourite colour. Ask why they chose it tonight.",
-            variant = ChallengeCardVariant.Icebreaker,
-            points = 10
-        ),
-        ChallengeCardUiModel(
-            description = "Sincerely compliment three different people on something they chose for tonight.",
-            variant = ChallengeCardVariant.Flirty,
-            points = 35
-        ),
-        ChallengeCardUiModel(
-            description = "Find one more player. Together find a fourth. Selfie. Bring me proof.",
-            variant = ChallengeCardVariant.Team,
-            points = 20
-        )
-    )
-
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
     ) {
-        AppTopBar(
-            state = AppTopBarState.Dashboard,
-            onRightClick = {  }
-        )
-
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            state = listState,
+            modifier = Modifier.fillMaxSize()
+                .zIndex(0f),
+            contentPadding = PaddingValues(bottom = 24.dp),
         ) {
-            item {
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-
             item(contentType = "header") {
                 DashboardHeader()
             }
 
-            item(contentType = "desk_card_info") {
-                DashboardEventInfoRow(
-                    leftText = "A TASTE OF THE GAME",
-                    description = "Real cards from past nights · swipe →",
-                    rightText = "120+ DECK",
-                )
+            item(contentType = "space-after-header") {
+                Spacer(modifier = Modifier.height(24.dp))
             }
 
-            item {
-                LazyRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentPadding = PaddingValues(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(
-                        items = gradientCards,
-                        key = { it.description },
-                        contentType = { "challenge_card" },
-                    ) { card ->
-                        GradientChallengeCard(
-                            card = card,
+            item(contentType = "featured-card-section") {
+                DashboardSection(
+                    title = stringResource(Res.string.dashboard_featured_event_section_title),
+                    description = null,
+                    ctaText = "",
+                    content = {
+                        val featuredEvent = EventDashboardUiModel(
+                            id = "1",
+                            title = stringResource(Res.string.dashboard_featured_event_title),
+                            date = stringResource(Res.string.dashboard_featured_event_date),
+                            formattedPrice = stringResource(Res.string.dashboard_featured_event_price),
+                            percentage = 42,
+                            isFeatured = false,
                         )
-                     }
 
-                    item(
-                        key = "see_all_challenges",
-                        contentType = "see_all_challenges"
-                    ) {
-                        MoreDeckCard()
-                    }
-                }
-            }
-
-            item(contentType = "divider") {
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-
-            item(contentType = "event_info") {
-                DashboardEventInfoRow(
-                    leftText = "UPCOMING EVENTS",
-                    rightText = "${state.events.size} events",
+                        DashboardFeaturedEventCard(
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            event = featuredEvent,
+                            onClicked = {
+                                onAction(DashboardAction.OnEventClicked(featuredEvent.id))
+                            },
+                        )
+                    },
                 )
+            }
+
+            item(contentType = "space-after-featured") {
+                Spacer(modifier = Modifier.height(24.dp))
+            }
+
+            item(contentType = "deck-card-section") {
+                DashboardSection(
+                    title = stringResource(Res.string.dashboard_game_preview_section_title),
+                    description = stringResource(Res.string.dashboard_game_preview_section_description),
+                    ctaText = stringResource(Res.string.dashboard_game_preview_cta),
+                    content = {
+                        LazyRow(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentPadding = PaddingValues(horizontal = 16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            items(
+                                items = state.tasks,
+                                key = { it.description }, // key'i task id yap.
+                                contentType = { "challenge_card" },
+                            ) { card ->
+                                GradientChallengeCard(card = card)
+                            }
+
+                            item(
+                                key = "see_all_challenges",
+                                contentType = "see_all_challenges",
+                            ) {
+                                MoreDeckCard()
+                            }
+                        }
+                    },
+                )
+            }
+
+            item(contentType = "space-after-deck") {
+                Spacer(modifier = Modifier.height(24.dp))
+            }
+
+            item(contentType = "upcoming-events-header") {
+                DashboardEventInfoRow(
+                    leftText = stringResource(Res.string.dashboard_upcoming_events_title),
+                    description = null,
+                    rightText = stringResource(
+                        Res.string.dashboard_upcoming_events_count,
+                        state.events.size,
+                    ),
+                )
+            }
+
+            item(contentType = "space-after-upcoming-header") {
+                Spacer(modifier = Modifier.height(12.dp))
             }
 
             items(
                 items = state.events,
                 key = { it.id },
-                contentType = { "event" },
+                contentType = { "event_card" },
             ) { event ->
-                EventRow(
-                    modifier = Modifier.padding(horizontal = 16.dp),
+                DashboardEventCard(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .padding(bottom = 12.dp),
                     event = event,
-                    onClicked = { onEventClicked(it) }
+                    onClicked = {
+                        onAction(DashboardAction.OnEventClicked(event.id))
+                    },
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun DashboardSection(
+    title: String,
+    ctaText: String,
+    modifier: Modifier = Modifier,
+    description: String? = null,
+    content: @Composable () -> Unit,
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        DashboardEventInfoRow(
+            leftText = title,
+            description = description,
+            rightText = ctaText,
+        )
+
+        content()
     }
 }
 
@@ -183,22 +242,22 @@ fun DashboardScreen(
 private fun DashboardHeader() {
     Column(
         modifier = Modifier
-            .padding(horizontal = 16.dp)
+            .padding(horizontal = 16.dp),
     ) {
+        Spacer(modifier = Modifier.height(12.dp))
+
         Text(
-            text = "This week in the city",
-            style = MaterialTheme.typography.headlineLarge,
+            text = stringResource(Res.string.dashboard_header_title),
+            style = MaterialTheme.typography.displayMedium,
         )
 
         Spacer(modifier = Modifier.height(4.dp))
 
         Text(
-            text = "Live bar games. You show up solo, leave with a story.",
+            text = stringResource(Res.string.dashboard_header_description),
             style = MaterialTheme.typography.bodySmall.copy(
                 color = AccessDefaults.TextMuted,
             ),
         )
-
-        Spacer(modifier = Modifier.height(16.dp))
     }
 }

@@ -1,5 +1,7 @@
 package com.kaanf.home.presentation.dashboard.component.challengecard
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -36,10 +38,18 @@ import androidx.compose.ui.unit.sp
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.JetbrainsMono
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawOutline
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
@@ -50,10 +60,31 @@ fun GradientChallengeCard(
 ) {
     val colors = getChallengeCardColor(card.variant)
 
+    var isPressed by remember { mutableStateOf(false) }
+
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.92f else 1f,
+        animationSpec = tween(durationMillis = 120),
+        label = "challenge_card_press_scale"
+    )
+
     Box(
         modifier = Modifier
             .width(200.dp)
             .height(200.dp)
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onPress = {
+                        isPressed = true
+                        tryAwaitRelease()
+                        isPressed = false
+                    }
+                )
+            }
             .clip(RoundedCornerShape(28.dp))
             .background(
                 Brush.verticalGradient(
@@ -276,11 +307,11 @@ fun MoreDeckCard() {
             .width(120.dp)
             .height(200.dp)
             .dottedBorder(
-                color = AccessDefaults.BorderSoft,
+                color = AccessDefaults.TextMuted,
                 shape = RoundedCornerShape(28.dp),
                 strokeWidth = 1.dp,
-                dotLength = 4.dp,
-                gapLength = 8.dp,
+                dotLength = 2.dp,
+                gapLength = 4.dp,
             ),
         content = {
             Column(
@@ -313,6 +344,7 @@ fun Modifier.dottedBorder(
     strokeWidth: Dp = 1.dp,
     dotLength: Dp = 2.dp,
     gapLength: Dp = 6.dp,
+    backgroundColor: Color = AccessDefaults.Surface,
 ): Modifier = this.drawBehind {
     val strokePx = strokeWidth.toPx()
     val halfStroke = strokePx / 2

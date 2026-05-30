@@ -1,10 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <resources>
-    <string name="register">Register</string>
-    <string name="login">Login</string>
-    <string name="login_wordmark_title">A.I.</string>
-    <string name="login_wordmark_subtitle">CREW STORIES</string>
-    <string name="next">Next</string>
     <!-- Welcome -->
     <string name="welcome_skip">Skip</string>
     <string name="welcome_headline_show_up">Show up</string>
@@ -32,20 +27,17 @@
     <string name="snackbar_access_granted_title">Access Granted</string>
     <string name="snackbar_uplink_failure_title">Uplink Failure</string>
     <string name="snackbar_input_warning_title">Input Warning</string>
-    <!-- Screen titles / labels -->
+    <!-- Shared auth form -->
+    <string name="auth_email_label">EMAIL</string>
+    <string name="auth_email_placeholder">you@somewhere.com</string>
+    <string name="auth_password_label">PASSWORD</string>
+
     <!-- Login -->
-    <string name="login_top_bar_register_action">Sign up</string>
-    <string name="login_title">Welcome back.</string>
-    <string name="login_subtitle">Pick up where you left off: tickets, history and more.</string>
-    <string name="login_email_label">EMAIL</string>
-    <string name="login_password_label">PASSWORD</string>
-    <string name="login_status_unauthorized_access_detected">UNAUTHORIZED ACCESS DETECTED</string>
-    <string name="login_badge_number_placeholder">you@somewhere.com</string>
-    <string name="login_passcode_placeholder">Password</string>
-    <string name="login_primary_action_enter_system">Sign in</string>
-    <string name="login_remember_this_device">Remember this device</string>
-    <string name="login_secondary_action_lost_credentials">Forgot?</string>
-    <string name="login_secondary_action_create_archive_record">New to Crew? Create an account</string>
+    <string name="login_headline">Welcome back.</string>
+    <string name="login_description">Pick up where you left off: tickets, history and more.</string>
+    <string name="login_password_placeholder">Password</string>
+    <string name="login_primary_action_sign_in">Sign in</string>
+    <string name="login_forgot_password_action">Forgot?</string>
     <!-- Login Snackbar - Invalid Email -->
     <string name="login_snackbar_invalid_email_title">INVALID COMM LINK</string>
     <string name="login_snackbar_invalid_email_description">The entered comm link format is not recognized by the system.</string>
@@ -60,9 +52,8 @@
     <string name="login_snackbar_success_description">Identity confirmed. Welcome back to the archive.</string>
 
     <!-- Register -->
-    <string name="register_top_bar_login_action">Sign in</string>
-    <string name="register_title">Join the Crew.</string>
-    <string name="register_subtitle">Takes 30 seconds.</string>
+    <string name="register_headline">Join the Crew.</string>
+    <string name="register_description">Takes 30 seconds.</string>
     <string name="register_full_name_placeholder">Full Name</string>
     <string name="register_date_of_birth_placeholder">DD-MM-YYYY</string>
     <string name="register_gender_placeholder">Select</string>
@@ -72,47 +63,14 @@
     <string name="register_gender_non_binary">Non-binary</string>
     <string name="register_gender_other">Other</string>
     <string name="register_gender_prefer_not_to_say">Prefer not to say</string>
-    <string name="register_email_label">Email</string>
-    <string name="register_password_label">Password</string>
     <string name="register_full_name_label">FULL NAME</string>
     <string name="register_date_of_birth_label">DATE OF BIRTH</string>
     <string name="register_gender_label">GENDER</string>
-    <string name="register_re_type_password_label">CONFIRM PASSWORD</string>
-    <string name="register_email_placeholder">you@somewhere.com</string>
+    <string name="register_confirm_password_label">CONFIRM PASSWORD</string>
     <string name="register_password_placeholder">At least 9 characters</string>
-    <string name="register_re_type_password_placeholder">Repeat your password</string>
-    <string name="register_password_supporting_text">Use at least 9 characters with one uppercase letter and one digit.</string>
-    <string name="register_full_name_supporting_text">Use more than 3 characters.</string>
-    <string name="register_primary_action_begin_first_case">Create my account</string>
-    <string name="register_terms_agreement">I agree to the Terms, House rules, and Privacy notice.</string>
-    <string name="register_secondary_action_return_to_login">Already a player? Sign in</string>
-
-    <!-- Forgot Password / Lost Credentials -->
-    <string name="forgot_password_title">LOST CREDENTIALS</string>
-    <string name="forgot_password_subtitle">REQUEST SECURE OVERRIDE</string>
-    <string name="forgot_password_email_placeholder">Registered Comm Link (Email)</string>
-    <string name="forgot_password_primary_action_send_reset_link">SEND RESET LINK</string>
-    <string name="forgot_password_secondary_action_abort_return_to_terminal">ABORT &amp; RETURN TO TERMINAL</string>
-
-    <!-- Verification Mail Sent -->
-    <string name="verification_mail_sent_title">SIGNAL DISPATCHED</string>
-    <string name="verification_mail_sent_message_line_1">A secure decryption link has been dispatched to %1$s.</string>
-    <string name="verification_mail_sent_message_line_2">VERIFY YOUR ENCRYPTED COMM CHANNEL TO FINALIZE THE CONNECTION.</string>
-    <string name="verification_mail_sent_primary_action_resend_signal_with_countdown">RESEND SIGNAL (%1$ds)</string>
-    <string name="verification_mail_sent_primary_action_resend_signal">RESEND SIGNAL</string>
-    <string name="verification_mail_sent_status_resending">RE-TRANSMITTING SIGNAL...</string>
-    <string name="verification_mail_sent_secondary_action_return_to_login">RETURN TO LOGIN</string>
-
-    <!-- Verification Success -->
-    <string name="verification_success_title">CLEARANCE GRANTED</string>
-    <string name="verification_success_message_line_1">Biometric signature verified.</string>
-    <string name="verification_success_message_line_2">YOUR CREDENTIALS ARE NOW VALID FOR THE GCPD ARCHIVES.</string>
-    <string name="verification_success_primary_action_return_to_login">RETURN TO LOGIN</string>
-
-    <!-- Verification Failed / Access Denied -->
-    <string name="verification_failed_title">ACCESS DENIED</string>
-    <string name="verification_failed_message_line_1">Identity verification failed.</string>
-    <string name="verification_failed_message_line_2">THE LINK MAY HAVE EXPIRED OR BEEN CORRUPTED. CENTRAL COMMAND REJECTED THE REQUEST.</string>
-    <string name="verification_failed_primary_action_request_new_link">REQUEST NEW LINK</string>
-    <string name="verification_failed_secondary_action_return_to_login">RETURN TO LOGIN</string>
+    <string name="register_confirm_password_placeholder">Repeat your password</string>
+    <string name="register_password_requirements_hint">Use at least 9 characters with one uppercase letter and one digit.</string>
+    <string name="register_full_name_hint">Use more than 3 characters.</string>
+    <string name="register_primary_action_create_account">Create my account</string>
+    <string name="register_terms_checkbox_label">I agree to the Terms, House rules, and Privacy notice.</string>
 </resources>

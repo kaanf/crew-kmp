@@ -19,11 +19,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.kaanf.core.designsystem.theme.AccessDefaults
+import com.kaanf.core.presentation.model.AppTopBarState
 
 @Composable
 fun SnackbarScaffold(
     snackbarHostState: SnackbarHostState,
     modifier: Modifier = Modifier,
+    topBar: @Composable () -> Unit = {},
     content: @Composable (PaddingValues) -> Unit,
 ) {
     Box(
@@ -32,6 +34,7 @@ fun SnackbarScaffold(
                 .fillMaxSize(),
     ) {
         Scaffold(
+            topBar = topBar,
             containerColor = AccessDefaults.Background,
             contentWindowInsets = WindowInsets.safeDrawing
                 .exclude(WindowInsets.ime),

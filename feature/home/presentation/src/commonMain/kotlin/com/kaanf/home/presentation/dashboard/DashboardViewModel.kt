@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
 class DashboardViewModel(
     private val getEventsUseCase: GetEventsUseCase,
 ) : ViewModel() {
-    private val eventChannel = Channel<BaseEvent>()
+    private val eventChannel = Channel<DashboardEvent>()
     val events = eventChannel.receiveAsFlow()
 
     private val _state = MutableStateFlow(DashboardState())
@@ -36,6 +36,12 @@ class DashboardViewModel(
 
     init {
         loadEvents()
+    }
+
+    fun onAction(action: DashboardAction) {
+        when (action) {
+            else -> Unit
+        }
     }
 
     private fun loadEvents() = viewModelScope.launch {
@@ -55,15 +61,6 @@ class DashboardViewModel(
 
             is Result.Failure -> {
                 _state.update { it.copy(isLoading = false) }
-                eventChannel.send(
-                    BaseEvent.ShowSnackbar(
-                        SnackbarMessage(
-                            title = UIText.Resource(Res.string.dashboard_snackbar_load_failed_title),
-                            description = result.error.toUiText(),
-                            variant = SnackbarVariant.Failure,
-                        ),
-                    ),
-                )
             }
         }
     }

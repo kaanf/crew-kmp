@@ -1,4 +1,7 @@
 package com.kaanf.home.presentation.dashboard
 
-class DashboardAction {
+import com.kaanf.core.domain.model.event.EventId
+
+sealed interface DashboardAction {
+    data class OnEventClicked(val id: EventId) : DashboardAction
 }

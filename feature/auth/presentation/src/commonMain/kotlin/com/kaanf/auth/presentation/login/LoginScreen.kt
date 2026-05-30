@@ -1,6 +1,5 @@
 package com.kaanf.auth.presentation.login
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -30,33 +29,24 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kaanf.core.designsystem.component.button.BaseButton
 import com.kaanf.core.designsystem.component.layout.AppTopBar
-import com.kaanf.core.designsystem.component.layout.LoadingOverlayLayout
 import com.kaanf.core.designsystem.component.layout.SnackbarScaffold
-import com.kaanf.core.designsystem.component.layout.showSnackbar
 import com.kaanf.core.designsystem.component.textfield.BasePasswordTextField
 import com.kaanf.core.designsystem.component.textfield.BaseTextField
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.CrewTheme
-import com.kaanf.core.presentation.base.BaseEvent
-import com.kaanf.core.presentation.model.SnackbarMessage
-import com.kaanf.core.presentation.model.SnackbarVariant
+import com.kaanf.core.presentation.model.AppTopBarState
 import com.kaanf.core.presentation.util.ObserveAsEvents
 import com.kaanf.core.presentation.util.TestTags
-import com.kaanf.core.presentation.util.UIText
 import com.kaanf.core.presentation.util.clearFocusOnTap
 import crew.feature.auth.presentation.generated.resources.Res
-import crew.feature.auth.presentation.generated.resources.login_badge_number_placeholder
-import crew.feature.auth.presentation.generated.resources.login_email_label
-import crew.feature.auth.presentation.generated.resources.login_passcode_placeholder
-import crew.feature.auth.presentation.generated.resources.login_password_label
-import crew.feature.auth.presentation.generated.resources.login_primary_action_enter_system
-import crew.feature.auth.presentation.generated.resources.login_secondary_action_lost_credentials
-import crew.feature.auth.presentation.generated.resources.login_snackbar_success_description
-import crew.feature.auth.presentation.generated.resources.login_snackbar_success_title
-import crew.feature.auth.presentation.generated.resources.login_subtitle
-import crew.feature.auth.presentation.generated.resources.login_title
-import crew.feature.auth.presentation.generated.resources.login_top_bar_register_action
-import org.jetbrains.compose.resources.getString
+import crew.feature.auth.presentation.generated.resources.auth_email_label
+import crew.feature.auth.presentation.generated.resources.auth_email_placeholder
+import crew.feature.auth.presentation.generated.resources.auth_password_label
+import crew.feature.auth.presentation.generated.resources.login_description
+import crew.feature.auth.presentation.generated.resources.login_forgot_password_action
+import crew.feature.auth.presentation.generated.resources.login_headline
+import crew.feature.auth.presentation.generated.resources.login_password_placeholder
+import crew.feature.auth.presentation.generated.resources.login_primary_action_sign_in
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
@@ -88,66 +78,63 @@ fun LoginRoot(
         }
     }
 
-    SnackbarScaffold(snackbarHostState = snackbarHostState) { innerPadding ->
-        LoadingOverlayLayout(
-            modifier =
-                Modifier
-                    .padding(innerPadding)
-                    .consumeWindowInsets(innerPadding),
-            isLoading = state.isSubmitting,
-        ) {
-            LoginScreen(
-                state = state,
-                onAction = viewModel::onAction,
+    SnackbarScaffold(
+        topBar = {
+            AppTopBar(
+                state = AppTopBarState.Login,
                 onBackClick = onBackClick,
+                onRightClick = { viewModel.onAction(LoginAction.OnRegisterClick) },
             )
-        }
+        },
+        snackbarHostState = snackbarHostState,
+    ) { innerPadding ->
+        LoginScreen(
+            modifier = Modifier
+                .padding(innerPadding)
+                .consumeWindowInsets(innerPadding),
+            state = state,
+            onAction = viewModel::onAction,
+        )
     }
 }
 
 @Composable
 private fun LoginScreen(
+    modifier: Modifier,
     state: LoginState,
     onAction: (LoginAction) -> Unit,
-    onBackClick: () -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
     val scrollState = rememberScrollState()
 
     Box(
         modifier =
-            Modifier
+            modifier
                 .fillMaxSize()
-                .clearFocusOnTap()
+                .clearFocusOnTap(),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            AppTopBar(
-                rightText = stringResource(Res.string.login_top_bar_register_action),
-                onBackClick = onBackClick,
-                onRightClick = { onAction(LoginAction.OnRegisterClick) },
-            )
-
             Column(
                 modifier =
                     Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                         .weight(1f)
-                        .verticalScroll(scrollState)
+                        .verticalScroll(scrollState),
             ) {
                 Text(
-                    text = stringResource(Res.string.login_title),
+                    text = stringResource(Res.string.login_headline),
                     style = MaterialTheme.typography.displaySmall.copy(
-                        color = AccessDefaults.TextPrimary
-                    )
+                        color = AccessDefaults.TextPrimary,
+                    ),
                 )
 
                 Text(
-                    text = stringResource(Res.string.login_subtitle),
+                    text = stringResource(Res.string.login_description),
                     style = MaterialTheme.typography.bodySmall.copy(
                         color = AccessDefaults.TextMuted,
                         fontSize = 14.sp,
@@ -161,20 +148,20 @@ private fun LoginScreen(
                 ) {
                     BaseTextField(
                         state = state.emailTextState,
-                        label = stringResource(Res.string.login_email_label),
-                        placeholder = stringResource(Res.string.login_badge_number_placeholder),
+                        label = stringResource(Res.string.auth_email_label),
+                        placeholder = stringResource(Res.string.auth_email_placeholder),
                         keyboardType = KeyboardType.Email,
                         testTag = TestTags.LOGIN_EMAIL,
                     )
 
                     BasePasswordTextField(
                         state = state.passwordTextState,
-                        label = stringResource(Res.string.login_password_label),
-                        placeholder = stringResource(Res.string.login_passcode_placeholder),
+                        label = stringResource(Res.string.auth_password_label),
+                        placeholder = stringResource(Res.string.login_password_placeholder),
                         testTag = TestTags.LOGIN_PASSWORD,
                         trailing = {
                             Text(
-                                text = stringResource(Res.string.login_secondary_action_lost_credentials),
+                                text = stringResource(Res.string.login_forgot_password_action),
                                 modifier =
                                     Modifier
                                         .testTag(TestTags.LOGIN_FORGOT_PASSWORD)
@@ -193,8 +180,9 @@ private fun LoginScreen(
                 }
             }
         }
+
         BaseButton(
-            text = stringResource(Res.string.login_primary_action_enter_system),
+            text = stringResource(Res.string.login_primary_action_sign_in),
             onClick = {
                 focusManager.clearFocus()
                 onAction(LoginAction.OnLoginClick)
@@ -203,8 +191,7 @@ private fun LoginScreen(
                 Modifier
                     .fillMaxWidth()
                     .padding(20.dp)
-                    .align(Alignment.BottomCenter)
-                    .testTag(TestTags.LOGIN_SUBMIT),
+                    .align(Alignment.BottomCenter),
             isLoading = state.isSubmitting,
             enabled = state.canSubmit,
             filled = true,
@@ -217,13 +204,13 @@ private fun LoginScreen(
 private fun LoginScreenPreview() {
     CrewTheme(isDarkTheme = true) {
         LoginScreen(
+            modifier = Modifier,
             state =
                 LoginState(
                     emailTextState = TextFieldState("crew@agency.io"),
                     passwordTextState = TextFieldState("AccessKey9"),
                 ),
             onAction = {},
-            onBackClick = {},
         )
     }
 }

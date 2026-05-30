@@ -3,6 +3,15 @@
     <string name="hide_password">Hide Password</string>
     <string name="show_password">Show Password</string>
 
+    <string name="empty" />
+
+    <string name="login_text">Sign in</string>
+    <string name="register_text">Sign up</string>
+
+    <string name="event_detail_title">Event detail</string>
+    <string name="ticket_qr_title">Your ticket</string>
+    <string name="event_code_title">Check in</string>
+
     <string name="snackbar_verification_complete">Login Success</string>
     <string name="snackbar_access_denied">Access Denied</string>
     <string name="snackbar_uplink_failure">Uplink Failure</string>

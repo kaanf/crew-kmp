@@ -1,4 +1,24 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <resources>
+    <string name="dashboard_header_title">This week in the city</string>
+    <string name="dashboard_header_description">Live bar games. You show up solo, leave with a story.</string>
+    <string name="dashboard_featured_event_section_title">FEATURED EVENT</string>
+    <string name="dashboard_featured_event_title">Crew - Vol 14.</string>
+    <string name="dashboard_featured_event_date">FRI, 12 MAR - DOORS 20:00</string>
+    <string name="dashboard_featured_event_price">220 CZK</string>
+    <string name="dashboard_game_preview_section_title">A TASTE OF THE GAME</string>
+    <string name="dashboard_game_preview_section_description">Real cards from past nights &#183; swipe &#8594;</string>
+    <string name="dashboard_game_preview_cta">120+ DECK</string>
+    <string name="dashboard_upcoming_events_title">UPCOMING EVENTS</string>
+    <string name="dashboard_upcoming_events_count">%1$d events</string>
     <string name="dashboard_snackbar_load_failed_title">Couldn't load events</string>
+    <string name="event_detail_ticket_cta">Get my ticket - 490 Kc</string>
+    <string name="event_detail_hero_date">SATURDAY - MAY 30</string>
+    <string name="event_detail_hero_title">One night.\nOne bar.\n80 strangers.</string>
+    <string name="event_code_headline">Type the\ndoor code.</string>
+    <string name="event_code_helper_text">Camera not co-operating? Use the 4-character code on tonight&apos;s welcome card instead.</string>
+    <string name="event_code_input_hint">Letters or numbers &#183; case doesn&apos;t matter</string>
+    <string name="event_code_info_title">Where to find tonight&apos;s code</string>
+    <string name="event_code_info_description">Printed on the welcome card by the host&apos;s table. Rotates every 15 minutes so screenshots can&apos;t sneak anyone in.</string>
+    <string name="event_code_show_qr_action">Show my QR instead</string>
 </resources>

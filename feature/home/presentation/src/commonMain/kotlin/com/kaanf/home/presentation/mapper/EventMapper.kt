@@ -3,6 +3,7 @@ package com.kaanf.home.presentation.mapper
 import com.kaanf.core.domain.model.event.EventDashboard
 import com.kaanf.home.presentation.model.EventDashboardUiModel
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.number
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Instant
 
@@ -33,7 +34,7 @@ private fun Instant.toEventDateText(
         else -> ""
     }
 
-    val monthText = when (date.monthNumber) {
+    val monthText = when (date.month.number) {
         1 -> "JAN"
         2 -> "FEB"
         3 -> "MAR"
@@ -49,5 +50,5 @@ private fun Instant.toEventDateText(
         else -> ""
     }
 
-    return "$dayText · $monthText ${date.dayOfMonth}"
+    return "$dayText · $monthText ${date.day}"
 }
