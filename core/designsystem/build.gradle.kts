@@ -12,6 +12,7 @@ kotlin {
 
                 implementation(libs.squircle.shape)
                 implementation(libs.coil.compose)
+                implementation(libs.chaintechQrKit)
 
                 /*
                 implementation(libs.compottie)
