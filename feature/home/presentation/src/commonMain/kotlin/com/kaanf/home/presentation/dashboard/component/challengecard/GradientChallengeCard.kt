@@ -52,6 +52,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.kaanf.core.presentation.util.dottedBorder
 
 
 @Composable
@@ -312,6 +313,7 @@ fun MoreDeckCard() {
                 strokeWidth = 1.dp,
                 dotLength = 2.dp,
                 gapLength = 4.dp,
+                backgroundColor = AccessDefaults.Surface
             ),
         content = {
             Column(
@@ -336,66 +338,4 @@ fun MoreDeckCard() {
             }
         },
     )
-}
-
-fun Modifier.dottedBorder(
-    color: Color,
-    shape: RoundedCornerShape,
-    strokeWidth: Dp = 1.dp,
-    dotLength: Dp = 2.dp,
-    gapLength: Dp = 6.dp,
-    backgroundColor: Color = AccessDefaults.Surface,
-): Modifier = this.drawBehind {
-    val strokePx = strokeWidth.toPx()
-    val halfStroke = strokePx / 2
-
-    val outline = shape.createOutline(
-        size = size,
-        layoutDirection = layoutDirection,
-        density = this
-    )
-
-    val pathEffect = PathEffect.dashPathEffect(
-        intervals = floatArrayOf(dotLength.toPx(), gapLength.toPx()),
-        phase = 0f
-    )
-
-    when (outline) {
-        is Outline.Rounded -> {
-            val radius = outline.roundRect.topLeftCornerRadius.x
-
-            drawRoundRect(
-                color = color,
-                topLeft = Offset(halfStroke, halfStroke),
-                size = Size(
-                    width = size.width - strokePx,
-                    height = size.height - strokePx
-                ),
-                cornerRadius = CornerRadius(radius, radius),
-                style = Stroke(
-                    width = strokePx,
-                    pathEffect = pathEffect,
-                    cap = StrokeCap.Round
-                )
-            )
-        }
-
-        is Outline.Rectangle -> {
-            drawRect(
-                color = color,
-                topLeft = Offset(halfStroke, halfStroke),
-                size = Size(
-                    width = size.width - strokePx,
-                    height = size.height - strokePx
-                ),
-                style = Stroke(
-                    width = strokePx,
-                    pathEffect = pathEffect,
-                    cap = StrokeCap.Round
-                )
-            )
-        }
-
-        else -> Unit
-    }
 }

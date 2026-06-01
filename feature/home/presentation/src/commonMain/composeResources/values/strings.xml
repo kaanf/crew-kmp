@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <resources>
-    <string name="dashboard_header_title">This week in the city</string>
+    <string name="dashboard_header_title">This week in\nthe city</string>
     <string name="dashboard_header_description">Live bar games. You show up solo, leave with a story.</string>
     <string name="dashboard_featured_event_section_title">FEATURED EVENT</string>
     <string name="dashboard_featured_event_title">Crew - Vol 14.</string>

@@ -5,13 +5,14 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import com.kaanf.home.presentation.dashboard.DashboardRoot
-import com.kaanf.home.presentation.dashboard.DashboardScreen
 import com.kaanf.home.presentation.eventcode.EventCodeRoot
 import com.kaanf.home.presentation.eventdetail.EventDetailRoot
-import com.kaanf.home.presentation.gamelobby.GameLobbyRoot
 import com.kaanf.home.presentation.ticketqr.TicketQrRoot
 
-fun NavGraphBuilder.homeGraph(navController: NavController) {
+fun NavGraphBuilder.homeGraph(
+    navController: NavController,
+    onGameCodeSuccess: () -> Unit,
+) {
     navigation<HomeGraphRoutes.Graph>(
         startDestination = HomeGraphRoutes.Dashboard,
     ) {
@@ -54,16 +55,9 @@ fun NavGraphBuilder.homeGraph(navController: NavController) {
         composable<HomeGraphRoutes.EventCode> {
             EventCodeRoot(
                 onTicketCodeSuccess = {
-                    navController.navigate(HomeGraphRoutes.GameLobby) {
-                        restoreState = true
-                        launchSingleTop = true
-                    }
+                    onGameCodeSuccess()
                 }
             )
-        }
-
-        composable<HomeGraphRoutes.GameLobby> {
-            GameLobbyRoot()
         }
     }
 }

@@ -34,8 +34,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.compose.AsyncImage
 import com.kaanf.core.designsystem.component.button.BaseButton
+import com.kaanf.core.designsystem.component.image.BaseImage
 import com.kaanf.core.designsystem.component.layout.AppTopBar
 import com.kaanf.core.designsystem.component.layout.SnackbarScaffold
 import com.kaanf.core.designsystem.theme.AccessDefaults
@@ -156,7 +156,7 @@ fun EventDetailScreen(
 @Composable
 private fun EventDetailHeroCard() {
     EventHeroBackground(
-        imageUrl = "https://www.booking.com/hotel/cz/hostel-florenc.en-gb.html",
+        imageUrl = "https://hostel-drunken-monkey.praguehotelsweb.com/data/Photos/OriginalPhoto/16920/1692044/1692044305/drunken-monkey-hostel-prague-photo-15.JPEG",
         modifier = Modifier
             .fillMaxWidth()
             .height(240.dp),
@@ -215,11 +215,10 @@ fun EventHeroBackground(
                 shape = shape,
             ),
     ) {
-        AsyncImage(
-            model = "https://hostel-drunken-monkey.praguehotelsweb.com/data/Photos/OriginalPhoto/16920/1692044/1692044305/drunken-monkey-hostel-prague-photo-15.JPEG",
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
+        BaseImage(
+            imageUrl = imageUrl,
             modifier = Modifier.matchParentSize(),
+            contentScale = ContentScale.Crop,
         )
 
         Box(

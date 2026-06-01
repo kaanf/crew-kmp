@@ -32,6 +32,10 @@ kotlin {
             implementation(projects.feature.auth.data)
             implementation(projects.feature.auth.presentation)
 
+            implementation(projects.feature.game.domain)
+            implementation(projects.feature.game.data)
+            implementation(projects.feature.game.presentation)
+
             implementation(projects.feature.home.domain)
             implementation(projects.feature.home.data)
             implementation(projects.feature.home.presentation)

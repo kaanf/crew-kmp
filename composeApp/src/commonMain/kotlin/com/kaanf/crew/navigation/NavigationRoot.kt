@@ -7,6 +7,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import com.kaanf.auth.presentation.navigation.AuthGraphRoutes
 import com.kaanf.auth.presentation.navigation.authGraph
+import com.kaanf.game.presentation.navigation.GameGraphRoutes
+import com.kaanf.game.presentation.navigation.gameGraph
 import com.kaanf.home.presentation.navigation.HomeGraphRoutes
 import com.kaanf.home.presentation.navigation.homeGraph
 
@@ -55,8 +57,27 @@ fun NavigationRoot(
                 }
             },
         )
+
         homeGraph(
             navController = navController,
+            onGameCodeSuccess = {
+                navController.navigate(GameGraphRoutes.Graph) {
+                    popUpTo(HomeGraphRoutes.Dashboard) {
+                        inclusive = false
+                    }
+                    launchSingleTop = true
+                }
+            }
+        )
+
+        gameGraph(
+            navController = navController,
+            onNavigateToDashboard = {
+                navController.popBackStack(
+                    route = HomeGraphRoutes.Dashboard,
+                    inclusive = false,
+                )
+            },
         )
     }
 }

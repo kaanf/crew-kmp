@@ -6,6 +6,7 @@ object AccessDefaults {
     val Background = Color(0xFF0E0B08)
 
     val AppBarShadow = Color(0xFF0A0806)
+    val AvatarBorder = Color(0xFF14100C)
 
     val Surface = Color(0xFF181410)
     val SurfaceElevated = Color(0xFF211B15)
@@ -28,6 +29,9 @@ object AccessDefaults {
     val Error = Color(0xFFFF7A5C)
     val Warning = Color(0xFFFFB341)
 
+    val DangerBackground = Color(0x1FFF5A7A)
+    val DangerBorder = Color(0x66FF5A7A)
+
     val InputCaret = Color(0xFFFFFFFF)
 
     val Sky = Color(0xFF6FB7FF)
@@ -40,6 +44,8 @@ object AccessDefaults {
     val LoadingOverlayScrim = Color(0xD6050505)
     val FieldFocusedBackground = CrewSurface2Focused
     val LoadingButtonText = Color(0xFFAAA4A4)
+
+    val LeftArrowColor = Color(0xFFFF5979)
 }
 
 

@@ -5,6 +5,14 @@ import com.kaanf.home.presentation.dashboard.component.challengecard.ChallengeCa
 import com.kaanf.home.presentation.model.EventDashboardUiModel
 
 data class DashboardState(
+    val featuredEvent: EventDashboardUiModel? = EventDashboardUiModel(
+        id = "1",
+        title = "Crew - Vol 14.",
+        date = "FRI, 12 MAR - DOORS 20:00",
+        formattedPrice = "220 CZK",
+        percentage = 42,
+        isFeatured = false,
+    ),
     val events: List<EventDashboardUiModel> = emptyList(),
     val tasks: List<ChallengeCardUiModel> = listOf(
         ChallengeCardUiModel(

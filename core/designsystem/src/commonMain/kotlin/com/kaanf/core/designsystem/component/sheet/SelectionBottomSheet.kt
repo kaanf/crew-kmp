@@ -27,10 +27,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.kaanf.core.designsystem.theme.AccessDefaults
 
-/**
- * A single-choice picker presented in a [ModalBottomSheet], styled with the access design tokens.
- * Selecting a row reports it via [onSelect] and dismisses the sheet through [onDismiss].
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun <T> SelectionBottomSheet(

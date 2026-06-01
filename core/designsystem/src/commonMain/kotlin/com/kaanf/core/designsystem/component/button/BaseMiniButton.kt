@@ -39,6 +39,7 @@ fun BaseMiniButton(
     isLoading: Boolean = false,
     loadingText: String = text,
     filled: Boolean = false,
+    danger: Boolean = false,
     leadingIcon: DrawableResource? = null,
 ) {
     val borderWidth = 1.5.dp
@@ -46,16 +47,23 @@ fun BaseMiniButton(
     val innerShape = RoundedCornerShape(10.dp - borderWidth)
     val interactionSource = remember { MutableInteractionSource() }
 
-    val borderColor = if (filled) AccessDefaults.Accent else AccessDefaults.Border
+    val borderColor =
+        when {
+            danger -> AccessDefaults.DangerBorder
+            filled -> AccessDefaults.Accent
+            else -> AccessDefaults.Border
+        }
     val backgroundColor =
         when {
             isLoading -> AccessDefaults.FieldFocusedBackground
+            danger -> AccessDefaults.DangerBackground
             filled -> AccessDefaults.Accent
             else -> AccessDefaults.Surface
         }
     val contentColor =
         when {
             isLoading -> AccessDefaults.LoadingButtonText
+            danger && enabled -> AccessDefaults.LeftArrowColor
             filled && enabled -> AccessDefaults.OnAccent
             enabled -> AccessDefaults.TextPrimary
             else -> AccessDefaults.TextFaint
@@ -133,6 +141,13 @@ private fun BaseMiniButtonPreview() {
                     isLoading = true,
                     loadingText = "...",
                     filled = true,
+                )
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                BaseMiniButton(
+                    text = "Etkinlikten çık",
+                    onClick = {},
+                    danger = true,
                 )
             }
         }

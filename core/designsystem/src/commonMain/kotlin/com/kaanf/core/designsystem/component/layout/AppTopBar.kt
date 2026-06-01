@@ -4,12 +4,9 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -48,6 +45,7 @@ import crew.core.designsystem.generated.resources.event_detail_title
 import crew.core.designsystem.generated.resources.ic_chevron_left_24
 import crew.core.designsystem.generated.resources.login_text
 import crew.core.designsystem.generated.resources.register_text
+import crew.core.designsystem.generated.resources.scan_opponent_title
 import crew.core.designsystem.generated.resources.ticket_qr_title
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -71,7 +69,12 @@ fun AppTopBar(
         modifier = modifier
             .zIndex(1f)
             .fillMaxWidth()
-            .background(AccessDefaults.Background)
+            .background(
+                when (state) {
+                    AppTopBarState.ScanOpponent -> Color.Transparent
+                    else -> AccessDefaults.Background
+                },
+            )
             .statusBarsPadding()
             .drawWithCache {
                 val shadowHeight = 24.dp.toPx()
@@ -98,17 +101,43 @@ fun AppTopBar(
                 }
             },
     ) {
-        Row(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
+                .padding(all = 16.dp),
         ) {
+            Text(
+                text = if (state is AppTopBarState.GameLobby) {
+                    state.title
+                } else {
+                    stringResource(
+                        when (state) {
+                            AppTopBarState.EventDetail -> Res.string.event_detail_title
+                            AppTopBarState.TicketQr -> Res.string.ticket_qr_title
+                            AppTopBarState.EventCode -> Res.string.event_code_title
+                            AppTopBarState.ScanOpponent -> Res.string.scan_opponent_title
+                            else -> Res.string.empty
+                        },
+                    )
+                },
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .fillMaxWidth()
+                    .padding(horizontal = 48.dp),
+                style = MaterialTheme.typography.titleMedium.copy(
+                    color = AccessDefaults.TextPrimary,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                ),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+
             if (state != AppTopBarState.Dashboard) {
                 IconButton(
                     onClick = onBackClick,
                     modifier = Modifier
+                        .align(Alignment.CenterStart)
                         .clip(CircleShape)
                         .background(AccessDefaults.SurfaceElevated)
                         .border(
@@ -124,13 +153,17 @@ fun AppTopBar(
                                 AppTopBarState.Login,
                                 AppTopBarState.Register,
                                 AppTopBarState.Dashboard,
-                                AppTopBarState.GameLobby,
                                 AppTopBarState.EventDetail,
+                                is AppTopBarState.GameLobby,
                                 AppTopBarState.TicketQr,
                                 AppTopBarState.EventCode,
                                     -> {
                                     AccessIcons.LeftChevron
                                 }
+
+                                AppTopBarState.ScanOpponent,
+                                AppTopBarState.Game,
+                                    -> AccessIcons.Close
                             },
                         ),
                         contentDescription = null,
@@ -140,29 +173,12 @@ fun AppTopBar(
                 }
             }
 
-            Text(
-                text = stringResource(
-                    when (state) {
-                        AppTopBarState.EventDetail -> Res.string.event_detail_title
-                        AppTopBarState.TicketQr -> Res.string.ticket_qr_title
-                        AppTopBarState.EventCode -> Res.string.event_code_title
-                        else -> Res.string.empty
-                    },
-                ),
-                modifier = Modifier.weight(1f),
-                style = MaterialTheme.typography.titleMedium.copy(
-                    color = AccessDefaults.TextPrimary,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                ),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-
             if (state == AppTopBarState.Register || state == AppTopBarState.Login) {
                 TextButton(
                     onClick = onRightClick,
-                    modifier = Modifier.widthIn(min = 36.dp),
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .widthIn(min = 36.dp),
                     contentPadding = PaddingValues(horizontal = 0.dp),
                 ) {
                     Text(
@@ -171,7 +187,7 @@ fun AppTopBar(
                                 Res.string.login_text
                             } else {
                                 Res.string.register_text
-                            }
+                            },
                         ),
                         style = MaterialTheme.typography.titleSmall.copy(
                             color = AccessDefaults.TextMuted,
@@ -181,11 +197,10 @@ fun AppTopBar(
             }
 
             if (state == AppTopBarState.Dashboard) {
-                Spacer(modifier = Modifier.weight(1f))
-
                 IconButton(
                     onClick = onRightClick,
                     modifier = Modifier
+                        .align(Alignment.CenterEnd)
                         .clip(CircleShape)
                         .background(AccessDefaults.SurfaceElevated)
                         .border(

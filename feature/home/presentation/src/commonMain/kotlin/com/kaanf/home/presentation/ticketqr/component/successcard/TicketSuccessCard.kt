@@ -12,7 +12,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessShapes
 import com.kaanf.core.designsystem.theme.CrewTheme
@@ -27,25 +35,48 @@ fun TicketSuccessCard() {
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight()
-            .eventHeroBackground(
-                shape = AccessShapes.Card,
-            )
-            .border(
-                width = 1.dp,
-                color = AccessDefaults.AccentGlow,
-                shape = AccessShapes.Card,
-            )
             .padding(
-                all = 24.dp,
+                all = 4.dp,
             ),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "See you Saturday.",
-            style = MaterialTheme.typography.headlineLarge.copy(
-                color = AccessDefaults.TextPrimary,
-            )
+            text = buildAnnotatedString {
+                withStyle(
+                    style = SpanStyle(
+                        brush = Brush.linearGradient(
+                            colors = listOf(
+                                AccessDefaults.Accent,
+                                AccessDefaults.Coral,
+                                AccessDefaults.Sky,
+                                AccessDefaults.Amber,
+                                AccessDefaults.Teal,
+                            )
+                        ),
+                        fontSize = 24.sp
+                    ),
+                ) {
+                    append(
+                        "You're on the list.",
+                    )
+                }
+
+                append("\n")
+
+                withStyle(
+                    style = SpanStyle(
+                        color = AccessDefaults.TextPrimary,
+                        fontWeight = FontWeight.Bold,
+                    ),
+                ) {
+                    append(
+                        "See you saturday!"
+                    )
+                }
+            },
+            style = MaterialTheme.typography.headlineLarge,
+            textAlign = TextAlign.Center
         )
 
         CountdownCard(

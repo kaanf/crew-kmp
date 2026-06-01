@@ -59,7 +59,7 @@ fun CountdownCard(
     Row(
         modifier = modifier
             .background(
-                color = AccessDefaults.Background,
+                color = AccessDefaults.Surface,
                 shape = AccessShapes.XXLarge
             )
             .border(

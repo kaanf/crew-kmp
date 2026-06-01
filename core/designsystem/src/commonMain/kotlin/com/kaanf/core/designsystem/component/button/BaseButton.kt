@@ -7,10 +7,13 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.kaanf.core.designsystem.theme.AccessDefaults
+import com.kaanf.core.designsystem.theme.AccessIcons
 import com.kaanf.core.designsystem.theme.CrewTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import androidx.compose.animation.core.LinearEasing
@@ -39,6 +43,8 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.drawscope.rotate
 import com.kaanf.core.designsystem.theme.AccessShapes
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
 import kotlin.math.hypot
 @Composable
 fun BaseButton(
@@ -50,21 +56,26 @@ fun BaseButton(
     loadingText: String = "AUTHENTICATING...",
     filled: Boolean = false,
     animatedBorder: Boolean = false,
+    leadingIcon: DrawableResource? = null,
+    backgroundColor: Color? = null,
+    borderColor: Color? = null,
+    contentColor: Color? = null,
 ) {
     val outerShape = AccessShapes.Medium
     val borderWidth = 1.5.dp
     val innerShape = RoundedCornerShape(12.dp - borderWidth)
     val interactionSource = remember { MutableInteractionSource() }
 
-    val borderColor = if (filled) AccessDefaults.Accent else AccessDefaults.Border
-    val backgroundColor =
-        when {
+    val resolvedBorderColor = borderColor
+        ?: if (filled) AccessDefaults.Accent else AccessDefaults.Border
+    val resolvedBackgroundColor = backgroundColor
+        ?: when {
             isLoading -> AccessDefaults.FieldFocusedBackground
             filled -> AccessDefaults.Accent
             else -> AccessDefaults.Surface
         }
-    val contentColor =
-        when {
+    val resolvedContentColor = contentColor
+        ?: when {
             isLoading -> AccessDefaults.LoadingButtonText
             filled && enabled -> AccessDefaults.OnAccent
             enabled -> AccessDefaults.TextPrimary
@@ -88,7 +99,7 @@ fun BaseButton(
                 color = AccessDefaults.Accent,
             )
         } else {
-            Box(Modifier.matchParentSize().background(borderColor))
+            Box(Modifier.matchParentSize().background(resolvedBorderColor))
         }
 
         Box(
@@ -97,7 +108,7 @@ fun BaseButton(
                     .matchParentSize()
                     .padding(borderWidth)
                     .clip(innerShape)
-                    .background(backgroundColor)
+                    .background(resolvedBackgroundColor)
                     .clickable(
                         enabled = enabled && !isLoading,
                         interactionSource = interactionSource,
@@ -107,13 +118,26 @@ fun BaseButton(
                     .padding(horizontal = 16.dp),
             contentAlignment = Alignment.Center,
         ) {
-            Text(
-                text = if (isLoading) loadingText else text,
-                style = MaterialTheme.typography.titleSmall.copy(
-                    fontWeight = FontWeight.Bold,
-                    color = contentColor,
-                ),
-            )
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                if (leadingIcon != null && !isLoading) {
+                    Icon(
+                        painter = painterResource(leadingIcon),
+                        contentDescription = null,
+                        tint = resolvedContentColor,
+                        modifier = Modifier.size(20.dp),
+                    )
+                }
+                Text(
+                    text = if (isLoading) loadingText else text,
+                    style = MaterialTheme.typography.titleSmall.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = resolvedContentColor,
+                    ),
+                )
+            }
         }
     }
 }
@@ -178,6 +202,12 @@ private fun BaseButtonPreview() {
             BaseButton(
                 text = "Secondary",
                 onClick = {},
+            )
+            BaseButton(
+                text = "With icon",
+                onClick = {},
+                filled = true,
+                leadingIcon = AccessIcons.QR,
             )
             BaseButton(
                 text = "Disabled secondary",

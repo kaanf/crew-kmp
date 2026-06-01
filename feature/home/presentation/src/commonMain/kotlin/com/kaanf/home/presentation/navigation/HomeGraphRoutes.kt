@@ -17,7 +17,4 @@ sealed interface HomeGraphRoutes {
 
     @Serializable
     data object EventCode : HomeGraphRoutes
-
-    @Serializable
-    data object GameLobby : HomeGraphRoutes
 }

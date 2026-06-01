@@ -34,12 +34,8 @@ import com.kaanf.home.presentation.dashboard.component.challengecard.GradientCha
 import com.kaanf.home.presentation.dashboard.component.challengecard.MoreDeckCard
 import com.kaanf.home.presentation.dashboard.component.eventinfo.DashboardEventInfoRow
 import com.kaanf.home.presentation.dashboard.component.featuredevent.DashboardFeaturedEventCard
-import com.kaanf.home.presentation.model.EventDashboardUiModel
 import crew.feature.home.presentation.generated.resources.Res
-import crew.feature.home.presentation.generated.resources.dashboard_featured_event_date
-import crew.feature.home.presentation.generated.resources.dashboard_featured_event_price
 import crew.feature.home.presentation.generated.resources.dashboard_featured_event_section_title
-import crew.feature.home.presentation.generated.resources.dashboard_featured_event_title
 import crew.feature.home.presentation.generated.resources.dashboard_game_preview_cta
 import crew.feature.home.presentation.generated.resources.dashboard_game_preview_section_description
 import crew.feature.home.presentation.generated.resources.dashboard_game_preview_section_title
@@ -60,7 +56,7 @@ fun DashboardRoot(
 
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
-            else -> Unit
+            is DashboardEvent.NavigateToEventDetail -> onEventClicked(event.eventId)
         }
     }
 
@@ -82,13 +78,7 @@ fun DashboardRoot(
                 .consumeWindowInsets(innerPadding),
             listState = listState,
             state = state,
-            onAction = { action ->
-                when (action) {
-                    is DashboardAction.OnEventClicked -> onEventClicked(action.id)
-                }
-
-                viewModel.onAction(action)
-            },
+            onAction = viewModel::onAction,
         )
     }
 }
@@ -117,34 +107,27 @@ fun DashboardScreen(
                 Spacer(modifier = Modifier.height(24.dp))
             }
 
-            item(contentType = "featured-card-section") {
-                DashboardSection(
-                    title = stringResource(Res.string.dashboard_featured_event_section_title),
-                    description = null,
-                    ctaText = "",
-                    content = {
-                        val featuredEvent = EventDashboardUiModel(
-                            id = "1",
-                            title = stringResource(Res.string.dashboard_featured_event_title),
-                            date = stringResource(Res.string.dashboard_featured_event_date),
-                            formattedPrice = stringResource(Res.string.dashboard_featured_event_price),
-                            percentage = 42,
-                            isFeatured = false,
-                        )
+            state.featuredEvent?.let { featuredEvent ->
+                item(contentType = "featured-card-section") {
+                    DashboardSection(
+                        title = stringResource(Res.string.dashboard_featured_event_section_title),
+                        description = null,
+                        ctaText = "",
+                        content = {
+                            DashboardFeaturedEventCard(
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                                event = featuredEvent,
+                                onClicked = {
+                                    onAction(DashboardAction.OnEventClicked(featuredEvent.id))
+                                },
+                            )
+                        },
+                    )
+                }
 
-                        DashboardFeaturedEventCard(
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            event = featuredEvent,
-                            onClicked = {
-                                onAction(DashboardAction.OnEventClicked(featuredEvent.id))
-                            },
-                        )
-                    },
-                )
-            }
-
-            item(contentType = "space-after-featured") {
-                Spacer(modifier = Modifier.height(24.dp))
+                item(contentType = "space-after-featured") {
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
             }
 
             item(contentType = "deck-card-section") {
@@ -244,7 +227,7 @@ private fun DashboardHeader() {
         modifier = Modifier
             .padding(horizontal = 16.dp),
     ) {
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(2.dp))
 
         Text(
             text = stringResource(Res.string.dashboard_header_title),

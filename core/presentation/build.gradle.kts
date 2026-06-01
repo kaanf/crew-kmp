@@ -12,6 +12,11 @@ kotlin {
                 implementation(projects.core.domain)
                 implementation(libs.material3.adaptive)
                 implementation(compose.components.resources)
+
+                implementation(libs.moko.permissions)
+                implementation(libs.moko.permissions.compose)
+                implementation(libs.moko.permissions.notifications)
+                implementation(libs.moko.permissions.camera)
             }
         }
 

@@ -2,6 +2,7 @@ package com.kaanf.home.presentation.dashboard
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kaanf.core.domain.model.event.EventId
 import com.kaanf.core.domain.util.Result
 import com.kaanf.core.presentation.base.BaseEvent
 import com.kaanf.core.presentation.model.SnackbarMessage
@@ -40,8 +41,12 @@ class DashboardViewModel(
 
     fun onAction(action: DashboardAction) {
         when (action) {
-            else -> Unit
+            is DashboardAction.OnEventClicked -> navigateToEventDetail(action.id)
         }
+    }
+
+    private fun navigateToEventDetail(eventId: EventId) = viewModelScope.launch {
+        eventChannel.send(DashboardEvent.NavigateToEventDetail(eventId))
     }
 
     private fun loadEvents() = viewModelScope.launch {

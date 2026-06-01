@@ -102,8 +102,6 @@ fun EventCodeScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 horizontalAlignment = Alignment.Start,
             ) {
-                Spacer(modifier = Modifier.height(1.dp))
-
                 Text(
                     text = stringResource(Res.string.event_code_headline),
                     style = MaterialTheme.typography.displaySmall.copy(

@@ -8,8 +8,8 @@ kotlin {
             dependencies {
                 implementation(libs.kotlin.stdlib)
                 implementation(libs.kotlinx.datetime)
-                implementation("io.coil-kt.coil3:coil-compose:3.4.0")
-                implementation("io.coil-kt.coil3:coil-network-ktor3:3.4.0")
+
+                implementation(libs.confettikit)
 
                 implementation(projects.feature.home.domain)
                 implementation(projects.core.domain)

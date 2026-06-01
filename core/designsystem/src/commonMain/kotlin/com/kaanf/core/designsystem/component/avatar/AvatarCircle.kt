@@ -11,23 +11,28 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kaanf.core.designsystem.theme.AccessDefaults
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun AvatarCircle(
     label: String,
     color: Color,
+    textColor: Color = Color(0xFF17110D),
     avatarSize: Int = 46,
+    textSize: Double = (avatarSize/2.5),
+    borderColor: Color = AccessDefaults.AvatarBorder,
+    borderSize: Int = (avatarSize/14),
     modifier: Modifier = Modifier
 ) {
     Box(
         modifier = modifier
             .size(avatarSize.dp)
             .drawBehind {
-                val borderWidth = (avatarSize/14).dp.toPx()
+                val borderWidth = borderSize.dp.toPx()
                 val radius = size.minDimension / 2f
                 drawCircle(
-                    color = Color(0xFF14100C),
+                    color = borderColor,
                     radius = radius
                 )
                 drawCircle(
@@ -39,8 +44,8 @@ fun AvatarCircle(
     ) {
         Text(
             text = label,
-            color = Color(0xFF17110D),
-            fontSize = (avatarSize/2.3).sp,
+            color = textColor,
+            fontSize = textSize.sp,
             fontWeight = FontWeight.ExtraBold
         )
     }

@@ -1,7 +1,9 @@
 package com.kaanf.home.presentation.ticketqr
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -11,10 +13,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -31,7 +38,15 @@ import com.kaanf.core.presentation.model.AppTopBarState
 import com.kaanf.core.presentation.util.ObserveAsEvents
 import com.kaanf.home.presentation.ticketqr.component.qr.TicketQrInfoCard
 import com.kaanf.home.presentation.ticketqr.component.successcard.TicketSuccessCard
+import io.github.vinceglb.confettikit.compose.ConfettiKit
+import io.github.vinceglb.confettikit.core.Party
+import io.github.vinceglb.confettikit.core.Position
+import io.github.vinceglb.confettikit.core.emitter.Emitter
+import io.github.vinceglb.confettikit.core.models.Shape
+import io.github.vinceglb.confettikit.core.models.Size
 import org.koin.compose.viewmodel.koinViewModel
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun TicketQrRoot(
@@ -41,7 +56,7 @@ fun TicketQrRoot(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    val listState: LazyListState = rememberLazyListState()
+    val scrollState: ScrollState = rememberScrollState()
 
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
@@ -51,25 +66,84 @@ fun TicketQrRoot(
     SnackbarScaffold(
         topBar = {
             AppTopBar(
+                elevated = { scrollState.canScrollBackward },
                 state = AppTopBarState.TicketQr,
                 onBackClick = {},
             )
         },
         snackbarHostState = snackbarHostState,
     ) { innerPadding ->
-        LoadingOverlayLayout(
+        TicketQrScreen(
+            modifier = Modifier
+                .padding(innerPadding)
+                .consumeWindowInsets(innerPadding),
+            scrollState = scrollState,
+            state = state,
+            onAction = {
+                when (it) {
+                    TicketQrAction.OnEventCodeClicked -> onEventCodeClicked()
+                }
+            },
+        )
+    }
+}
 
-            isLoading = false,
+@Composable
+fun TicketQrScreen(
+    modifier: Modifier,
+    scrollState: ScrollState,
+    state: TicketQrState,
+    onAction: (TicketQrAction) -> Unit,
+) {
+    var isConfettiVisible by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        isConfettiVisible = true
+    }
+
+    Box(
+        modifier = modifier.fillMaxSize(),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp)
+                .verticalScroll(scrollState),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            TicketQrScreen(
-                modifier = Modifier
-                    .padding(innerPadding)
-                    .consumeWindowInsets(innerPadding),
-                listState = listState,
-                state = state,
-                onAction = {
-                    when (it) {
-                        TicketQrAction.OnEventCodeClicked -> onEventCodeClicked()
+            TicketSuccessCard()
+
+            InfoCard(
+                text = buildAnnotatedString {
+                    append("Show the QR at the door — or if the camera's slow, tap ")
+
+                    withStyle(
+                        style = SpanStyle(
+                            fontWeight = FontWeight.Bold,
+                            color = AccessDefaults.TextPrimary,
+                        ),
+                    ) {
+                        append("enter event code")
+                    }
+
+                    append(" and type the 4 letters on the welcome card.")
+                },
+            )
+
+            TicketQrInfoCard(
+                onEventCodeClicked = {
+                    onAction(TicketQrAction.OnEventCodeClicked)
+                },
+            )
+        }
+
+        if (isConfettiVisible) {
+            ConfettiKit(
+                modifier = Modifier.fillMaxSize(),
+                parties = remember { listOf(successConfetti()) },
+                onParticleSystemEnded = { _, activeSystems ->
+                    if (activeSystems == 0) {
+                        isConfettiVisible = false
                     }
                 },
             )
@@ -77,57 +151,31 @@ fun TicketQrRoot(
     }
 }
 
-@Composable
-fun TicketQrScreen(
-    modifier: Modifier,
-    listState: LazyListState,
-    state: TicketQrState,
-    onAction: (TicketQrAction) -> Unit,
-) {
-    Box(
-        modifier = modifier.fillMaxSize(),
-    ) {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize(),
-            state = listState,
-            contentPadding = PaddingValues(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            item {
-                Spacer(modifier = Modifier.height(1.dp))
-            }
-
-            item(contentType = "success-card") {
-                TicketSuccessCard()
-            }
-
-            item(contentType = "info-card") {
-                InfoCard(
-                    text = buildAnnotatedString {
-                        append("Show the QR at the door — or if the camera's slow, tap ")
-
-                        withStyle(
-                            style = SpanStyle(
-                                fontWeight = FontWeight.Bold,
-                                color = AccessDefaults.TextPrimary,
-                            ),
-                        ) {
-                            append("enter event code")
-                        }
-
-                        append(" and type the 4 letters on the welcome card.")
-                    },
-                )
-            }
-
-            item(contentType = "ticket-qr-card") {
-                TicketQrInfoCard(
-                    onEventCodeClicked = {
-                        onAction(TicketQrAction.OnEventCodeClicked)
-                    },
-                )
-            }
-        }
-    }
+private fun successConfetti(): Party {
+    return Party(
+        speed = 0f,
+        maxSpeed = 30f,
+        damping = 0.9f,
+        spread = 360,
+        colors = listOf(
+            0xC8FF3D,
+            0xFF7A5C,
+            0xFF5A7A,
+            0x6FB7FF,
+        ),
+        shapes = listOf(
+            Shape.Circle,
+        ),
+        size = listOf(
+            Size.SMALL,
+            Size.MEDIUM,
+        ),
+        emitter = Emitter(
+            duration = 100.milliseconds,
+        ).max(100),
+        position = Position.Relative(
+            x = 0.5,
+            y = 0.05,
+        ),
+    )
 }

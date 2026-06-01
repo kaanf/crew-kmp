@@ -3,6 +3,7 @@ package com.kaanf.crew.di
 import com.kaanf.auth.data.di.authDataModule
 import com.kaanf.auth.presentation.di.authPresentationModule
 import com.kaanf.core.data.di.coreDataModule
+import com.kaanf.game.presentation.di.gamePresentationModule
 import com.kaanf.home.data.di.homeDataModule
 import com.kaanf.home.presentation.di.homePresentationModule
 import org.koin.core.module.Module
@@ -28,6 +29,7 @@ fun initKoin(
             authPresentationModule,
             homeDataModule,
             homePresentationModule,
+            gamePresentationModule,
             appModule,
             *additionalModules.toTypedArray(),
         )
