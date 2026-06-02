@@ -1,36 +1,31 @@
 package com.kaanf.game.presentation.scanopponent
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kaanf.core.designsystem.component.layout.AppTopBar
 import com.kaanf.core.designsystem.component.layout.SnackbarScaffold
-import com.kaanf.core.designsystem.theme.AccessDefaults
+import com.kaanf.core.designsystem.component.sheet.ContainerBottomSheet
 import com.kaanf.core.presentation.model.AppTopBarState
 import com.kaanf.core.presentation.permission.Permission
 import com.kaanf.core.presentation.permission.rememberPermissionController
 import com.kaanf.core.presentation.util.ObserveAsEvents
-import com.kaanf.game.presentation.scanopponent.component.ScannerOverlay
+import com.kaanf.game.presentation.scanopponent.component.overlay.ScannerOverlay
+import com.kaanf.game.presentation.scanopponent.component.sheet.GameRequestSheet
 import org.koin.compose.viewmodel.koinViewModel
 import qrscanner.CameraLens
 import qrscanner.OverlayShape
@@ -65,7 +60,6 @@ fun ScanOpponentRoot(
                 .consumeWindowInsets(innerPadding),
             state = state,
             onAction = viewModel::onAction,
-            onQrScanned = {}
         )
     }
 }
@@ -76,10 +70,19 @@ fun ScanOpponentScreen(
     modifier: Modifier = Modifier,
     state: ScanOpponentState,
     onAction: (ScanOpponentAction) -> Unit,
-    onQrScanned: (String) -> Unit,
 ) {
     BackHandler {
         onAction(ScanOpponentAction.OnCloseClicked)
+    }
+
+    if (state.showGameRequestSheet) {
+        ContainerBottomSheet(
+            dismissible = false,
+            showDragHandle = false,
+            onDismiss = {}
+        ) {
+            GameRequestSheet()
+        }
     }
 
     val permissionController = rememberPermissionController()
@@ -102,25 +105,16 @@ fun ScanOpponentScreen(
             onCompletion = { result ->
                 if (!handled) {
                     handled = true
-                    onQrScanned(result)
+                    onAction(ScanOpponentAction.OnScanResult)
                 }
             },
             imagePickerHandler = {},
-            onFailure = {
-            },
+            onFailure = {},
             overlayShape = OverlayShape.Rectangle,
             overlayColor = Color.Transparent,
             overlayBorderColor = Color.Transparent,
         )
 
-        ScannerOverlay(
-            onCloseClick = { onAction(ScanOpponentAction.OnCloseClicked) },
-            onSimulateClick = {
-                if (!handled) {
-                    handled = true
-                    onQrScanned("debug-match-qr")
-                }
-            },
-        )
+        ScannerOverlay()
     }
 }

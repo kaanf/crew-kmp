@@ -1,9 +1,12 @@
 package com.kaanf.home.data.repository
 
 import com.kaanf.core.data.dto.EventDashboardDto
+import com.kaanf.core.data.dto.EventDetailDto
 import com.kaanf.core.data.mappers.toDomain
 import com.kaanf.core.data.networking.get
 import com.kaanf.core.domain.model.event.EventDashboard
+import com.kaanf.core.domain.model.event.EventDetail
+import com.kaanf.core.domain.model.event.EventId
 import com.kaanf.core.domain.util.DataError
 import com.kaanf.core.domain.util.Result
 import com.kaanf.core.domain.util.map
@@ -19,5 +22,11 @@ class EventRepositoryImpl(
         ).map { events ->
             events.map { it.toDomain() }
         }
+    }
+
+    override suspend fun getEventDetail(eventId: EventId): Result<EventDetail, DataError.Remote> {
+        return httpClient.get<EventDetailDto>(
+            route = "/events/$eventId",
+        ).map { it.toDomain() }
     }
 }

@@ -4,6 +4,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
 import com.kaanf.auth.presentation.navigation.AuthGraphRoutes
@@ -49,13 +50,21 @@ fun App(
         SystemBarsEffect(isDarkTheme = true)
 
         if (!state.isCheckingAuth) {
-            NavigationRoot(
-                navController = navController,
-                startDestination = if(state.isLoggedIn) {
+            // Computed once when the initial auth check completes. Keeping it fixed
+            // prevents the NavHost graph from being rebuilt (which resets the back
+            // stack) when isLoggedIn later changes after a login/logout. Runtime
+            // session changes are handled via navigation events instead.
+            val startDestination = remember {
+                if (state.isLoggedIn) {
                     HomeGraphRoutes.Graph
                 } else {
                     AuthGraphRoutes.Graph
                 }
+            }
+
+            NavigationRoot(
+                navController = navController,
+                startDestination = startDestination,
             )
         }
     }

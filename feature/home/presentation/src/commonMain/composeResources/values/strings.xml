@@ -13,6 +13,7 @@
     <string name="dashboard_upcoming_events_count">%1$d events</string>
     <string name="dashboard_snackbar_load_failed_title">Couldn't load events</string>
     <string name="event_detail_ticket_cta">Get my ticket - 490 Kc</string>
+    <string name="event_detail_my_ticket_cta">Go to ticket detail</string>
     <string name="event_detail_hero_date">SATURDAY - MAY 30</string>
     <string name="event_detail_hero_title">One night.\nOne bar.\n80 strangers.</string>
     <string name="event_code_headline">Type the\ndoor code.</string>
@@ -21,4 +22,18 @@
     <string name="event_code_info_title">Where to find tonight&apos;s code</string>
     <string name="event_code_info_description">Printed on the welcome card by the host&apos;s table. Rotates every 15 minutes so screenshots can&apos;t sneak anyone in.</string>
     <string name="event_code_show_qr_action">Show my QR instead</string>
+    <string name="ticket_qr_success_on_list">You&apos;re on the list.</string>
+    <string name="ticket_qr_success_see_you">See you saturday!</string>
+    <string name="ticket_qr_info_prefix">Show the QR at the door &#8212; or if the camera&apos;s slow, tap\u0020</string>
+    <string name="ticket_qr_info_action">enter event code</string>
+    <string name="ticket_qr_info_suffix">\u0020and type the 4 letters on the welcome card.</string>
+    <string name="ticket_qr_event_series">CREW &#183; VOL. 14</string>
+    <string name="ticket_qr_event_date">Sat May 30 &#183; 20:00</string>
+    <string name="ticket_qr_event_venue">Bar Skutek &#183; Vinohrady</string>
+    <string name="ticket_qr_entry_badge">Entry QR</string>
+    <string name="ticket_qr_enter_event_code_action">Enter event with code</string>
+    <string name="ticket_qr_countdown_days_label">DAYS</string>
+    <string name="ticket_qr_countdown_hours_label">HRS</string>
+    <string name="ticket_qr_countdown_minutes_label">MIN</string>
+    <string name="ticket_qr_countdown_seconds_label">SEC</string>
 </resources>

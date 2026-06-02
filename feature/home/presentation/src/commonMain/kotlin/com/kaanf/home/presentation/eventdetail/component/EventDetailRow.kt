@@ -21,13 +21,17 @@ import com.kaanf.core.designsystem.theme.AccessDefaults
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
-fun EventDetailInformationCard() {
+fun EventDetailInformationCard(
+    doorsTime: String,
+    gameTime: String,
+    crew: String,
+    price: String,
+) {
     val items = listOf(
-        EventDetailInfoItem("Venue", "Bar Skutek - Vinohrady"),
-        EventDetailInfoItem("Doors", "20:00"),
-        EventDetailInfoItem("Game", "20:30 - 23:00"),
-        EventDetailInfoItem("Crew", "42 / 80 in"),
-        EventDetailInfoItem("Price", "490 Kc"),
+        EventDetailInfoItem("Doors", doorsTime),
+        EventDetailInfoItem("Game", gameTime),
+        EventDetailInfoItem("Crew", crew),
+        EventDetailInfoItem("Price", price),
     )
 
     Column(
@@ -104,5 +108,10 @@ private data class EventDetailInfoItem(
 @Composable
 @Preview
 fun EventDetailRowPreview() {
-    EventDetailInformationCard()
+    EventDetailInformationCard(
+        doorsTime = "20:00",
+        gameTime = "20:30 - 23:00",
+        crew = "42 / 80 in",
+        price = "490 CZK",
+    )
 }

@@ -1,7 +1,7 @@
 package com.kaanf.home.presentation.dashboard
 
-import com.kaanf.home.presentation.dashboard.component.challengecard.ChallengeCardUiModel
-import com.kaanf.home.presentation.dashboard.component.challengecard.ChallengeCardVariant
+import com.kaanf.core.presentation.model.ChallengeCardUiModel
+import com.kaanf.core.presentation.model.ChallengeCardVariant
 import com.kaanf.home.presentation.model.EventDashboardUiModel
 
 data class DashboardState(

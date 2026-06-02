@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -35,18 +34,19 @@ import com.kaanf.core.designsystem.component.info.InfoCard
 import com.kaanf.core.designsystem.component.layout.AppTopBar
 import com.kaanf.core.designsystem.component.layout.SnackbarScaffold
 import com.kaanf.core.designsystem.component.sheet.ContainerBottomSheet
+import com.kaanf.core.designsystem.component.sheet.TwoOptionBottomSheet
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessIcons
 import com.kaanf.core.designsystem.theme.CrewTheme
 import com.kaanf.core.presentation.model.AppTopBarState
 import com.kaanf.core.presentation.util.ObserveAsEvents
+import com.kaanf.game.presentation.component.EmojiStackCard
 import com.kaanf.game.presentation.component.OnboardingInfoCard
 import com.kaanf.game.presentation.gamelobby.component.custom.BeforeTheBell
 import com.kaanf.game.presentation.gamelobby.component.custom.MinuteSecondCountdownCard
 import com.kaanf.game.presentation.gamelobby.component.custom.TonightFlowCard
 import com.kaanf.game.presentation.gamelobby.component.custom.WhoIsInTonightCard
 import com.kaanf.game.presentation.gamelobby.component.dialog.LeaveEventDialog
-import com.kaanf.game.presentation.gamelobby.component.sheet.GameStartSheet
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -102,19 +102,27 @@ fun GameLobbyScreen(
     }
 
     if (state.showGameStartSheet) {
-        ContainerBottomSheet(
-            dismissible = false,
+        BackHandler(enabled = !state.showExitConfirmDialog) {
+            onAction(GameLobbyAction.OnBackClick)
+        }
+
+        TwoOptionBottomSheet(
+            iconContent = {
+                EmojiStackCard(
+                    size = 64.dp,
+                    isWaving = true,
+                )
+            },
+            title = "Doors open!",
+            description = "Find someone, jump into the game, and start the\nnight’s first little bit of chaos.",
+            confirmButtonText = "Enter the game",
+            cancelButtonText = "Leave event",
+            onConfirmClicked = { onAction(GameLobbyAction.OnEnterGameClick) },
+            onCancelClicked = { onAction(GameLobbyAction.OnBackClick) },
+            isDismissable = false,
             showDragHandle = false,
             onDismiss = {}
-        ) {
-            BackHandler(enabled = !state.showExitConfirmDialog) {
-                onAction(GameLobbyAction.OnBackClick)
-            }
-            GameStartSheet(
-                onEnterGame = { onAction(GameLobbyAction.OnEnterGameClick) },
-                onLeaveEvent = { onAction(GameLobbyAction.OnBackClick) },
-            )
-        }
+        )
     }
 
     if (state.showExitConfirmDialog) {

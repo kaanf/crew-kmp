@@ -29,9 +29,9 @@ import com.kaanf.core.designsystem.component.layout.SnackbarScaffold
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.presentation.model.AppTopBarState
 import com.kaanf.core.presentation.util.ObserveAsEvents
+import com.kaanf.core.designsystem.component.card.GradientChallengeCard
+import com.kaanf.core.designsystem.component.card.MoreDeckCard
 import com.kaanf.home.presentation.dashboard.component.eventcard.DashboardEventCard
-import com.kaanf.home.presentation.dashboard.component.challengecard.GradientChallengeCard
-import com.kaanf.home.presentation.dashboard.component.challengecard.MoreDeckCard
 import com.kaanf.home.presentation.dashboard.component.eventinfo.DashboardEventInfoRow
 import com.kaanf.home.presentation.dashboard.component.featuredevent.DashboardFeaturedEventCard
 import crew.feature.home.presentation.generated.resources.Res

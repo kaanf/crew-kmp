@@ -4,13 +4,13 @@ import kotlinx.serialization.Serializable
 
 sealed interface GameGraphRoutes {
     @Serializable
-    data object Graph : GameGraphRoutes
+    data class Graph(val eventId: String) : GameGraphRoutes
 
     @Serializable
     data object GameLobby : GameGraphRoutes
 
     @Serializable
-    data object Game : GameGraphRoutes
+    data class Game(val eventId: String) : GameGraphRoutes
 
     @Serializable
     data object PersonalMatchQR : GameGraphRoutes
@@ -26,6 +26,24 @@ sealed interface GameGraphRoutes {
 
     @Serializable
     data object GameConfirmation : GameGraphRoutes
+
+    @Serializable
+    data object WinnerPicks : GameGraphRoutes
+
+    @Serializable
+    data object WinnerWaits : GameGraphRoutes
+
+    @Serializable
+    data object LoserWaits : GameGraphRoutes
+
+    @Serializable
+    data object LoserAccepts : GameGraphRoutes
+
+    @Serializable
+    data object TaskActive : GameGraphRoutes
+
+    @Serializable
+    data object WinnerConfirms : GameGraphRoutes
 
     @Serializable
     data object WinReveal : GameGraphRoutes

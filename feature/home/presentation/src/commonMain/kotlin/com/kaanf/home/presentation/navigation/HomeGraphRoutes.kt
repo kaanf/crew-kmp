@@ -10,11 +10,15 @@ sealed interface HomeGraphRoutes {
     data object Dashboard : HomeGraphRoutes
 
     @Serializable
-    data object EventDetail : HomeGraphRoutes
+    data class EventDetail(val eventId: String) : HomeGraphRoutes
 
     @Serializable
-    data object TicketQr : HomeGraphRoutes
+    data class TicketQr(
+        val eventId: String,
+    ) : HomeGraphRoutes
 
     @Serializable
-    data object EventCode : HomeGraphRoutes
+    data class EventCode(
+        val eventId: String
+    ) : HomeGraphRoutes
 }

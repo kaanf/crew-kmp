@@ -60,8 +60,8 @@ fun NavigationRoot(
 
         homeGraph(
             navController = navController,
-            onGameCodeSuccess = {
-                navController.navigate(GameGraphRoutes.Graph) {
+            onGameCodeSuccess = { eventId ->
+                navController.navigate(GameGraphRoutes.Graph(eventId = eventId)) {
                     popUpTo(HomeGraphRoutes.Dashboard) {
                         inclusive = false
                     }

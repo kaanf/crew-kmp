@@ -1,4 +1,4 @@
-package com.kaanf.home.presentation.dashboard.component.challengecard
+package com.kaanf.core.presentation.model
 
 enum class ChallengeCardVariant {
     Social, Bold, Icebreaker, Flirty, Team, Funny

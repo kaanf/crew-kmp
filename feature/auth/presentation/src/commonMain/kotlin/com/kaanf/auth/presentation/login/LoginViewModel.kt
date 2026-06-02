@@ -93,8 +93,8 @@ class LoginViewModel(
                         )
                 ) {
                     is Result.Success -> {
-                        eventChannel.send(LoginEvent.NavigateToDashboard)
                         sessionStorage.set(result.data)
+                        eventChannel.send(LoginEvent.NavigateToDashboard)
                     }
 
                     is Result.Failure -> {

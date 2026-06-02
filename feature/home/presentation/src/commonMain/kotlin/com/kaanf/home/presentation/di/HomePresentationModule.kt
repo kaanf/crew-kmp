@@ -1,6 +1,10 @@
 package com.kaanf.home.presentation.di
 
+import com.kaanf.home.domain.usecase.CheckInUseCase
+import com.kaanf.home.domain.usecase.CreateTicketUseCase
+import com.kaanf.home.domain.usecase.GetEventDetailUseCase
 import com.kaanf.home.domain.usecase.GetEventsUseCase
+import com.kaanf.home.domain.usecase.GetMyTicketUseCase
 import com.kaanf.home.presentation.dashboard.DashboardViewModel
 import com.kaanf.home.presentation.eventcode.EventCodeViewModel
 import com.kaanf.home.presentation.eventdetail.EventDetailViewModel
@@ -12,6 +16,10 @@ import org.koin.dsl.module
 val homePresentationModule =
     module {
         factoryOf(::GetEventsUseCase)
+        factoryOf(::GetEventDetailUseCase)
+        factoryOf(::CreateTicketUseCase)
+        factoryOf(::GetMyTicketUseCase)
+        factoryOf(::CheckInUseCase)
         viewModelOf(::DashboardViewModel)
         viewModelOf(::EventDetailViewModel)
         viewModelOf(::TicketQrViewModel)

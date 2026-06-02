@@ -41,27 +41,30 @@ fun BaseMiniButton(
     filled: Boolean = false,
     danger: Boolean = false,
     leadingIcon: DrawableResource? = null,
+    backgroundColor: Color? = null,
+    borderColor: Color? = null,
+    textColor: Color? = null,
 ) {
     val borderWidth = 1.5.dp
     val outerShape = RoundedCornerShape(10.dp)
     val innerShape = RoundedCornerShape(10.dp - borderWidth)
     val interactionSource = remember { MutableInteractionSource() }
 
-    val borderColor =
-        when {
+    val resolvedBorderColor =
+        borderColor ?: when {
             danger -> AccessDefaults.DangerBorder
             filled -> AccessDefaults.Accent
             else -> AccessDefaults.Border
         }
-    val backgroundColor =
-        when {
+    val resolvedBackgroundColor =
+        backgroundColor ?: when {
             isLoading -> AccessDefaults.FieldFocusedBackground
             danger -> AccessDefaults.DangerBackground
             filled -> AccessDefaults.Accent
             else -> AccessDefaults.Surface
         }
-    val contentColor =
-        when {
+    val resolvedContentColor =
+        textColor ?: when {
             isLoading -> AccessDefaults.LoadingButtonText
             danger && enabled -> AccessDefaults.LeftArrowColor
             filled && enabled -> AccessDefaults.OnAccent
@@ -74,10 +77,10 @@ fun BaseMiniButton(
             .height(36.dp)
             .alpha(if (enabled) 1f else 0.5f)
             .clip(outerShape)
-            .background(borderColor)
+            .background(resolvedBorderColor)
             .padding(borderWidth)
             .clip(innerShape)
-            .background(backgroundColor)
+            .background(resolvedBackgroundColor)
             .clickable(
                 enabled = enabled && !isLoading,
                 interactionSource = interactionSource,
@@ -93,7 +96,7 @@ fun BaseMiniButton(
             Icon(
                 painter = painterResource(leadingIcon),
                 contentDescription = null,
-                tint = contentColor,
+                tint = resolvedContentColor,
                 modifier = Modifier.size(16.dp),
             )
         }
@@ -102,7 +105,7 @@ fun BaseMiniButton(
             style = MaterialTheme.typography.labelLarge.copy(
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Bold,
-                color = contentColor,
+                color = resolvedContentColor,
             ),
         )
     }

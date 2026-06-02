@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class GameRpsReadyViewModel : ViewModel() {
@@ -23,7 +24,9 @@ class GameRpsReadyViewModel : ViewModel() {
 
     fun onAction(action: GameRpsReadyAction) {
         when (action) {
-            GameRpsReadyAction.OnBackClick -> onBackClick()
+            GameRpsReadyAction.OnBackClick -> _state.update { it.copy(showExitConfirmSheet = true) }
+            GameRpsReadyAction.OnExitConfirmed -> onBackClick()
+            GameRpsReadyAction.OnExitDismissed -> _state.update { it.copy(showExitConfirmSheet = false) }
         }
     }
 

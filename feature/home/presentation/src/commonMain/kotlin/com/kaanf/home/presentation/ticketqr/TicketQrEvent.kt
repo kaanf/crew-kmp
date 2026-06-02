@@ -1,4 +1,3 @@
 package com.kaanf.home.presentation.ticketqr
 
-class TicketQrEvent {
-}
+sealed interface TicketQrEvent

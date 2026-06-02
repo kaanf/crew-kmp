@@ -123,6 +123,7 @@ fun EventCodeScreen(
                     value = state.eventCode,
                     onValueChange = { onAction(EventCodeAction.OnCodeChanged(it)) },
                     status = state.status,
+                    enabled = !state.isLoading,
                 )
 
                 Text(
@@ -203,7 +204,7 @@ fun EventCodePreview() {
     CrewTheme {
         EventCodeScreen(
             modifier = Modifier,
-            state = EventCodeState(),
+            state = EventCodeState(""),
             onAction = {},
         )
     }

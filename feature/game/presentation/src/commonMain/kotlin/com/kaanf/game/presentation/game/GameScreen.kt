@@ -38,6 +38,7 @@ import com.kaanf.core.designsystem.component.dialog.BaseDialog
 import com.kaanf.core.designsystem.component.layout.AppTopBar
 import com.kaanf.core.designsystem.component.layout.SnackbarScaffold
 import com.kaanf.core.designsystem.component.qr.UserQrCard
+import com.kaanf.core.designsystem.component.sheet.ContainerBottomSheet
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessIcons
 import com.kaanf.core.designsystem.theme.CrewTheme
@@ -49,6 +50,8 @@ import com.kaanf.core.presentation.util.ObserveAsEvents
 import com.kaanf.game.presentation.component.OnboardingInfoCard
 import com.kaanf.game.presentation.game.component.LostThrowInfoCard
 import com.kaanf.game.presentation.gamelobby.component.dialog.LeaveEventDialog
+import com.kaanf.game.presentation.scanopponent.component.sheet.GameRequestSheet
+import com.kaanf.game.presentation.scanopponent.component.sheet.GameResponseSheet
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
@@ -68,6 +71,16 @@ fun GameRoot(
         when (event) {
             GameEvent.NavigateToDashboard -> onNavigateToDashboard()
             GameEvent.NavigateToScanOpponent -> onNavigateScanOpponent()
+        }
+    }
+
+    if (state.showMatchRequestSheet) {
+        ContainerBottomSheet(
+            dismissible = true,
+            showDragHandle = false,
+            onDismiss = {}
+        ) {
+            GameResponseSheet()
         }
     }
 

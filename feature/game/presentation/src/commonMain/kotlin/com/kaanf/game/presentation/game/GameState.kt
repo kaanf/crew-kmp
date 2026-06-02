@@ -4,4 +4,5 @@ data class GameState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val showExitConfirmDialog: Boolean = false,
+    val showMatchRequestSheet: Boolean = false
 )

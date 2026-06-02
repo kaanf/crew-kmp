@@ -5,12 +5,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,14 +18,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessShapes
+import crew.feature.home.presentation.generated.resources.Res
+import crew.feature.home.presentation.generated.resources.ticket_qr_countdown_days_label
+import crew.feature.home.presentation.generated.resources.ticket_qr_countdown_hours_label
+import crew.feature.home.presentation.generated.resources.ticket_qr_countdown_minutes_label
+import crew.feature.home.presentation.generated.resources.ticket_qr_countdown_seconds_label
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Clock
 
 @Composable
@@ -73,28 +74,28 @@ fun CountdownCard(
     ) {
         CountdownItem(
             value = days.toString(),
-            label = "DAYS"
+            label = stringResource(Res.string.ticket_qr_countdown_days_label)
         )
 
         CountdownSeparator()
 
         CountdownItem(
             value = hours.toString().padStart(2, '0'),
-            label = "HRS"
+            label = stringResource(Res.string.ticket_qr_countdown_hours_label)
         )
 
         CountdownSeparator()
 
         CountdownItem(
             value = minutes.toString().padStart(2, '0'),
-            label = "MIN"
+            label = stringResource(Res.string.ticket_qr_countdown_minutes_label)
         )
 
         CountdownSeparator()
 
         CountdownItem(
             value = seconds.toString().padStart(2, '0'),
-            label = "SEC"
+            label = stringResource(Res.string.ticket_qr_countdown_seconds_label)
         )
     }
 }

@@ -162,6 +162,8 @@ fun AppTopBar(
                                 }
 
                                 AppTopBarState.ScanOpponent,
+                                AppTopBarState.GameRpsReady,
+                                AppTopBarState.GameConfirmation,
                                 AppTopBarState.Game,
                                     -> AccessIcons.Close
                             },

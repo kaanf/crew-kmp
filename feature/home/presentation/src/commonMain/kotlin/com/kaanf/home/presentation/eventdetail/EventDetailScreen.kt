@@ -1,5 +1,7 @@
 package com.kaanf.home.presentation.eventdetail
 
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -17,6 +19,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -44,9 +47,10 @@ import com.kaanf.core.presentation.util.ObserveAsEvents
 import com.kaanf.home.presentation.eventdetail.component.EventDetailInformationCard
 import com.kaanf.home.presentation.eventdetail.component.EventOnboardingCard
 import com.kaanf.home.presentation.eventdetail.component.SafetyBadge
+import com.kaanf.home.presentation.model.EventDetailUiModel
+import com.kaanf.home.presentation.util.toClockText
 import crew.feature.home.presentation.generated.resources.Res
-import crew.feature.home.presentation.generated.resources.event_detail_hero_date
-import crew.feature.home.presentation.generated.resources.event_detail_hero_title
+import crew.feature.home.presentation.generated.resources.event_detail_my_ticket_cta
 import crew.feature.home.presentation.generated.resources.event_detail_ticket_cta
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -56,7 +60,7 @@ import org.koin.compose.viewmodel.koinViewModel
 fun EventDetailRoot(
     viewModel: EventDetailViewModel = koinViewModel(),
     onBackClick: () -> Unit,
-    onCheckoutSuccess: () -> Unit,
+    onCheckoutSuccess: (eventId: String) -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -65,8 +69,8 @@ fun EventDetailRoot(
 
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
-            EventDetailEvent.CheckoutSuccess -> {
-                onCheckoutSuccess()
+            is EventDetailEvent.CheckoutSuccess -> {
+                onCheckoutSuccess(event.eventId)
             }
         }
     }
@@ -87,11 +91,7 @@ fun EventDetailRoot(
                 .consumeWindowInsets(innerPadding),
             listState = listState,
             state = state,
-            onAction = {
-                when (it) {
-                    EventDetailAction.OnCheckoutClicked -> onCheckoutSuccess()
-                }
-            },
+            onAction = viewModel::onAction,
         )
     }
 }
@@ -103,8 +103,38 @@ fun EventDetailScreen(
     state: EventDetailState,
     onAction: (EventDetailAction) -> Unit,
 ) {
-    Box(
+    Crossfade(
+        targetState = state.event,
         modifier = modifier.fillMaxSize(),
+        animationSpec = tween(durationMillis = 250),
+    ) { event ->
+        if (event == null) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator(color = AccessDefaults.Accent)
+            }
+        } else {
+            EventDetailContent(
+                listState = listState,
+                event = event,
+                isCheckingOut = state.isCheckingOut,
+                onAction = onAction,
+            )
+        }
+    }
+}
+
+@Composable
+private fun EventDetailContent(
+    listState: LazyListState,
+    event: EventDetailUiModel,
+    isCheckingOut: Boolean,
+    onAction: (EventDetailAction) -> Unit,
+) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
     ) {
         LazyColumn(
             state = listState,
@@ -114,11 +144,19 @@ fun EventDetailScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             item(contentType = "hero-card") {
-                EventDetailHeroCard()
+                EventDetailHeroCard(
+                    date = event.heroDate,
+                    title = event.title,
+                )
             }
 
             item(contentType = "information-card") {
-                EventDetailInformationCard()
+                EventDetailInformationCard(
+                    doorsTime = event.doorsOpenAt.toClockText(),
+                    gameTime = event.gameTime,
+                    crew = event.crew,
+                    price = event.formattedPrice,
+                )
             }
 
             item(contentType = "onboarding-card") {
@@ -135,9 +173,17 @@ fun EventDetailScreen(
         }
 
         BaseButton(
-            text = stringResource(Res.string.event_detail_ticket_cta),
+            text = if (!event.hasMyTicket) {
+                stringResource(Res.string.event_detail_ticket_cta)
+            } else {
+                stringResource(Res.string.event_detail_my_ticket_cta)
+            },
             onClick = {
-                onAction(EventDetailAction.OnCheckoutClicked)
+                if (!event.hasMyTicket) {
+                    onAction(EventDetailAction.OnCheckoutClicked)
+                } else {
+                    onAction(EventDetailAction.GoToTicketQr)
+                }
             },
             modifier =
                 Modifier
@@ -145,8 +191,8 @@ fun EventDetailScreen(
                     .padding(horizontal = 16.dp)
                     .padding(bottom = 20.dp)
                     .align(Alignment.BottomCenter),
-            isLoading = false,
-            enabled = true,
+            isLoading = isCheckingOut,
+            enabled = !isCheckingOut,
             filled = false,
             animatedBorder = true,
         )
@@ -154,7 +200,10 @@ fun EventDetailScreen(
 }
 
 @Composable
-private fun EventDetailHeroCard() {
+private fun EventDetailHeroCard(
+    date: String,
+    title: String,
+) {
     EventHeroBackground(
         imageUrl = "https://hostel-drunken-monkey.praguehotelsweb.com/data/Photos/OriginalPhoto/16920/1692044/1692044305/drunken-monkey-hostel-prague-photo-15.JPEG",
         modifier = Modifier
@@ -171,7 +220,7 @@ private fun EventDetailHeroCard() {
             ),
         ) {
             Text(
-                text = stringResource(Res.string.event_detail_hero_date),
+                text = date,
                 style = MaterialTheme.typography.labelSmall.copy(
                     color = AccessDefaults.TextMuted,
                     fontSize = 12.sp,
@@ -179,7 +228,7 @@ private fun EventDetailHeroCard() {
             )
 
             Text(
-                text = stringResource(Res.string.event_detail_hero_title),
+                text = title,
                 style = MaterialTheme.typography.displaySmall.copy(
                     color = AccessDefaults.TextPrimary,
                 ),

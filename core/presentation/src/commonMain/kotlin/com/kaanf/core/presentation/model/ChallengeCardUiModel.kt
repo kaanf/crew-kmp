@@ -1,4 +1,4 @@
-package com.kaanf.home.presentation.dashboard.component.challengecard
+package com.kaanf.core.presentation.model
 
 data class ChallengeCardUiModel(
     val variant: ChallengeCardVariant,

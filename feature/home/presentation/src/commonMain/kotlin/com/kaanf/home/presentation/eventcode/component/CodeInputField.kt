@@ -27,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
@@ -49,9 +50,10 @@ fun CodeInputField(
     modifier: Modifier = Modifier,
     length: Int = 4,
     status: CodeFieldStatus = CodeFieldStatus.Editing,
+    enabled: Boolean = true,
     cellSpacing: Dp = 12.dp,
 ) {
-    val enabled = status != CodeFieldStatus.Success
+    val editable = enabled && status != CodeFieldStatus.Success
     var isFocused by remember { mutableStateOf(false) }
 
     BasicTextField(
@@ -65,7 +67,7 @@ fun CodeInputField(
         modifier = modifier
             .fillMaxWidth()
             .onFocusChanged { isFocused = it.isFocused },
-        enabled = enabled,
+        enabled = editable,
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Text,
             capitalization = KeyboardCapitalization.Characters,
@@ -74,7 +76,9 @@ fun CodeInputField(
         decorationBox = {
             val cursorIndex = if (value.length < length) value.length else length - 1
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .alpha(if (enabled) 1f else DISABLED_ALPHA),
                 horizontalArrangement = Arrangement.spacedBy(cellSpacing),
             ) {
                 repeat(length) { index ->
@@ -83,7 +87,8 @@ fun CodeInputField(
                             .weight(1f)
                             .aspectRatio(1f),
                         char = value.getOrNull(index),
-                        showCursor = isFocused &&
+                        showCursor = enabled &&
+                            isFocused &&
                             status == CodeFieldStatus.Editing &&
                             index == cursorIndex,
                         status = status,
@@ -166,6 +171,8 @@ private fun BlinkingCursor(
             .background(color.copy(alpha = alpha), RoundedCornerShape(1.dp)),
     )
 }
+
+private const val DISABLED_ALPHA = 0.4f
 
 private val Accent = Color(0xFFA4D63C)
 private val Cream = Color(0xFFF2EDE0)
