@@ -3,11 +3,11 @@
 
 # Crew
 
-Crew, fiziksel etkinliklerde tanışmayı oyunlaştıran Kotlin Multiplatform mobil uygulamasıdır. Kullanıcılar hesap oluşturur, e-posta doğrulaması yapar, etkinlikleri görüntüler, bilet/QR akışına girer ve etkinlik alanında gerçek zamanlı oyun sürecine katılır.
+Crew is a Kotlin Multiplatform mobile app that turns real-world social events into an interactive game experience. Users can create an account, verify their email, discover events, access ticket/QR flows, check in at the venue, and join real-time game sessions during the event.
 
-Uygulama Android ve iOS için ortak Kotlin/Compose kodu kullanır. Android tarafı Compose ile, iOS tarafı SwiftUI içinde `ComposeApp` framework'u ile çalışır.
+The app shares Kotlin and Compose code across Android and iOS. Android runs with Compose directly, while iOS hosts the shared `ComposeApp` framework inside a SwiftUI shell.
 
-## Ekran Görüntüleri
+## Screenshots
 
 <table>
   <tr>
@@ -56,44 +56,44 @@ Uygulama Android ve iOS için ortak Kotlin/Compose kodu kullanır. Android taraf
   </tr>
 </table>
 
-## Öne Çıkanlar
+## Highlights
 
-- Kotlin Multiplatform ile Android ve iOS için ortak UI, domain ve data katmanı.
-- Compose Multiplatform, Material 3 ve custom design system ile tutarlı mobil arayüz.
-- Feature-based modular yapı: `auth`, `home`, `game` modülleri.
-- Clean Architecture yaklaşımı: `presentation`, `domain`, `data` ayrımı.
-- MVVM state yönetimi: `ViewModel`, `StateFlow`, event/action/state modelleri.
-- Ktor Client ile REST API entegrasyonu, JSON serialization ve merkezi hata yönetimi.
-- Bearer token authentication, refresh token akışı ve DataStore tabanlı session persistence.
-- Ktor WebSocket ile canlı etkinlik/oyun mesajlarını dinleme.
-- QR ticket, event code check-in, opponent scan ve oyun sonuç akışları.
-- Koin ile dependency injection.
-- Detekt, Ktlint, Android Lint ve Fastlane destekli geliştirme altyapısı.
+- Shared UI, domain, and data layers for Android and iOS with Kotlin Multiplatform.
+- Consistent mobile interface built with Compose Multiplatform, Material 3, and a custom design system.
+- Feature-based modular structure with dedicated `auth`, `home`, and `game` modules.
+- Clean Architecture with clear `presentation`, `domain`, and `data` boundaries.
+- MVVM state management using `ViewModel`, `StateFlow`, and event/action/state models.
+- REST API integration with Ktor Client, JSON serialization, and centralized error handling.
+- Bearer token authentication, refresh token flow, and DataStore-based session persistence.
+- Real-time event and game updates through Ktor WebSocket.
+- QR ticket, event code check-in, opponent scan, and game result flows.
+- Dependency injection with Koin.
+- Development workflow supported by Detekt, Ktlint, Android Lint, and Fastlane.
 
-## Ürün Akışı
+## Product Flow
 
-- **Auth:** Welcome, login, register, forgot password, email verification ve deep link destekli doğrulama sonucu.
-- **Home:** Etkinlik dashboard'u, etkinlik detayı, ticket oluşturma/görüntüleme, QR ve event code ile giriş.
-- **Game:** Lobby, personal match QR, opponent scan, ready state, winner/loser onayları, challenge seçimi, task active ve reveal ekranları.
+- **Auth:** Welcome, login, register, forgot password, email verification, and deep-link-based verification result screens.
+- **Home:** Event dashboard, event detail, ticket creation/viewing, QR access, and event code check-in.
+- **Game:** Lobby, personal match QR, opponent scan, ready state, winner/loser confirmations, challenge selection, active task, and reveal screens.
 
-## Mimari
+## Architecture
 
 ```text
-composeApp                  # KMP uygulama girişi, navigation root, Android/iOS bridge
-core:designsystem           # Tema, typography, buttons, cards, sheets, QR/image components
-core:presentation           # Ortak UI modelleri, permission helpers, snackbar utilities
-core:domain                 # Ortak domain modelleri, result/error modelleri, repository contracts
-core:data                   # Ktor client, session storage, DTO mapper'ları, platform data providers
+composeApp                  # KMP app entry point, navigation root, Android/iOS bridge
+core:designsystem           # Theme, typography, buttons, cards, sheets, QR/image components
+core:presentation           # Shared UI models, permission helpers, snackbar utilities
+core:domain                 # Shared domain models, result/error models, repository contracts
+core:data                   # Ktor client, session storage, DTO mappers, platform data providers
 feature:auth                # Authentication presentation/domain/data
-feature:home                # Event, ticket ve check-in presentation/domain/data
+feature:home                # Event, ticket, and check-in presentation/domain/data
 feature:game                # Real-time game presentation/domain/data
-build-logic                 # Convention plugins ve ortak Gradle ayarları
+build-logic                 # Convention plugins and shared Gradle configuration
 iosApp                      # SwiftUI host app
 ```
 
-## Teknolojiler
+## Technologies
 
-| Alan | Kullanılan Teknolojiler |
+| Area | Technologies |
 | --- | --- |
 | Language | Kotlin 2.2, Swift |
 | Cross-platform | Kotlin Multiplatform, Compose Multiplatform |
@@ -108,15 +108,15 @@ iosApp                      # SwiftUI host app
 | Build & Quality | Gradle Kotlin DSL, Convention Plugins, Detekt, Ktlint, Android Lint |
 | Release | Fastlane for iOS build lane |
 
-## Gereksinimler
+## Requirements
 
 - JDK 17
 - Android Studio
-- Xcode ve iOS simulator/device
-- Kotlin Multiplatform uyumlu Gradle ortamı
-- API sunucusu: `core/data/src/commonMain/kotlin/com/kaanf/core/data/networking/UrlConstants.kt` içindeki HTTP ve WebSocket adresleri aktif olmalıdır.
+- Xcode and an iOS simulator/device
+- Kotlin Multiplatform-compatible Gradle environment
+- Active API server: the HTTP and WebSocket URLs defined in `core/data/src/commonMain/kotlin/com/kaanf/core/data/networking/UrlConstants.kt` must be reachable.
 
-## Çalıştırma
+## Running
 
 Android debug build:
 
@@ -124,13 +124,13 @@ Android debug build:
 ./gradlew :composeApp:assembleDebug
 ```
 
-Android kalite kontrolleri:
+Android quality checks:
 
 ```bash
 ./gradlew ktlintCheck detekt androidLint
 ```
 
-iOS için Xcode ile aç:
+Open the iOS project with Xcode:
 
 ```bash
 open iosApp/iosApp.xcodeproj
@@ -142,8 +142,8 @@ iOS Fastlane build:
 bundle exec fastlane ios ios_build
 ```
 
-## Notlar
+## Notes
 
-- `composeApp` ana uygulama modülüdür; `androidApp` klasörü mevcut olsa da Gradle settings içinde aktif modül olarak dahil edilmemiştir.
-- Backend adresleri şu an source içinde sabit tanımlıdır. Farklı ortamlar için `UrlConstants` veya BuildKonfig tabanlı ortam ayrımı kullanılabilir.
-- Proje feature bazlı ayrıldığı için yeni ekran veya akış eklerken ilgili feature altında `presentation/domain/data` sınırlarını korumak gerekir.
+- `composeApp` is the main application module; the `androidApp` directory exists but is not included as an active module in Gradle settings.
+- Backend URLs are currently defined directly in source. Environment-specific configuration can be moved to `UrlConstants` or a BuildKonfig-based setup.
+- The project is organized by feature, so new screens or flows should keep the existing `presentation/domain/data` boundaries inside the relevant feature module.
