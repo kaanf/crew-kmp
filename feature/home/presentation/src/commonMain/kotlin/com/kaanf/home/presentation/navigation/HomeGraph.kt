@@ -64,6 +64,9 @@ fun NavGraphBuilder.homeGraph(
             EventCodeRoot(
                 onTicketCodeSuccess = {
                     onGameCodeSuccess(eventId)
+                },
+                onBack = {
+                    navController.popBackStack()
                 }
             )
         }

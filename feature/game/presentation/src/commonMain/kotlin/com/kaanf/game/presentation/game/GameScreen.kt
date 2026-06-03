@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -16,12 +15,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -50,8 +46,7 @@ import com.kaanf.core.presentation.util.ObserveAsEvents
 import com.kaanf.game.presentation.component.OnboardingInfoCard
 import com.kaanf.game.presentation.game.component.LostThrowInfoCard
 import com.kaanf.game.presentation.gamelobby.component.dialog.LeaveEventDialog
-import com.kaanf.game.presentation.scanopponent.component.sheet.GameRequestSheet
-import com.kaanf.game.presentation.scanopponent.component.sheet.GameResponseSheet
+import com.kaanf.game.presentation.component.sheet.GameResponseSheet
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
@@ -60,7 +55,8 @@ import org.koin.compose.viewmodel.koinViewModel
 fun GameRoot(
     viewModel: GameViewModel = koinViewModel(),
     onNavigateToDashboard: () -> Unit,
-    onNavigateScanOpponent: () -> Unit
+    onNavigateScanOpponent: () -> Unit,
+    onNavigateToGameRpsReady: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -71,6 +67,7 @@ fun GameRoot(
         when (event) {
             GameEvent.NavigateToDashboard -> onNavigateToDashboard()
             GameEvent.NavigateToScanOpponent -> onNavigateScanOpponent()
+            GameEvent.NavigateToGameRpsReady -> onNavigateToGameRpsReady()
         }
     }
 
@@ -78,9 +75,16 @@ fun GameRoot(
         ContainerBottomSheet(
             dismissible = true,
             showDragHandle = false,
-            onDismiss = {}
+            onDismiss = { viewModel.onAction(GameAction.OnInviteDeclined) }
         ) {
-            GameResponseSheet()
+            state.incomingInvite?.let { message ->
+                GameResponseSheet(
+                    isResponding = state.isRespondingToInvite,
+                    message = message,
+                    onAccept = { viewModel.onAction(GameAction.OnInviteAccepted) },
+                    onDecline = { viewModel.onAction(GameAction.OnInviteDeclined) },
+                )
+            }
         }
     }
 
@@ -179,7 +183,7 @@ fun GameScreen(
 
         UserQrCard(
             modifier = Modifier.size(300.dp),
-            inputText = "CR-7K8B-2M9X-04-CR",
+            inputText = state.matchQrToken.orEmpty(),
         )
 
         Spacer(modifier = Modifier.height(1.dp))

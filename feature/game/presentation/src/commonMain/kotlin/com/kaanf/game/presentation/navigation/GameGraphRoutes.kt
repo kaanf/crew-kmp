@@ -16,7 +16,7 @@ sealed interface GameGraphRoutes {
     data object PersonalMatchQR : GameGraphRoutes
 
     @Serializable
-    data object ScanOpponent : GameGraphRoutes
+    data class ScanOpponent(val eventId: String) : GameGraphRoutes
 
     @Serializable
     data object GameRpsReady : GameGraphRoutes

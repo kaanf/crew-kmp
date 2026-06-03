@@ -2,5 +2,7 @@ package com.kaanf.game.presentation.scanopponent
 
 sealed interface ScanOpponentAction {
     data object OnCloseClicked : ScanOpponentAction
-    data object OnScanResult : ScanOpponentAction
+
+    // Okunan QR'ın çözümlenmiş metni = karşı tarafın maç token'ı.
+    data class OnScanResult(val scannedMatchQrToken: String) : ScanOpponentAction
 }

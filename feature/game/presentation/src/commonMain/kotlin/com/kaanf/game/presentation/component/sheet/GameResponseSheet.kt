@@ -1,4 +1,4 @@
-package com.kaanf.game.presentation.scanopponent.component.sheet
+package com.kaanf.game.presentation.component.sheet
 
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
@@ -8,6 +8,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -34,12 +35,16 @@ import androidx.compose.ui.unit.sp
 import com.kaanf.core.designsystem.component.avatar.AvatarCircle
 import com.kaanf.core.designsystem.component.button.BaseButton
 import com.kaanf.core.designsystem.theme.AccessDefaults
-import qrgenerator.qrkitpainter.text
+import com.kaanf.game.domain.model.GameSocketMessage
 
 
 @Composable
 fun GameResponseSheet(
     modifier: Modifier = Modifier,
+    isResponding: Boolean = false,
+    message: GameSocketMessage.MatchInviteReceived,
+    onAccept: () -> Unit = {},
+    onDecline: () -> Unit = {},
 ) {
     Column(
         modifier = modifier
@@ -70,7 +75,7 @@ fun GameResponseSheet(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             AvatarCircle(
-                label = "Y",
+                label = message.fromFullName.first().toString(),
                 color = AccessDefaults.Rose,
                 avatarSize = 78,
                 textSize = 30.0,
@@ -107,7 +112,7 @@ fun GameResponseSheet(
         }
 
         Text(
-            text = "Y wants to\nplay with you.",
+            text = "${message.fromFullName} wants to\nplay with you.",
             style = MaterialTheme.typography.headlineMedium.copy(
                 color = AccessDefaults.TextPrimary,
                 textAlign = TextAlign.Center
@@ -127,12 +132,16 @@ fun GameResponseSheet(
 
         BaseButton(
             text = "Accept - start match",
-            onClick = {},
+            onClick = onAccept,
+            enabled = !isResponding,
+            isLoading = isResponding,
+            loadingText = "STARTING...",
             filled = true
         )
 
         Text(
             text = "Not right now",
+            modifier = Modifier.clickable(enabled = !isResponding, onClick = onDecline),
             style = MaterialTheme.typography.titleSmall.copy(
                 color = AccessDefaults.TextFaint,
                 fontWeight = FontWeight.Medium,

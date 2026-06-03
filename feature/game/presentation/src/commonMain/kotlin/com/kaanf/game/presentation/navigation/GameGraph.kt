@@ -43,10 +43,16 @@ fun NavGraphBuilder.gameGraph(
         }
 
         composable<GameGraphRoutes.Game> {
+            // Soketteki invite gönderimi için eventId'yi scan ekranına taşı.
+            val eventId = navController.getBackStackEntry<GameGraphRoutes.Graph>()
+                .toRoute<GameGraphRoutes.Graph>().eventId
             GameRoot(
                 onNavigateToDashboard = onNavigateToDashboard,
                 onNavigateScanOpponent = {
-                    navController.navigate(GameGraphRoutes.ScanOpponent)
+                    navController.navigate(GameGraphRoutes.ScanOpponent(eventId = eventId))
+                },
+                onNavigateToGameRpsReady = {
+                    navController.navigate(GameGraphRoutes.GameRpsReady)
                 },
             )
         }
@@ -63,6 +69,12 @@ fun NavGraphBuilder.gameGraph(
             ScanOpponentRoot(
                 onCloseClicked = {
                     navController.popBackStack()
+                },
+                onNavigateToGameRpsReady = {
+                    // Kamera ekranını geride bırakma: RPS'ten geri gelince Game'e dön.
+                    navController.navigate(GameGraphRoutes.GameRpsReady) {
+                        popUpTo<GameGraphRoutes.ScanOpponent> { inclusive = true }
+                    }
                 },
             )
         }

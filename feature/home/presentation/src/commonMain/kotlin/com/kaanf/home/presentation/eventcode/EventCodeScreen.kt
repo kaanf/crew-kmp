@@ -55,6 +55,7 @@ import org.koin.compose.viewmodel.koinViewModel
 fun EventCodeRoot(
     viewModel: EventCodeViewModel = koinViewModel(),
     onTicketCodeSuccess: () -> Unit,
+    onBack: () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -69,7 +70,9 @@ fun EventCodeRoot(
         topBar = {
             AppTopBar(
                 state = AppTopBarState.EventCode,
-                onBackClick = {},
+                onBackClick = {
+                    onBack()
+                },
             )
         },
         snackbarHostState = snackbarHostState,

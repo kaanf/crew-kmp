@@ -3,7 +3,14 @@ package com.kaanf.game.presentation.game
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kaanf.core.domain.util.DataError
+import com.kaanf.core.domain.util.EmptyResult
+import com.kaanf.core.domain.util.asEmptyResult
+import com.kaanf.core.domain.util.onFailure
+import com.kaanf.core.domain.util.onSuccess
+import com.kaanf.game.domain.model.GameSocketMessage
 import com.kaanf.game.domain.repository.GameSocketRepository
+import com.kaanf.game.domain.repository.MatchRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,6 +25,7 @@ import kotlinx.coroutines.launch
 
 class GameViewModel(
     private val gameSocketRepository: GameSocketRepository,
+    private val matchRepository: MatchRepository,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     private val eventId = savedStateHandle.get<String>("eventId").orEmpty()
@@ -36,7 +44,7 @@ class GameViewModel(
         )
 
     init {
-        // Kullanıcı oyuna girince sokete subscribe ol.
+        loadMatchQrToken()
         subscribeToEvents()
     }
 
@@ -46,6 +54,51 @@ class GameViewModel(
             GameAction.OnExitDismissed -> _state.update { it.copy(showExitConfirmDialog = false) }
             GameAction.OnExitConfirmed -> onExitConfirmed()
             GameAction.OnScanClicked -> onScanClicked()
+            GameAction.OnInviteAccepted -> respondToInvite(navigateToRps = true) { inviteId ->
+                matchRepository.acceptInvite(eventId = eventId, inviteId = inviteId).asEmptyResult()
+            }
+            GameAction.OnInviteDeclined -> respondToInvite(navigateToRps = false) { inviteId ->
+                matchRepository.declineInvite(eventId = eventId, inviteId = inviteId)
+            }
+        }
+    }
+
+    private fun respondToInvite(
+        navigateToRps: Boolean,
+        call: suspend (inviteId: String) -> EmptyResult<DataError.Remote>,
+    ) {
+        val inviteId = _state.value.incomingInvite?.inviteId ?: return
+        if (_state.value.isRespondingToInvite) return
+        _state.update { it.copy(isRespondingToInvite = true, errorMessage = null) }
+
+        viewModelScope.launch {
+            call(inviteId)
+                .onSuccess {
+                    _state.update {
+                        it.copy(
+                            isRespondingToInvite = false,
+                            showMatchRequestSheet = false,
+                            incomingInvite = null,
+                        )
+                    }
+                    if (navigateToRps) {
+                        eventChannel.send(GameEvent.NavigateToGameRpsReady)
+                    }
+                }
+                .onFailure { error ->
+                    _state.update {
+                        it.copy(isRespondingToInvite = false, errorMessage = error.toString())
+                    }
+                }
+        }
+    }
+
+    private fun loadMatchQrToken() {
+        viewModelScope.launch {
+            matchRepository.getMyMatchQrToken(eventId)
+                .onSuccess { token ->
+                    _state.update { it.copy(matchQrToken = token) }
+                }
         }
     }
 
@@ -53,13 +106,28 @@ class GameViewModel(
         if (socketJob?.isActive == true) return
 
         socketJob = gameSocketRepository.observeEvents(eventId)
-            .onEach { message ->
-                // TODO: gelen mesaja göre state'i güncelle (message.type / message.raw)
-            }
+            .onEach(::onSocketMessage)
             .catch { error ->
                 _state.update { it.copy(errorMessage = error.message) }
             }
             .launchIn(viewModelScope)
+    }
+
+    private fun onSocketMessage(message: GameSocketMessage) {
+        when (message) {
+            is GameSocketMessage.GameStarted ->
+                _state.update { it.copy(gameStarted = true) }
+
+            is GameSocketMessage.MatchInviteReceived ->
+                _state.update {
+                    it.copy(incomingInvite = message, showMatchRequestSheet = true)
+                }
+
+            is GameSocketMessage.MatchStarted,
+            is GameSocketMessage.MatchInviteDeclined,
+            GameSocketMessage.Connected,
+            is GameSocketMessage.Unknown -> Unit
+        }
     }
 
     private fun unsubscribeFromEvents() {
@@ -82,7 +150,6 @@ class GameViewModel(
     }
 
     override fun onCleared() {
-        // Ekran back-stack'ten çıkınca (oyundan ayrılınca) soketi kapat.
         unsubscribeFromEvents()
         super.onCleared()
     }

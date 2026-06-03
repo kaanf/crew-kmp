@@ -1,4 +1,4 @@
-package com.kaanf.game.presentation.scanopponent.component.sheet
+package com.kaanf.game.presentation.component.sheet
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -16,39 +16,40 @@ import com.kaanf.core.designsystem.component.avatar.AvatarCircle
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.CrewTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
+import com.kaanf.game.presentation.component.ThreeDotsAnimatedCard
 
 @Composable
 fun GameRequestSheet(
     modifier: Modifier = Modifier,
+    opponentName: String,
 ) {
     Column(
         modifier = modifier
             .fillMaxWidth()
             .padding(
-                all = 20.dp,
+                vertical = 20.dp,
+                horizontal = 24.dp
             ),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -110,7 +111,7 @@ fun GameRequestSheet(
         }
 
         Text(
-            text = "Waiting for Mira\nto accept.",
+            text = "Waiting for $opponentName\nto accept.",
             style = MaterialTheme.typography.headlineMedium.copy(
                 color = AccessDefaults.TextPrimary,
                 textAlign = TextAlign.Center
@@ -118,7 +119,7 @@ fun GameRequestSheet(
         )
 
         Text(
-            text = "Your request just landed on Mira's phone. The match starts the second they tap accept.\nHang tight.",
+            text = "Your request just landed on $opponentName's phone. The match starts the second they tap accept.\nHang tight.",
             style = MaterialTheme.typography.titleSmall.copy(
                 color = AccessDefaults.TextMuted,
                 fontWeight = FontWeight.Medium,
@@ -128,15 +129,42 @@ fun GameRequestSheet(
 
         Spacer(modifier = Modifier.height(1.dp))
 
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(
+                space = 6.dp,
+                alignment = Alignment.CenterHorizontally
+            ),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            ThreeDotsAnimatedCard(
+                dotRadius = 2.dp,
+                spacing = 4.dp
+            )
+            Text(
+                text = "Waiting for response",
+                style = MaterialTheme.typography.titleSmall.copy(
+                    color = AccessDefaults.TextSecondary,
+                    fontSize = 11.sp,
+                ),
+            )
+        }
+
+        /* Daha sonra koyacağız
         Text(
             text = "Cancel request",
+            modifier = Modifier.clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = onCancel,
+            ),
             style = MaterialTheme.typography.titleSmall.copy(
-                color = AccessDefaults.TextFaint,
-                fontWeight = FontWeight.Medium,
-                textAlign = TextAlign.Center,
-                fontSize = 12.sp
+                color = AccessDefaults.LeftArrowColor,
+                fontSize = 12.sp,
             ),
         )
+        */
     }
 }
 
@@ -213,6 +241,8 @@ fun DrawScope.drawGlowDot(
 @Preview
 fun GameRequestSheetPreview() {
     CrewTheme {
-        GameRequestSheet()
+        GameRequestSheet(
+            opponentName = "",
+        )
     }
 }

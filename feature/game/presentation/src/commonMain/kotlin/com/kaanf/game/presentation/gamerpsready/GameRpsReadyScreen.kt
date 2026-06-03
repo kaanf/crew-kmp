@@ -89,7 +89,7 @@ fun GameRpsReadyScreen(
             confirmButtonText = "Keep playing",
             cancelButtonText = "Leave round",
             onConfirmClicked = { onAction(GameRpsReadyAction.OnExitDismissed) },
-            onCancelClicked = { onAction(GameRpsReadyAction.OnBackClick) },
+            onCancelClicked = { onAction(GameRpsReadyAction.OnExitConfirmed) },
             isDismissable = true,
             showDragHandle = true,
             onDismiss = {

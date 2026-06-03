@@ -25,7 +25,7 @@ import com.kaanf.core.presentation.permission.Permission
 import com.kaanf.core.presentation.permission.rememberPermissionController
 import com.kaanf.core.presentation.util.ObserveAsEvents
 import com.kaanf.game.presentation.scanopponent.component.overlay.ScannerOverlay
-import com.kaanf.game.presentation.scanopponent.component.sheet.GameRequestSheet
+import com.kaanf.game.presentation.component.sheet.GameRequestSheet
 import org.koin.compose.viewmodel.koinViewModel
 import qrscanner.CameraLens
 import qrscanner.OverlayShape
@@ -35,6 +35,7 @@ import qrscanner.QrScanner
 fun ScanOpponentRoot(
     viewModel: ScanOpponentViewModel = koinViewModel(),
     onCloseClicked: () -> Unit,
+    onNavigateToGameRpsReady: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -42,6 +43,7 @@ fun ScanOpponentRoot(
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
             ScanOpponentEvent.CloseScreen -> onCloseClicked()
+            ScanOpponentEvent.NavigateToGameRpsReady -> onNavigateToGameRpsReady()
         }
     }
 
@@ -81,7 +83,9 @@ fun ScanOpponentScreen(
             showDragHandle = false,
             onDismiss = {}
         ) {
-            GameRequestSheet()
+            GameRequestSheet(
+                opponentName = state.opponentName.orEmpty(),
+            )
         }
     }
 
@@ -105,7 +109,7 @@ fun ScanOpponentScreen(
             onCompletion = { result ->
                 if (!handled) {
                     handled = true
-                    onAction(ScanOpponentAction.OnScanResult)
+                    onAction(ScanOpponentAction.OnScanResult(scannedMatchQrToken = result))
                 }
             },
             imagePickerHandler = {},
