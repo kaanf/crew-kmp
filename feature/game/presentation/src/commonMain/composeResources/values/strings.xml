@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+    <string name="match_you_avatar_label">Y</string>
+    <string name="match_unknown_avatar_label">?</string>
+    <string name="match_points_format">+%1$d PTS</string>
+
+    <string name="match_onboarding_info_text">&#10024;\t\tNew here? See how a night plays out</string>
+
+    <string name="match_task_card_accept_label">ACCEPT</string>
+    <string name="match_task_card_reject_label">REJECT</string>
+    <string name="match_task_card_variant_social">SOCIAL</string>
+    <string name="match_task_card_variant_bold">BOLD</string>
+    <string name="match_task_card_variant_icebreaker">ICEBREAKER</string>
+    <string name="match_task_card_variant_flirty">FLIRTY</string>
+    <string name="match_task_card_variant_team">TEAM</string>
+    <string name="match_task_card_variant_funny">FUNNY</string>
+
+    <string name="match_phase_qr_home_title_prefix">Your pass is </string>
+    <string name="match_phase_qr_home_title_highlight">live</string>
+    <string name="match_phase_qr_home_description">Flash your code at a stranger, throw hands, and bank points before the lights come up.</string>
+    <string name="match_phase_qr_home_scan_action">Scan Someone Instead</string>
+    <string name="match_phase_lost_throw_icon">&#x1F525;</string>
+    <string name="match_phase_lost_throw_title">Lost the throw? Still worth it.</string>
+    <string name="match_phase_lost_throw_description">You bank points just for playing &#8212; win or lose. Keep the night moving.</string>
+
+    <string name="match_phase_rps_ready_vs_label">VS.</string>
+    <string name="match_phase_rps_ready_title">Throw on three.</string>
+    <string name="match_phase_rps_ready_description">Lock eyes, count it yourselves, play it out, then both tap button and report the winner.</string>
+    <string name="match_phase_rps_ready_action">We played</string>
+    <string name="match_phase_rps_ready_loading">Waiting on %1$s...</string>
+
+    <string name="match_phase_who_won_eyebrow">WHO WON?</string>
+    <string name="match_phase_who_won_title">Tell us honestly.</string>
+    <string name="match_phase_who_won_description">Tap your call. %1$s taps theirs.</string>
+    <string name="match_phase_who_won_won_title">I won</string>
+    <string name="match_phase_who_won_won_description">You pick a task for %1$s</string>
+    <string name="match_phase_who_won_won_emoji">&#x1F451;</string>
+    <string name="match_phase_who_won_lost_title">I lost</string>
+    <string name="match_phase_who_won_lost_points">NO BONUS</string>
+    <string name="match_phase_who_won_lost_description">%1$s picks a task for you</string>
+    <string name="match_phase_who_won_lost_emoji">&#x1F605;</string>
+    <string name="match_phase_who_won_waiting">%1$s is calling it...</string>
+    <string name="match_phase_who_won_dispute_action">Dispute &#183; ask the host</string>
+
+    <string name="match_phase_winner_picks_eyebrow">PICK A TASK FOR %1$s</string>
+    <string name="match_phase_winner_picks_title">Choose 1 of %1$d.</string>
+    <string name="match_phase_winner_picks_description">%1$s can decline (with a penalty).</string>
+    <string name="match_phase_winner_picks_send_action">Send to %1$s</string>
+    <string name="match_phase_winner_picks_loading">WAITING FOR %1$s...</string>
+
+    <string name="match_phase_loser_waits_eyebrow">THEIR MOVE</string>
+    <string name="match_phase_loser_waits_title">%1$s is choosing\nyour task.</string>
+    <string name="match_phase_loser_waits_description">%1$s is choosing 1 of 3 tasks from tonight&apos;s deck.\nYou&apos;ll see it here when it&apos;s ready.</string>
+    <string name="match_phase_loser_waits_status">Waiting for response</string>
+
+    <string name="match_phase_loser_accepts_eyebrow">%1$s PICKED THIS FOR YOU</string>
+    <string name="match_phase_loser_accepts_title">Up to you.</string>
+    <string name="match_phase_loser_accepts_reject_action">Reject</string>
+    <string name="match_phase_loser_accepts_accept_action">Accept</string>
+    <string name="match_phase_loser_accepts_loading">STARTING...</string>
+
+    <string name="match_phase_loser_active_title">%1$s is watching.</string>
+
+    <string name="match_phase_winner_confirms_eyebrow">TASK ACCEPTED</string>
+    <string name="match_phase_winner_confirms_title">%1$s is doing the task.</string>
+    <string name="match_phase_winner_confirms_not_done_action">Not done</string>
+    <string name="match_phase_winner_confirms_completed_action">Completed</string>
+    <string name="match_phase_winner_confirms_loading">SAVING...</string>
+
+    <string name="match_phase_scoreboard_title_prefix">Points </string>
+    <string name="match_phase_scoreboard_title_highlight">banked.</string>
+    <string name="match_phase_scoreboard_subtitle_loading">Tallying up the match&#8230;</string>
+    <string name="match_phase_scoreboard_subtitle_winner_done">You took the throw &#183; task done. Here&apos;s the tally.</string>
+    <string name="match_phase_scoreboard_subtitle_winner_bailed">You took the throw &#183; task bailed. Here&apos;s the tally.</string>
+    <string name="match_phase_scoreboard_subtitle_loser_done">You cleared the task. Here&apos;s the tally.</string>
+    <string name="match_phase_scoreboard_subtitle_loser_not_done">Task not done. Here&apos;s the tally.</string>
+    <string name="match_phase_scoreboard_finish_action">Finish</string>
+    <string name="match_phase_scoreboard_finish_loading">FINISHING...</string>
+
+    <string name="match_scoreboard_you_label">You</string>
+    <string name="match_scoreboard_won_throw_label">WON THE THROW</string>
+    <string name="match_scoreboard_lost_throw_label">LOST THE THROW</string>
+    <string name="match_scoreboard_detail_won_throw_title">Won the throw</string>
+    <string name="match_scoreboard_detail_lost_throw_title">Lost the throw</string>
+    <string name="match_scoreboard_detail_rps_subtitle">Rock &#183; Paper &#183; Scissors</string>
+    <string name="match_scoreboard_detail_completed_task_title">Completed the task</string>
+    <string name="match_scoreboard_detail_completed_task_subtitle">Challenge cleared</string>
+    <string name="match_scoreboard_detail_task_not_done_title">Task not done</string>
+    <string name="match_scoreboard_detail_task_not_done_subtitle">No points earned</string>
+</resources>

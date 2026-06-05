@@ -11,7 +11,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -20,7 +19,10 @@ import com.kaanf.core.designsystem.theme.AccessIcons
 import com.kaanf.core.designsystem.theme.AccessShapes
 import com.kaanf.core.designsystem.theme.CrewTheme
 import com.kaanf.core.presentation.util.dottedBorder
+import crew.feature.game.presentation.generated.resources.Res
+import crew.feature.game.presentation.generated.resources.match_onboarding_info_text
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -34,7 +36,7 @@ fun OnboardingInfoCard() {
                 strokeWidth = 1.dp,
                 dotLength = 2.dp,
                 gapLength = 4.dp,
-                backgroundColor = Color.Transparent
+                backgroundColor = Color.Transparent,
             ),
         content = {
             Row(
@@ -45,17 +47,17 @@ fun OnboardingInfoCard() {
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(
-                    text = "✨\t\tNew here? See how a night plays out",
+                    text = stringResource(Res.string.match_onboarding_info_text),
                     overflow = TextOverflow.Ellipsis,
                     style = MaterialTheme.typography.titleSmall.copy(
                         color = AccessDefaults.TextSecondary,
-                    )
+                    ),
                 )
 
                 Icon(
                     painter = painterResource(AccessIcons.RightChevron),
                     contentDescription = null,
-                    tint = AccessDefaults.BorderSoft
+                    tint = AccessDefaults.BorderSoft,
                 )
             }
         },

@@ -34,17 +34,17 @@ fun UserQrCard(
     modifier: Modifier = Modifier,
     inputText: String,
 ) {
-    val centerLogo = painterResource(AccessIcons.User)
+    val centerLogo = painterResource(AccessIcons.LogoLetter)
 
     val painter = rememberQrKitPainter(inputText) {
         shapes = QrKitShapes(
-            ballShape = getSelectedQrBall(QrBallType.RoundCornersQrBall(radius = 10f)),
-            darkPixelShape = getSelectedPixel(QrPixelType.SquarePixel()),
+            ballShape = getSelectedQrBall(QrBallType.CircleQrBall()),
+            darkPixelShape = getSelectedPixel(QrPixelType.CirclePixel(size = 0.9f)),
             frameShape = getSelectedFrameShape(QrFrameType.RoundCornersFrame(corner = 0.25f)),
             codeShape = getSelectedPattern(PatternType.SquarePattern),
         )
         colors = QrKitColors(
-            darkBrush = QrKitBrush.solidBrush(AccessDefaults.Surface),
+            darkBrush = QrKitBrush.solidBrush(AccessDefaults.TextPrimary),
         )
         logo = QrKitLogo(centerLogo, padding = QrKitLogoPadding.Natural(0.1f))
     }
@@ -53,11 +53,11 @@ fun UserQrCard(
         modifier = modifier
             .size(285.dp)
             .background(
-                AccessDefaults.TextPrimary,
+                AccessDefaults.Surface,
                 shape = AccessShapes.Large
             )
             .padding(
-                all = 12.dp
+                all = 10.dp
             ),
         contentAlignment = Alignment.Center
     ) {

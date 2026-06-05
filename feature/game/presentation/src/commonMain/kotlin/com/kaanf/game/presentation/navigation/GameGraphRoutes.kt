@@ -9,6 +9,7 @@ sealed interface GameGraphRoutes {
     @Serializable
     data object GameLobby : GameGraphRoutes
 
+    // Maç oturumu container'ı; eski faz route'ları (RpsReady, WhoWon, ...) buraya MatchPhase olarak katlandı.
     @Serializable
     data class Game(val eventId: String) : GameGraphRoutes
 
@@ -17,37 +18,4 @@ sealed interface GameGraphRoutes {
 
     @Serializable
     data class ScanOpponent(val eventId: String) : GameGraphRoutes
-
-    @Serializable
-    data object GameRpsReady : GameGraphRoutes
-
-    @Serializable
-    data object WhoWon : GameGraphRoutes
-
-    @Serializable
-    data object GameConfirmation : GameGraphRoutes
-
-    @Serializable
-    data object WinnerPicks : GameGraphRoutes
-
-    @Serializable
-    data object WinnerWaits : GameGraphRoutes
-
-    @Serializable
-    data object LoserWaits : GameGraphRoutes
-
-    @Serializable
-    data object LoserAccepts : GameGraphRoutes
-
-    @Serializable
-    data object TaskActive : GameGraphRoutes
-
-    @Serializable
-    data object WinnerConfirms : GameGraphRoutes
-
-    @Serializable
-    data object WinReveal : GameGraphRoutes
-
-    @Serializable
-    data object LoseReveal : GameGraphRoutes
 }

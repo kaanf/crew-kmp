@@ -5,10 +5,8 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -33,7 +31,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import com.kaanf.core.designsystem.component.logo.LogoCard
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessIcons
 import com.kaanf.core.designsystem.theme.CrewTheme
@@ -42,11 +42,21 @@ import crew.core.designsystem.generated.resources.Res
 import crew.core.designsystem.generated.resources.empty
 import crew.core.designsystem.generated.resources.event_code_title
 import crew.core.designsystem.generated.resources.event_detail_title
-import crew.core.designsystem.generated.resources.ic_chevron_left_24
+import crew.core.designsystem.generated.resources.game_how_to_play
+import crew.core.designsystem.generated.resources.loser_accepts_title
+import crew.core.designsystem.generated.resources.loser_active_task_title
+import crew.core.designsystem.generated.resources.loser_waits_title
 import crew.core.designsystem.generated.resources.login_text
+import crew.core.designsystem.generated.resources.loser_active_task_skip
 import crew.core.designsystem.generated.resources.register_text
+import crew.core.designsystem.generated.resources.rps_ready_title
 import crew.core.designsystem.generated.resources.scan_opponent_title
 import crew.core.designsystem.generated.resources.ticket_qr_title
+import crew.core.designsystem.generated.resources.who_won_title
+import crew.core.designsystem.generated.resources.winner_confirms_title
+import crew.core.designsystem.generated.resources.winner_picks_title
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -64,6 +74,11 @@ fun AppTopBar(
         animationSpec = tween(durationMillis = 200),
         label = "AppTopBarOverlayAlpha",
     )
+    val title = when (state) {
+        is AppTopBarState.GameLobby -> state.title
+        else -> stringResource(state.titleResource)
+    }
+    val navigationIcon = state.navigationIcon
 
     Box(
         modifier = modifier
@@ -104,22 +119,16 @@ fun AppTopBar(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(all = 16.dp),
+                .padding(
+                    horizontal = 16.dp,
+                )
+                .padding(
+                    top = 20.dp,
+                    bottom = 16.dp
+                ),
         ) {
             Text(
-                text = if (state is AppTopBarState.GameLobby) {
-                    state.title
-                } else {
-                    stringResource(
-                        when (state) {
-                            AppTopBarState.EventDetail -> Res.string.event_detail_title
-                            AppTopBarState.TicketQr -> Res.string.ticket_qr_title
-                            AppTopBarState.EventCode -> Res.string.event_code_title
-                            AppTopBarState.ScanOpponent -> Res.string.scan_opponent_title
-                            else -> Res.string.empty
-                        },
-                    )
-                },
+                text = title,
                 modifier = Modifier
                     .align(Alignment.Center)
                     .fillMaxWidth()
@@ -133,7 +142,7 @@ fun AppTopBar(
                 overflow = TextOverflow.Ellipsis,
             )
 
-            if (state != AppTopBarState.Dashboard) {
+            navigationIcon?.let { icon ->
                 IconButton(
                     onClick = onBackClick,
                     modifier = Modifier
@@ -148,34 +157,38 @@ fun AppTopBar(
                         .size(32.dp),
                 ) {
                     Icon(
-                        painter = painterResource(
-                            when (state) {
-                                AppTopBarState.Login,
-                                AppTopBarState.Register,
-                                AppTopBarState.Dashboard,
-                                AppTopBarState.EventDetail,
-                                is AppTopBarState.GameLobby,
-                                AppTopBarState.TicketQr,
-                                AppTopBarState.EventCode,
-                                    -> {
-                                    AccessIcons.LeftChevron
-                                }
-
-                                AppTopBarState.ScanOpponent,
-                                AppTopBarState.GameRpsReady,
-                                AppTopBarState.GameConfirmation,
-                                AppTopBarState.Game,
-                                    -> AccessIcons.Close
-                            },
-                        ),
+                        painter = painterResource(icon),
                         contentDescription = null,
                         tint = AccessDefaults.TextPrimary,
-                        modifier = Modifier.size(24.dp),
+                        modifier = Modifier.size(20.dp),
                     )
                 }
             }
 
-            if (state == AppTopBarState.Register || state == AppTopBarState.Login) {
+            if (state is AppTopBarState.Dashboard) {
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .align(Alignment.CenterStart),
+                ) {
+                    LogoCard(
+                        modifier = Modifier
+                            .matchParentSize()
+                    )
+                }
+            }
+
+            val isRightIconVisible = when (state) {
+                AppTopBarState.Register,
+                AppTopBarState.Login,
+                AppTopBarState.Dashboard,
+                AppTopBarState.Game,
+                AppTopBarState.LoserActiveTask -> true
+
+                else -> false
+            }
+
+            if (isRightIconVisible) {
                 TextButton(
                     onClick = onRightClick,
                     modifier = Modifier
@@ -183,50 +196,103 @@ fun AppTopBar(
                         .widthIn(min = 36.dp),
                     contentPadding = PaddingValues(horizontal = 0.dp),
                 ) {
-                    Text(
-                        text = stringResource(
-                            if (state == AppTopBarState.Register) {
-                                Res.string.login_text
-                            } else {
-                                Res.string.register_text
-                            },
-                        ),
-                        style = MaterialTheme.typography.titleSmall.copy(
-                            color = AccessDefaults.TextMuted,
-                        ),
-                    )
-                }
-            }
-
-            if (state == AppTopBarState.Dashboard) {
-                IconButton(
-                    onClick = onRightClick,
-                    modifier = Modifier
-                        .align(Alignment.CenterEnd)
-                        .clip(CircleShape)
-                        .background(AccessDefaults.SurfaceElevated)
-                        .border(
-                            width = 1.dp,
-                            color = AccessDefaults.BorderSoft,
-                            shape = CircleShape,
+                    if (state is AppTopBarState.Dashboard) {
+                        IconButton(
+                            onClick = onRightClick,
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(AccessDefaults.SurfaceElevated)
+                                .border(
+                                    width = 1.dp,
+                                    color = AccessDefaults.BorderSoft,
+                                    shape = CircleShape,
+                                )
+                                .size(32.dp),
+                        ) {
+                            Icon(
+                                painter = painterResource(AccessIcons.User),
+                                contentDescription = "Back",
+                                tint = AccessDefaults.TextPrimary,
+                                modifier = Modifier.size(24.dp),
+                            )
+                        }
+                    } else {
+                        Text(
+                            text = stringResource(
+                                when (state) {
+                                    AppTopBarState.Register -> Res.string.register_text
+                                    AppTopBarState.Login -> Res.string.login_text
+                                    AppTopBarState.Game -> Res.string.game_how_to_play
+                                    AppTopBarState.LoserActiveTask -> Res.string.loser_active_task_skip
+                                    else -> Res.string.empty
+                                }
+                            ),
+                            style = MaterialTheme.typography.titleSmall.copy(
+                                color = if (state is AppTopBarState.LoserActiveTask) {
+                                    AccessDefaults.LeftArrowColor
+                                } else {
+                                    AccessDefaults.TextMuted
+                                },
+                                fontSize = 12.sp
+                            ),
                         )
-                        .size(32.dp),
-                ) {
-                    Icon(
-                        painter = painterResource(AccessIcons.User),
-                        contentDescription = "Back",
-                        tint = AccessDefaults.TextPrimary,
-                        modifier = Modifier.size(24.dp),
-                    )
+                    }
                 }
             }
         }
     }
 }
 
+private val AppTopBarState.titleResource: StringResource
+    get() = when (this) {
+        AppTopBarState.Login,
+        AppTopBarState.Register,
+        AppTopBarState.Dashboard,
+        AppTopBarState.Game,
+        is AppTopBarState.GameLobby,
+            -> Res.string.empty
+
+        AppTopBarState.EventDetail -> Res.string.event_detail_title
+        AppTopBarState.TicketQr -> Res.string.ticket_qr_title
+        AppTopBarState.EventCode -> Res.string.event_code_title
+        AppTopBarState.ScanOpponent -> Res.string.scan_opponent_title
+        AppTopBarState.RpsReady -> Res.string.rps_ready_title
+        AppTopBarState.RpsConfirmation -> Res.string.who_won_title
+        AppTopBarState.WinnerPicks -> Res.string.winner_picks_title
+        AppTopBarState.WinnerConfirms -> Res.string.winner_confirms_title
+        AppTopBarState.LoserWaits -> Res.string.loser_waits_title
+        AppTopBarState.LoserAccepts -> Res.string.loser_accepts_title
+        AppTopBarState.LoserActiveTask -> Res.string.loser_active_task_title
+    }
+
+private val AppTopBarState.navigationIcon: DrawableResource?
+    get() = when (this) {
+        AppTopBarState.Dashboard,
+        AppTopBarState.RpsConfirmation,
+        AppTopBarState.WinnerPicks,
+        AppTopBarState.WinnerConfirms,
+        AppTopBarState.LoserWaits,
+        AppTopBarState.LoserAccepts,
+        AppTopBarState.LoserActiveTask,
+            -> null
+
+        AppTopBarState.Login,
+        AppTopBarState.Register,
+        AppTopBarState.EventDetail,
+        is AppTopBarState.GameLobby,
+        AppTopBarState.TicketQr,
+        AppTopBarState.EventCode,
+            -> AccessIcons.LeftChevron
+
+        AppTopBarState.Game,
+        AppTopBarState.ScanOpponent,
+        AppTopBarState.RpsReady,
+            -> AccessIcons.Close
+    }
+
 @Composable
 @Preview
-fun AppTopBarPreview() {
+private fun AppTopBarPreview() {
     CrewTheme {
         AppTopBar(
             state = AppTopBarState.Dashboard,

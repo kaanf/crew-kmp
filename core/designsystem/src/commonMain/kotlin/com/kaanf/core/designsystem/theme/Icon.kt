@@ -1,6 +1,8 @@
 package com.kaanf.core.designsystem.theme
 
 import crew.core.designsystem.generated.resources.Res
+import crew.core.designsystem.generated.resources.crew_c_letter
+import crew.core.designsystem.generated.resources.crew_logo_qr
 import crew.core.designsystem.generated.resources.ic_chevron_left_24
 import crew.core.designsystem.generated.resources.ic_chevron_right_24
 import crew.core.designsystem.generated.resources.ic_close
@@ -12,6 +14,7 @@ import crew.core.designsystem.generated.resources.ic_qr
 import crew.core.designsystem.generated.resources.ic_safety
 import crew.core.designsystem.generated.resources.ic_sparkle
 import crew.core.designsystem.generated.resources.ic_user
+import crew.core.designsystem.generated.resources.ic_wifi_off
 
 object AccessIcons {
     val LeftChevron = Res.drawable.ic_chevron_left_24
@@ -25,4 +28,6 @@ object AccessIcons {
     val Sparkle = Res.drawable.ic_sparkle
     val LeftArrow = Res.drawable.ic_left_arrow
     val Close = Res.drawable.ic_close
+    val LogoLetter = Res.drawable.crew_logo_qr
+    val WifiOff = Res.drawable.ic_wifi_off
 }

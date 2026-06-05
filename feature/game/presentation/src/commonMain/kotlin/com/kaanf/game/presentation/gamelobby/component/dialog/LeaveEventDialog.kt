@@ -61,7 +61,7 @@ fun LeaveEventDialog(
             )
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(4.dp))
 
         Text(
             text = "Etkinlikten ayrılmak\nistediğine emin misin?",

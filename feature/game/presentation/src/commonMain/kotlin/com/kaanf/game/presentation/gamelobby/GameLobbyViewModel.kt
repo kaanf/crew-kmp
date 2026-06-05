@@ -52,6 +52,6 @@ class GameLobbyViewModel: ViewModel() {
     }
 
     private companion object {
-        const val COUNTDOWN_DURATION_MILLIS = 10_000L
+        const val COUNTDOWN_DURATION_MILLIS = 1_000L
     }
 }

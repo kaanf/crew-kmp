@@ -1,25 +1,16 @@
 package com.kaanf.game.presentation.navigation
 
+import androidx.compose.runtime.remember
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.toRoute
-import com.kaanf.game.presentation.game.GameRoot
-import com.kaanf.game.presentation.gameconfirmation.GameConfirmationRoot
 import com.kaanf.game.presentation.gamelobby.GameLobbyRoot
-import com.kaanf.game.presentation.gamerpsready.GameRpsReadyRoot
-import com.kaanf.game.presentation.loseraccepts.LoserAcceptsRoot
-import com.kaanf.game.presentation.losereveal.LoseRevealRoot
-import com.kaanf.game.presentation.loserwaits.LoserWaitsRoot
-import com.kaanf.game.presentation.personalmatchqr.PersonalMatchQRRoot
 import com.kaanf.game.presentation.scanopponent.ScanOpponentRoot
-import com.kaanf.game.presentation.taskactive.TaskActiveRoot
-import com.kaanf.game.presentation.whowon.WhoWonRoot
-import com.kaanf.game.presentation.winnerconfirms.WinnerConfirmsRoot
-import com.kaanf.game.presentation.winnerpicks.WinnerPicksRoot
-import com.kaanf.game.presentation.winnerwaits.WinnerWaitsRoot
-import com.kaanf.game.presentation.winreveal.WinRevealRoot
+import com.kaanf.game.presentation.session.MatchContainerRoot
+import com.kaanf.game.presentation.session.MatchSessionViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 fun NavGraphBuilder.gameGraph(
     navController: NavController,
@@ -29,141 +20,43 @@ fun NavGraphBuilder.gameGraph(
         startDestination = GameGraphRoutes.GameLobby,
     ) {
         composable<GameGraphRoutes.GameLobby> {
-            // eventId graph seviyesinde taşınıyor; lobby'den oyuna geçerken aktar.
             val eventId = navController.getBackStackEntry<GameGraphRoutes.Graph>()
                 .toRoute<GameGraphRoutes.Graph>().eventId
             GameLobbyRoot(
-                onBack = {
-                    navController.popBackStack()
-                },
+                onBack = { navController.popBackStack() },
                 onNavigateToGame = {
                     navController.navigate(GameGraphRoutes.Game(eventId = eventId))
                 },
             )
         }
 
-        composable<GameGraphRoutes.Game> {
-            // Soketteki invite gönderimi için eventId'yi scan ekranına taşı.
-            val eventId = navController.getBackStackEntry<GameGraphRoutes.Graph>()
-                .toRoute<GameGraphRoutes.Graph>().eventId
-            GameRoot(
-                onNavigateToDashboard = onNavigateToDashboard,
-                onNavigateScanOpponent = {
+        composable<GameGraphRoutes.Game> { entry ->
+            val graphEntry = remember(entry) {
+                navController.getBackStackEntry<GameGraphRoutes.Graph>()
+            }
+            val eventId = graphEntry.toRoute<GameGraphRoutes.Graph>().eventId
+            val sessionViewModel: MatchSessionViewModel =
+                koinViewModel(viewModelStoreOwner = graphEntry)
+
+            MatchContainerRoot(
+                viewModel = sessionViewModel,
+                onNavigateToScanOpponent = {
                     navController.navigate(GameGraphRoutes.ScanOpponent(eventId = eventId))
                 },
-                onNavigateToGameRpsReady = {
-                    navController.navigate(GameGraphRoutes.GameRpsReady)
-                },
+                onNavigateToDashboard = onNavigateToDashboard,
             )
         }
 
-        composable<GameGraphRoutes.PersonalMatchQR> {
-            PersonalMatchQRRoot(
-                onBack = {
-                    navController.popBackStack()
-                },
-            )
-        }
+        composable<GameGraphRoutes.ScanOpponent> { entry ->
+            val graphEntry = remember(entry) {
+                navController.getBackStackEntry<GameGraphRoutes.Graph>()
+            }
+            val sessionViewModel: MatchSessionViewModel =
+                koinViewModel(viewModelStoreOwner = graphEntry)
 
-        composable<GameGraphRoutes.ScanOpponent> {
             ScanOpponentRoot(
-                onCloseClicked = {
-                    navController.popBackStack()
-                },
-                onNavigateToGameRpsReady = {
-                    // Kamera ekranını geride bırakma: RPS'ten geri gelince Game'e dön.
-                    navController.navigate(GameGraphRoutes.GameRpsReady) {
-                        popUpTo<GameGraphRoutes.ScanOpponent> { inclusive = true }
-                    }
-                },
-            )
-        }
-
-        composable<GameGraphRoutes.GameRpsReady> {
-            GameRpsReadyRoot(
-                onBack = {
-                    navController.popBackStack()
-                },
-            )
-        }
-
-        composable<GameGraphRoutes.WhoWon> {
-            WhoWonRoot(
-                onBack = {
-                    navController.popBackStack()
-                },
-            )
-        }
-
-        composable<GameGraphRoutes.GameConfirmation> {
-            GameConfirmationRoot(
-                onBack = {
-                    navController.popBackStack()
-                },
-            )
-        }
-
-        composable<GameGraphRoutes.WinnerPicks> {
-            WinnerPicksRoot(
-                onBack = {
-                    navController.popBackStack()
-                },
-            )
-        }
-
-        composable<GameGraphRoutes.WinnerWaits> {
-            WinnerWaitsRoot(
-                onBack = {
-                    navController.popBackStack()
-                },
-            )
-        }
-
-        composable<GameGraphRoutes.LoserWaits> {
-            LoserWaitsRoot(
-                onBack = {
-                    navController.popBackStack()
-                },
-            )
-        }
-
-        composable<GameGraphRoutes.LoserAccepts> {
-            LoserAcceptsRoot(
-                onBack = {
-                    navController.popBackStack()
-                },
-            )
-        }
-
-        composable<GameGraphRoutes.TaskActive> {
-            TaskActiveRoot(
-                onBack = {
-                    navController.popBackStack()
-                },
-            )
-        }
-
-        composable<GameGraphRoutes.WinnerConfirms> {
-            WinnerConfirmsRoot(
-                onBack = {
-                    navController.popBackStack()
-                },
-            )
-        }
-
-        composable<GameGraphRoutes.WinReveal> {
-            WinRevealRoot(
-                onBack = {
-                    navController.popBackStack()
-                },
-            )
-        }
-
-        composable<GameGraphRoutes.LoseReveal> {
-            LoseRevealRoot(
-                onBack = {
-                    navController.popBackStack()
-                },
+                viewModel = sessionViewModel,
+                onClose = { navController.popBackStack() },
             )
         }
     }

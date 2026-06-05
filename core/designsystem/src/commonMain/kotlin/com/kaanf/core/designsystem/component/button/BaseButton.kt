@@ -65,31 +65,30 @@ fun BaseButton(
     val borderWidth = 1.5.dp
     val innerShape = RoundedCornerShape(12.dp - borderWidth)
     val interactionSource = remember { MutableInteractionSource() }
+    val isInteractionEnabled = enabled && !isLoading
 
     val resolvedBorderColor = borderColor
         ?: if (filled) AccessDefaults.Accent else AccessDefaults.Border
     val resolvedBackgroundColor = backgroundColor
         ?: when {
-            isLoading -> AccessDefaults.FieldFocusedBackground
             filled -> AccessDefaults.Accent
             else -> AccessDefaults.Surface
         }
     val resolvedContentColor = contentColor
         ?: when {
-            isLoading -> AccessDefaults.LoadingButtonText
-            filled && enabled -> AccessDefaults.OnAccent
-            enabled -> AccessDefaults.TextPrimary
+            filled && isInteractionEnabled -> AccessDefaults.OnAccent
+            isInteractionEnabled -> AccessDefaults.TextPrimary
             else -> AccessDefaults.TextFaint
         }
 
-    val borderAnimated = animatedBorder && enabled && !isLoading
+    val borderAnimated = animatedBorder && isInteractionEnabled
 
     Box(
         modifier =
             modifier
                 .fillMaxWidth()
                 .height(52.dp)
-                .alpha(if (enabled) 1f else 0.5f)
+                .alpha(if (isInteractionEnabled) 1f else 0.5f)
                 .clip(outerShape),
         contentAlignment = Alignment.Center,
     ) {
@@ -110,7 +109,7 @@ fun BaseButton(
                     .clip(innerShape)
                     .background(resolvedBackgroundColor)
                     .clickable(
-                        enabled = enabled && !isLoading,
+                        enabled = isInteractionEnabled,
                         interactionSource = interactionSource,
                         indication = null,
                         onClick = onClick,

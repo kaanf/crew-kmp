@@ -2,6 +2,7 @@ package com.kaanf.game.presentation.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,7 +11,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.MaterialTheme
@@ -29,12 +29,25 @@ import com.kaanf.core.designsystem.theme.AccessShapes
 import com.kaanf.core.designsystem.theme.JetbrainsMono
 import com.kaanf.core.presentation.model.ChallengeCardUiModel
 import com.kaanf.core.presentation.model.ChallengeCardVariant
+import crew.feature.game.presentation.generated.resources.Res
+import crew.feature.game.presentation.generated.resources.match_points_format
+import crew.feature.game.presentation.generated.resources.match_task_card_accept_label
+import crew.feature.game.presentation.generated.resources.match_task_card_reject_label
+import crew.feature.game.presentation.generated.resources.match_task_card_variant_bold
+import crew.feature.game.presentation.generated.resources.match_task_card_variant_flirty
+import crew.feature.game.presentation.generated.resources.match_task_card_variant_funny
+import crew.feature.game.presentation.generated.resources.match_task_card_variant_icebreaker
+import crew.feature.game.presentation.generated.resources.match_task_card_variant_social
+import crew.feature.game.presentation.generated.resources.match_task_card_variant_team
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
-fun WinnerPickChallengeCard(
+fun GameTaskCard(
     modifier: Modifier = Modifier,
     card: ChallengeCardUiModel,
-    isExpanded: Boolean = false
+    isExpanded: Boolean = false,
+    selected: Boolean = false,
+    onClick: (() -> Unit)? = null,
 ) {
 
     Column(
@@ -45,10 +58,11 @@ fun WinnerPickChallengeCard(
                 shape = AccessShapes.Large,
             )
             .border(
-                width = 1.dp,
-                color = AccessDefaults.Border,
+                width = if (selected) 2.dp else 1.dp,
+                color = if (selected) AccessDefaults.Accent else AccessDefaults.Border,
                 shape = AccessShapes.Large,
             )
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
             .padding(horizontal = 20.dp)
             .padding(top = 12.dp, bottom = 16.dp),
         verticalArrangement = Arrangement.SpaceBetween,
@@ -64,7 +78,7 @@ fun WinnerPickChallengeCard(
 
             Text(
                 modifier = Modifier.fillMaxWidth(),
-                text = "+${card.points} PTS",
+                text = stringResource(Res.string.match_points_format, card.points),
                 color = card.variant.getColor(),
                 fontSize = 12.sp,
                 fontFamily = JetbrainsMono,
@@ -100,15 +114,15 @@ fun WinnerPickChallengeCard(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 PointCard(
-                    text = "ACCEPT",
+                    text = stringResource(Res.string.match_task_card_accept_label),
                     point = 35,
                     color = AccessDefaults.Accent,
                     isLeft = true
                 )
 
                 PointCard(
-                    text = "REJECT",
-                    point = 5,
+                    text = stringResource(Res.string.match_task_card_reject_label),
+                    point = -5,
                     color = AccessDefaults.LeftArrowColor,
                     isLeft = false
                 )
@@ -139,7 +153,7 @@ private fun PointCard(
         )
 
         Text(
-            text = "+$point PTS",
+            text = stringResource(Res.string.match_points_format, point),
             color = color,
             fontSize = 12.sp,
             fontFamily = JetbrainsMono,
@@ -153,6 +167,15 @@ private fun PointCard(
 private fun CardBadge(
     variant: ChallengeCardVariant,
 ) {
+    val label = when (variant) {
+        ChallengeCardVariant.Social -> stringResource(Res.string.match_task_card_variant_social)
+        ChallengeCardVariant.Bold -> stringResource(Res.string.match_task_card_variant_bold)
+        ChallengeCardVariant.Icebreaker -> stringResource(Res.string.match_task_card_variant_icebreaker)
+        ChallengeCardVariant.Flirty -> stringResource(Res.string.match_task_card_variant_flirty)
+        ChallengeCardVariant.Team -> stringResource(Res.string.match_task_card_variant_team)
+        ChallengeCardVariant.Funny -> stringResource(Res.string.match_task_card_variant_funny)
+    }
+
     Box(
         modifier = Modifier
             .wrapContentSize()
@@ -164,7 +187,7 @@ private fun CardBadge(
         contentAlignment = Alignment.Center,
     ) {
         Text(
-            text = variant.name.uppercase(),
+            text = label,
             style = MaterialTheme.typography.labelSmall.copy(
                 color = variant.getColor(),
             ),

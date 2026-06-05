@@ -10,6 +10,11 @@ sealed interface AppTopBarState {
     data class GameLobby(val title: String) : AppTopBarState
     data object Game : AppTopBarState
     data object ScanOpponent : AppTopBarState
-    data object GameRpsReady : AppTopBarState
-    data object GameConfirmation : AppTopBarState
+    data object RpsReady : AppTopBarState
+    data object RpsConfirmation : AppTopBarState
+    data object WinnerPicks : AppTopBarState
+    data object WinnerConfirms : AppTopBarState
+    data object LoserWaits : AppTopBarState
+    data object LoserAccepts : AppTopBarState
+    data object LoserActiveTask : AppTopBarState
 }

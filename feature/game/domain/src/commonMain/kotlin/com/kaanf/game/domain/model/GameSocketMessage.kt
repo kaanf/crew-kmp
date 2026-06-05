@@ -18,10 +18,16 @@ sealed interface GameSocketMessage {
         val expiresAt: String,
     ) : GameSocketMessage
 
-    /**
-     * Davet kabul edildiğinde maçın iki tarafına da gönderilir (type = MATCH_STARTED).
-     * Hem kabul eden hem davet eden bu mesajla GameRpsReady ekranına geçer.
-     */
+    data class MatchInviteDeclined(
+        val inviteId: String,
+        val eventId: String,
+    ) : GameSocketMessage
+
+    data class MatchInviteExpired(
+        val inviteId: String,
+        val eventId: String,
+    ) : GameSocketMessage
+
     data class MatchStarted(
         val matchId: String,
         val eventId: String,
@@ -30,14 +36,71 @@ sealed interface GameSocketMessage {
         val opponentFullName: String,
     ) : GameSocketMessage
 
-    /**
-     * Davet reddedildiğinde yalnızca daveti gönderene iletilir (type = MATCH_INVITE_DECLINED).
-     */
-    data class MatchInviteDeclined(
-        val inviteId: String,
+    data class MatchCancelled(
+        val matchId: String,
         val eventId: String,
+        val state: String,
+        val cancelledByUserId: String,
     ) : GameSocketMessage
 
-    /** Henüz bağlanmamış sunucu mesaj tipleri (sonra ele alınacak). */
+    data class MatchReadyCompleted(
+        val matchId: String,
+        val eventId: String,
+        val state: String,
+    ) : GameSocketMessage
+
+    data class MatchResultReported(
+        val matchId: String,
+        val eventId: String,
+        val state: String,
+        val reporterUserId: String,
+        val claimedWinnerUserId: String,
+    ) : GameSocketMessage
+
+    data class MatchResultConfirmed(
+        val matchId: String,
+        val eventId: String,
+        val state: String,
+        val winnerUserId: String,
+    ) : GameSocketMessage
+
+    data class TaskOffered(
+        val matchId: String,
+        val eventId: String,
+        val state: String,
+        val offeredByUserId: String,
+        val taskId: String,
+        val taskTitle: String,
+        val taskPoints: Int,
+        val taskCategories: List<TaskCategory>,
+    ) : GameSocketMessage
+
+    data class TaskStarted(
+        val matchId: String,
+        val eventId: String,
+        val state: String,
+        val taskId: String,
+    ) : GameSocketMessage
+
+    data class TaskRejected(
+        val matchId: String,
+        val eventId: String,
+        val state: String,
+        val rejectedByUserId: String,
+    ) : GameSocketMessage
+
+    data class TaskFinished(
+        val matchId: String,
+        val eventId: String,
+        val state: String,
+        val completed: Boolean,
+        val winnerUserId: String,
+        val loserUserId: String,
+        val winnerPointsAwarded: Int,
+        val loserPointsAwarded: Int,
+        val winnerTotalScore: Int,
+        val loserTotalScore: Int,
+    ) : GameSocketMessage
+
     data class Unknown(val type: String) : GameSocketMessage
 }

@@ -11,7 +11,17 @@
     <string name="event_detail_title">Event detail</string>
     <string name="ticket_qr_title">Your ticket</string>
     <string name="event_code_title">Check in</string>
+    <string name="game_how_to_play">How to play?</string>
     <string name="scan_opponent_title">Point at their code</string>
+    <string name="rps_ready_title">Match</string>
+    <string name="who_won_title">Match</string>
+    <string name="winner_picks_title">You won</string>
+    <string name="winner_confirms_title">Did they do it?</string>
+    <string name="loser_waits_title">You lost</string>
+    <string name="loser_accepts_title">You lost</string>
+    <string name="loser_active_task_title">Task active</string>
+    <string name="loser_active_task_skip">Skip</string>
+    <string name="match_scoreboard_title">Match scoreboard</string>
 
     <string name="snackbar_verification_complete">Login Success</string>
     <string name="snackbar_access_denied">Access Denied</string>

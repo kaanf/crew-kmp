@@ -23,35 +23,47 @@ import com.kaanf.core.designsystem.component.sheet.ContainerBottomSheet
 import com.kaanf.core.presentation.model.AppTopBarState
 import com.kaanf.core.presentation.permission.Permission
 import com.kaanf.core.presentation.permission.rememberPermissionController
-import com.kaanf.core.presentation.util.ObserveAsEvents
 import com.kaanf.game.presentation.scanopponent.component.overlay.ScannerOverlay
 import com.kaanf.game.presentation.component.sheet.GameRequestSheet
-import org.koin.compose.viewmodel.koinViewModel
+import com.kaanf.game.presentation.session.MatchPhase
+import com.kaanf.game.presentation.session.MatchSessionAction
+import com.kaanf.game.presentation.session.MatchSessionViewModel
 import qrscanner.CameraLens
 import qrscanner.OverlayShape
 import qrscanner.QrScanner
 
+/**
+ * Scan, container'ın ÜSTÜNE açılan ayrı bir destination'dır ama socket'e DOKUNMAZ:
+ * graph-scoped [MatchSessionViewModel] verilir, state oradan okunur, okunan token oraya delege edilir.
+ * Maç başlayınca (MATCH_STARTED → session phase = RpsReady) kendini pop'lar; arkadaki container
+ * zaten RpsReady'i gösterir. Davet reddinde (MATCH_INVITE_DECLINED) bekleme sheet'i kapanır, ekran açık kalır.
+ */
 @Composable
 fun ScanOpponentRoot(
-    viewModel: ScanOpponentViewModel = koinViewModel(),
-    onCloseClicked: () -> Unit,
-    onNavigateToGameRpsReady: () -> Unit,
+    viewModel: MatchSessionViewModel,
+    onClose: () -> Unit,
 ) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
+    val sessionState by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    ObserveAsEvents(viewModel.events) { event ->
-        when (event) {
-            ScanOpponentEvent.CloseScreen -> onCloseClicked()
-            ScanOpponentEvent.NavigateToGameRpsReady -> onNavigateToGameRpsReady()
-        }
+    // Navigasyon event ile değil, phase ile sürülür (tek event-collector container'da kalsın).
+    LaunchedEffect(sessionState.phase) {
+        if (sessionState.phase is MatchPhase.RpsReady) onClose()
     }
+
+    // Session state → bu ekranın ihtiyaç duyduğu dilime indir.
+    val scanState = ScanOpponentState(
+        isLoading = sessionState.isSendingInvite,
+        errorMessage = sessionState.errorMessage,
+        showGameRequestSheet = sessionState.showOutgoingInviteSheet,
+        opponentName = sessionState.outgoingOpponentName,
+    )
 
     SnackbarScaffold(
         topBar = {
             AppTopBar(
                 state = AppTopBarState.ScanOpponent,
-                onBackClick = { viewModel.onAction(ScanOpponentAction.OnCloseClicked) },
+                onBackClick = onClose,
             )
         },
         snackbarHostState = snackbarHostState,
@@ -60,8 +72,14 @@ fun ScanOpponentRoot(
             modifier = Modifier
                 .padding(innerPadding)
                 .consumeWindowInsets(innerPadding),
-            state = state,
-            onAction = viewModel::onAction,
+            state = scanState,
+            onAction = { action ->
+                when (action) {
+                    ScanOpponentAction.OnCloseClicked -> onClose()
+                    is ScanOpponentAction.OnScanResult ->
+                        viewModel.onAction(MatchSessionAction.OnScanResult(action.scannedMatchQrToken))
+                }
+            },
         )
     }
 }
