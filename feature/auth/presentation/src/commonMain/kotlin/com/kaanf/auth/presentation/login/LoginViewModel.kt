@@ -94,7 +94,11 @@ class LoginViewModel(
                 ) {
                     is Result.Success -> {
                         sessionStorage.set(result.data)
-                        eventChannel.send(LoginEvent.NavigateToDashboard)
+                        if (result.data.user.isProfileComplete) {
+                            eventChannel.send(LoginEvent.NavigateToDashboard)
+                        } else {
+                            eventChannel.send(LoginEvent.NavigateToProfilePicture)
+                        }
                     }
 
                     is Result.Failure -> {

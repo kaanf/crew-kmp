@@ -33,7 +33,10 @@ import crew.feature.home.presentation.generated.resources.ticket_qr_event_series
 import crew.feature.home.presentation.generated.resources.ticket_qr_event_venue
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
+@OptIn(ExperimentalUuidApi::class)
 @Composable
 fun TicketQrInfoCard(
     eventTitle: String,
@@ -110,7 +113,7 @@ fun TicketQrInfoCard(
         SectionDivider()
 
         UserQrCard(
-            inputText = entryCode,
+            inputText = entryCode + Uuid.random(),
         )
 
         Text(

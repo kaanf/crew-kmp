@@ -7,9 +7,11 @@ import com.kaanf.core.domain.util.DataError
 import com.kaanf.core.domain.util.EmptyResult
 import com.kaanf.core.domain.util.onFailure
 import com.kaanf.core.domain.util.onSuccess
+import com.kaanf.game.domain.model.GameConnectionState
 import com.kaanf.game.domain.model.GameSocketMessage
 import com.kaanf.game.domain.model.GameTask
-import com.kaanf.game.domain.repository.GameSocketRepository
+import com.kaanf.game.domain.model.MatchSnapshot
+import com.kaanf.game.domain.event.EventConnectionClient
 import com.kaanf.game.domain.repository.MatchRepository
 import com.kaanf.game.presentation.session.MatchPhase.*
 import kotlinx.coroutines.channels.Channel
@@ -25,7 +27,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class MatchSessionViewModel(
-    private val gameSocketRepository: GameSocketRepository,
+    private val eventConnectionClient: EventConnectionClient,
     private val matchRepository: MatchRepository,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
@@ -49,22 +51,97 @@ class MatchSessionViewModel(
     }
 
     // region Socket
+    // Her işlenen soket mesajında artar. Reconnect'te snapshot çekerken canlı bir event
+    // geldiyse (epoch değişmişse) snapshot bayatlamıştır; push-only soket reconnect sonrası
+    // yalnız yeni event verdiği için canlı mesaj her zaman snapshot'tan tazedir. Bu, ordinal
+    // tabanlı guard'ın aksine görev-reddi gibi geri geçişlerde de doğru çalışır.
+    private var socketEpoch = 0
+
     private fun observeConnectionState() {
-        gameSocketRepository.observeConnectionState(eventId)
+        eventConnectionClient
+            .observeConnectionState(eventId)
             .onEach { connectionState ->
-                _state.update { it.copy(connectionState = connectionState) }
+                _state.update {
+                    it.copy(
+                        connectionState = connectionState
+                    )
+                }
+                // Her (yeniden) bağlanmada sunucu doğrusuyla uzlaş: kopukken kaçırılan
+                // push'lara rağmen faz snapshot'tan kurulur (ilk bağlantı dahil).
+                if (connectionState is GameConnectionState.Connected) {
+                    reconcileFromSnapshot()
+                }
             }
             .launchIn(viewModelScope)
     }
 
+    private fun reconcileFromSnapshot() {
+        val epochAtStart = socketEpoch
+        viewModelScope.launch {
+            matchRepository.getMatchSnapshot(eventId)
+                .onSuccess { snapshot ->
+                    // Snapshot uçarken canlı event geldiyse onu esas al, snapshot'ı at.
+                    if (socketEpoch != epochAtStart) return@onSuccess
+                    if (snapshot == null) onMatchEnded() else applySnapshot(snapshot)
+                }
+            // onFailure: geçici hata; mevcut state korunur, soket akmaya devam eder.
+        }
+    }
+
+    private fun applySnapshot(snapshot: MatchSnapshot) {
+        val phase = snapshot.toMatchPhase()
+        // Karar: server kazanır. Faz tamamen snapshot'tan kurulur, in-flight loading
+        // bayrakları ve davet sheet'leri sıfırlanır (zaten kopuktun).
+        _state.update {
+            it.copy(
+                phase = phase,
+                currentUserId = it.currentUserId ?: snapshot.me.userId,
+                matchId = snapshot.matchId,
+                opponentFullName = snapshot.opponent.fullName,
+                amIWinner = snapshot.amIWinnerOrNull(),
+                activeTask = snapshot.task ?: it.activeTask,
+                incomingInvite = null,
+                isRespondingToInvite = false,
+                showMatchRequestSheet = false,
+                isSendingInvite = false,
+                showOutgoingInviteSheet = false,
+                outgoingOpponentName = null,
+                errorMessage = null,
+            )
+        }
+        // Snapshot taşımayan veriler: kazananın görev listesi / puan tablosu.
+        when (phase) {
+            is MatchPhase.WinnerPicks -> loadTasks()
+            is MatchPhase.Scoreboard -> loadScoreboard()
+            else -> Unit
+        }
+    }
+
+    private fun onMatchEnded() {
+        val current = _state.value
+        // İlk bağlantıda zaten Idle'daysak (maç hiç başlamadıysa) sessiz kal.
+        if (current.phase == MatchPhase.Idle && current.matchId == null) return
+        // Kopukken maç bitti/iptal oldu: Idle'a sıfırla ve kullanıcıyı bilgilendir.
+        _state.update {
+            MatchSessionState(
+                connectionState = it.connectionState,
+                matchQrToken = it.matchQrToken,
+                currentUserId = it.currentUserId,
+                errorMessage = MATCH_ENDED_MESSAGE,
+            )
+        }
+    }
+
     private fun subscribeToEvents() {
-        gameSocketRepository.observeEvents(eventId)
+        eventConnectionClient.observeEvents(eventId)
             .onEach(::onSocketMessage)
             .catch { error -> _state.update { it.copy(errorMessage = error.message) } }
             .launchIn(viewModelScope)
     }
 
     private suspend fun onSocketMessage(message: GameSocketMessage) {
+        // Canlı event geldi; uçmakta olan bir snapshot reconcile'ı varsa bayatlatır.
+        socketEpoch++
         when (message) {
             is GameSocketMessage.MatchInviteReceived -> {
                 _state.update {
@@ -111,12 +188,6 @@ class MatchSessionViewModel(
 
             is GameSocketMessage.MatchResultConfirmed -> {
                 val isWinner = message.winnerUserId == _state.value.currentUserId
-                // İlk tıklayan tarafa ikinci tıklayanın seçimi için MATCH_RESULT_REPORTED gelmez;
-                // doğrudan CONFIRMED gelir. Bu durumda rakibin avatarı WhoWon satırına hiç düşmeden
-                // bir sonraki faza atlıyordu. Önce rakibin (onaylanan kazanan = ortak karar)
-                // seçimini WhoWon fazına işleyip avatarın düşme animasyonunu gösteriyor, kısa bir
-                // bekleme sonrası faz geçişini yapıyoruz. İkinci tıklayanda avatar zaten düştüğü
-                // için (opponentClaimedWinnerUserId dolu) ek bekleme atlanır.
                 val whoWon = _state.value.phase as? WhoWon
                 if (whoWon != null && whoWon.opponentClaimedWinnerUserId == null) {
                     _state.update {
@@ -158,9 +229,6 @@ class MatchSessionViewModel(
             }
 
             is GameSocketMessage.TaskStarted -> {
-                // İki tarafa da gelir: kazanan onay ekranına, kaybeden aktif görev ekranına.
-                // Aktif görevi mevcut fazdan yakalayıp her iki faza taşırız: kazananda seçtiği
-                // görev (WinnerPicks), kaybedende sunulan görev (LoserAccepts).
                 _state.update { state ->
                     val activeTask = when (val phase = state.phase) {
                         is WinnerPicks -> phase.tasks.firstOrNull { it.id == phase.selectedTaskId }
@@ -175,8 +243,6 @@ class MatchSessionViewModel(
             }
 
             is GameSocketMessage.TaskFinished -> {
-                // Kazanan onayladığında iki tarafa da gelir; puan tablosuna geçilir ve
-                // ekran açılınca güncel skorlar getScoreboard ile yüklenir.
                 _state.update { it.copy(phase = Scoreboard(completed = message.completed)) }
                 loadScoreboard()
             }
@@ -184,8 +250,6 @@ class MatchSessionViewModel(
             is GameSocketMessage.GameStarted,
             GameSocketMessage.Connected,
             is GameSocketMessage.Unknown,
-                -> Unit
-
             is GameSocketMessage.MatchCancelled,
             is GameSocketMessage.MatchInviteExpired -> Unit
         }
@@ -513,5 +577,6 @@ class MatchSessionViewModel(
     private companion object {
         const val RESULT_REPORT_DELAY_MS = 100L
         const val RESULT_CONFIRM_REVEAL_DELAY_MS = 900L
+        const val MATCH_ENDED_MESSAGE = "Maç sonlandı."
     }
 }

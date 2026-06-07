@@ -46,7 +46,7 @@
     <string name="match_phase_winner_picks_title">Choose 1 of %1$d.</string>
     <string name="match_phase_winner_picks_description">%1$s can decline (with a penalty).</string>
     <string name="match_phase_winner_picks_send_action">Send to %1$s</string>
-    <string name="match_phase_winner_picks_loading">WAITING FOR %1$s...</string>
+    <string name="match_phase_winner_picks_loading">Waiting for %1$s...</string>
 
     <string name="match_phase_loser_waits_eyebrow">THEIR MOVE</string>
     <string name="match_phase_loser_waits_title">%1$s is choosing\nyour task.</string>
@@ -57,7 +57,7 @@
     <string name="match_phase_loser_accepts_title">Up to you.</string>
     <string name="match_phase_loser_accepts_reject_action">Reject</string>
     <string name="match_phase_loser_accepts_accept_action">Accept</string>
-    <string name="match_phase_loser_accepts_loading">STARTING...</string>
+    <string name="match_phase_loser_accepts_loading">Starting...</string>
 
     <string name="match_phase_loser_active_title">%1$s is watching.</string>
 
@@ -65,7 +65,7 @@
     <string name="match_phase_winner_confirms_title">%1$s is doing the task.</string>
     <string name="match_phase_winner_confirms_not_done_action">Not done</string>
     <string name="match_phase_winner_confirms_completed_action">Completed</string>
-    <string name="match_phase_winner_confirms_loading">SAVING...</string>
+    <string name="match_phase_winner_confirms_loading">Saving...</string>
 
     <string name="match_phase_scoreboard_title_prefix">Points </string>
     <string name="match_phase_scoreboard_title_highlight">banked.</string>
@@ -75,7 +75,7 @@
     <string name="match_phase_scoreboard_subtitle_loser_done">You cleared the task. Here&apos;s the tally.</string>
     <string name="match_phase_scoreboard_subtitle_loser_not_done">Task not done. Here&apos;s the tally.</string>
     <string name="match_phase_scoreboard_finish_action">Finish</string>
-    <string name="match_phase_scoreboard_finish_loading">FINISHING...</string>
+    <string name="match_phase_scoreboard_finish_loading">Finishing...</string>
 
     <string name="match_scoreboard_you_label">You</string>
     <string name="match_scoreboard_won_throw_label">WON THE THROW</string>

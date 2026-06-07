@@ -1,3 +1,5 @@
 package com.kaanf.home.presentation.ticketqr
 
-sealed interface TicketQrEvent
+sealed interface TicketQrEvent {
+    data object CheckInSuccess : TicketQrEvent
+}

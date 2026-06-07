@@ -36,13 +36,12 @@ fun OnboardingInfoCard() {
                 strokeWidth = 1.dp,
                 dotLength = 2.dp,
                 gapLength = 4.dp,
-                backgroundColor = Color.Transparent,
             ),
         content = {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 16.dp),
+                    .padding(horizontal = 12.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {

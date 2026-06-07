@@ -33,16 +33,20 @@ class DataStoreSessionStorage(
     }
 
     override suspend fun set(info: AuthInfo?) {
-        if (info == null) {
-            dataStore.edit {
-                it.remove(authInfoKey)
-            }
-            return
-        }
+        update { info }
+    }
 
-        val serialized = json.encodeToString(info.toSerializable())
+    override suspend fun update(transform: (AuthInfo?) -> AuthInfo?) {
         dataStore.edit { prefs ->
-            prefs[authInfoKey] = serialized
+            val current = prefs[authInfoKey]?.let {
+                json.decodeFromString<AuthInfoSerializable>(it).toDomain()
+            }
+            val updated = transform(current)
+            if (updated == null) {
+                prefs.remove(authInfoKey)
+            } else {
+                prefs[authInfoKey] = json.encodeToString(updated.toSerializable())
+            }
         }
     }
 }

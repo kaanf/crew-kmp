@@ -21,6 +21,7 @@ kotlin {
 
         androidMain {
             dependencies {
+                implementation(libs.androidx.lifecycle.process)
                 implementation(libs.koin.android)
             }
         }

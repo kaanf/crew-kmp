@@ -4,6 +4,8 @@
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Rakibinin QR kodunu okumak için kamera erişimi gerekiyor.</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>

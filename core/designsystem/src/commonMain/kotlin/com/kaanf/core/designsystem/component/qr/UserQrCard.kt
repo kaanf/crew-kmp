@@ -3,8 +3,9 @@ package com.kaanf.core.designsystem.component.qr
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,6 +20,7 @@ import qrgenerator.qrkitpainter.QrFrameType
 import qrgenerator.qrkitpainter.QrKitBrush
 import qrgenerator.qrkitpainter.QrKitColors
 import qrgenerator.qrkitpainter.QrKitLogo
+import qrgenerator.qrkitpainter.QrKitLogoKitShape
 import qrgenerator.qrkitpainter.QrKitLogoPadding
 import qrgenerator.qrkitpainter.QrKitShapes
 import qrgenerator.qrkitpainter.QrPixelType
@@ -39,25 +41,26 @@ fun UserQrCard(
     val painter = rememberQrKitPainter(inputText) {
         shapes = QrKitShapes(
             ballShape = getSelectedQrBall(QrBallType.CircleQrBall()),
-            darkPixelShape = getSelectedPixel(QrPixelType.CirclePixel(size = 0.9f)),
+            darkPixelShape = getSelectedPixel(QrPixelType.CirclePixel(size = 0.8f)),
             frameShape = getSelectedFrameShape(QrFrameType.RoundCornersFrame(corner = 0.25f)),
             codeShape = getSelectedPattern(PatternType.SquarePattern),
         )
         colors = QrKitColors(
             darkBrush = QrKitBrush.solidBrush(AccessDefaults.TextPrimary),
         )
-        logo = QrKitLogo(centerLogo, padding = QrKitLogoPadding.Natural(0.1f))
+        logo = QrKitLogo(centerLogo, padding = QrKitLogoPadding.Natural(0.2f), shape = QrKitLogoKitShape.Default)
     }
 
     Box(
         modifier = modifier
-            .size(285.dp)
+            .fillMaxSize()
+            .aspectRatio(1f)
             .background(
-                AccessDefaults.Surface,
+                AccessDefaults.SurfaceElevated,
                 shape = AccessShapes.Large
             )
             .padding(
-                all = 10.dp
+                all = 12.dp
             ),
         contentAlignment = Alignment.Center
     ) {

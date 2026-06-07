@@ -3,4 +3,6 @@ package com.kaanf.crew
 import androidx.compose.ui.window.ComposeUIViewController
 
 @Suppress("FunctionName")
-fun MainViewController() = ComposeUIViewController { App() }
+fun MainViewController() = ComposeUIViewController {
+    App()
+}

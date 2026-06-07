@@ -16,6 +16,9 @@ sealed interface AuthGraphRoutes {
     data object Register : AuthGraphRoutes
 
     @Serializable
+    data object ProfilePicture : AuthGraphRoutes
+
+    @Serializable
     data class EmailVerificationSent(val email: String) : AuthGraphRoutes
 
     @Serializable

@@ -8,4 +8,6 @@ sealed interface LoginEvent : BaseEvent {
     data object NavigateToForgotPassword : LoginEvent
 
     data object NavigateToDashboard : LoginEvent
+
+    data object NavigateToProfilePicture : LoginEvent
 }

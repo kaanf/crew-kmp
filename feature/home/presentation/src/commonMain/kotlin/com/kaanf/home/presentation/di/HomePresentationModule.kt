@@ -6,7 +6,6 @@ import com.kaanf.home.domain.usecase.GetEventDetailUseCase
 import com.kaanf.home.domain.usecase.GetEventsUseCase
 import com.kaanf.home.domain.usecase.GetMyTicketUseCase
 import com.kaanf.home.presentation.dashboard.DashboardViewModel
-import com.kaanf.home.presentation.eventcode.EventCodeViewModel
 import com.kaanf.home.presentation.eventdetail.EventDetailViewModel
 import com.kaanf.home.presentation.ticketqr.TicketQrViewModel
 import org.koin.core.module.dsl.factoryOf
@@ -23,5 +22,4 @@ val homePresentationModule =
         viewModelOf(::DashboardViewModel)
         viewModelOf(::EventDetailViewModel)
         viewModelOf(::TicketQrViewModel)
-        viewModelOf(::EventCodeViewModel)
     }

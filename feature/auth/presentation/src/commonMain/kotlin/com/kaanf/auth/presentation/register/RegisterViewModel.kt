@@ -171,6 +171,7 @@ class RegisterViewModel(
                                 fullName = currentState.fullNameTextState.text.toString(),
                                 dateOfBirth = dateOfBirth,
                                 gender = gender,
+                                profilePictureUrl = ""
                             ),
                         )
                 ) {

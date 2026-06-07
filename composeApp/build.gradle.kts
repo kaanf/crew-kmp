@@ -21,6 +21,8 @@ kotlin {
             implementation(libs.core.splashscreen)
 
             implementation(libs.koin.android)
+            // Wiretap yalnızca Android'de (Kotlin 2.3 ABI nedeniyle iOS'ta yok).
+            implementation(libs.wiretap.launcher)
         }
         commonMain.dependencies {
             implementation(projects.core.data)
@@ -64,8 +66,6 @@ extensions.configure<ApplicationExtension> {
 dependencies {
     add("androidTestImplementation", platform(libs.androidx.compose.bom))
     add("androidTestImplementation", libs.androidx.compose.ui.test.junit4.android)
-    add("androidTestImplementation", libs.androidx.runner)
-    add("androidTestImplementation", libs.androidx.junit)
     add("androidTestImplementation", libs.kotlinx.serialization.json)
     add("androidTestImplementation", "io.ktor:ktor-client-mock:3.2.3")
     add("debugImplementation", platform(libs.androidx.compose.bom))

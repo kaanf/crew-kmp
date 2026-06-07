@@ -34,7 +34,6 @@ fun Modifier.dottedBorder(
     strokeWidth: Dp = 1.dp,
     dotLength: Dp = 2.dp,
     gapLength: Dp = 6.dp,
-    backgroundColor: Color,
 ): Modifier = this.drawBehind {
     val strokePx = strokeWidth.toPx()
     val halfStroke = strokePx / 2

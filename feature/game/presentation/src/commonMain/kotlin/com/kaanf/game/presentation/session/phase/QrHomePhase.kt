@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -25,6 +26,7 @@ import com.kaanf.core.designsystem.component.button.BaseButton
 import com.kaanf.core.designsystem.component.qr.UserQrCard
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessIcons
+import com.kaanf.core.designsystem.theme.CrewTheme
 import com.kaanf.core.presentation.permission.Permission
 import com.kaanf.core.presentation.permission.PermissionState
 import com.kaanf.core.presentation.permission.rememberPermissionController
@@ -39,6 +41,7 @@ import crew.feature.game.presentation.generated.resources.match_phase_qr_home_ti
 import crew.feature.game.presentation.generated.resources.match_phase_qr_home_title_prefix
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun QrHomePhase(
@@ -90,7 +93,6 @@ fun QrHomePhase(
         Spacer(modifier = Modifier.height(1.dp))
 
         UserQrCard(
-            modifier = Modifier.size(300.dp),
             inputText = state.matchQrToken.orEmpty(),
         )
 
@@ -114,8 +116,17 @@ fun QrHomePhase(
 
         Spacer(modifier = Modifier.height(1.dp))
 
-        OnboardingInfoCard()
+        // LostThrowInfoCard()
+    }
+}
 
-        LostThrowInfoCard()
+@Composable
+@Preview
+fun QrHomePhasePreview() {
+    CrewTheme {
+        QrHomePhase(
+            state = MatchSessionState(),
+            onAction = {}
+        )
     }
 }

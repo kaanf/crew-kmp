@@ -1,12 +1,13 @@
 package com.kaanf.home.presentation.eventcode
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,11 +17,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.SpanStyle
@@ -28,16 +26,12 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kaanf.core.designsystem.component.info.InfoCard
-import com.kaanf.core.designsystem.component.layout.AppTopBar
-import com.kaanf.core.designsystem.component.layout.SnackbarScaffold
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessIcons
 import com.kaanf.core.designsystem.theme.AccessShapes
 import com.kaanf.core.designsystem.theme.CrewTheme
-import com.kaanf.core.presentation.model.AppTopBarState
-import com.kaanf.core.presentation.util.ObserveAsEvents
+import com.kaanf.home.presentation.eventcode.component.CodeFieldStatus
 import com.kaanf.home.presentation.eventcode.component.CodeInputField
 import crew.feature.home.presentation.generated.resources.Res
 import crew.feature.home.presentation.generated.resources.event_code_headline
@@ -49,49 +43,16 @@ import crew.feature.home.presentation.generated.resources.event_code_show_qr_act
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
-import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun EventCodeRoot(
-    viewModel: EventCodeViewModel = koinViewModel(),
-    onTicketCodeSuccess: () -> Unit,
-    onBack: () -> Unit
-) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
-    val snackbarHostState = remember { SnackbarHostState() }
-
-    ObserveAsEvents(viewModel.events) { event ->
-        when (event) {
-            EventCodeEvent.CodeSuccess -> onTicketCodeSuccess()
-        }
-    }
-
-    SnackbarScaffold(
-        topBar = {
-            AppTopBar(
-                state = AppTopBarState.EventCode,
-                onBackClick = {
-                    onBack()
-                },
-            )
-        },
-        snackbarHostState = snackbarHostState,
-    ) { innerPadding ->
-        EventCodeScreen(
-            modifier = Modifier
-                .padding(innerPadding)
-                .consumeWindowInsets(innerPadding),
-            state = state,
-            onAction = viewModel::onAction,
-        )
-    }
-}
-
-@Composable
-fun EventCodeScreen(
-    modifier: Modifier,
-    state: EventCodeState,
-    onAction: (EventCodeAction) -> Unit,
+fun EventCodeContent(
+    eventCode: String,
+    status: CodeFieldStatus,
+    enabled: Boolean,
+    onCodeChanged: (String) -> Unit,
+    onShowQrClicked: () -> Unit,
+    modifier: Modifier = Modifier,
+    scrollState: ScrollState = rememberScrollState(),
 ) {
     Column(
         modifier = modifier
@@ -101,7 +62,7 @@ fun EventCodeScreen(
             Column(
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
-                    .verticalScroll(rememberScrollState()),
+                    .verticalScroll(scrollState),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 horizontalAlignment = Alignment.Start,
             ) {
@@ -123,10 +84,10 @@ fun EventCodeScreen(
                 Spacer(modifier = Modifier.height(6.dp))
 
                 CodeInputField(
-                    value = state.eventCode,
-                    onValueChange = { onAction(EventCodeAction.OnCodeChanged(it)) },
-                    status = state.status,
-                    enabled = !state.isLoading,
+                    value = eventCode,
+                    onValueChange = onCodeChanged,
+                    status = status,
+                    enabled = enabled,
                 )
 
                 Text(
@@ -174,6 +135,7 @@ fun EventCodeScreen(
                             color = AccessDefaults.Border,
                             shape = AccessShapes.Large,
                         )
+                        .clickable(onClick = onShowQrClicked)
                         .padding(horizontal = 12.dp, vertical = 20.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(
@@ -205,10 +167,13 @@ fun EventCodeScreen(
 @Preview
 fun EventCodePreview() {
     CrewTheme {
-        EventCodeScreen(
+        EventCodeContent(
+            eventCode = "",
+            status = CodeFieldStatus.Editing,
+            enabled = true,
+            onCodeChanged = {},
+            onShowQrClicked = {},
             modifier = Modifier,
-            state = EventCodeState(""),
-            onAction = {},
         )
     }
 }

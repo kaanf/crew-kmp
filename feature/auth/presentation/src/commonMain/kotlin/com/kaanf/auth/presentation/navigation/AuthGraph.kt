@@ -9,6 +9,7 @@ import com.kaanf.auth.presentation.emailverification.verificationresult.EmailVer
 import com.kaanf.auth.presentation.emailverification.verificationsent.EmailVerificationSentRoot
 import com.kaanf.auth.presentation.forgotpassword.ForgotPasswordRoot
 import com.kaanf.auth.presentation.login.LoginRoot
+import com.kaanf.auth.presentation.profilepicture.ProfilePictureRoot
 import com.kaanf.auth.presentation.register.RegisterRoot
 import com.kaanf.auth.presentation.welcome.WelcomeRoot
 
@@ -53,6 +54,14 @@ fun NavGraphBuilder.authGraph(
                     }
                 },
                 onLoginSuccess = onLoginSuccess,
+                onProfileIncomplete = {
+                    navController.navigate(AuthGraphRoutes.ProfilePicture) {
+                        popUpTo(AuthGraphRoutes.Login) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
+                },
             )
         }
         composable<AuthGraphRoutes.Register> {
@@ -75,6 +84,12 @@ fun NavGraphBuilder.authGraph(
                         restoreState = true
                     }
                 },
+            )
+        }
+        composable<AuthGraphRoutes.ProfilePicture> {
+            ProfilePictureRoot(
+                onBack = {},
+                onUploadSuccess = onLoginSuccess,
             )
         }
         composable<AuthGraphRoutes.ForgotPassword> {

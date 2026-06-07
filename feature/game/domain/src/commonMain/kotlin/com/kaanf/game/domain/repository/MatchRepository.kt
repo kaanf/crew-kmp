@@ -7,12 +7,20 @@ import com.kaanf.game.domain.model.GameTask
 import com.kaanf.game.domain.model.MatchInvite
 import com.kaanf.game.domain.model.MatchParticipant
 import com.kaanf.game.domain.model.MatchScoreboard
+import com.kaanf.game.domain.model.MatchSnapshot
 
 interface MatchRepository {
     suspend fun getMyMatchQrToken(eventId: String): Result<String, DataError.Remote>
 
     /** Aktif kullanıcının katılımcı kaydını döner (QR token + userId dahil). */
     suspend fun getMyParticipant(eventId: String): Result<MatchParticipant, DataError.Remote>
+
+    /**
+     * Çağıran kullanıcının bu etkinlikteki güncel maçının snapshot'ı; aktif maç yoksa
+     * `null` (sunucu 204). Soket her (yeniden) bağlandığında çağrılıp faz, kopukken
+     * kaçırılan push'lara karşı sunucu doğrusuyla uzlaştırılır.
+     */
+    suspend fun getMatchSnapshot(eventId: String): Result<MatchSnapshot?, DataError.Remote>
 
     suspend fun sendInvite(
         eventId: String, scannedMatchQrToken: String,

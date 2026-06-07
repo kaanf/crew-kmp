@@ -1,6 +1,7 @@
 package com.kaanf.game.data.repository
 
 import com.kaanf.core.data.networking.get
+import com.kaanf.core.data.networking.getOrNull
 import com.kaanf.core.data.networking.post
 import com.kaanf.core.domain.util.DataError
 import com.kaanf.core.domain.util.EmptyResult
@@ -15,6 +16,7 @@ import com.kaanf.game.data.dto.MatchInviteDto
 import com.kaanf.game.data.dto.MatchReadyDto
 import com.kaanf.game.data.dto.MatchResultDto
 import com.kaanf.game.data.dto.MatchScoreboardDto
+import com.kaanf.game.data.dto.MatchSnapshotDto
 import com.kaanf.game.data.dto.MatchTaskOfferDto
 import com.kaanf.game.data.dto.MatchTaskStateDto
 import com.kaanf.game.data.dto.MyParticipantDto
@@ -26,6 +28,7 @@ import com.kaanf.game.domain.model.GameTask
 import com.kaanf.game.domain.model.MatchInvite
 import com.kaanf.game.domain.model.MatchParticipant
 import com.kaanf.game.domain.model.MatchScoreboard
+import com.kaanf.game.domain.model.MatchSnapshot
 import com.kaanf.game.domain.repository.MatchRepository
 import io.ktor.client.HttpClient
 
@@ -141,6 +144,15 @@ class MatchRepositoryImpl(
         return httpClient.get<MatchScoreboardDto>(
             route = "/events/$eventId/matches/$matchId/scoreboard",
         ).map { it.toDomain() }
+    }
+
+    override suspend fun getMatchSnapshot(
+        eventId: String,
+    ): Result<MatchSnapshot?, DataError.Remote> {
+        // 204 (aktif maç yok) → null; ekran Idle'a uzlaşır.
+        return httpClient.getOrNull<MatchSnapshotDto>(
+            route = "/events/$eventId/matches/current",
+        ).map { it?.toDomain() }
     }
 
     override suspend fun finishMatch(

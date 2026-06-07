@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.kaanf.core.domain.util.onFailure
 import com.kaanf.core.domain.util.onSuccess
 import com.kaanf.game.domain.model.GameSocketMessage
-import com.kaanf.game.domain.repository.GameSocketRepository
+import com.kaanf.game.domain.event.EventConnectionClient
 import com.kaanf.game.domain.repository.MatchRepository
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,7 +20,7 @@ import kotlinx.coroutines.launch
 
 class ScanOpponentViewModel(
     private val matchRepository: MatchRepository,
-    private val gameSocketRepository: GameSocketRepository,
+    private val eventConnectionClient: EventConnectionClient,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     private val eventId = savedStateHandle.get<String>("eventId").orEmpty()
@@ -41,7 +41,7 @@ class ScanOpponentViewModel(
     }
 
     private fun observeInviteResult() {
-        gameSocketRepository.observeEvents(eventId)
+        eventConnectionClient.observeEvents(eventId)
             .onEach { message ->
                 when (message) {
                     is GameSocketMessage.MatchStarted ->

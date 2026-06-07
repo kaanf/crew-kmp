@@ -10,7 +10,7 @@ fun AuthInfoSerializable.toDomain(): AuthInfo {
     return AuthInfo(
         accessToken = accessToken,
         refreshToken = refreshToken,
-        user = user?.toDomain(),
+        user = user.toDomain(),
     )
 }
 
@@ -19,11 +19,13 @@ fun UserSerializable.toDomain(): User {
         id = id,
         email = email,
         fullName = fullName,
+        profilePictureUrl = profilePictureUrl,
         dateOfBirth = dateOfBirth,
         gender = gender,
         role = role,
         status = status,
         hasVerifiedEmail = hasVerifiedEmail,
+        isProfileComplete = isProfileComplete
     )
 }
 
@@ -33,6 +35,7 @@ fun User.toSerializable(): UserSerializable {
         email = email,
         fullName = fullName,
         dateOfBirth = dateOfBirth,
+        profilePictureUrl = profilePictureUrl,
         gender = gender,
         role = role,
         status = status,
@@ -44,6 +47,6 @@ fun AuthInfo.toSerializable(): AuthInfoSerializable {
     return AuthInfoSerializable(
         accessToken = accessToken,
         refreshToken = refreshToken,
-        user = user?.toSerializable(),
+        user = user.toSerializable(),
     )
 }

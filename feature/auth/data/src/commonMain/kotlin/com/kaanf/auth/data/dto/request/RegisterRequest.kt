@@ -9,5 +9,6 @@ data class RegisterRequest(
     val password: String,
     val fullName: String,
     val dateOfBirth: LocalDate,
+    val profilePictureUrl: String? = null,
     val gender: GenderDto,
 )

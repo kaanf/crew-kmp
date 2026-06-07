@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
@@ -131,8 +132,10 @@ fun MatchContainerScreen(
                 contentKey = { it.key },
                 transitionSpec = {
                     (slideInHorizontally { it / 4 } + fadeIn()) togetherWith
-                        (slideOutHorizontally { -it / 4 } + fadeOut())
+                        (slideOutHorizontally { -it / 4 } + fadeOut()) using
+                        SizeTransform(clip = false)
                 },
+                contentAlignment = Alignment.Center,
                 label = "match_phase",
                 modifier = Modifier.weight(1f),
             ) { phase ->

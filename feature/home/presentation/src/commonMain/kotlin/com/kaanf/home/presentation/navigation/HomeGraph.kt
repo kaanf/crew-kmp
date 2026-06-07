@@ -6,7 +6,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.toRoute
 import com.kaanf.home.presentation.dashboard.DashboardRoot
-import com.kaanf.home.presentation.eventcode.EventCodeRoot
 import com.kaanf.home.presentation.eventdetail.EventDetailRoot
 import com.kaanf.home.presentation.ticketqr.TicketQrRoot
 
@@ -44,30 +43,12 @@ fun NavGraphBuilder.homeGraph(
             )
         }
 
-        composable<HomeGraphRoutes.TicketQr> {
+        composable<HomeGraphRoutes.TicketQr> { entry ->
+            val eventId = entry.toRoute<HomeGraphRoutes.TicketQr>().eventId
             TicketQrRoot(
-                onEventCodeClicked = { eventId ->
-                    navController.navigate(
-                        HomeGraphRoutes.EventCode(
-                            eventId = eventId
-                        )
-                    ) {
-                        restoreState = true
-                        launchSingleTop = true
-                    }
-                }
-            )
-        }
-
-        composable<HomeGraphRoutes.EventCode> { entry ->
-            val eventId = entry.toRoute<HomeGraphRoutes.EventCode>().eventId
-            EventCodeRoot(
-                onTicketCodeSuccess = {
+                onCheckInSuccess = {
                     onGameCodeSuccess(eventId)
                 },
-                onBack = {
-                    navController.popBackStack()
-                }
             )
         }
     }

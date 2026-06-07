@@ -1,5 +1,9 @@
 package com.kaanf.home.presentation.ticketqr
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,12 +15,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -29,76 +32,121 @@ import com.kaanf.core.designsystem.component.layout.SnackbarScaffold
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.presentation.model.AppTopBarState
 import com.kaanf.core.presentation.util.ObserveAsEvents
+import com.kaanf.home.presentation.eventcode.EventCodeContent
 import com.kaanf.home.presentation.ticketqr.component.qr.TicketQrInfoCard
 import com.kaanf.home.presentation.ticketqr.component.successcard.TicketSuccessCard
 import crew.feature.home.presentation.generated.resources.Res
 import crew.feature.home.presentation.generated.resources.ticket_qr_info_action
 import crew.feature.home.presentation.generated.resources.ticket_qr_info_prefix
 import crew.feature.home.presentation.generated.resources.ticket_qr_info_suffix
-import io.github.vinceglb.confettikit.compose.ConfettiKit
-import io.github.vinceglb.confettikit.core.Party
-import io.github.vinceglb.confettikit.core.Position
-import io.github.vinceglb.confettikit.core.emitter.Emitter
-import io.github.vinceglb.confettikit.core.models.Shape
-import io.github.vinceglb.confettikit.core.models.Size
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
-import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun TicketQrRoot(
     viewModel: TicketQrViewModel = koinViewModel(),
-    onEventCodeClicked: (eventId: String) -> Unit,
+    onCheckInSuccess: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    val scrollState: ScrollState = rememberScrollState()
-
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
-            else -> Unit
+            TicketQrEvent.CheckInSuccess -> onCheckInSuccess()
         }
+    }
+
+    TicketContainerScreen(
+        state = state,
+        onAction = viewModel::onAction,
+        snackbarHostState = snackbarHostState,
+    )
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun TicketContainerScreen(
+    state: TicketQrState,
+    onAction: (TicketQrAction) -> Unit,
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
+    modifier: Modifier = Modifier,
+) {
+    val qrScrollState: ScrollState = rememberScrollState()
+    val eventCodeScrollState: ScrollState = rememberScrollState()
+
+    BackHandler(enabled = state.phase == TicketPhase.EventCode) {
+        onAction(TicketQrAction.OnBackClick)
     }
 
     SnackbarScaffold(
         topBar = {
             AppTopBar(
-                elevated = { scrollState.canScrollBackward },
-                state = AppTopBarState.TicketQr,
-                onBackClick = {},
+                elevated = {
+                    when (state.phase) {
+                        TicketPhase.Qr -> qrScrollState.canScrollBackward
+                        TicketPhase.EventCode -> eventCodeScrollState.canScrollBackward
+                    }
+                },
+                state = when (state.phase) {
+                    TicketPhase.Qr -> AppTopBarState.TicketQr
+                    TicketPhase.EventCode -> AppTopBarState.EventCode
+                },
+                onBackClick = {
+                    if (state.phase == TicketPhase.EventCode) {
+                        onAction(TicketQrAction.OnBackClick)
+                    }
+                },
             )
         },
         snackbarHostState = snackbarHostState,
     ) { innerPadding ->
-        TicketQrScreen(
+        AnimatedContent(
+            targetState = state.phase,
+            contentKey = { it },
+            transitionSpec = {
+                val forward = targetState.ordinal > initialState.ordinal
+                val towards = if (forward) {
+                    AnimatedContentTransitionScope.SlideDirection.Left
+                } else {
+                    AnimatedContentTransitionScope.SlideDirection.Right
+                }
+                slideIntoContainer(towards, tween(300)) togetherWith
+                    slideOutOfContainer(towards, tween(300))
+            },
+            label = "ticket_phase",
             modifier = Modifier
                 .padding(innerPadding)
                 .consumeWindowInsets(innerPadding),
-            scrollState = scrollState,
-            state = state,
-            onAction = {
-                when (it) {
-                    TicketQrAction.OnEventCodeClicked -> onEventCodeClicked(state.ticket?.eventId.orEmpty())
-                }
-            },
-        )
+        ) { phase ->
+            when (phase) {
+                TicketPhase.Qr -> TicketQrContent(
+                    state = state,
+                    scrollState = qrScrollState,
+                    onAction = onAction,
+                    modifier = Modifier.fillMaxSize(),
+                )
+
+                TicketPhase.EventCode -> EventCodeContent(
+                    eventCode = state.eventCode,
+                    status = state.codeStatus,
+                    enabled = !state.isCheckingIn,
+                    scrollState = eventCodeScrollState,
+                    onCodeChanged = { onAction(TicketQrAction.OnCodeChanged(it)) },
+                    onShowQrClicked = { onAction(TicketQrAction.OnBackClick) },
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
+        }
     }
 }
 
 @Composable
-fun TicketQrScreen(
-    modifier: Modifier,
-    scrollState: ScrollState,
+private fun TicketQrContent(
     state: TicketQrState,
+    scrollState: ScrollState,
     onAction: (TicketQrAction) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    var isConfettiVisible by remember { mutableStateOf(false) }
-
-    LaunchedEffect(Unit) {
-        isConfettiVisible = true
-    }
-
     Box(
         modifier = modifier.fillMaxSize(),
     ) {
@@ -140,46 +188,5 @@ fun TicketQrScreen(
                 },
             )
         }
-
-        if (isConfettiVisible) {
-            ConfettiKit(
-                modifier = Modifier.fillMaxSize(),
-                parties = remember { listOf(successConfetti()) },
-                onParticleSystemEnded = { _, activeSystems ->
-                    if (activeSystems == 0) {
-                        isConfettiVisible = false
-                    }
-                },
-            )
-        }
     }
-}
-
-private fun successConfetti(): Party {
-    return Party(
-        speed = 0f,
-        maxSpeed = 30f,
-        damping = 0.9f,
-        spread = 360,
-        colors = listOf(
-            0xC8FF3D,
-            0xFF7A5C,
-            0xFF5A7A,
-            0x6FB7FF,
-        ),
-        shapes = listOf(
-            Shape.Circle,
-        ),
-        size = listOf(
-            Size.SMALL,
-            Size.MEDIUM,
-        ),
-        emitter = Emitter(
-            duration = 100.milliseconds,
-        ).max(100),
-        position = Position.Relative(
-            x = 0.5,
-            y = 0.05,
-        ),
-    )
 }

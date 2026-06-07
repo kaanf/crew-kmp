@@ -16,9 +16,4 @@ sealed interface HomeGraphRoutes {
     data class TicketQr(
         val eventId: String,
     ) : HomeGraphRoutes
-
-    @Serializable
-    data class EventCode(
-        val eventId: String
-    ) : HomeGraphRoutes
 }

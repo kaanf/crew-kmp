@@ -3,13 +3,12 @@ package com.kaanf.core.domain.model.user
 data class User(
     val id: String,
     val email: String,
-    val fullName: String? = null,
+    val fullName: String,
     val dateOfBirth: String,
+    val profilePictureUrl: String? = null,
     val gender: String,
     val role: String,
     val status: String,
+    val isProfileComplete: Boolean,
     val hasVerifiedEmail: Boolean
-) {
-    val isCharacterCreated: Boolean
-        get() = fullName != null
-}
+)

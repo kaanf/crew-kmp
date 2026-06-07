@@ -5,6 +5,7 @@ import com.kaanf.core.data.dto.RefreshRequest
 import com.kaanf.core.data.mappers.toDomain
 import com.kaanf.core.domain.repository.SessionStorage
 import com.kaanf.core.domain.logging.CrewLogger
+import com.kaanf.core.domain.util.DataError
 import com.kaanf.core.domain.util.onFailure
 import com.kaanf.core.domain.util.onSuccess
 import io.ktor.client.HttpClient
@@ -32,6 +33,7 @@ class HttpClientFactory(
 ) {
     fun create(engine: HttpClientEngine): HttpClient {
         return HttpClient(engine) {
+            installWiretapHttp()
             install(ContentNegotiation) {
                 json(
                     json =
@@ -53,9 +55,12 @@ class HttpClientFactory(
                     }
                 level = LogLevel.ALL
             }
-            install(WebSockets) {
-                pingIntervalMillis = 20_000L
-            }
+            // Keepalive otoritesi backend'de (server PING/PONG + pong-timeout). Client kendi
+            // ping'ini atmaz; Ktor'un DefaultWebSocketSession ponger'ı gelen server PING'lerine
+            // otomatik PONG döner (ponger pingInterval'dan bağımsız hep aktiftir).
+            install(WebSockets)
+            // WebSocket trafiğini Wiretap konsoluna yansıtır (WebSockets'ten sonra kurulmalı).
+            installWiretapWebSocket()
             defaultRequest {
                 contentType(ContentType.Application.Json)
             }
@@ -100,7 +105,15 @@ class HttpClientFactory(
                                 refreshToken = newAuthInfo.refreshToken
                             )
                         }.onFailure { error ->
-                            sessionStorage.set(null)
+                            // Yalnızca sunucu refresh token'ı kesin reddettiğinde (401/403)
+                            // oturumu sil. Ağ/timeout/5xx/serileştirme gibi geçici hatalarda
+                            // token'ı koru ki kullanıcı boş yere logout olmasın; sonraki istek
+                            // tekrar refresh dener.
+                            if (error == DataError.Remote.UNAUTHORIZED ||
+                                error == DataError.Remote.FORBIDDEN
+                            ) {
+                                sessionStorage.set(null)
+                            }
                         }
 
                         bearerTokens

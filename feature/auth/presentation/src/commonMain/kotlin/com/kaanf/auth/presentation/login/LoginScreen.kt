@@ -58,6 +58,7 @@ fun LoginRoot(
     onRegisterClick: () -> Unit,
     onForgotPasswordClick: () -> Unit,
     onLoginSuccess: () -> Unit,
+    onProfileIncomplete: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -74,6 +75,10 @@ fun LoginRoot(
 
             LoginEvent.NavigateToDashboard -> {
                 onLoginSuccess.invoke()
+            }
+
+            LoginEvent.NavigateToProfilePicture -> {
+                onProfileIncomplete.invoke()
             }
         }
     }

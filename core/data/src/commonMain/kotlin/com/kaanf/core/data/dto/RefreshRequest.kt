@@ -1,8 +1,9 @@
 package com.kaanf.core.data.dto
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class RefreshRequest(
-    val refreshToken: String
+    @SerialName("token") val refreshToken: String
 )

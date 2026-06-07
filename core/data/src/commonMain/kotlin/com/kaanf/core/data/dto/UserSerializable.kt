@@ -6,10 +6,12 @@ import kotlinx.serialization.Serializable
 data class UserSerializable(
     val id: String = "",
     val email: String,
-    val fullName: String? = null,
+    val fullName: String,
     val dateOfBirth: String = "",
+    val profilePictureUrl: String? = null,
     val gender: String = "",
     val role: String = "",
     val status: String = "",
     val hasVerifiedEmail: Boolean = false,
+    val isProfileComplete: Boolean = false,
 )

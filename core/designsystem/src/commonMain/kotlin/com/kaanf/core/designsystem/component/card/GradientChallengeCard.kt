@@ -302,7 +302,6 @@ fun MoreDeckCard() {
                 strokeWidth = 1.dp,
                 dotLength = 2.dp,
                 gapLength = 4.dp,
-                backgroundColor = AccessDefaults.Surface
             ),
         content = {
             Column(

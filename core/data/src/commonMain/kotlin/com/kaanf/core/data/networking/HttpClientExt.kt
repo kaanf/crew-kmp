@@ -14,6 +14,7 @@ import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.client.request.url
 import io.ktor.client.statement.HttpResponse
+import io.ktor.http.HttpStatusCode
 
 expect suspend fun <T> platformSafeCall(
     execute: suspend () -> HttpResponse,
@@ -68,6 +69,35 @@ suspend inline fun <reified Response : Any> HttpClient.get(
             builder()
         }
     }
+}
+
+/**
+ * GET ki yanıt gövdesi opsiyonel: 204 No Content → `Result.Success(null)`, aksi halde
+ * normal gövde çözümü. "Kayıt yok" durumunu hata değil, null olarak modellemek için.
+ */
+suspend inline fun <reified Response : Any> HttpClient.getOrNull(
+    route: String,
+    queryParams: Map<String, Any> = mapOf(),
+    crossinline builder: HttpRequestBuilder.() -> Unit = {},
+): Result<Response?, DataError.Remote> {
+    return platformSafeCall(
+        execute = {
+            get {
+                url(constructRoute(route))
+                queryParams.forEach { (key, value) ->
+                    parameter(key, value)
+                }
+                builder()
+            }
+        },
+        handleResponse = { response ->
+            if (response.status == HttpStatusCode.NoContent) {
+                Result.Success(null)
+            } else {
+                responseToResult<Response>(response)
+            }
+        },
+    )
 }
 
 suspend inline fun <reified Response : Any> HttpClient.delete(

@@ -123,8 +123,8 @@ fun AppTopBar(
                     horizontal = 16.dp,
                 )
                 .padding(
-                    top = 20.dp,
-                    bottom = 16.dp
+                    top = 12.dp,
+                    bottom = 8.dp,
                 ),
         ) {
             Text(
@@ -160,7 +160,7 @@ fun AppTopBar(
                         painter = painterResource(icon),
                         contentDescription = null,
                         tint = AccessDefaults.TextPrimary,
-                        modifier = Modifier.size(20.dp),
+                        modifier = Modifier.size(24.dp),
                     )
                 }
             }
@@ -174,6 +174,9 @@ fun AppTopBar(
                     LogoCard(
                         modifier = Modifier
                             .matchParentSize()
+                            .padding(
+                                vertical = 8.dp,
+                            ),
                     )
                 }
             }
@@ -183,7 +186,8 @@ fun AppTopBar(
                 AppTopBarState.Login,
                 AppTopBarState.Dashboard,
                 AppTopBarState.Game,
-                AppTopBarState.LoserActiveTask -> true
+                AppTopBarState.LoserActiveTask,
+                    -> true
 
                 else -> false
             }
@@ -223,9 +227,12 @@ fun AppTopBar(
                                     AppTopBarState.Register -> Res.string.register_text
                                     AppTopBarState.Login -> Res.string.login_text
                                     AppTopBarState.Game -> Res.string.game_how_to_play
-                                    AppTopBarState.LoserActiveTask -> Res.string.loser_active_task_skip
+                                    AppTopBarState.ProfilePicture,
+                                    AppTopBarState.LoserActiveTask,
+                                        -> Res.string.loser_active_task_skip
+
                                     else -> Res.string.empty
-                                }
+                                },
                             ),
                             style = MaterialTheme.typography.titleSmall.copy(
                                 color = if (state is AppTopBarState.LoserActiveTask) {
@@ -233,7 +240,7 @@ fun AppTopBar(
                                 } else {
                                     AccessDefaults.TextMuted
                                 },
-                                fontSize = 12.sp
+                                fontSize = 12.sp,
                             ),
                         )
                     }
@@ -247,6 +254,7 @@ private val AppTopBarState.titleResource: StringResource
     get() = when (this) {
         AppTopBarState.Login,
         AppTopBarState.Register,
+        AppTopBarState.ProfilePicture,
         AppTopBarState.Dashboard,
         AppTopBarState.Game,
         is AppTopBarState.GameLobby,
@@ -273,15 +281,16 @@ private val AppTopBarState.navigationIcon: DrawableResource?
         AppTopBarState.WinnerConfirms,
         AppTopBarState.LoserWaits,
         AppTopBarState.LoserAccepts,
+        AppTopBarState.ProfilePicture,
         AppTopBarState.LoserActiveTask,
             -> null
 
         AppTopBarState.Login,
         AppTopBarState.Register,
         AppTopBarState.EventDetail,
-        is AppTopBarState.GameLobby,
         AppTopBarState.TicketQr,
         AppTopBarState.EventCode,
+        is AppTopBarState.GameLobby,
             -> AccessIcons.LeftChevron
 
         AppTopBarState.Game,

@@ -1,11 +1,13 @@
 package com.kaanf.core.designsystem.theme
 
 import crew.core.designsystem.generated.resources.Res
-import crew.core.designsystem.generated.resources.crew_c_letter
 import crew.core.designsystem.generated.resources.crew_logo_qr
+import crew.core.designsystem.generated.resources.crew_pixel_art
+import crew.core.designsystem.generated.resources.ic_camera
 import crew.core.designsystem.generated.resources.ic_chevron_left_24
 import crew.core.designsystem.generated.resources.ic_chevron_right_24
 import crew.core.designsystem.generated.resources.ic_close
+import crew.core.designsystem.generated.resources.ic_clock
 import crew.core.designsystem.generated.resources.ic_info
 import crew.core.designsystem.generated.resources.ic_left_arrow
 import crew.core.designsystem.generated.resources.ic_more
@@ -30,4 +32,6 @@ object AccessIcons {
     val Close = Res.drawable.ic_close
     val LogoLetter = Res.drawable.crew_logo_qr
     val WifiOff = Res.drawable.ic_wifi_off
+    val Camera = Res.drawable.ic_camera
+    val Clock = Res.drawable.ic_clock
 }

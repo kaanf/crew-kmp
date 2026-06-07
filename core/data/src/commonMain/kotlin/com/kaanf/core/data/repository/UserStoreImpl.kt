@@ -4,7 +4,6 @@ import com.kaanf.core.domain.model.user.User
 import com.kaanf.core.domain.repository.SessionStorage
 import com.kaanf.core.domain.repository.UserStore
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 class UserStoreImpl(
@@ -15,7 +14,8 @@ class UserStoreImpl(
     }
 
     override suspend fun updateCurrentUser(user: User) {
-        val current = sessionStorage.observeAuthInfo().first() ?: return
-        sessionStorage.set(current.copy(user = user))
+        sessionStorage.update { current ->
+            current?.copy(user = user)
+        }
     }
 }

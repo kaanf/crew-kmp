@@ -19,4 +19,18 @@ fun BaseImage(
     )
 }
 
+@Composable
+fun BaseImage(
+    modifier: Modifier = Modifier,
+    imageBytes: ByteArray,
+    contentScale: ContentScale
+) {
+    AsyncImage(
+        model = imageBytes,
+        contentDescription = null,
+        contentScale = contentScale,
+        modifier = modifier,
+    )
+}
+
 

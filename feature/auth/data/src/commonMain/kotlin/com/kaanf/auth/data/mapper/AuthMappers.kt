@@ -11,6 +11,7 @@ fun RegisterParams.toDto(): RegisterRequest =
         password = password,
         fullName = fullName,
         dateOfBirth = dateOfBirth,
+        profilePictureUrl = profilePictureUrl,
         gender = gender.toDto(),
     )
 

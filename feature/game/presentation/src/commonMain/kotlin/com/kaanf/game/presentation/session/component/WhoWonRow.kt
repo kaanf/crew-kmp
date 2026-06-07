@@ -41,7 +41,6 @@ import com.kaanf.game.presentation.model.WhoWonAvatarUi
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
-/** Aynı satıra birden fazla avatar aynı anda gelince aralarındaki sıralı düşüş gecikmesi. */
 private const val AVATAR_STAGGER_MILLIS = 90L
 
 @Composable

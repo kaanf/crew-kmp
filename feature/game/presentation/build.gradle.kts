@@ -46,7 +46,6 @@ kotlin {
 dependencies {
     add("androidTestImplementation", platform(libs.androidx.compose.bom))
     add("androidTestImplementation", libs.androidx.compose.ui.test.junit4.android)
-    add("androidTestImplementation", libs.androidx.runner)
     add("debugImplementation", platform(libs.androidx.compose.bom))
     add("debugImplementation", libs.androidx.compose.ui.test.manifest)
 }
