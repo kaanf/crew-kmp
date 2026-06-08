@@ -4,5 +4,6 @@ import androidx.compose.ui.graphics.Color
 
 data class UserAvatar(
     val label: String,
-    val color: Color
+    val color: Color,
+    val imageUrl: String? = null
 )

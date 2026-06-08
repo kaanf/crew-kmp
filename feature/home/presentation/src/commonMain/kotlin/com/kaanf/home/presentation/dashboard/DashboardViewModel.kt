@@ -3,6 +3,8 @@ package com.kaanf.home.presentation.dashboard
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kaanf.core.domain.model.event.EventId
+import com.kaanf.core.domain.repository.SessionStorage
+import com.kaanf.core.domain.repository.UserStore
 import com.kaanf.core.domain.util.Result
 import com.kaanf.core.presentation.base.BaseEvent
 import com.kaanf.core.presentation.model.SnackbarMessage
@@ -16,6 +18,8 @@ import crew.feature.home.presentation.generated.resources.dashboard_snackbar_loa
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -23,17 +27,33 @@ import kotlinx.coroutines.launch
 
 class DashboardViewModel(
     private val getEventsUseCase: GetEventsUseCase,
+    userStorage: UserStore
 ) : ViewModel() {
     private val eventChannel = Channel<DashboardEvent>()
     val events = eventChannel.receiveAsFlow()
 
+    private var hasLoadedInitialData = false
+
     private val _state = MutableStateFlow(DashboardState())
-    val state = _state
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000L),
-            initialValue = DashboardState(),
-        )
+    val state = combine(
+        _state,
+        userStorage.observeCurrentUser()
+    ) { currentState, currentUser ->
+        if (currentUser != null) {
+            currentState.copy(
+                profilePictureUrl = currentUser.profilePictureUrl
+            )
+        } else currentState
+    }.onStart {
+        if (!hasLoadedInitialData) {
+            loadEvents()
+            hasLoadedInitialData = true
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000L),
+        initialValue = DashboardState(),
+    )
 
     init {
         loadEvents()

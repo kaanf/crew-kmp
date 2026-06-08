@@ -19,9 +19,11 @@ fun NavGraphBuilder.gameGraph(
     navigation<GameGraphRoutes.Graph>(
         startDestination = GameGraphRoutes.GameLobby,
     ) {
-        composable<GameGraphRoutes.GameLobby> {
-            val eventId = navController.getBackStackEntry<GameGraphRoutes.Graph>()
-                .toRoute<GameGraphRoutes.Graph>().eventId
+        composable<GameGraphRoutes.GameLobby> { entry ->
+            val graphEntry = remember(entry) {
+                navController.getBackStackEntry<GameGraphRoutes.Graph>()
+            }
+            val eventId = graphEntry.toRoute<GameGraphRoutes.Graph>().eventId
             GameLobbyRoot(
                 onBack = { navController.popBackStack() },
                 onNavigateToGame = {

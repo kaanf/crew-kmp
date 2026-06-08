@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kaanf.core.designsystem.component.avatar.AvatarCircle
+import com.kaanf.core.designsystem.component.avatar.AvatarContent
 import com.kaanf.core.designsystem.component.button.BaseButton
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.game.domain.model.GameSocketMessage
@@ -75,8 +76,10 @@ fun GameResponseSheet(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             AvatarCircle(
-                label = message.fromFullName.first().toString(),
-                color = AccessDefaults.Rose,
+                content = AvatarContent.Initials(
+                    label = message.fromFullName.first().toString(),
+                    color = AccessDefaults.Rose,
+                ),
                 avatarSize = 78,
                 textSize = 30.0,
                 borderColor = AccessDefaults.BorderSoft,
@@ -102,8 +105,7 @@ fun GameResponseSheet(
             }
 
             AvatarCircle(
-                label = "MK",
-                color = AccessDefaults.Teal,
+                content = AvatarContent.Initials(label = "MK", color = AccessDefaults.Teal),
                 avatarSize = 78,
                 textSize = 30.0,
                 borderColor = AccessDefaults.Accent,

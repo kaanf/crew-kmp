@@ -19,6 +19,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kaanf.core.designsystem.component.avatar.AvatarCircle
+import com.kaanf.core.designsystem.component.avatar.AvatarContent
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessIcons
 import com.kaanf.core.designsystem.theme.AccessShapes
@@ -84,8 +85,7 @@ private fun WinnerIsWatchingCard(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 AvatarCircle(
-                    label = "M",
-                    color = AccessDefaults.Sky,
+                    content = AvatarContent.Initials(label = "M", color = AccessDefaults.Sky),
                     avatarSize = 48,
                     borderSize = 2
                 )

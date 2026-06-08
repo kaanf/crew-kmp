@@ -65,7 +65,7 @@ fun DashboardRoot(
     SnackbarScaffold(
         topBar = {
             AppTopBar(
-                state = AppTopBarState.Dashboard,
+                state = AppTopBarState.Dashboard(state.profilePictureUrl),
                 elevated = { listState.canScrollBackward },
                 onRightClick = {},
             )

@@ -18,6 +18,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kaanf.core.designsystem.component.avatar.AvatarCircle
+import com.kaanf.core.designsystem.component.avatar.AvatarContent
 import com.kaanf.core.designsystem.component.button.BaseButton
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.CrewTheme
@@ -62,8 +63,10 @@ fun RpsReadyPhase(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             AvatarCircle(
-                label = stringResource(Res.string.match_you_avatar_label),
-                color = AccessDefaults.Rose,
+                content = AvatarContent.Initials(
+                    label = stringResource(Res.string.match_you_avatar_label),
+                    color = AccessDefaults.Rose,
+                ),
                 avatarSize = 78,
                 textSize = 30.0,
                 borderColor = AccessDefaults.BorderSoft,
@@ -80,8 +83,7 @@ fun RpsReadyPhase(
             )
 
             AvatarCircle(
-                label = opponentInitial,
-                color = AccessDefaults.Teal,
+                content = AvatarContent.Initials(label = opponentInitial, color = AccessDefaults.Teal),
                 avatarSize = 78,
                 textSize = 30.0,
                 borderColor = AccessDefaults.BorderSoft,

@@ -27,6 +27,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kaanf.auth.presentation.util.PolicyUrls
+import com.kaanf.auth.presentation.util.appendPolicyLink
 import com.kaanf.core.designsystem.component.button.BaseButton
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.CrewTheme
@@ -38,8 +40,10 @@ import crew.feature.auth.presentation.generated.resources.welcome_headline_solo
 import crew.feature.auth.presentation.generated.resources.welcome_headline_story
 import crew.feature.auth.presentation.generated.resources.welcome_house_rules
 import crew.feature.auth.presentation.generated.resources.welcome_primary_action_create_account
+import crew.feature.auth.presentation.generated.resources.welcome_privacy_policy
 import crew.feature.auth.presentation.generated.resources.welcome_secondary_action_login
 import crew.feature.auth.presentation.generated.resources.welcome_terms
+import crew.feature.auth.presentation.generated.resources.welcome_terms_conjunction
 import crew.feature.auth.presentation.generated.resources.welcome_terms_middle
 import crew.feature.auth.presentation.generated.resources.welcome_terms_prefix
 import crew.feature.auth.presentation.generated.resources.welcome_terms_suffix
@@ -169,13 +173,20 @@ private fun Footer(
             text =
                 buildAnnotatedString {
                     append(stringResource(Res.string.welcome_terms_prefix))
-                    withStyle(SpanStyle(color = AccessDefaults.TextSecondary)) {
-                        append(stringResource(Res.string.welcome_terms))
-                    }
+                    appendPolicyLink(
+                        text = stringResource(Res.string.welcome_terms),
+                        url = PolicyUrls.TERMS_OF_USE,
+                    )
                     append(stringResource(Res.string.welcome_terms_middle))
-                    withStyle(SpanStyle(color = AccessDefaults.TextPrimary)) {
-                        append(stringResource(Res.string.welcome_house_rules))
-                    }
+                    appendPolicyLink(
+                        text = stringResource(Res.string.welcome_house_rules),
+                        url = PolicyUrls.HOUSE_RULES,
+                    )
+                    append(stringResource(Res.string.welcome_terms_conjunction))
+                    appendPolicyLink(
+                        text = stringResource(Res.string.welcome_privacy_policy),
+                        url = PolicyUrls.PRIVACY_POLICY,
+                    )
                     append(stringResource(Res.string.welcome_terms_suffix))
                 },
             modifier =

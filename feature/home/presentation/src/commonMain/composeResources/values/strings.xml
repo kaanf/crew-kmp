@@ -12,7 +12,8 @@
     <string name="dashboard_upcoming_events_title">UPCOMING EVENTS</string>
     <string name="dashboard_upcoming_events_count">%1$d events</string>
     <string name="dashboard_snackbar_load_failed_title">Couldn't load events</string>
-    <string name="event_detail_ticket_cta">Get my ticket - 490 Kc</string>
+    <string name="event_detail_ticket_cta">Get my ticket - %1$s</string>
+    <string name="event_detail_free_ticket_cta">Get your free ticket</string>
     <string name="event_detail_my_ticket_cta">Go to ticket detail</string>
     <string name="event_detail_hero_date">SATURDAY - MAY 30</string>
     <string name="event_detail_hero_title">One night.\nOne bar.\n80 strangers.</string>

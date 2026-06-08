@@ -54,6 +54,13 @@ class HttpClientFactory(
                         }
                     }
                 level = LogLevel.ALL
+                // İkili gövdeleri (örn. signed URL'e giden profil fotoğrafı upload'ı) metne
+                // çevirmek, logger'ın StringBuilder'ını megabaytlarca şişirip OOM'a yol açıyor.
+                // Yalnızca JSON ve gövdesiz istekleri logla; binary içerikleri loglama dışı tut.
+                filter { request ->
+                    val contentType = request.contentType()
+                    contentType == null || contentType.match(ContentType.Application.Json)
+                }
             }
             // Keepalive otoritesi backend'de (server PING/PONG + pong-timeout). Client kendi
             // ping'ini atmaz; Ktor'un DefaultWebSocketSession ponger'ı gelen server PING'lerine

@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kaanf.core.designsystem.theme.AccessDefaults
@@ -34,6 +35,25 @@ fun BaseCheckbox(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
     label: String,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    testTag: String? = null,
+) {
+    BaseCheckbox(
+        checked = checked,
+        onCheckedChange = onCheckedChange,
+        label = AnnotatedString(label),
+        modifier = modifier,
+        enabled = enabled,
+        testTag = testTag,
+    )
+}
+
+@Composable
+fun BaseCheckbox(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    label: AnnotatedString,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     testTag: String? = null,

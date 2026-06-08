@@ -7,6 +7,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -33,6 +34,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import com.kaanf.core.designsystem.component.avatar.AvatarCircle
+import com.kaanf.core.designsystem.component.avatar.AvatarContent
 import com.kaanf.core.designsystem.component.logo.LogoCard
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessIcons
@@ -43,6 +46,7 @@ import crew.core.designsystem.generated.resources.empty
 import crew.core.designsystem.generated.resources.event_code_title
 import crew.core.designsystem.generated.resources.event_detail_title
 import crew.core.designsystem.generated.resources.game_how_to_play
+import crew.core.designsystem.generated.resources.image_crop_title
 import crew.core.designsystem.generated.resources.loser_accepts_title
 import crew.core.designsystem.generated.resources.loser_active_task_title
 import crew.core.designsystem.generated.resources.loser_waits_title
@@ -64,7 +68,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @Composable
 fun AppTopBar(
     modifier: Modifier = Modifier,
-    state: AppTopBarState = AppTopBarState.Dashboard,
+    state: AppTopBarState = AppTopBarState.Dashboard(profileImageUrl = null),
     elevated: () -> Boolean = { false },
     onBackClick: (() -> Unit) = {},
     onRightClick: (() -> Unit) = {},
@@ -119,12 +123,13 @@ fun AppTopBar(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
+                .height(68.dp)
                 .padding(
                     horizontal = 16.dp,
                 )
                 .padding(
-                    top = 12.dp,
-                    bottom = 8.dp,
+                    top = 6.dp,
+                    bottom = 2.dp
                 ),
         ) {
             Text(
@@ -184,7 +189,8 @@ fun AppTopBar(
             val isRightIconVisible = when (state) {
                 AppTopBarState.Register,
                 AppTopBarState.Login,
-                AppTopBarState.Dashboard,
+                AppTopBarState.ProfilePicture,
+                is AppTopBarState.Dashboard,
                 AppTopBarState.Game,
                 AppTopBarState.LoserActiveTask,
                     -> true
@@ -201,23 +207,12 @@ fun AppTopBar(
                     contentPadding = PaddingValues(horizontal = 0.dp),
                 ) {
                     if (state is AppTopBarState.Dashboard) {
-                        IconButton(
-                            onClick = onRightClick,
-                            modifier = Modifier
-                                .clip(CircleShape)
-                                .background(AccessDefaults.SurfaceElevated)
-                                .border(
-                                    width = 1.dp,
-                                    color = AccessDefaults.BorderSoft,
-                                    shape = CircleShape,
-                                )
-                                .size(32.dp),
-                        ) {
-                            Icon(
-                                painter = painterResource(AccessIcons.User),
-                                contentDescription = "Back",
-                                tint = AccessDefaults.TextPrimary,
-                                modifier = Modifier.size(24.dp),
+                        state.profileImageUrl?.let { url ->
+                            AvatarCircle(
+                                AvatarContent.Image(url),
+                                avatarSize = 40,
+                                borderColor = AccessDefaults.Border,
+                                borderSize = 1
                             )
                         }
                     } else {
@@ -255,12 +250,13 @@ private val AppTopBarState.titleResource: StringResource
         AppTopBarState.Login,
         AppTopBarState.Register,
         AppTopBarState.ProfilePicture,
-        AppTopBarState.Dashboard,
+        is AppTopBarState.Dashboard,
         AppTopBarState.Game,
         is AppTopBarState.GameLobby,
             -> Res.string.empty
 
         AppTopBarState.EventDetail -> Res.string.event_detail_title
+        AppTopBarState.ImageCrop -> Res.string.image_crop_title
         AppTopBarState.TicketQr -> Res.string.ticket_qr_title
         AppTopBarState.EventCode -> Res.string.event_code_title
         AppTopBarState.ScanOpponent -> Res.string.scan_opponent_title
@@ -275,7 +271,7 @@ private val AppTopBarState.titleResource: StringResource
 
 private val AppTopBarState.navigationIcon: DrawableResource?
     get() = when (this) {
-        AppTopBarState.Dashboard,
+        is AppTopBarState.Dashboard,
         AppTopBarState.RpsConfirmation,
         AppTopBarState.WinnerPicks,
         AppTopBarState.WinnerConfirms,
@@ -290,6 +286,7 @@ private val AppTopBarState.navigationIcon: DrawableResource?
         AppTopBarState.EventDetail,
         AppTopBarState.TicketQr,
         AppTopBarState.EventCode,
+        AppTopBarState.ImageCrop,
         is AppTopBarState.GameLobby,
             -> AccessIcons.LeftChevron
 
@@ -304,7 +301,7 @@ private val AppTopBarState.navigationIcon: DrawableResource?
 private fun AppTopBarPreview() {
     CrewTheme {
         AppTopBar(
-            state = AppTopBarState.Dashboard,
+            state = AppTopBarState.Dashboard(profileImageUrl = null),
             onBackClick = {},
             onRightClick = {},
         )

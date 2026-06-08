@@ -28,8 +28,8 @@ fun AvatarStack(
     ) {
         avatars.forEachIndexed { index, avatar ->
             AvatarCircle(
-                label = avatar.label,
-                color = avatar.color,
+                content = avatar.imageUrl?.let { AvatarContent.Image(it) }
+                    ?: AvatarContent.Initials(label = avatar.label, color = avatar.color),
                 avatarSize = avatarSize,
                 modifier = Modifier.offset(x = step * index)
             )

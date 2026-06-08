@@ -17,8 +17,10 @@ import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeoutConfig
 import io.ktor.client.plugins.timeout
 import io.ktor.client.plugins.websocket.webSocketSession
+import io.ktor.client.request.header
 import io.ktor.client.request.parameter
 import io.ktor.client.request.url
+import io.ktor.http.HttpHeaders
 import io.ktor.websocket.CloseReason
 import io.ktor.websocket.Frame
 import io.ktor.websocket.close
@@ -42,6 +44,7 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.shareIn
@@ -193,11 +196,13 @@ class EventConnectionClientImpl(
     }
 
     private fun rawSocketFlow(eventId: String): Flow<GameSocketMessage> = flow {
+        val accessToken = sessionStorage.observeAuthInfo().firstOrNull()?.accessToken
+            ?: throw TerminalSocketException(code = null, message = REASON_UNAUTHENTICATED)
+
         val session = httpClient.webSocketSession {
-            url("${UrlConstants.BASE_URL_WS}/ws/events")
+            url(UrlConstants.BASE_URL_WS)
             parameter("eventId", eventId)
-            // HttpTimeout (HTTP istekleri için 20sn) bu uzun ömürlü sokete sızıp inbound
-            // sessizlik anında soketi koparmasın; keepalive backend PING/PONG ile yürür.
+            header(HttpHeaders.Authorization, "Bearer $accessToken")
             timeout {
                 socketTimeoutMillis = HttpTimeoutConfig.INFINITE_TIMEOUT_MS
                 requestTimeoutMillis = HttpTimeoutConfig.INFINITE_TIMEOUT_MS

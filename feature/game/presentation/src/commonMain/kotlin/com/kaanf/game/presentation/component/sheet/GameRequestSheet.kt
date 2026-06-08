@@ -13,6 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kaanf.core.designsystem.component.avatar.AvatarCircle
+import com.kaanf.core.designsystem.component.avatar.AvatarContent
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.CrewTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -71,8 +72,7 @@ fun GameRequestSheet(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             AvatarCircle(
-                label = "Y",
-                color = AccessDefaults.Rose,
+                content = AvatarContent.Initials(label = "Y", color = AccessDefaults.Rose),
                 avatarSize = 78,
                 textSize = 30.0,
                 borderColor = AccessDefaults.BorderSoft,
@@ -98,8 +98,7 @@ fun GameRequestSheet(
             }
 
             AvatarCircle(
-                label = "MK",
-                color = AccessDefaults.Teal,
+                content = AvatarContent.Initials(label = "MK", color = AccessDefaults.Teal),
                 avatarSize = 78,
                 textSize = 30.0,
                 borderColor = AccessDefaults.Accent,

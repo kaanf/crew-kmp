@@ -16,5 +16,6 @@ fun EventDetail.toUiModel(): EventDetailUiModel {
         gameTime = "${startsAt.toClockText()} - ${endsAt.toClockText()}",
         crew = "$soldCount / $capacity in",
         formattedPrice = price.format(),
+        isFree = price.amount == 0L,
     )
 }

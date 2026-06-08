@@ -28,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kaanf.core.designsystem.component.avatar.AvatarCircle
+import com.kaanf.core.designsystem.component.avatar.AvatarContent
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessShapes
 import com.kaanf.core.designsystem.theme.CrewTheme
@@ -206,10 +207,12 @@ fun MatchScoreboardRow(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             AvatarCircle(
+                content = AvatarContent.Initials(
+                    label = displayName.firstOrNull()?.uppercase().orEmpty(),
+                    color = if (entry.isWinner) AccessDefaults.Accent else AccessDefaults.Sky,
+                ),
                 avatarSize = 56,
-                label = displayName.firstOrNull()?.uppercase().orEmpty(),
                 borderSize = 2,
-                color = if (entry.isWinner) AccessDefaults.Accent else AccessDefaults.Sky,
             )
 
             Column(

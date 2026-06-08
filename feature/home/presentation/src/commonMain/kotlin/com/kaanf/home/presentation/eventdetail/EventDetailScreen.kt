@@ -50,6 +50,7 @@ import com.kaanf.home.presentation.eventdetail.component.SafetyBadge
 import com.kaanf.home.presentation.model.EventDetailUiModel
 import com.kaanf.home.presentation.util.toClockText
 import crew.feature.home.presentation.generated.resources.Res
+import crew.feature.home.presentation.generated.resources.event_detail_free_ticket_cta
 import crew.feature.home.presentation.generated.resources.event_detail_my_ticket_cta
 import crew.feature.home.presentation.generated.resources.event_detail_ticket_cta
 import org.jetbrains.compose.resources.stringResource
@@ -173,10 +174,10 @@ private fun EventDetailContent(
         }
 
         BaseButton(
-            text = if (!event.hasMyTicket) {
-                stringResource(Res.string.event_detail_ticket_cta)
-            } else {
-                stringResource(Res.string.event_detail_my_ticket_cta)
+            text = when {
+                event.hasMyTicket -> stringResource(Res.string.event_detail_my_ticket_cta)
+                event.isFree -> stringResource(Res.string.event_detail_free_ticket_cta)
+                else -> stringResource(Res.string.event_detail_ticket_cta, event.formattedPrice)
             },
             onClick = {
                 if (!event.hasMyTicket) {

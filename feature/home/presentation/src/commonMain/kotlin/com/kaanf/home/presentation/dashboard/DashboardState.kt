@@ -42,4 +42,5 @@ data class DashboardState(
         ),
     ),
     val isLoading: Boolean = false,
+    val profilePictureUrl: String? = null
 )

@@ -23,6 +23,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kaanf.core.designsystem.component.avatar.AvatarCircle
+import com.kaanf.core.designsystem.component.avatar.AvatarContent
 import com.kaanf.core.designsystem.component.avatar.AvatarStack
 import com.kaanf.core.designsystem.component.badge.RoundedBadge
 import com.kaanf.core.designsystem.theme.AccessDefaults
@@ -127,8 +128,7 @@ fun WhoIsInTonightCard() {
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 AvatarCircle(
-                    label = "KF",
-                    color = AccessDefaults.Rose,
+                    content = AvatarContent.Initials(label = "KF", color = AccessDefaults.Rose),
                     avatarSize = 48,
                     textSize = 16.0,
                     borderColor = AccessDefaults.BorderSoft,

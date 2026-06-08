@@ -22,11 +22,14 @@ actual fun rememberImagePickerLauncher(
             val parser = ContentUriParser(context)
 
             scope.launch {
+                // Pass the original bytes straight through; cropping and the single WebP encode
+                // happen later from this full-resolution source (no early downscale, no double
+                // compression).
                 val rawBytes = parser.readUri(uri) ?: return@launch
                 onResult(
                     PickedImageData(
-                        bytes = downscaleToJpeg(rawBytes),
-                        mimeType = "image/jpeg"
+                        bytes = rawBytes,
+                        mimeType = parser.getMimeType(uri)
                     )
                 )
             }

@@ -33,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kaanf.core.designsystem.component.avatar.AvatarCircle
+import com.kaanf.core.designsystem.component.avatar.AvatarContent
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessShapes
 import com.kaanf.core.designsystem.theme.CrewTheme
@@ -179,7 +180,7 @@ private fun WhoWonAvatar(
         },
         contentAlignment = Alignment.Center,
     ) {
-        AvatarCircle(label = avatar.label, color = avatar.color)
+        AvatarCircle(AvatarContent.Initials(label = avatar.label, color = avatar.color))
     }
 }
 

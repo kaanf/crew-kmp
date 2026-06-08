@@ -63,10 +63,12 @@ actual fun rememberImagePickerLauncher(
                                     memcpy(rawBytes.refTo(0), it.bytes, it.length)
                                 }
 
+                                // Pass the original bytes straight through; cropping and the single
+                                // WebP encode happen later from this full-resolution source.
                                 imageDataList.add(
                                     PickedImageData(
-                                        bytes = downscaleToJpeg(rawBytes),
-                                        mimeType = "image/jpeg"
+                                        bytes = rawBytes,
+                                        mimeType = null
                                     )
                                 )
                             }

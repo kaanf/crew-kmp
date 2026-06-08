@@ -13,4 +13,5 @@ data class EventDetailUiModel(
     val gameTime: String,
     val crew: String,
     val formattedPrice: String,
+    val isFree: Boolean,
 )

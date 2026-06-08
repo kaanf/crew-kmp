@@ -11,6 +11,7 @@
     <string name="event_detail_title">Event detail</string>
     <string name="ticket_qr_title">Your ticket</string>
     <string name="event_code_title">Check in</string>
+    <string name="image_crop_title">Adjust photo</string>
     <string name="game_how_to_play">How to play?</string>
     <string name="scan_opponent_title">Point at their code</string>
     <string name="rps_ready_title">Match</string>

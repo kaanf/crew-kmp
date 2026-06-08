@@ -21,11 +21,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kaanf.auth.domain.model.Gender
+import com.kaanf.auth.presentation.util.PolicyUrls
+import com.kaanf.auth.presentation.util.appendPolicyLink
 import com.kaanf.core.designsystem.component.button.BaseButton
 import com.kaanf.core.designsystem.component.checkbox.BaseCheckbox
 import com.kaanf.core.designsystem.component.layout.AppTopBar
@@ -67,7 +70,13 @@ import crew.feature.auth.presentation.generated.resources.register_headline
 import crew.feature.auth.presentation.generated.resources.register_password_placeholder
 import crew.feature.auth.presentation.generated.resources.register_password_requirements_hint
 import crew.feature.auth.presentation.generated.resources.register_primary_action_create_account
-import crew.feature.auth.presentation.generated.resources.register_terms_checkbox_label
+import crew.feature.auth.presentation.generated.resources.register_house_rules
+import crew.feature.auth.presentation.generated.resources.register_privacy_policy
+import crew.feature.auth.presentation.generated.resources.register_terms
+import crew.feature.auth.presentation.generated.resources.register_terms_conjunction
+import crew.feature.auth.presentation.generated.resources.register_terms_prefix
+import crew.feature.auth.presentation.generated.resources.register_terms_separator
+import crew.feature.auth.presentation.generated.resources.register_terms_suffix
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -219,7 +228,24 @@ fun RegisterScreen(
                     BaseCheckbox(
                         checked = state.hasAcceptedTerms,
                         onCheckedChange = { onAction(RegisterAction.OnTermsToggle) },
-                        label = stringResource(Res.string.register_terms_checkbox_label),
+                        label = buildAnnotatedString {
+                            append(stringResource(Res.string.register_terms_prefix))
+                            appendPolicyLink(
+                                text = stringResource(Res.string.register_terms),
+                                url = PolicyUrls.TERMS_OF_USE,
+                            )
+                            append(stringResource(Res.string.register_terms_separator))
+                            appendPolicyLink(
+                                text = stringResource(Res.string.register_house_rules),
+                                url = PolicyUrls.HOUSE_RULES,
+                            )
+                            append(stringResource(Res.string.register_terms_conjunction))
+                            appendPolicyLink(
+                                text = stringResource(Res.string.register_privacy_policy),
+                                url = PolicyUrls.PRIVACY_POLICY,
+                            )
+                            append(stringResource(Res.string.register_terms_suffix))
+                        },
                         modifier = Modifier.padding(top = 8.dp),
                     )
 

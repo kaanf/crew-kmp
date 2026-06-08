@@ -29,19 +29,61 @@ class ProfilePictureViewModel(
 
     fun onAction(action: ProfilePictureAction) {
         when (action) {
-            is ProfilePictureAction.OnPictureSelected -> onPictureSelected(action.bytes, action.mimeType)
+            is ProfilePictureAction.OnPictureSelected -> onPictureSelected(action.bytes)
+            is ProfilePictureAction.OnReCropClick -> onReCrop()
+            is ProfilePictureAction.OnRemoveClick -> onRemove()
+            is ProfilePictureAction.OnCropConfirmed -> onCropConfirmed(action.bytes)
+            is ProfilePictureAction.OnCropCancelled -> onCropCancelled()
             is ProfilePictureAction.OnConfirmClick -> uploadProfilePicture(
                 bytes = state.value.selectedImageBytes,
                 mimeType = state.value.selectedMimeType,
             )
+            is ProfilePictureAction.OnSkipClick -> onSkip()
             else -> Unit
         }
     }
 
-    private fun onPictureSelected(bytes: ByteArray, mimeType: String?) {
+    private fun onRemove() {
+        _state.update { it.copy(
+            selectedImageBytes = null,
+            selectedMimeType = null,
+            originalImageBytes = null,
+            pendingCropBytes = null,
+        ) }
+    }
+
+    private fun onSkip() {
+        viewModelScope.launch {
+            eventChannel.send(ProfilePictureEvent.SkipSuccess)
+        }
+    }
+
+    private fun onPictureSelected(bytes: ByteArray) {
+        _state.update { it.copy(
+            originalImageBytes = bytes,
+            pendingCropBytes = bytes,
+        ) }
+    }
+
+    private fun onReCrop() {
+        // Re-open the cropper on the original full-resolution source, not the already-cropped result.
+        val original = _state.value.originalImageBytes ?: return
+        _state.update { it.copy(
+            pendingCropBytes = original,
+        ) }
+    }
+
+    private fun onCropConfirmed(bytes: ByteArray) {
         _state.update { it.copy(
             selectedImageBytes = bytes,
-            selectedMimeType = mimeType,
+            selectedMimeType = "image/webp",
+            pendingCropBytes = null,
+        ) }
+    }
+
+    private fun onCropCancelled() {
+        _state.update { it.copy(
+            pendingCropBytes = null,
         ) }
     }
 

@@ -4,41 +4,40 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.media.ExifInterface
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
 
-actual suspend fun downscaleToJpeg(
+actual suspend fun decodeImageForCrop(
     bytes: ByteArray,
-    maxSize: Int,
-    quality: Int,
-): ByteArray = withContext(Dispatchers.Default) {
-    // 1) Read the dimensions only, without decoding any pixels, so a huge original never
-    //    allocates a full-resolution bitmap on the heap.
+    maxDimension: Int,
+): ImageBitmap? = withContext(Dispatchers.Default) {
+    // 1) Read dimensions only, so a huge original never allocates a full-resolution bitmap.
     val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
     BitmapFactory.decodeByteArray(bytes, 0, bytes.size, bounds)
-    if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return@withContext bytes
+    if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return@withContext null
 
-    // 2) Decode already downsampled (power-of-two), so the bitmap that hits memory is small.
+    // 2) Decode already downsampled (power-of-two) close to the cap.
     val decodeOptions = BitmapFactory.Options().apply {
-        inSampleSize = calculateInSampleSize(bounds.outWidth, bounds.outHeight, maxSize)
+        inSampleSize = calculateInSampleSize(bounds.outWidth, bounds.outHeight, maxDimension)
     }
     val decoded = BitmapFactory.decodeByteArray(bytes, 0, bytes.size, decodeOptions)
-        ?: return@withContext bytes
+        ?: return@withContext null
 
-    // 3) Apply EXIF orientation; raw pixels are not rotated, only the gallery honours the tag.
+    // 3) Apply EXIF orientation; raw pixels are not rotated, only the tag is set.
     val oriented = applyExifOrientation(decoded, bytes)
 
-    // 4) Scale the longest edge down to exactly maxSize, preserving aspect ratio.
-    val scaled = scaleToMaxSize(oriented, maxSize)
+    // 4) Bring the longest edge down to the cap.
+    val scaled = scaleToMaxSize(oriented, maxDimension)
 
-    // 5) Encode as JPEG.
-    val output = ByteArrayOutputStream()
-    scaled.compress(Bitmap.CompressFormat.JPEG, quality, output)
-    scaled.recycle()
+    // The Compose Android canvas only ever does bilinear filtering regardless of FilterQuality, so a
+    // 2560px bitmap shown in a ~1000px viewport aliases. Enabling mipmaps makes the hardware canvas
+    // minify it cleanly.
+    scaled.setHasMipMap(true)
 
-    output.toByteArray()
+    scaled.asImageBitmap()
 }
 
 private fun calculateInSampleSize(width: Int, height: Int, maxSize: Int): Int {

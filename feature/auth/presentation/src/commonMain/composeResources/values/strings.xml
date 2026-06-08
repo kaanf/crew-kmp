@@ -11,9 +11,11 @@
     <string name="welcome_secondary_action_login">I already have one</string>
     <string name="welcome_terms_prefix">By continuing you agree to our </string>
     <string name="welcome_terms">Terms</string>
-    <string name="welcome_terms_middle"> and </string>
+    <string name="welcome_terms_middle">, </string>
     <string name="welcome_house_rules">House rules</string>
-    <string name="welcome_terms_suffix">. \n18+ only.</string>
+    <string name="welcome_terms_conjunction"> and </string>
+    <string name="welcome_privacy_policy">Privacy Policy</string>
+    <string name="welcome_terms_suffix">. 18+ only.</string>
     <string name="error_account_exists">An account with that email or username already exists.</string>
     <string name="error_email_exists">An account with that email already exists.</string>
     <string name="error_username_exists">An account with that username already exists.</string>
@@ -72,5 +74,11 @@
     <string name="register_password_requirements_hint">Use at least 9 characters with one uppercase letter and one digit.</string>
     <string name="register_full_name_hint">Use more than 3 characters.</string>
     <string name="register_primary_action_create_account">Create my account</string>
-    <string name="register_terms_checkbox_label">I agree to the Terms, House rules, and Privacy notice.</string>
+    <string name="register_terms_prefix">I agree to the </string>
+    <string name="register_terms">Terms</string>
+    <string name="register_terms_separator">, </string>
+    <string name="register_house_rules">House Rules</string>
+    <string name="register_terms_conjunction">, and </string>
+    <string name="register_privacy_policy">Privacy Policy</string>
+    <string name="register_terms_suffix">.</string>
 </resources>

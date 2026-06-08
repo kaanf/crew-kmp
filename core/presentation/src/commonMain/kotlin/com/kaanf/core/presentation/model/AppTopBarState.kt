@@ -4,7 +4,8 @@ sealed interface AppTopBarState {
     data object Login : AppTopBarState
     data object Register : AppTopBarState
     data object ProfilePicture : AppTopBarState
-    data object Dashboard : AppTopBarState
+    data object ImageCrop : AppTopBarState
+    data class Dashboard(val profileImageUrl: String?) : AppTopBarState
     data object EventDetail : AppTopBarState
     data object TicketQr : AppTopBarState
     data object EventCode : AppTopBarState

@@ -43,6 +43,7 @@ import com.kaanf.core.presentation.util.ObserveAsEvents
 import com.kaanf.game.presentation.component.EmojiStackCard
 import com.kaanf.game.presentation.component.OnboardingInfoCard
 import com.kaanf.game.presentation.gamelobby.component.custom.BeforeTheBell
+import com.kaanf.game.presentation.gamelobby.component.custom.LobbyPresenceCluster
 import com.kaanf.game.presentation.gamelobby.component.custom.MinuteSecondCountdownCard
 import com.kaanf.game.presentation.gamelobby.component.custom.TonightFlowCard
 import com.kaanf.game.presentation.gamelobby.component.custom.WhoIsInTonightCard
@@ -156,6 +157,11 @@ fun GameLobbyScreen(
         MinuteSecondCountdownCard(
             targetEpochMillis = state.targetEpochMillis,
             onFinished = { onAction(GameLobbyAction.OnCountdownFinished) },
+        )
+
+        LobbyPresenceCluster(
+            members = state.lobbyMembers,
+            totalCount = state.lobbyTotalCount,
         )
 
         Spacer(modifier = Modifier.height(1.dp))

@@ -4,20 +4,7 @@
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
-	<key>NSCameraUsageDescription</key>
-	<string>Rakibinin QR kodunu okumak için kamera erişimi gerekiyor.</string>
 	<key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
-			<key>CFBundleURLName</key>
-			<string>ads.kaanf.com</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>crew</string>
-			</array>
-		</dict>
-	</array>
+	<array/>
 </dict>
 </plist>

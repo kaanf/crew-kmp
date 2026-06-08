@@ -67,9 +67,14 @@ fun NavGraphBuilder.authGraph(
         composable<AuthGraphRoutes.Register> {
             RegisterRoot(
                 onRegisterSuccess = {
-                    navController.navigate(
-                        AuthGraphRoutes.EmailVerificationSent(it),
-                    )
+                    navController.navigate(AuthGraphRoutes.Login) {
+                        popUpTo(AuthGraphRoutes.Register) {
+                            inclusive = true
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
                 },
                 onBackClick = {
                     navController.popBackStack()
@@ -88,8 +93,8 @@ fun NavGraphBuilder.authGraph(
         }
         composable<AuthGraphRoutes.ProfilePicture> {
             ProfilePictureRoot(
-                onBack = {},
                 onUploadSuccess = onLoginSuccess,
+                onSkip = onLoginSuccess,
             )
         }
         composable<AuthGraphRoutes.ForgotPassword> {

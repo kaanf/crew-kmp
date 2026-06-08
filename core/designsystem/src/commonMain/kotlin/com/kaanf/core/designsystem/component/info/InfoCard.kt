@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -68,6 +69,7 @@ fun InfoCard(
                 text = text,
                 style = MaterialTheme.typography.bodyMedium.copy(
                     color = AccessDefaults.TextMuted,
+                    fontWeight = FontWeight.Medium,
                     fontSize = 13.sp,
                     lineHeight = 20.sp
                 ),
