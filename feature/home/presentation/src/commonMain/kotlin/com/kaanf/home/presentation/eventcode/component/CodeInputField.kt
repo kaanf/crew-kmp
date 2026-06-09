@@ -31,6 +31,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -168,7 +169,10 @@ private fun BlinkingCursor(
         modifier = Modifier
             .width(2.dp)
             .height(height)
-            .background(color.copy(alpha = alpha), RoundedCornerShape(1.dp)),
+            // alpha is read inside graphicsLayer (draw phase), so the 60fps blink only
+            // redraws this box — it never recomposes it.
+            .graphicsLayer { this.alpha = alpha }
+            .background(color, RoundedCornerShape(1.dp)),
     )
 }
 

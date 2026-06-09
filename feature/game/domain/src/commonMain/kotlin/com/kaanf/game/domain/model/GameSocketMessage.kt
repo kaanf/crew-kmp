@@ -107,5 +107,17 @@ sealed interface GameSocketMessage {
         val loserTotalScore: Int,
     ) : GameSocketMessage
 
+    data class LobbyUserJoined(
+        val userId: String,
+        val totalCount: Int,
+        val fullName: String?,
+        val profilePictureUrl: String?,
+    ) : GameSocketMessage
+
+    data class LobbyUserLeft(
+        val userId: String,
+        val totalCount: Int,
+    ) : GameSocketMessage
+
     data class Unknown(val type: String) : GameSocketMessage
 }

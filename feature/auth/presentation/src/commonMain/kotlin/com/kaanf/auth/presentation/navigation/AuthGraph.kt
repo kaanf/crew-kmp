@@ -4,10 +4,6 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
-import androidx.navigation.navDeepLink
-import com.kaanf.auth.presentation.emailverification.verificationresult.EmailVerificationResultRoot
-import com.kaanf.auth.presentation.emailverification.verificationsent.EmailVerificationSentRoot
-import com.kaanf.auth.presentation.forgotpassword.ForgotPasswordRoot
 import com.kaanf.auth.presentation.login.LoginRoot
 import com.kaanf.auth.presentation.profilepicture.ProfilePictureRoot
 import com.kaanf.auth.presentation.register.RegisterRoot
@@ -95,40 +91,6 @@ fun NavGraphBuilder.authGraph(
             ProfilePictureRoot(
                 onUploadSuccess = onLoginSuccess,
                 onSkip = onLoginSuccess,
-            )
-        }
-        composable<AuthGraphRoutes.ForgotPassword> {
-            ForgotPasswordRoot()
-        }
-        composable<AuthGraphRoutes.EmailVerificationSent> {
-            EmailVerificationSentRoot(
-                onReturnToLoginClick = {
-                    navController.popBackStack(AuthGraphRoutes.Login, inclusive = false)
-                },
-            )
-        }
-        composable<AuthGraphRoutes.EmailVerificationResult>(
-            deepLinks =
-                listOf(
-                    navDeepLink {
-                        this.uriPattern = "https://ads.kaanf.com/api/notification/activate-user?token={token}"
-                    },
-                    navDeepLink {
-                        this.uriPattern = "ads://ads.kaanf.com/api/notification/activate-user?token={token}"
-                    },
-                ),
-        ) {
-            EmailVerificationResultRoot(
-                onLoginClick = {
-                    navController.navigate(AuthGraphRoutes.Login) {
-                        popUpTo(AuthGraphRoutes.Register) {
-                            inclusive = true
-                            saveState = true
-                        }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                },
             )
         }
     }

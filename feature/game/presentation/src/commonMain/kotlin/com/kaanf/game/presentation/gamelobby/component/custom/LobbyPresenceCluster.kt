@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateListOf
@@ -38,31 +39,15 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.math.PI
 import kotlin.math.sin
 
-/**
- * Live "who's here" cluster shown in the lobby. Renders up to [MAX_CELLS] cells in a
- * centered, slightly-overlapping 4 / 5 / 4 grid (a tightly-seated friend group):
- *
- *  - `total <= MAX_CELLS` → every member gets an avatar, no overflow badge.
- *  - `total >= MAX_CELLS + 1` → first [MAX_AVATARS] members get avatars and the last
- *    cell becomes a `+N` badge where `N = total - MAX_AVATARS`.
- *
- * Members are keyed by [LobbyMember.id], so joins pop in, leaves pop out, and the
- * remaining avatars reflow to close the gap. Every cell also rides a faint, continuous
- * Mexican wave that ripples left → right.
- *
- * Reserves a constant 3-row height so the surrounding screen never jumps as people
- * come and go.
- */
 @Composable
 fun LobbyPresenceCluster(
     members: List<LobbyMember>,
     totalCount: Int,
     modifier: Modifier = Modifier,
-    avatarSize: Int = 44,
+    avatarSize: Int = 56,
 ) {
     val step = avatarSize * (1f - OVERLAP)
 
-    // How many real avatars to draw, and whether the last cell is a +N badge.
     val avatarCount = if (totalCount <= MAX_CELLS) totalCount else MAX_AVATARS
     val badgeCount = if (totalCount > MAX_CELLS) totalCount - MAX_AVATARS else 0
     val occupiedCells = if (totalCount <= MAX_CELLS) totalCount else MAX_CELLS
@@ -70,8 +55,6 @@ fun LobbyPresenceCluster(
     val cells = remember(occupiedCells, step) { buildCells(occupiedCells, step) }
     val visibleMembers = remember(members, avatarCount) { members.take(avatarCount) }
 
-    // Render list keeps members that are animating out until their pop-out finishes,
-    // so a leave can play even though the member is already gone from [members].
     val rendered = remember { mutableStateListOf<LobbyMember>() }
 
     LaunchedEffect(visibleMembers) {
@@ -80,7 +63,7 @@ fun LobbyPresenceCluster(
         }
     }
 
-    val wavePhase = rememberWavePhase()
+    val wavePhaseState = rememberWavePhaseState()
 
     Box(
         modifier = modifier
@@ -98,7 +81,7 @@ fun LobbyPresenceCluster(
                     targetCell = if (present) cells.getOrNull(presentIndex) else null,
                     avatarSize = avatarSize,
                     step = step,
-                    wavePhase = wavePhase,
+                    wavePhaseState = wavePhaseState,
                     onExited = { rendered.removeAll { it.id == member.id } },
                 )
             }
@@ -109,7 +92,7 @@ fun LobbyPresenceCluster(
                 ClusterCell(
                     cell = cell,
                     step = step,
-                    wavePhase = wavePhase,
+                    wavePhaseState = wavePhaseState,
                     popIn = true,
                 ) {
                     ExtraAvatarCircle(count = badgeCount, avatarSize = avatarSize)
@@ -126,13 +109,11 @@ private fun PresenceAvatar(
     targetCell: Cell?,
     avatarSize: Int,
     step: Float,
-    wavePhase: Float,
+    wavePhaseState: State<Float>,
     onExited: () -> Unit,
 ) {
     val scale = remember { Animatable(0f) }
 
-    // Freeze the last slot while leaving so the avatar pops out in place instead of
-    // sliding to (0, 0).
     var cell by remember { mutableStateOf(targetCell ?: Cell(0f, 0f)) }
     if (targetCell != null) cell = targetCell
 
@@ -148,7 +129,7 @@ private fun PresenceAvatar(
     AnimatedClusterCell(
         cell = cell,
         step = step,
-        wavePhase = wavePhase,
+        wavePhaseState = wavePhaseState,
         scale = scale.value,
     ) {
         AvatarCircle(
@@ -160,36 +141,36 @@ private fun PresenceAvatar(
     }
 }
 
-/** A cell that pops in once on first composition (used for the static overflow badge). */
 @Composable
 private fun ClusterCell(
     cell: Cell,
     step: Float,
-    wavePhase: Float,
+    wavePhaseState: State<Float>,
     popIn: Boolean,
     content: @Composable () -> Unit,
 ) {
     val scale = remember { Animatable(if (popIn) 0f else 1f) }
     LaunchedEffect(Unit) { if (popIn) scale.animateTo(1f, popInSpring()) }
-    AnimatedClusterCell(cell = cell, step = step, wavePhase = wavePhase, scale = scale.value, content = content)
+    AnimatedClusterCell(cell = cell, step = step, wavePhaseState = wavePhaseState, scale = scale.value, content = content)
 }
 
-/** Places [content] at [cell] with spring-animated reflow, the shared wave, and a scale. */
 @Composable
 private fun AnimatedClusterCell(
     cell: Cell,
     step: Float,
-    wavePhase: Float,
+    wavePhaseState: State<Float>,
     scale: Float,
     content: @Composable () -> Unit,
 ) {
     val x by animateFloatAsState(cell.x, reflowSpring(), label = "cellX")
     val y by animateFloatAsState(cell.y, reflowSpring(), label = "cellY")
-    val waveY = waveLiftFor(wavePhase, x, step) * WAVE_AMPLITUDE
 
     Box(
         modifier = Modifier
-            .offset { IntOffset(x.dp.roundToPx(), (y - waveY).dp.roundToPx()) }
+            .offset {
+                val waveY = waveLiftFor(wavePhaseState.value, x, step) * WAVE_AMPLITUDE
+                IntOffset(x.dp.roundToPx(), (y - waveY).dp.roundToPx())
+            }
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
@@ -200,10 +181,8 @@ private fun AnimatedClusterCell(
     }
 }
 
-/** Cell center offset, in dp, relative to the cluster center. */
 private data class Cell(val x: Float, val y: Float)
 
-/** Distributes [occupied] cells top-down into the [ROW_CAPS] rows, each row centered. */
 private fun buildCells(occupied: Int, step: Float): List<Cell> {
     val rows = mutableListOf<Int>()
     var remaining = occupied
@@ -226,9 +205,9 @@ private fun buildCells(occupied: Int, step: Float): List<Cell> {
 }
 
 @Composable
-private fun rememberWavePhase(): Float {
+private fun rememberWavePhaseState(): State<Float> {
     val transition = rememberInfiniteTransition(label = "lobbyWave")
-    val phase by transition.animateFloat(
+    return transition.animateFloat(
         initialValue = 0f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
@@ -237,22 +216,13 @@ private fun rememberWavePhase(): Float {
         ),
         label = "lobbyWavePhase",
     )
-    return phase
 }
 
-/**
- * Faint sine bump that ripples left → right. The horizontal position [x] is normalized
- * into a phase shift so cells further right crest slightly later, giving the wave.
- */
 private fun waveLiftFor(phase: Float, x: Float, step: Float): Float {
     val halfSpan = (ROW_CAPS.max() - 1) / 2f * step
     val normalized = if (halfSpan == 0f) 0.5f else (x + halfSpan) / (2f * halfSpan)
-    val local = phase - normalized * WAVE_SPREAD
-    return if (local in 0f..WAVE_BUMP_WIDTH) {
-        sin(local / WAVE_BUMP_WIDTH * PI).toFloat()
-    } else {
-        0f
-    }
+    val angle = 2f * PI.toFloat() * (phase - normalized * WAVE_SPREAD)
+    return sin(angle)
 }
 
 private fun popInSpring() = spring<Float>(
@@ -272,8 +242,7 @@ private const val MAX_AVATARS = MAX_CELLS - 1
 private const val OVERLAP = 0.16f
 private const val WAVE_AMPLITUDE = 3.5f
 private const val WAVE_DURATION_MS = 2600
-private const val WAVE_BUMP_WIDTH = 0.5f
-private const val WAVE_SPREAD = 0.5f
+private const val WAVE_SPREAD = 1f
 private const val POP_OUT_MS = 220
 
 @Composable

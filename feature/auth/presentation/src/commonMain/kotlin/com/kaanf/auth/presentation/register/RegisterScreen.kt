@@ -33,7 +33,6 @@ import com.kaanf.core.designsystem.component.button.BaseButton
 import com.kaanf.core.designsystem.component.checkbox.BaseCheckbox
 import com.kaanf.core.designsystem.component.layout.AppTopBar
 import com.kaanf.core.designsystem.component.layout.SnackbarScaffold
-import com.kaanf.core.designsystem.component.layout.showSnackbar
 import com.kaanf.core.designsystem.component.sheet.SelectionBottomSheet
 import com.kaanf.core.designsystem.component.textfield.BasePasswordTextField
 import com.kaanf.core.designsystem.component.textfield.BaseSelectField
@@ -42,7 +41,6 @@ import com.kaanf.core.designsystem.component.textfield.DateInputTransformation
 import com.kaanf.core.designsystem.component.textfield.DateOutputTransformation
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.CrewTheme
-import com.kaanf.core.presentation.base.BaseEvent
 import com.kaanf.core.presentation.model.AppTopBarState
 import com.kaanf.core.presentation.util.ObserveAsEvents
 import com.kaanf.core.presentation.util.clearFocusOnTap
@@ -95,10 +93,6 @@ fun RegisterRoot(
 
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
-            is BaseEvent.ShowSnackbar -> {
-                snackbarHostState.showSnackbar(event.snackbarMessage)
-            }
-
             is RegisterEvent.RegisterSuccess -> {
                 onRegisterSuccess(event.email)
             }

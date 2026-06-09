@@ -1,6 +1,8 @@
 package com.kaanf.game.data.mappers
 
 import com.kaanf.game.data.dto.ConnectedPayloadDto
+import com.kaanf.game.data.dto.LobbyUserJoinedDto
+import com.kaanf.game.data.dto.LobbyUserLeftDto
 import com.kaanf.game.data.dto.GameStartedPayloadDto
 import com.kaanf.game.data.dto.LobbyMemberDto
 import com.kaanf.game.data.dto.MatchInviteReceivedPayloadDto
@@ -169,6 +171,26 @@ fun SocketEnvelopeDto.toDomain(json: Json): GameSocketMessage = when (type) {
             GameSocketMessage.MatchInviteDeclined(
                 inviteId = it.inviteId,
                 eventId = it.eventId,
+            )
+        }
+        ?: GameSocketMessage.Unknown(type)
+
+    "LOBBY_USER_JOINED" -> json.decodePayloadOrNull<LobbyUserJoinedDto>(payload)
+        ?.let {
+            GameSocketMessage.LobbyUserJoined(
+                userId = it.userId,
+                totalCount = it.totalCount,
+                fullName = it.fullName,
+                profilePictureUrl = it.profilePictureUrl,
+            )
+        }
+        ?: GameSocketMessage.Unknown(type)
+
+    "LOBBY_USER_LEFT" -> json.decodePayloadOrNull<LobbyUserLeftDto>(payload)
+        ?.let {
+            GameSocketMessage.LobbyUserLeft(
+                userId = it.userId,
+                totalCount = it.totalCount,
             )
         }
         ?: GameSocketMessage.Unknown(type)

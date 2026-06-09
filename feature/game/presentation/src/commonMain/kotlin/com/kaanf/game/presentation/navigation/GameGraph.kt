@@ -7,6 +7,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.toRoute
 import com.kaanf.game.presentation.gamelobby.GameLobbyRoot
+import com.kaanf.game.presentation.gamelobby.GameLobbyViewModel
 import com.kaanf.game.presentation.scanopponent.ScanOpponentRoot
 import com.kaanf.game.presentation.session.MatchContainerRoot
 import com.kaanf.game.presentation.session.MatchSessionViewModel
@@ -24,7 +25,9 @@ fun NavGraphBuilder.gameGraph(
                 navController.getBackStackEntry<GameGraphRoutes.Graph>()
             }
             val eventId = graphEntry.toRoute<GameGraphRoutes.Graph>().eventId
+            val lobbyViewModel: GameLobbyViewModel = koinViewModel(viewModelStoreOwner = graphEntry)
             GameLobbyRoot(
+                viewModel = lobbyViewModel,
                 onBack = { navController.popBackStack() },
                 onNavigateToGame = {
                     navController.navigate(GameGraphRoutes.Game(eventId = eventId))

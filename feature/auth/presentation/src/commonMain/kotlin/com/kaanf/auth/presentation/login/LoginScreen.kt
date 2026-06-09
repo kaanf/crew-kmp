@@ -30,6 +30,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kaanf.core.designsystem.component.button.BaseButton
 import com.kaanf.core.designsystem.component.layout.AppTopBar
 import com.kaanf.core.designsystem.component.layout.SnackbarScaffold
+import com.kaanf.core.designsystem.component.layout.showSnackbar
 import com.kaanf.core.designsystem.component.textfield.BasePasswordTextField
 import com.kaanf.core.designsystem.component.textfield.BaseTextField
 import com.kaanf.core.designsystem.theme.AccessDefaults
@@ -79,6 +80,12 @@ fun LoginRoot(
 
             LoginEvent.NavigateToProfilePicture -> {
                 onProfileIncomplete.invoke()
+            }
+
+            is LoginEvent.ShowSnackbar -> {
+                snackbarHostState.showSnackbar(
+                    event.message
+                )
             }
         }
     }

@@ -5,10 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.kaanf.auth.domain.model.RegisterParams
 import com.kaanf.auth.domain.repository.AuthRepository
 import com.kaanf.auth.presentation.util.toLocalDate
+import com.kaanf.core.designsystem.component.layout.SnackbarMessage
+import com.kaanf.core.designsystem.component.layout.SnackbarVariant
 import com.kaanf.core.domain.util.Result
-import com.kaanf.core.presentation.base.BaseEvent
-import com.kaanf.core.presentation.model.SnackbarMessage
-import com.kaanf.core.presentation.model.SnackbarVariant
 import com.kaanf.core.presentation.util.UIText
 import com.kaanf.core.presentation.util.toUiText
 import crew.feature.auth.presentation.generated.resources.Res
@@ -30,7 +29,7 @@ import kotlinx.coroutines.launch
 class RegisterViewModel(
     private val authRepository: AuthRepository,
 ) : ViewModel() {
-    private val eventChannel = Channel<BaseEvent>()
+    private val eventChannel = Channel<RegisterEvent>()
     val events = eventChannel.receiveAsFlow()
 
     private val _state = MutableStateFlow(RegisterState())
@@ -83,58 +82,30 @@ class RegisterViewModel(
     private fun register() =
         viewModelScope.launch {
             if (!_state.value.hasAcceptedTerms) {
-                eventChannel.send(
-                    BaseEvent.ShowSnackbar(
-                        SnackbarMessage(
-                            title = UIText.Resource(Res.string.snackbar_input_warning_title),
-                            description = UIText.Resource(Res.string.error_accept_terms),
-                            variant = SnackbarVariant.Warning,
-                        ),
-                    ),
-                )
-
                 return@launch
             }
 
             if (!_state.value.isPasswordValid) {
+                /*
                 eventChannel.send(
                     BaseEvent.ShowSnackbar(
                         SnackbarMessage(
                             title = UIText.Resource(Res.string.snackbar_input_warning_title),
                             description = UIText.Resource(Res.string.error_invalid_password),
-                            variant = SnackbarVariant.Warning,
+                            variant = SnackbarVariant.Warn,
                         ),
                     ),
                 )
+                 */
 
                 return@launch
             }
 
             if (!_state.value.isPasswordMatch) {
-                eventChannel.send(
-                    BaseEvent.ShowSnackbar(
-                        SnackbarMessage(
-                            title = UIText.Resource(Res.string.snackbar_input_warning_title),
-                            description = UIText.Resource(Res.string.error_password_mismatch),
-                            variant = SnackbarVariant.Warning,
-                        ),
-                    ),
-                )
-
                 return@launch
             }
 
             if (!_state.value.isEmailValid) {
-                eventChannel.send(
-                    BaseEvent.ShowSnackbar(
-                        SnackbarMessage(
-                            title = UIText.Resource(Res.string.snackbar_input_warning_title),
-                            description = UIText.Resource(Res.string.error_invalid_email),
-                            variant = SnackbarVariant.Warning,
-                        ),
-                    ),
-                )
-
                 return@launch
             }
 
@@ -144,16 +115,6 @@ class RegisterViewModel(
 
             val dateOfBirth = currentState.dateOfBirthTextState.text.toString().toLocalDate()
             if (dateOfBirth == null) {
-                eventChannel.send(
-                    BaseEvent.ShowSnackbar(
-                        SnackbarMessage(
-                            title = UIText.Resource(Res.string.snackbar_input_warning_title),
-                            description = UIText.Resource(Res.string.error_invalid_date_of_birth),
-                            variant = SnackbarVariant.Warning,
-                        ),
-                    ),
-                )
-
                 return@launch
             }
 
@@ -184,15 +145,6 @@ class RegisterViewModel(
                     }
 
                     is Result.Failure -> {
-                        eventChannel.send(
-                            BaseEvent.ShowSnackbar(
-                                SnackbarMessage(
-                                    title = UIText.Resource(Res.string.snackbar_uplink_failure_title),
-                                    description = result.error.toUiText(),
-                                    variant = SnackbarVariant.Warning,
-                                ),
-                            ),
-                        )
                     }
                 }
             } finally {

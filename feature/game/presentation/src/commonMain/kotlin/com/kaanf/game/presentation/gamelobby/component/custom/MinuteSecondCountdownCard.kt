@@ -66,13 +66,13 @@ fun MinuteSecondCountdownCard(
         Text(
             text = "${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}",
             modifier = modifier,
-            style = MaterialTheme.typography.labelSmall.copy(
-                color = AccessDefaults.Accent,
+            style = MaterialTheme.typography.displayLarge.copy(
+                color = AccessDefaults.TextPrimary,
                 fontSize = 72.sp,
-                fontWeight = FontWeight.Medium,
+                fontWeight = FontWeight.SemiBold,
                 letterSpacing = 0.sp,
                 shadow = Shadow(
-                    color = AccessDefaults.Accent.copy(alpha = 0.7f),
+                    color = AccessDefaults.TextPrimary.copy(alpha = 0.5f),
                     offset = Offset.Zero,
                     blurRadius = 48f,
                 ),

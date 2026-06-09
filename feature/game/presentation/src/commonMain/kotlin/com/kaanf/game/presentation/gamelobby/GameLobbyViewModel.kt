@@ -1,32 +1,36 @@
 package com.kaanf.game.presentation.gamelobby
 
 import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kaanf.core.presentation.model.LobbyMember
 import com.kaanf.core.presentation.model.UserAvatar
+import com.kaanf.game.domain.event.EventConnectionClient
+import com.kaanf.game.domain.model.GameSocketMessage
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlin.random.Random
-import kotlin.time.Clock
+import kotlinx.datetime.Instant
+import kotlin.math.abs
 
-class GameLobbyViewModel: ViewModel() {
+class GameLobbyViewModel(
+    private val eventConnectionClient: EventConnectionClient,
+    savedStateHandle: SavedStateHandle,
+) : ViewModel() {
+    private val eventId: String = savedStateHandle.get<String>("eventId").orEmpty()
+
     private val eventChannel = Channel<GameLobbyEvent>()
     val events = eventChannel.receiveAsFlow()
 
-    private val _state = MutableStateFlow(
-        GameLobbyState(
-            targetEpochMillis = Clock.System.now().toEpochMilliseconds() + COUNTDOWN_DURATION_MILLIS,
-            lobbyMembers = (0 until INITIAL_MEMBERS).map { newMember() },
-        ).let { it.copy(lobbyTotalCount = it.lobbyMembers.size) },
-    )
+    private val _state = MutableStateFlow(GameLobbyState())
     val state = _state
         .stateIn(
             scope = viewModelScope,
@@ -35,79 +39,103 @@ class GameLobbyViewModel: ViewModel() {
         )
 
     init {
-        // TODO: replace with the lobby presence socket — feed joins/leaves into
-        //  lobbyMembers and the real headcount into lobbyTotalCount. Until then this
-        //  simulator drives the pop-in / pop-out / reflow animations with mock data.
-        startPresenceSimulator()
+        subscribeToEvents()
+    }
+
+    private fun subscribeToEvents() {
+        eventConnectionClient.observeEvents(eventId)
+            .onEach(::onSocketMessage)
+            .catch { }
+            .launchIn(viewModelScope)
+    }
+
+    private fun onSocketMessage(message: GameSocketMessage) {
+        when (message) {
+            is GameSocketMessage.Connected -> {
+                val epochMillis = runCatching {
+                    Instant.parse(message.doorsAt).toEpochMilliseconds()
+                }.getOrDefault(0L)
+                val members = message.members.take(MAX_AVATARS).map { it.toPresentation() }
+                _state.update {
+                    it.copy(
+                        targetEpochMillis = epochMillis,
+                        lobbyMembers = members,
+                        lobbyTotalCount = message.totalCount,
+                    )
+                }
+            }
+
+            is GameSocketMessage.LobbyUserJoined -> {
+                _state.update { state ->
+                    val members = state.lobbyMembers.toMutableList()
+                    if (message.fullName != null && members.size < MAX_AVATARS) {
+                        members.add(message.toPresentation())
+                    }
+                    state.copy(lobbyMembers = members, lobbyTotalCount = message.totalCount)
+                }
+            }
+
+            is GameSocketMessage.LobbyUserLeft -> {
+                _state.update { state ->
+                    val members = state.lobbyMembers.filter { it.id != message.userId }
+                    state.copy(lobbyMembers = members, lobbyTotalCount = message.totalCount)
+                }
+            }
+
+            else -> Unit
+        }
     }
 
     fun onAction(action: GameLobbyAction) {
         when (action) {
             GameLobbyAction.OnBackClick -> _state.update { it.copy(showExitConfirmDialog = true) }
-            GameLobbyAction.OnCountdownFinished -> _state.update { it.copy(showExitConfirmDialog = false, showGameStartSheet = true) }
+            GameLobbyAction.OnCountdownFinished -> _state.update { it.copy(showExitConfirmDialog = false, showGameStartSheet = false) }
             GameLobbyAction.OnExitDismissed -> _state.update { it.copy(showExitConfirmDialog = false) }
             GameLobbyAction.OnExitConfirmed -> onExitConfirmed()
             GameLobbyAction.OnEnterGameClick -> onEnterGameClick()
         }
     }
 
-    private fun startPresenceSimulator() {
-        viewModelScope.launch {
-            while (isActive) {
-                delay(Random.nextLong(SIM_MIN_DELAY_MS, SIM_MAX_DELAY_MS))
-                _state.update { state ->
-                    val members = state.lobbyMembers.toMutableList()
-                    val shouldJoin = members.size < SIM_MIN_MEMBERS ||
-                        (members.size < SIM_MAX_MEMBERS && Random.nextBoolean())
-                    if (shouldJoin) {
-                        members.add(Random.nextInt(members.size + 1), newMember())
-                    } else if (members.isNotEmpty()) {
-                        members.removeAt(Random.nextInt(members.size))
-                    }
-                    state.copy(lobbyMembers = members, lobbyTotalCount = members.size)
-                }
-            }
-        }
-    }
-
     private fun onEnterGameClick() {
         _state.update { it.copy(showGameStartSheet = false) }
-        viewModelScope.launch {
-            eventChannel.send(GameLobbyEvent.NavigateToGame)
-        }
+        viewModelScope.launch { eventChannel.send(GameLobbyEvent.NavigateToGame) }
     }
 
     private fun onExitConfirmed() {
         _state.update { it.copy(showExitConfirmDialog = false, showGameStartSheet = false) }
-        viewModelScope.launch {
-            eventChannel.send(GameLobbyEvent.NavigateBack)
-        }
+        viewModelScope.launch { eventChannel.send(GameLobbyEvent.NavigateBack) }
     }
 
-    private var nextMemberId = 0
-
-    private fun newMember(): LobbyMember {
-        val id = "sim-${nextMemberId++}"
+    private fun com.kaanf.game.domain.model.LobbyMember.toPresentation(): LobbyMember {
         return LobbyMember(
-            id = id,
+            id = userId,
             avatar = UserAvatar(
-                label = MOCK_LABELS[Random.nextInt(MOCK_LABELS.length)].toString(),
-                color = MOCK_COLORS.random(),
+                label = fullName.take(1).uppercase(),
+                color = avatarColor(userId),
+                imageUrl = profilePictureUrl,
             ),
         )
     }
 
+    private fun GameSocketMessage.LobbyUserJoined.toPresentation(): LobbyMember {
+        val name = fullName.orEmpty()
+        return LobbyMember(
+            id = userId,
+            avatar = UserAvatar(
+                label = name.take(1).uppercase(),
+                color = avatarColor(userId),
+                imageUrl = profilePictureUrl,
+            ),
+        )
+    }
+
+    private fun avatarColor(userId: String): Color =
+        AVATAR_COLORS[abs(userId.hashCode()) % AVATAR_COLORS.size]
+
     private companion object {
-        const val COUNTDOWN_DURATION_MILLIS = 30_000L
+        const val MAX_AVATARS = 13
 
-        const val INITIAL_MEMBERS = 6
-        const val SIM_MIN_MEMBERS = 3
-        const val SIM_MAX_MEMBERS = 16
-        const val SIM_MIN_DELAY_MS = 900L
-        const val SIM_MAX_DELAY_MS = 1_900L
-
-        const val MOCK_LABELS = "EMAJKRLSTNOBCDFG"
-        val MOCK_COLORS = listOf(
+        val AVATAR_COLORS = listOf(
             Color(0xFFFF5A7A),
             Color(0xFFC8FF3D),
             Color(0xFF5BE0C5),

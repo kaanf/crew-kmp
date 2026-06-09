@@ -152,16 +152,16 @@ fun GameLobbyScreen(
             textColor = AccessDefaults.Accent,
         )
 
+        LobbyPresenceCluster(
+            members = state.lobbyMembers,
+            totalCount = state.lobbyTotalCount,
+        )
+
         Spacer(modifier = Modifier.height(1.dp))
 
         MinuteSecondCountdownCard(
             targetEpochMillis = state.targetEpochMillis,
             onFinished = { onAction(GameLobbyAction.OnCountdownFinished) },
-        )
-
-        LobbyPresenceCluster(
-            members = state.lobbyMembers,
-            totalCount = state.lobbyTotalCount,
         )
 
         Spacer(modifier = Modifier.height(1.dp))

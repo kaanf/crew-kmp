@@ -248,7 +248,9 @@ class MatchSessionViewModel(
             }
 
             is GameSocketMessage.GameStarted,
-            GameSocketMessage.Connected,
+            is GameSocketMessage.Connected,
+            is GameSocketMessage.LobbyUserJoined,
+            is GameSocketMessage.LobbyUserLeft,
             is GameSocketMessage.Unknown,
             is GameSocketMessage.MatchCancelled,
             is GameSocketMessage.MatchInviteExpired -> Unit

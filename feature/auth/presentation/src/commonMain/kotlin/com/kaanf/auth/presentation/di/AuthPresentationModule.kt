@@ -1,8 +1,5 @@
 package com.kaanf.auth.presentation.di
 
-import com.kaanf.auth.presentation.emailverification.verificationresult.EmailVerificationResultViewModel
-import com.kaanf.auth.presentation.emailverification.verificationsent.EmailVerificationSentViewModel
-import com.kaanf.auth.presentation.forgotpassword.ForgotPasswordViewModel
 import com.kaanf.auth.presentation.login.LoginViewModel
 import com.kaanf.auth.presentation.profilepicture.ProfilePictureViewModel
 import com.kaanf.auth.presentation.register.RegisterViewModel
@@ -14,7 +11,4 @@ val authPresentationModule =
         viewModelOf(::LoginViewModel)
         viewModelOf(::RegisterViewModel)
         viewModelOf(::ProfilePictureViewModel)
-        viewModelOf(::EmailVerificationSentViewModel)
-        viewModelOf(::EmailVerificationResultViewModel)
-        viewModelOf(::ForgotPasswordViewModel)
     }

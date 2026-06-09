@@ -3,7 +3,7 @@ package com.kaanf.auth.presentation.util.mediapicker
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
-import android.media.ExifInterface
+import androidx.exifinterface.media.ExifInterface
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import kotlinx.coroutines.Dispatchers
@@ -14,27 +14,20 @@ actual suspend fun decodeImageForCrop(
     bytes: ByteArray,
     maxDimension: Int,
 ): ImageBitmap? = withContext(Dispatchers.Default) {
-    // 1) Read dimensions only, so a huge original never allocates a full-resolution bitmap.
     val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
     BitmapFactory.decodeByteArray(bytes, 0, bytes.size, bounds)
     if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return@withContext null
 
-    // 2) Decode already downsampled (power-of-two) close to the cap.
     val decodeOptions = BitmapFactory.Options().apply {
         inSampleSize = calculateInSampleSize(bounds.outWidth, bounds.outHeight, maxDimension)
     }
     val decoded = BitmapFactory.decodeByteArray(bytes, 0, bytes.size, decodeOptions)
         ?: return@withContext null
 
-    // 3) Apply EXIF orientation; raw pixels are not rotated, only the tag is set.
     val oriented = applyExifOrientation(decoded, bytes)
 
-    // 4) Bring the longest edge down to the cap.
     val scaled = scaleToMaxSize(oriented, maxDimension)
 
-    // The Compose Android canvas only ever does bilinear filtering regardless of FilterQuality, so a
-    // 2560px bitmap shown in a ~1000px viewport aliases. Enabling mipmaps makes the hardware canvas
-    // minify it cleanly.
     scaled.setHasMipMap(true)
 
     scaled.asImageBitmap()

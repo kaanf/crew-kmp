@@ -3,23 +3,14 @@ package com.kaanf.auth.presentation.login
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kaanf.auth.domain.repository.AuthRepository
+import com.kaanf.core.designsystem.component.layout.SnackbarMessage
+import com.kaanf.core.designsystem.component.layout.SnackbarVariant
 import com.kaanf.core.domain.repository.SessionStorage
 import com.kaanf.core.domain.util.Result
-import com.kaanf.core.presentation.base.BaseEvent
-import com.kaanf.core.presentation.model.SnackbarMessage
-import com.kaanf.core.presentation.model.SnackbarVariant
 import com.kaanf.core.presentation.util.UIText
-import com.kaanf.core.presentation.util.toUiText
 import crew.feature.auth.presentation.generated.resources.Res
-import crew.feature.auth.presentation.generated.resources.login_snackbar_auth_failed_title
-import crew.feature.auth.presentation.generated.resources.login_snackbar_invalid_email_description
-import crew.feature.auth.presentation.generated.resources.login_snackbar_invalid_email_title
-import crew.feature.auth.presentation.generated.resources.login_snackbar_invalid_password_description
-import crew.feature.auth.presentation.generated.resources.login_snackbar_invalid_password_title
-import crew.feature.auth.presentation.generated.resources.login_snackbar_success_description
-import crew.feature.auth.presentation.generated.resources.login_snackbar_success_title
+import crew.feature.auth.presentation.generated.resources.snackbar_access_granted_title
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -94,6 +85,17 @@ class LoginViewModel(
                 ) {
                     is Result.Success -> {
                         sessionStorage.set(result.data)
+
+                        eventChannel.send(
+                            LoginEvent.ShowSnackbar(
+                                SnackbarMessage(
+                                    title = UIText.Resource(Res.string.snackbar_access_granted_title),
+                                    description = UIText.DynamicString("Başarılı"),
+                                    variant = SnackbarVariant.Success
+                                )
+                            )
+                        )
+
                         if (result.data.user.isProfileComplete) {
                             eventChannel.send(LoginEvent.NavigateToDashboard)
                         } else {
@@ -102,6 +104,15 @@ class LoginViewModel(
                     }
 
                     is Result.Failure -> {
+                        eventChannel.send(
+                            LoginEvent.ShowSnackbar(
+                                SnackbarMessage(
+                                    title = UIText.Resource(Res.string.snackbar_access_granted_title),
+                                    description = UIText.DynamicString("Başarılı"),
+                                    variant = SnackbarVariant.Success
+                                )
+                            )
+                        )
                     }
                 }
             } finally {

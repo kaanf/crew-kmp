@@ -94,8 +94,6 @@ fun GradientChallengeCard(
                     radius = size.width * 1.45f,
                 )
 
-                // Arka plan + glow gradient'lerini bir kez bitmap'e rasterize edip
-                // scroll sırasında her karede GPU'da yeniden boyamak yerine basıyoruz.
                 val width = size.width.toInt().coerceAtLeast(1)
                 val height = size.height.toInt().coerceAtLeast(1)
                 val cachedImage = ImageBitmap(width, height)

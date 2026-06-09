@@ -4,7 +4,10 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
 import com.kaanf.auth.presentation.navigation.AuthGraphRoutes
@@ -48,6 +51,15 @@ fun App(
 
     CrewTheme(isDarkTheme = false) {
         SystemBarsEffect(isDarkTheme = true)
+
+        var warmupActive by remember { mutableStateOf(true) }
+        if (warmupActive) {
+            LaunchedEffect(Unit) {
+                repeat(3) { withFrameNanos { } }
+                warmupActive = false
+            }
+            ShaderWarmup()
+        }
 
         if (!state.isCheckingAuth) {
             val startDestination = remember {
