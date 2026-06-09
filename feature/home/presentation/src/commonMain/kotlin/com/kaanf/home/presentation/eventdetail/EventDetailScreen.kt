@@ -31,8 +31,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -285,7 +289,17 @@ fun EventHeroBackground(
                     val stripeStep = 18.dp.toPx()
                     val stripeStroke = 2.dp.toPx()
 
-                    onDrawBehind {
+                    // Çizgi desenini her karede ~20+ drawLine ile çizmek yerine bir
+                    // kez bitmap'e rasterize edip scroll/crossfade'de sadece basıyoruz.
+                    val width = size.width.toInt().coerceAtLeast(1)
+                    val height = size.height.toInt().coerceAtLeast(1)
+                    val stripeImage = ImageBitmap(width, height)
+                    CanvasDrawScope().draw(
+                        density = this,
+                        layoutDirection = layoutDirection,
+                        canvas = Canvas(stripeImage),
+                        size = Size(size.width, size.height),
+                    ) {
                         var x = -size.height
 
                         while (x < size.width + size.height) {
@@ -297,6 +311,10 @@ fun EventHeroBackground(
                             )
                             x += stripeStep
                         }
+                    }
+
+                    onDrawBehind {
+                        drawImage(stripeImage)
                     }
                 },
         )

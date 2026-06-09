@@ -90,110 +90,105 @@ fun DashboardScreen(
     onAction: (DashboardAction) -> Unit,
     listState: LazyListState,
 ) {
-    Column(
+    LazyColumn(
+        state = listState,
         modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(bottom = 24.dp),
     ) {
-        LazyColumn(
-            state = listState,
-            modifier = Modifier.fillMaxSize()
-                .zIndex(0f),
-            contentPadding = PaddingValues(bottom = 24.dp),
-        ) {
-            item(contentType = "header") {
-                DashboardHeader()
-            }
+        item(contentType = "header") {
+            DashboardHeader()
+        }
 
-            item(contentType = "space-after-header") {
-                Spacer(modifier = Modifier.height(24.dp))
-            }
+        item(contentType = "space-after-header") {
+            Spacer(modifier = Modifier.height(24.dp))
+        }
 
-            state.featuredEvent?.let { featuredEvent ->
-                item(contentType = "featured-card-section") {
-                    DashboardSection(
-                        title = stringResource(Res.string.dashboard_featured_event_section_title),
-                        description = null,
-                        ctaText = "",
-                        content = {
-                            DashboardFeaturedEventCard(
-                                modifier = Modifier.padding(horizontal = 16.dp),
-                                event = featuredEvent,
-                                onClicked = {
-                                    onAction(DashboardAction.OnEventClicked(featuredEvent.id))
-                                },
-                            )
-                        },
-                    )
-                }
-
-                item(contentType = "space-after-featured") {
-                    Spacer(modifier = Modifier.height(24.dp))
-                }
-            }
-
-            item(contentType = "deck-card-section") {
+        state.featuredEvent?.let { featuredEvent ->
+            item(contentType = "featured-card-section") {
                 DashboardSection(
-                    title = stringResource(Res.string.dashboard_game_preview_section_title),
-                    description = stringResource(Res.string.dashboard_game_preview_section_description),
-                    ctaText = stringResource(Res.string.dashboard_game_preview_cta),
+                    title = stringResource(Res.string.dashboard_featured_event_section_title),
+                    description = null,
+                    ctaText = "",
                     content = {
-                        LazyRow(
-                            modifier = Modifier.fillMaxWidth(),
-                            contentPadding = PaddingValues(horizontal = 16.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            items(
-                                items = state.tasks,
-                                key = { it.description }, // key'i task id yap.
-                                contentType = { "challenge_card" },
-                            ) { card ->
-                                GradientChallengeCard(card = card)
-                            }
-
-                            item(
-                                key = "see_all_challenges",
-                                contentType = "see_all_challenges",
-                            ) {
-                                MoreDeckCard()
-                            }
-                        }
+                        DashboardFeaturedEventCard(
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            event = featuredEvent,
+                            onClicked = {
+                                onAction(DashboardAction.OnEventClicked(featuredEvent.id))
+                            },
+                        )
                     },
                 )
             }
 
-            item(contentType = "space-after-deck") {
+            item(contentType = "space-after-featured") {
                 Spacer(modifier = Modifier.height(24.dp))
             }
+        }
 
-            item(contentType = "upcoming-events-header") {
-                DashboardEventInfoRow(
-                    leftText = stringResource(Res.string.dashboard_upcoming_events_title),
-                    description = null,
-                    rightText = stringResource(
-                        Res.string.dashboard_upcoming_events_count,
-                        state.events.size,
-                    ),
-                )
-            }
+        item(contentType = "deck-card-section") {
+            DashboardSection(
+                title = stringResource(Res.string.dashboard_game_preview_section_title),
+                description = stringResource(Res.string.dashboard_game_preview_section_description),
+                ctaText = stringResource(Res.string.dashboard_game_preview_cta),
+                content = {
+                    LazyRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentPadding = PaddingValues(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        items(
+                            items = state.tasks,
+                            key = { it.description }, // key'i task id yap.
+                            contentType = { "challenge_card" },
+                        ) { card ->
+                            GradientChallengeCard(card = card)
+                        }
 
-            item(contentType = "space-after-upcoming-header") {
-                Spacer(modifier = Modifier.height(12.dp))
-            }
+                        item(
+                            key = "see_all_challenges",
+                            contentType = "see_all_challenges",
+                        ) {
+                            MoreDeckCard()
+                        }
+                    }
+                },
+            )
+        }
 
-            items(
-                items = state.events,
-                key = { it.id },
-                contentType = { "event_card" },
-            ) { event ->
-                DashboardEventCard(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp)
-                        .padding(bottom = 12.dp),
-                    event = event,
-                    onClicked = {
-                        onAction(DashboardAction.OnEventClicked(event.id))
-                    },
-                )
-            }
+        item(contentType = "space-after-deck") {
+            Spacer(modifier = Modifier.height(24.dp))
+        }
+
+        item(contentType = "upcoming-events-header") {
+            DashboardEventInfoRow(
+                leftText = stringResource(Res.string.dashboard_upcoming_events_title),
+                description = null,
+                rightText = stringResource(
+                    Res.string.dashboard_upcoming_events_count,
+                    state.events.size,
+                ),
+            )
+        }
+
+        item(contentType = "space-after-upcoming-header") {
+            Spacer(modifier = Modifier.height(12.dp))
+        }
+
+        items(
+            items = state.events,
+            key = { it.id },
+            contentType = { "event_card" },
+        ) { event ->
+            DashboardEventCard(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 12.dp),
+                event = event,
+                onClicked = {
+                    onAction(DashboardAction.OnEventClicked(event.id))
+                },
+            )
         }
     }
 }

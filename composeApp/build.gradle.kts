@@ -1,7 +1,3 @@
-import com.android.build.api.dsl.ApplicationExtension
-import org.gradle.kotlin.dsl.configure
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
-import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetTree
 
 plugins {
     alias(libs.plugins.convention.cmp.application)
@@ -9,9 +5,11 @@ plugins {
 }
 
 kotlin {
-    @OptIn(ExperimentalKotlinGradlePluginApi::class)
-    androidTarget {
-        instrumentedTestVariant.sourceSetTree.set(KotlinSourceSetTree.test)
+    androidLibrary {
+        compileSdk = 36
+        minSdk = 26
+        namespace = "com.plcoding.chirp.composeapp"
+        experimentalProperties["android.experimental.kmp.enableAndroidResources"] = true
     }
 
     sourceSets {
@@ -51,23 +49,9 @@ kotlin {
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
+            implementation(compose.preview)
             implementation(libs.jetbrains.compose.viewmodel)
             implementation(libs.jetbrains.lifecycle.compose)
         }
     }
-}
-
-extensions.configure<ApplicationExtension> {
-    defaultConfig {
-        testInstrumentationRunner = "com.kaanf.crew.test.CrewTestRunner"
-    }
-}
-
-dependencies {
-    add("androidTestImplementation", platform(libs.androidx.compose.bom))
-    add("androidTestImplementation", libs.androidx.compose.ui.test.junit4.android)
-    add("androidTestImplementation", libs.kotlinx.serialization.json)
-    add("androidTestImplementation", "io.ktor:ktor-client-mock:3.2.3")
-    add("debugImplementation", platform(libs.androidx.compose.bom))
-    add("debugImplementation", libs.androidx.compose.ui.test.manifest)
 }

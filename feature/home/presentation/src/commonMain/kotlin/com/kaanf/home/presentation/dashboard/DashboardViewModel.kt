@@ -55,10 +55,6 @@ class DashboardViewModel(
         initialValue = DashboardState(),
     )
 
-    init {
-        loadEvents()
-    }
-
     fun onAction(action: DashboardAction) {
         when (action) {
             is DashboardAction.OnEventClicked -> navigateToEventDetail(action.id)

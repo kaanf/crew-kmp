@@ -1,6 +1,8 @@
 package com.kaanf.game.data.mappers
 
+import com.kaanf.game.data.dto.ConnectedPayloadDto
 import com.kaanf.game.data.dto.GameStartedPayloadDto
+import com.kaanf.game.data.dto.LobbyMemberDto
 import com.kaanf.game.data.dto.MatchInviteReceivedPayloadDto
 import com.kaanf.game.data.dto.MatchInviteResolvedPayloadDto
 import com.kaanf.game.data.dto.MatchReadyCompletedPayloadDto
@@ -13,12 +15,32 @@ import com.kaanf.game.data.dto.TaskOfferedPayloadDto
 import com.kaanf.game.data.dto.TaskRejectedPayloadDto
 import com.kaanf.game.data.dto.TaskStartedPayloadDto
 import com.kaanf.game.domain.model.GameSocketMessage
+import com.kaanf.game.domain.model.LobbyMember
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.decodeFromJsonElement
 
+private fun LobbyMemberDto.toDomain(): LobbyMember {
+    return LobbyMember(
+        userId = userId,
+        fullName = fullName,
+        profilePictureUrl = profilePictureUrl
+    )
+}
+
 fun SocketEnvelopeDto.toDomain(json: Json): GameSocketMessage = when (type) {
-    "CONNECTED" -> GameSocketMessage.Connected
+    "CONNECTED" -> json.decodePayloadOrNull<ConnectedPayloadDto>(payload)
+        ?.let {
+            GameSocketMessage.Connected(
+                eventId = it.eventId,
+                doorsAt = it.doorsAt,
+                totalCount = it.totalCount,
+                members = it.members.map { member ->
+                    member.toDomain()
+                }
+            )
+        }
+        ?: GameSocketMessage.Unknown(type)
 
     "GAME_STARTED" -> json.decodePayloadOrNull<GameStartedPayloadDto>(payload)
         ?.let {

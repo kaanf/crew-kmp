@@ -1,7 +1,12 @@
 package com.kaanf.game.domain.model
 
 sealed interface GameSocketMessage {
-    data object Connected : GameSocketMessage
+    data class Connected(
+        val eventId: String,
+        val doorsAt: String,
+        val totalCount: Int,
+        val members: List<LobbyMember>
+    ) : GameSocketMessage
 
     data class GameStarted(
         val eventId: String,

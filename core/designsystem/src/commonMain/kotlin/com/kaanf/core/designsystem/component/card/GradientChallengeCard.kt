@@ -2,7 +2,6 @@ package com.kaanf.core.designsystem.component.card
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -28,8 +27,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
@@ -76,15 +79,14 @@ fun GradientChallengeCard(
                 )
             }
             .clip(RoundedCornerShape(28.dp))
-            .background(
-                Brush.verticalGradient(
+            .drawWithCache {
+                val corner = 28.dp.toPx()
+
+                val backgroundBrush = Brush.verticalGradient(
                     colors = colors.backgroundColors,
                     startY = 0f,
                     endY = Float.POSITIVE_INFINITY,
-                ),
-            )
-            .drawWithCache {
-                val corner = 28.dp.toPx()
+                )
 
                 val glowBrush = Brush.radialGradient(
                     colors = colors.glowColors,
@@ -92,11 +94,26 @@ fun GradientChallengeCard(
                     radius = size.width * 1.45f,
                 )
 
-                onDrawBehind {
+                // Arka plan + glow gradient'lerini bir kez bitmap'e rasterize edip
+                // scroll sırasında her karede GPU'da yeniden boyamak yerine basıyoruz.
+                val width = size.width.toInt().coerceAtLeast(1)
+                val height = size.height.toInt().coerceAtLeast(1)
+                val cachedImage = ImageBitmap(width, height)
+                CanvasDrawScope().draw(
+                    density = this,
+                    layoutDirection = layoutDirection,
+                    canvas = Canvas(cachedImage),
+                    size = Size(size.width, size.height),
+                ) {
+                    drawRect(brush = backgroundBrush)
                     drawRoundRect(
                         brush = glowBrush,
                         cornerRadius = CornerRadius(corner, corner),
                     )
+                }
+
+                onDrawBehind {
+                    drawImage(cachedImage)
                 }
             }
             .border(
@@ -310,7 +327,7 @@ fun MoreDeckCard() {
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
-                    text = "+114",
+                    text = "+187",
                     fontFamily = JetbrainsMono,
                     color = AccessDefaults.TextPrimary,
                     fontSize = 14.sp,
@@ -318,10 +335,12 @@ fun MoreDeckCard() {
                 )
 
                 Text(
-                    text = "More in \nthe deck".uppercase(),
+                    text = "More\nin the\ndeck".uppercase(),
                     fontFamily = JetbrainsMono,
                     color = AccessDefaults.TextMuted,
                     fontSize = 11.sp,
+                    textAlign = TextAlign.Center,
+                    lineHeight = 16.sp
                 )
             }
         },

@@ -6,9 +6,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
 import androidx.compose.ui.unit.dp
 import kotlin.math.min
 
@@ -67,11 +71,26 @@ fun Modifier.eventHeroBackground(
                 radius = minSize * 0.55f
             )
 
-            onDrawBehind {
+            // Gradient'leri her karede yeniden boyamak yerine bir kez bir bitmap'e
+            // rasterize edip (size değişene kadar yeniden çalışmaz), scroll sırasında
+            // sadece hazır bitmap'i basıyoruz. drawImage = ucuz textured blit.
+            val width = size.width.toInt().coerceAtLeast(1)
+            val height = size.height.toInt().coerceAtLeast(1)
+            val cachedImage = ImageBitmap(width, height)
+            CanvasDrawScope().draw(
+                density = this,
+                layoutDirection = layoutDirection,
+                canvas = Canvas(cachedImage),
+                size = Size(size.width, size.height),
+            ) {
                 drawRect(baseGradient)
                 drawRect(coralGlow)
                 drawRect(limeGlow)
                 drawRect(centerDark)
+            }
+
+            onDrawBehind {
+                drawImage(cachedImage)
             }
         }
         .border(

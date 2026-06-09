@@ -50,10 +50,6 @@ fun App(
         SystemBarsEffect(isDarkTheme = true)
 
         if (!state.isCheckingAuth) {
-            // Computed once when the initial auth check completes. Keeping it fixed
-            // prevents the NavHost graph from being rebuilt (which resets the back
-            // stack) when isLoggedIn later changes after a login/logout. Runtime
-            // session changes are handled via navigation events instead.
             val startDestination = remember {
                 if (state.isLoggedIn) {
                     HomeGraphRoutes.Graph
