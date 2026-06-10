@@ -7,7 +7,6 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -17,8 +16,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.backhandler.BackHandler
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kaanf.auth.presentation.util.mediapicker.rememberImagePickerLauncher
+import com.kaanf.core.designsystem.component.layout.AppScaffold
 import com.kaanf.core.designsystem.component.layout.AppTopBar
-import com.kaanf.core.designsystem.component.layout.SnackbarScaffold
 import com.kaanf.core.presentation.model.AppTopBarState
 import com.kaanf.core.presentation.util.ObserveAsEvents
 import org.koin.compose.viewmodel.koinViewModel
@@ -30,7 +29,6 @@ fun ProfilePictureRoot(
     onSkip: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val snackbarHostState = remember { SnackbarHostState() }
 
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
@@ -57,7 +55,6 @@ fun ProfilePictureRoot(
             }
             viewModel.onAction(action)
         },
-        snackbarHostState = snackbarHostState,
     )
 }
 
@@ -66,14 +63,13 @@ fun ProfilePictureRoot(
 fun ProfilePictureScreen(
     state: ProfilePictureState,
     onAction: (ProfilePictureAction) -> Unit,
-    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     modifier: Modifier = Modifier,
 ) {
     BackHandler(enabled = state.phase == ProfilePicturePhase.Crop) {
         onAction(ProfilePictureAction.OnCropCancelled)
     }
 
-    SnackbarScaffold(
+    AppScaffold(
         modifier = modifier,
         topBar = {
             AppTopBar(
@@ -94,7 +90,6 @@ fun ProfilePictureScreen(
                 },
             )
         },
-        snackbarHostState = snackbarHostState,
     ) { innerPadding ->
         AnimatedContent(
             targetState = state.phase,

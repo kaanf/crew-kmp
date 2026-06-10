@@ -8,5 +8,6 @@ data class MatchInviteDto(
     val eventId: String,
     val toParticipantId: String,
     val toFullName: String,
+    val toProfilePictureUrl: String? = null,
     val expiresAt: String,
 )

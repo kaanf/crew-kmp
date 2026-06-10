@@ -50,6 +50,7 @@ class DashboardViewModel(
     fun onAction(action: DashboardAction) {
         when (action) {
             is DashboardAction.OnEventClicked -> navigateToEventDetail(action.id)
+            is DashboardAction.OnRefresh -> loadEvents(isRefresh = true)
         }
     }
 
@@ -57,8 +58,10 @@ class DashboardViewModel(
         eventChannel.send(DashboardEvent.NavigateToEventDetail(eventId))
     }
 
-    private fun loadEvents() = viewModelScope.launch {
-        _state.update { it.copy(isLoading = true) }
+    private fun loadEvents(isRefresh: Boolean = false) = viewModelScope.launch {
+        _state.update {
+            if (isRefresh) it.copy(isRefreshing = true) else it.copy(isLoading = true)
+        }
 
         when (val result = getEventsUseCase()) {
             is Result.Success -> {
@@ -68,12 +71,18 @@ class DashboardViewModel(
                     it.copy(
                         events = uiModels,
                         isLoading = false,
+                        isRefreshing = false,
                     )
                 }
             }
 
             is Result.Failure -> {
-                _state.update { it.copy(isLoading = false) }
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        isRefreshing = false,
+                    )
+                }
             }
         }
     }

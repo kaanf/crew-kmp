@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kaanf.core.designsystem.component.avatar.AvatarCircle
 import com.kaanf.core.designsystem.component.avatar.AvatarContent
+import com.kaanf.core.designsystem.component.avatar.avatarContentFor
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.CrewTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -41,6 +42,8 @@ import com.kaanf.core.designsystem.component.progressbar.ThreeDotsAnimatedCard
 fun GameRequestSheet(
     modifier: Modifier = Modifier,
     opponentName: String,
+    opponentPhotoUrl: String? = null,
+    selfPhotoUrl: String? = null,
 ) {
     Column(
         modifier = modifier
@@ -72,7 +75,8 @@ fun GameRequestSheet(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             AvatarCircle(
-                content = AvatarContent.Initials(label = "Y", color = AccessDefaults.Rose),
+                content = selfPhotoUrl?.let { AvatarContent.Image(it) }
+                    ?: AvatarContent.Initials(label = "Y", color = AccessDefaults.Rose),
                 avatarSize = 78,
                 textSize = 30.0,
                 borderColor = AccessDefaults.BorderSoft,
@@ -98,7 +102,11 @@ fun GameRequestSheet(
             }
 
             AvatarCircle(
-                content = AvatarContent.Initials(label = "MK", color = AccessDefaults.Teal),
+                content = avatarContentFor(
+                    imageUrl = opponentPhotoUrl,
+                    initialsLabel = opponentName.take(1).uppercase().ifBlank { "?" },
+                    seed = opponentName,
+                ),
                 avatarSize = 78,
                 textSize = 30.0,
                 borderColor = AccessDefaults.Accent,

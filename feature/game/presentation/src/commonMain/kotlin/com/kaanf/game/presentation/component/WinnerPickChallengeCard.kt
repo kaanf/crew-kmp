@@ -59,7 +59,7 @@ fun GameTaskCard(
             )
             .border(
                 width = if (selected) 2.dp else 1.dp,
-                color = if (selected) AccessDefaults.Accent else AccessDefaults.Border,
+                color = if (selected) card.variant.taskAccentColor() else AccessDefaults.Border,
                 shape = AccessShapes.Large,
             )
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
@@ -79,7 +79,7 @@ fun GameTaskCard(
             Text(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(Res.string.match_points_format, card.points),
-                color = card.variant.getColor(),
+                color = card.variant.taskAccentColor(),
                 fontSize = 12.sp,
                 fontFamily = JetbrainsMono,
                 textAlign = TextAlign.End,
@@ -180,7 +180,7 @@ private fun CardBadge(
         modifier = Modifier
             .wrapContentSize()
             .background(
-                color = variant.getColor().copy(alpha = 0.1f),
+                color = variant.taskAccentColor().copy(alpha = 0.1f),
                 shape = AccessShapes.XSmall,
             )
             .padding(horizontal = 4.dp, vertical = 2.dp),
@@ -189,13 +189,13 @@ private fun CardBadge(
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall.copy(
-                color = variant.getColor(),
+                color = variant.taskAccentColor(),
             ),
         )
     }
 }
 
-private fun ChallengeCardVariant.getColor(): Color {
+internal fun ChallengeCardVariant.taskAccentColor(): Color {
     return when (this) {
         ChallengeCardVariant.Social -> AccessDefaults.Sky
         ChallengeCardVariant.Bold -> AccessDefaults.Coral

@@ -44,7 +44,9 @@ fun MinuteSecondCountdownCard(
     val minutes = totalSeconds / 60
     val seconds = totalSeconds % 60
 
-    val isFinished = totalSeconds <= 0
+    // targetEpochMillis henüz gelmediyse (0L = CONNECTED soketinden önceki başlangıç değeri)
+    // geri sayım bitmiş sayılmaz; aksi halde onFinished ilk komposizyonda yanlışça tetiklenir.
+    val isFinished = targetEpochMillis > 0L && totalSeconds <= 0
     LaunchedEffect(isFinished) {
         if (isFinished) onFinished()
     }

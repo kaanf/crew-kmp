@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -17,8 +16,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.kaanf.core.designsystem.component.layout.AppScaffold
 import com.kaanf.core.designsystem.component.layout.AppTopBar
-import com.kaanf.core.designsystem.component.layout.SnackbarScaffold
 import com.kaanf.core.designsystem.component.sheet.ContainerBottomSheet
 import com.kaanf.core.presentation.model.AppTopBarState
 import com.kaanf.core.presentation.permission.Permission
@@ -44,7 +43,6 @@ fun ScanOpponentRoot(
     onClose: () -> Unit,
 ) {
     val sessionState by viewModel.state.collectAsStateWithLifecycle()
-    val snackbarHostState = remember { SnackbarHostState() }
 
     // Navigasyon event ile değil, phase ile sürülür (tek event-collector container'da kalsın).
     LaunchedEffect(sessionState.phase) {
@@ -57,16 +55,17 @@ fun ScanOpponentRoot(
         errorMessage = sessionState.errorMessage,
         showGameRequestSheet = sessionState.showOutgoingInviteSheet,
         opponentName = sessionState.outgoingOpponentName,
+        opponentPhotoUrl = sessionState.outgoingOpponentPhotoUrl,
+        selfPhotoUrl = sessionState.currentUserPhotoUrl,
     )
 
-    SnackbarScaffold(
+    AppScaffold(
         topBar = {
             AppTopBar(
                 state = AppTopBarState.ScanOpponent,
                 onBackClick = onClose,
             )
         },
-        snackbarHostState = snackbarHostState,
     ) { innerPadding ->
         ScanOpponentScreen(
             modifier = Modifier
@@ -103,6 +102,8 @@ fun ScanOpponentScreen(
         ) {
             GameRequestSheet(
                 opponentName = state.opponentName.orEmpty(),
+                opponentPhotoUrl = state.opponentPhotoUrl,
+                selfPhotoUrl = state.selfPhotoUrl,
             )
         }
     }

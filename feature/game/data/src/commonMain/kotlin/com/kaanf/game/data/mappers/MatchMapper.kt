@@ -15,6 +15,7 @@ fun MatchInviteDto.toDomain(): MatchInvite = MatchInvite(
     eventId = eventId,
     toParticipantId = toParticipantId,
     toFullName = toFullName,
+    toProfilePictureUrl = toProfilePictureUrl,
     expiresAt = expiresAt,
 )
 

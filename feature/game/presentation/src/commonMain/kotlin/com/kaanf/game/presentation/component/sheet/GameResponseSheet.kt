@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kaanf.core.designsystem.component.avatar.AvatarCircle
 import com.kaanf.core.designsystem.component.avatar.AvatarContent
+import com.kaanf.core.designsystem.component.avatar.avatarContentFor
 import com.kaanf.core.designsystem.component.button.BaseButton
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.game.domain.model.GameSocketMessage
@@ -44,6 +45,7 @@ fun GameResponseSheet(
     modifier: Modifier = Modifier,
     isResponding: Boolean = false,
     message: GameSocketMessage.MatchInviteReceived,
+    selfPhotoUrl: String? = null,
     onAccept: () -> Unit = {},
     onDecline: () -> Unit = {},
 ) {
@@ -76,9 +78,10 @@ fun GameResponseSheet(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             AvatarCircle(
-                content = AvatarContent.Initials(
-                    label = message.fromFullName.first().toString(),
-                    color = AccessDefaults.Rose,
+                content = avatarContentFor(
+                    imageUrl = message.fromProfilePictureUrl,
+                    initialsLabel = message.fromFullName.take(1).uppercase(),
+                    seed = message.fromFullName,
                 ),
                 avatarSize = 78,
                 textSize = 30.0,
@@ -105,7 +108,8 @@ fun GameResponseSheet(
             }
 
             AvatarCircle(
-                content = AvatarContent.Initials(label = "MK", color = AccessDefaults.Teal),
+                content = selfPhotoUrl?.let { AvatarContent.Image(it) }
+                    ?: AvatarContent.Initials(label = "MK", color = AccessDefaults.Teal),
                 avatarSize = 78,
                 textSize = 30.0,
                 borderColor = AccessDefaults.Accent,

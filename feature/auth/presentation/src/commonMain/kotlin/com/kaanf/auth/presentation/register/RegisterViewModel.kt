@@ -5,19 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.kaanf.auth.domain.model.RegisterParams
 import com.kaanf.auth.domain.repository.AuthRepository
 import com.kaanf.auth.presentation.util.toLocalDate
-import com.kaanf.core.designsystem.component.layout.SnackbarMessage
-import com.kaanf.core.designsystem.component.layout.SnackbarVariant
 import com.kaanf.core.domain.util.Result
-import com.kaanf.core.presentation.util.UIText
-import com.kaanf.core.presentation.util.toUiText
-import crew.feature.auth.presentation.generated.resources.Res
-import crew.feature.auth.presentation.generated.resources.error_accept_terms
-import crew.feature.auth.presentation.generated.resources.error_invalid_date_of_birth
-import crew.feature.auth.presentation.generated.resources.error_invalid_email
-import crew.feature.auth.presentation.generated.resources.error_invalid_password
-import crew.feature.auth.presentation.generated.resources.error_password_mismatch
-import crew.feature.auth.presentation.generated.resources.snackbar_input_warning_title
-import crew.feature.auth.presentation.generated.resources.snackbar_uplink_failure_title
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -86,18 +74,6 @@ class RegisterViewModel(
             }
 
             if (!_state.value.isPasswordValid) {
-                /*
-                eventChannel.send(
-                    BaseEvent.ShowSnackbar(
-                        SnackbarMessage(
-                            title = UIText.Resource(Res.string.snackbar_input_warning_title),
-                            description = UIText.Resource(Res.string.error_invalid_password),
-                            variant = SnackbarVariant.Warn,
-                        ),
-                    ),
-                )
-                 */
-
                 return@launch
             }
 

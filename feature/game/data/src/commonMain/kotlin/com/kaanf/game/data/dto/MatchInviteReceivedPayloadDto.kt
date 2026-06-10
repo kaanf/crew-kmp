@@ -9,5 +9,6 @@ data class MatchInviteReceivedPayloadDto(
     val fromParticipantId: String,
     val fromUserId: String,
     val fromFullName: String,
+    val fromProfilePictureUrl: String? = null,
     val expiresAt: String,
 )

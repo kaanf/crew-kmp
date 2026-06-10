@@ -1,13 +1,7 @@
 package com.kaanf.core.data.networking
 
-import com.kaanf.core.data.dto.AuthInfoSerializable
-import com.kaanf.core.data.dto.RefreshRequest
-import com.kaanf.core.data.mappers.toDomain
 import com.kaanf.core.domain.repository.SessionStorage
 import com.kaanf.core.domain.logging.CrewLogger
-import com.kaanf.core.domain.util.DataError
-import com.kaanf.core.domain.util.onFailure
-import com.kaanf.core.domain.util.onSuccess
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.plugins.HttpTimeout
@@ -29,7 +23,8 @@ import kotlinx.serialization.json.Json
 
 class HttpClientFactory(
     private val crewLogger: CrewLogger,
-    private val sessionStorage: SessionStorage
+    private val sessionStorage: SessionStorage,
+    private val sessionRefresher: SessionRefresher,
 ) {
     fun create(engine: HttpClientEngine): HttpClient {
         return HttpClient(engine) {
@@ -90,40 +85,14 @@ class HttpClientFactory(
                             return@refreshTokens null
                         }
 
-                        val authInfo = sessionStorage.observeAuthInfo().firstOrNull()
-                        if (authInfo?.refreshToken.isNullOrBlank()) {
-                            sessionStorage.set(null)
-                            return@refreshTokens null
-                        }
-
-                        var bearerTokens: BearerTokens? = null
-                        client.post<RefreshRequest, AuthInfoSerializable>(
-                            route = "/auth/refresh",
-                            body = RefreshRequest(
-                                refreshToken = authInfo.refreshToken
-                            ),
-                            builder = {
-                                markAsRefreshTokenRequest()
-                            }
-                        ).onSuccess { newAuthInfo ->
-                            sessionStorage.set(newAuthInfo.toDomain())
-                            bearerTokens = BearerTokens(
-                                accessToken = newAuthInfo.accessToken,
-                                refreshToken = newAuthInfo.refreshToken
+                        // Yenilemenin kendisi (storage güncelleme, 401/403'te logout dahil)
+                        // SessionRefresher'da: event soketiyle ortak tek kaynak.
+                        sessionRefresher.refresh(client)?.let { authInfo ->
+                            BearerTokens(
+                                accessToken = authInfo.accessToken,
+                                refreshToken = authInfo.refreshToken,
                             )
-                        }.onFailure { error ->
-                            // Yalnızca sunucu refresh token'ı kesin reddettiğinde (401/403)
-                            // oturumu sil. Ağ/timeout/5xx/serileştirme gibi geçici hatalarda
-                            // token'ı koru ki kullanıcı boş yere logout olmasın; sonraki istek
-                            // tekrar refresh dener.
-                            if (error == DataError.Remote.UNAUTHORIZED ||
-                                error == DataError.Remote.FORBIDDEN
-                            ) {
-                                sessionStorage.set(null)
-                            }
                         }
-
-                        bearerTokens
                     }
                 }
             }

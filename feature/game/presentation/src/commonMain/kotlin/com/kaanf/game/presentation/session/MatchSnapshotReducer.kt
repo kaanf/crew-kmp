@@ -18,6 +18,7 @@ internal fun MatchSnapshot.toMatchPhase(): MatchPhase {
 
         MatchSnapshotState.ResultPending,
         MatchSnapshotState.ResultConfirmation,
+        MatchSnapshotState.Disputed,
         -> MatchPhase.WhoWon(
             myResultClaimWon = myReportedWinnerUserId?.let { it == me.userId },
             opponentClaimedWinnerUserId = opponentReportedWinnerUserId,

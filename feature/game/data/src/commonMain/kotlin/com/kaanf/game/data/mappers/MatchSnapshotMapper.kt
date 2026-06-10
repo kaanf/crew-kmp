@@ -39,6 +39,7 @@ private fun String.toMatchSnapshotState(): MatchSnapshotState = when (this) {
     "ReadyWaiting" -> MatchSnapshotState.ReadyWaiting
     "ResultPending" -> MatchSnapshotState.ResultPending
     "ResultConfirmation" -> MatchSnapshotState.ResultConfirmation
+    "Disputed" -> MatchSnapshotState.Disputed
     "TaskPickPending" -> MatchSnapshotState.TaskPickPending
     "TaskOfferPending" -> MatchSnapshotState.TaskOfferPending
     "TaskActive" -> MatchSnapshotState.TaskActive

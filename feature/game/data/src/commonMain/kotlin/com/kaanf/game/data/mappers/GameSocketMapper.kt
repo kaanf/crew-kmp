@@ -5,6 +5,7 @@ import com.kaanf.game.data.dto.LobbyUserJoinedDto
 import com.kaanf.game.data.dto.LobbyUserLeftDto
 import com.kaanf.game.data.dto.GameStartedPayloadDto
 import com.kaanf.game.data.dto.LobbyMemberDto
+import com.kaanf.game.data.dto.MatchDisputedPayloadDto
 import com.kaanf.game.data.dto.MatchInviteReceivedPayloadDto
 import com.kaanf.game.data.dto.MatchInviteResolvedPayloadDto
 import com.kaanf.game.data.dto.MatchReadyCompletedPayloadDto
@@ -35,7 +36,7 @@ fun SocketEnvelopeDto.toDomain(json: Json): GameSocketMessage = when (type) {
         ?.let {
             GameSocketMessage.Connected(
                 eventId = it.eventId,
-                doorsAt = it.doorsAt,
+                doorsAt = it.gameStartsAt,
                 totalCount = it.totalCount,
                 members = it.members.map { member ->
                     member.toDomain()
@@ -62,6 +63,7 @@ fun SocketEnvelopeDto.toDomain(json: Json): GameSocketMessage = when (type) {
                 fromParticipantId = it.fromParticipantId,
                 fromUserId = it.fromUserId,
                 fromFullName = it.fromFullName,
+                fromProfilePictureUrl = it.fromProfilePictureUrl,
                 expiresAt = it.expiresAt,
             )
         }
@@ -108,6 +110,17 @@ fun SocketEnvelopeDto.toDomain(json: Json): GameSocketMessage = when (type) {
                 eventId = it.eventId,
                 state = it.state,
                 winnerUserId = it.winnerUserId,
+            )
+        }
+        ?: GameSocketMessage.Unknown(type)
+
+    "MATCH_DISPUTED" -> json.decodePayloadOrNull<MatchDisputedPayloadDto>(payload)
+        ?.let {
+            GameSocketMessage.MatchDisputed(
+                matchId = it.matchId,
+                eventId = it.eventId,
+                state = it.state,
+                disputedByUserId = it.disputedByUserId,
             )
         }
         ?: GameSocketMessage.Unknown(type)

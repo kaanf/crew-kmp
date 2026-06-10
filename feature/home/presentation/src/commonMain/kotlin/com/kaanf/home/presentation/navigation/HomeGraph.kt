@@ -49,6 +49,9 @@ fun NavGraphBuilder.homeGraph(
                 onCheckInSuccess = {
                     onGameCodeSuccess(eventId)
                 },
+                onBack = {
+                    navController.popBackStack()
+                },
             )
         }
     }

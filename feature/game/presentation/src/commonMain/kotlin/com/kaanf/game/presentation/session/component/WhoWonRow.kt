@@ -124,8 +124,6 @@ fun WhoWonRow(
         ) {
             avatars.forEachIndexed { index, avatar ->
                 key(avatar.label) {
-                    // İlk kompozisyonda false→true geçişi pop-in animasyonunu tetikler.
-                    // Birden fazla avatar aynı anda gelirse index'e göre ufak gecikmeyle sıralı düşerler.
                     val appearState = remember { MutableTransitionState(false) }
                     LaunchedEffect(Unit) {
                         delay(index * AVATAR_STAGGER_MILLIS)
@@ -180,7 +178,10 @@ private fun WhoWonAvatar(
         },
         contentAlignment = Alignment.Center,
     ) {
-        AvatarCircle(AvatarContent.Initials(label = avatar.label, color = avatar.color))
+        AvatarCircle(
+            avatar.imageUrl?.let { AvatarContent.Image(it) }
+                ?: AvatarContent.Initials(label = avatar.label, color = avatar.color),
+        )
     }
 }
 

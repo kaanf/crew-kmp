@@ -32,6 +32,7 @@ enum class MatchSnapshotState {
     ReadyWaiting,
     ResultPending,
     ResultConfirmation,
+    Disputed,
     TaskPickPending,
     TaskOfferPending,
     TaskActive,

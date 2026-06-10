@@ -14,11 +14,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -27,8 +25,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kaanf.core.designsystem.component.dialog.BaseDialog
+import com.kaanf.core.designsystem.component.layout.AppScaffold
 import com.kaanf.core.designsystem.component.layout.AppTopBar
-import com.kaanf.core.designsystem.component.layout.SnackbarScaffold
 import com.kaanf.core.designsystem.component.sheet.ContainerBottomSheet
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.presentation.model.AppTopBarState
@@ -53,19 +51,20 @@ fun MatchContainerRoot(
     onNavigateToDashboard: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val snackbarHostState = remember { SnackbarHostState() }
 
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
             MatchSessionEvent.NavigateToScanOpponent -> onNavigateToScanOpponent()
             MatchSessionEvent.NavigateToDashboard -> onNavigateToDashboard()
+            // Lobi event'leri; bu ekranda tüketilmez.
+            MatchSessionEvent.NavigateToGame,
+            MatchSessionEvent.NavigateBack -> Unit
         }
     }
 
     MatchContainerScreen(
         state = state,
         onAction = viewModel::onAction,
-        snackbarHostState = snackbarHostState,
     )
 }
 
@@ -74,7 +73,6 @@ fun MatchContainerRoot(
 fun MatchContainerScreen(
     state: MatchSessionState,
     onAction: (MatchSessionAction) -> Unit,
-    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     modifier: Modifier = Modifier,
 ) {
     BackHandler(enabled = !state.showExitConfirmDialog) {
@@ -100,6 +98,7 @@ fun MatchContainerScreen(
                 GameResponseSheet(
                     isResponding = state.isRespondingToInvite,
                     message = invite,
+                    selfPhotoUrl = state.currentUserPhotoUrl,
                     onAccept = { onAction(MatchSessionAction.OnInviteAccepted) },
                     onDecline = { onAction(MatchSessionAction.OnInviteDeclined) },
                 )
@@ -107,14 +106,13 @@ fun MatchContainerScreen(
         }
     }
 
-    SnackbarScaffold(
+    AppScaffold(
         topBar = {
             AppTopBar(
                 state = topBarStateFor(state.phase),
                 onBackClick = { onAction(MatchSessionAction.OnBackClick) },
             )
         },
-        snackbarHostState = snackbarHostState,
     ) { innerPadding ->
         Column(
             modifier = modifier
@@ -181,6 +179,8 @@ private fun MatchPhaseContent(
             isWaiting = phase.isMarkingReady,
             onReadyClick = { onAction(MatchSessionAction.OnReadyClick) },
             modifier = modifier,
+            opponentImageUrl = state.opponentProfilePictureUrl,
+            myImageUrl = state.currentUserPhotoUrl,
         )
 
         is MatchPhase.WhoWon -> WhoWonPhase(
@@ -190,6 +190,8 @@ private fun MatchPhaseContent(
             modifier = modifier,
             myClaimWon = phase.myResultClaimWon,
             opponentClaimedMeWon = phase.opponentClaimedMeWon(state.currentUserId),
+            opponentImageUrl = state.opponentProfilePictureUrl,
+            myImageUrl = state.currentUserPhotoUrl,
         )
 
         is MatchPhase.WinnerPicks -> WinnerPicksPhase(
@@ -221,6 +223,7 @@ private fun MatchPhaseContent(
             opponentName = state.formattedOpponentName,
             task = state.activeTask,
             modifier = modifier,
+            opponentImageUrl = state.opponentProfilePictureUrl,
         )
 
         is MatchPhase.WinnerConfirms -> WinnerConfirmsPhase(

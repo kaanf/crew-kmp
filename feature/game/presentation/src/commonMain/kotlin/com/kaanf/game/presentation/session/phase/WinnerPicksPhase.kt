@@ -1,5 +1,8 @@
 package com.kaanf.game.presentation.session.phase
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,19 +13,30 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import com.kaanf.core.designsystem.component.button.BaseButton
 import com.kaanf.core.designsystem.component.progressbar.ThreeDotsAnimatedCard
 import com.kaanf.core.designsystem.theme.AccessDefaults
+import com.kaanf.core.designsystem.theme.AccessShapes
 import com.kaanf.core.designsystem.theme.CrewTheme
 import com.kaanf.game.domain.model.GameTask
 import com.kaanf.game.domain.model.TaskCategory
 import com.kaanf.game.presentation.component.GameTaskCard
+import com.kaanf.game.presentation.component.taskAccentColor
 import crew.feature.game.presentation.generated.resources.Res
 import crew.feature.game.presentation.generated.resources.match_phase_winner_picks_description
 import crew.feature.game.presentation.generated.resources.match_phase_winner_picks_eyebrow
@@ -86,10 +100,10 @@ fun WinnerPicksPhase(
         Spacer(modifier = Modifier.height(12.dp))
 
         tasks.forEach { task ->
-            GameTaskCard(
-                card = task.toUiModel(),
-                selected = task.id == selectedTaskId,
-                onClick = { onTaskSelected(task.id) },
+            WinnerPickTaskCard(
+                task = task,
+                selectedTaskId = selectedTaskId,
+                onTaskSelected = onTaskSelected,
             )
         }
 
@@ -104,6 +118,92 @@ fun WinnerPicksPhase(
             onClick = onSendClick,
         )
     }
+}
+
+@Composable
+private fun WinnerPickTaskCard(
+    task: GameTask,
+    selectedTaskId: String?,
+    onTaskSelected: (String) -> Unit,
+) {
+    val isSelectionActive = selectedTaskId != null
+    val selected = task.id == selectedTaskId
+    val card = task.toUiModel()
+    val accentColor = card.variant.taskAccentColor()
+
+    val scale by animateFloatAsState(
+        targetValue = when {
+            selected -> 1.035f
+            isSelectionActive -> 0.98f
+            else -> 1f
+        },
+        animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
+        label = "winner_pick_task_scale",
+    )
+    val dimAlpha by animateFloatAsState(
+        targetValue = if (isSelectionActive && !selected) 0.48f else 0f,
+        animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
+        label = "winner_pick_task_dim",
+    )
+    val glowAlpha by animateFloatAsState(
+        targetValue = if (selected) 1f else 0f,
+        animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
+        label = "winner_pick_task_glow",
+    )
+    val shadowElevation by animateFloatAsState(
+        targetValue = if (selected) 18f else 0f,
+        animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
+        label = "winner_pick_task_shadow_elevation",
+    )
+
+    GameTaskCard(
+        modifier = Modifier
+            .zIndex(if (selected) 1f else 0f)
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+                this.shadowElevation = shadowElevation.dp.toPx()
+                shape = AccessShapes.Large
+                clip = false
+                ambientShadowColor = accentColor.copy(alpha = 0.48f * glowAlpha)
+                spotShadowColor = accentColor.copy(alpha = 0.72f * glowAlpha)
+            }
+            .drawWithContent {
+                drawContent()
+                if (glowAlpha > 0f) {
+                    val corner = 16.dp.toPx()
+                    drawRoundRect(
+                        color = accentColor.copy(alpha = 0.28f * glowAlpha),
+                        topLeft = Offset(2.dp.toPx(), 2.dp.toPx()),
+                        size = Size(
+                            width = size.width - 4.dp.toPx(),
+                            height = size.height - 4.dp.toPx(),
+                        ),
+                        cornerRadius = CornerRadius(corner, corner),
+                        style = Stroke(width = 8.dp.toPx()),
+                    )
+                    drawRoundRect(
+                        color = accentColor.copy(alpha = 0.42f * glowAlpha),
+                        topLeft = Offset(1.dp.toPx(), 1.dp.toPx()),
+                        size = Size(
+                            width = size.width - 2.dp.toPx(),
+                            height = size.height - 2.dp.toPx(),
+                        ),
+                        cornerRadius = CornerRadius(corner, corner),
+                        style = Stroke(width = 2.dp.toPx()),
+                    )
+                }
+                if (dimAlpha > 0f) {
+                    drawRoundRect(
+                        color = Color.Black.copy(alpha = dimAlpha),
+                        cornerRadius = CornerRadius(16.dp.toPx(), 16.dp.toPx()),
+                    )
+                }
+            },
+        card = card,
+        selected = selected,
+        onClick = { onTaskSelected(task.id) },
+    )
 }
 
 @Composable

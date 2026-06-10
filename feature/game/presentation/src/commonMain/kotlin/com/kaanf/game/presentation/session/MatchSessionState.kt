@@ -1,6 +1,7 @@
 package com.kaanf.game.presentation.session
 
 import androidx.compose.runtime.Immutable
+import com.kaanf.core.presentation.model.LobbyMember
 import com.kaanf.game.domain.model.GameConnectionState
 import com.kaanf.game.domain.model.GameSocketMessage
 import com.kaanf.game.domain.model.GameTask
@@ -10,10 +11,26 @@ import com.kaanf.game.domain.model.MatchScoreboardEntry
 data class MatchSessionState(
     val phase: MatchPhase = MatchPhase.Idle,
     val connectionState: GameConnectionState = GameConnectionState.Connecting,
+    // Lobi durumu da aynı session'da yaşar: etkinlik boyunca tek soket aboneliği var,
+    // CONNECTED'taki lobi snapshot'ı ve join/left push'ları burada toplanır.
+    /** Kapıların açılacağı an (CONNECTED'taki gameStartsAt); 0 = henüz gelmedi. */
+    val lobbyTargetEpochMillis: Long = 0L,
+    val lobbyMembers: List<LobbyMember> = emptyList(),
+    val lobbyTotalCount: Int = 0,
+    val showGameStartSheet: Boolean = false,
     val matchQrToken: String? = null,
     val currentUserId: String? = null,
+    /** Kendi profil fotomuz (kimliğe bağlı, maça özel değil); "ben" avatarlarında kullanılır. */
+    val currentUserPhotoUrl: String? = null,
     val matchId: String? = null,
     val opponentFullName: String? = null,
+    /**
+     * Rakibin profil fotosu. Foto yalnızca davet anında gelir (gelen davette
+     * [GameSocketMessage.MatchInviteReceived.fromProfilePictureUrl], giden davette
+     * sendInvite yanıtındaki url); maç başlayınca buraya taşınır ve session boyu kullanılır.
+     * Null ise UI baş harf + isimden türeyen palet rengine düşer.
+     */
+    val opponentProfilePictureUrl: String? = null,
     val amIWinner: Boolean? = null,
     val activeTask: GameTask? = null,
     val incomingInvite: GameSocketMessage.MatchInviteReceived? = null,
@@ -22,6 +39,8 @@ data class MatchSessionState(
     val isSendingInvite: Boolean = false,
     val showOutgoingInviteSheet: Boolean = false,
     val outgoingOpponentName: String? = null,
+    /** Giden davette, MATCH_STARTED'a kadar tutulan rakip fotosu (sendInvite yanıtından). */
+    val outgoingOpponentPhotoUrl: String? = null,
     val showExitConfirmDialog: Boolean = false,
     val errorMessage: String? = null,
 ) {

@@ -17,6 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kaanf.core.designsystem.component.avatar.avatarPaletteColor
 import com.kaanf.core.designsystem.component.button.BaseMiniButton
 import com.kaanf.core.designsystem.component.progressbar.ThreeDotsAnimatedCard
 import com.kaanf.core.designsystem.theme.AccessDefaults
@@ -51,6 +52,8 @@ fun WhoWonPhase(
     modifier: Modifier = Modifier,
     myClaimWon: Boolean? = null,
     opponentClaimedMeWon: Boolean? = null,
+    opponentImageUrl: String? = null,
+    myImageUrl: String? = null,
 ) {
     val unknownAvatarLabel = stringResource(Res.string.match_unknown_avatar_label)
     val opponentInitial = opponentFullName.take(1).uppercase().ifBlank { unknownAvatarLabel }
@@ -58,10 +61,12 @@ fun WhoWonPhase(
     val meAvatar = WhoWonAvatarUi(
         label = stringResource(Res.string.match_you_avatar_label),
         color = AccessDefaults.Rose,
+        imageUrl = myImageUrl,
     )
     val opponentAvatar = WhoWonAvatarUi(
         label = opponentInitial,
-        color = AccessDefaults.Teal,
+        color = avatarPaletteColor(opponentFullName),
+        imageUrl = opponentImageUrl,
         highlight = true,
     )
 

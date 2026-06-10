@@ -19,7 +19,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kaanf.core.designsystem.component.avatar.AvatarCircle
-import com.kaanf.core.designsystem.component.avatar.AvatarContent
+import com.kaanf.core.designsystem.component.avatar.avatarContentFor
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessIcons
 import com.kaanf.core.designsystem.theme.AccessShapes
@@ -40,6 +40,7 @@ fun LoserActiveTaskPhase(
     opponentName: String,
     task: GameTask?,
     modifier: Modifier = Modifier,
+    opponentImageUrl: String? = null,
 ) {
     Column(
         modifier =
@@ -57,14 +58,16 @@ fun LoserActiveTaskPhase(
         }
 
         WinnerIsWatchingCard(
-            opponentName = opponentName
+            opponentName = opponentName,
+            opponentImageUrl = opponentImageUrl,
         )
     }
 }
 
 @Composable
 private fun WinnerIsWatchingCard(
-    opponentName: String
+    opponentName: String,
+    opponentImageUrl: String? = null,
 ) {
     Box(
         modifier = Modifier
@@ -85,7 +88,11 @@ private fun WinnerIsWatchingCard(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 AvatarCircle(
-                    content = AvatarContent.Initials(label = "M", color = AccessDefaults.Sky),
+                    content = avatarContentFor(
+                        imageUrl = opponentImageUrl,
+                        initialsLabel = opponentName.take(1).uppercase().ifBlank { "?" },
+                        seed = opponentName,
+                    ),
                     avatarSize = 48,
                     borderSize = 2
                 )

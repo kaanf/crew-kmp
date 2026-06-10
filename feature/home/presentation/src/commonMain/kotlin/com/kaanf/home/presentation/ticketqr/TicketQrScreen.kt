@@ -13,10 +13,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.backhandler.BackHandler
@@ -27,8 +25,8 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kaanf.core.designsystem.component.info.InfoCard
+import com.kaanf.core.designsystem.component.layout.AppScaffold
 import com.kaanf.core.designsystem.component.layout.AppTopBar
-import com.kaanf.core.designsystem.component.layout.SnackbarScaffold
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.presentation.model.AppTopBarState
 import com.kaanf.core.presentation.util.ObserveAsEvents
@@ -46,9 +44,9 @@ import org.koin.compose.viewmodel.koinViewModel
 fun TicketQrRoot(
     viewModel: TicketQrViewModel = koinViewModel(),
     onCheckInSuccess: () -> Unit,
+    onBack: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val snackbarHostState = remember { SnackbarHostState() }
 
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
@@ -59,7 +57,7 @@ fun TicketQrRoot(
     TicketContainerScreen(
         state = state,
         onAction = viewModel::onAction,
-        snackbarHostState = snackbarHostState,
+        onBack = onBack,
     )
 }
 
@@ -68,7 +66,7 @@ fun TicketQrRoot(
 fun TicketContainerScreen(
     state: TicketQrState,
     onAction: (TicketQrAction) -> Unit,
-    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
+    onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val qrScrollState: ScrollState = rememberScrollState()
@@ -78,7 +76,8 @@ fun TicketContainerScreen(
         onAction(TicketQrAction.OnBackClick)
     }
 
-    SnackbarScaffold(
+    AppScaffold(
+        modifier = modifier,
         topBar = {
             AppTopBar(
                 elevated = {
@@ -92,13 +91,13 @@ fun TicketContainerScreen(
                     TicketPhase.EventCode -> AppTopBarState.EventCode
                 },
                 onBackClick = {
-                    if (state.phase == TicketPhase.EventCode) {
-                        onAction(TicketQrAction.OnBackClick)
+                    when (state.phase) {
+                        TicketPhase.EventCode -> onAction(TicketQrAction.OnBackClick)
+                        TicketPhase.Qr -> onBack()
                     }
                 },
             )
         },
-        snackbarHostState = snackbarHostState,
     ) { innerPadding ->
         AnimatedContent(
             targetState = state.phase,

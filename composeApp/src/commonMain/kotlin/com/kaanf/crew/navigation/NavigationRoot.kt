@@ -1,8 +1,9 @@
 package com.kaanf.crew.navigation
 
+import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -13,21 +14,46 @@ import com.kaanf.game.presentation.navigation.gameGraph
 import com.kaanf.home.presentation.navigation.HomeGraphRoutes
 import com.kaanf.home.presentation.navigation.homeGraph
 
+private const val TRANSITION_DURATION_MILLIS = 350
+private const val PARALLAX_NUMERATOR = 3
+private const val PARALLAX_DENOMINATOR = 10
+
+private val TransitionEasing = CubicBezierEasing(0.1f, 0.8f, 0.2f, 1f)
+
+
 @Suppress("FunctionNaming")
 @Composable
 fun NavigationRoot(
     navController: NavHostController,
-    startDestination: Any
+    startDestination: Any,
 ) {
     NavHost(
         navController = navController,
         startDestination = startDestination,
-        // Slide yerine fade: ekran kaymadığı için pahalı çizimlerin layer cache'i
-        // korunur, çift ekran rasterize maliyeti olmaz.
-        enterTransition = { fadeIn(tween(150)) },
-        exitTransition = { fadeOut(tween(150)) },
-        popEnterTransition = { fadeIn(tween(150)) },
-        popExitTransition = { fadeOut(tween(150)) },
+        enterTransition = {
+            slideInHorizontally(
+                animationSpec = tween(TRANSITION_DURATION_MILLIS, easing = TransitionEasing),
+                initialOffsetX = { fullWidth -> fullWidth },
+            )
+        },
+        exitTransition = {
+            slideOutHorizontally(
+                animationSpec = tween(TRANSITION_DURATION_MILLIS, easing = TransitionEasing),
+                targetOffsetX = { fullWidth -> -fullWidth * PARALLAX_NUMERATOR / PARALLAX_DENOMINATOR },
+            )
+        },
+        popEnterTransition = {
+            slideInHorizontally(
+                animationSpec = tween(TRANSITION_DURATION_MILLIS, easing = TransitionEasing),
+                initialOffsetX = { fullWidth -> -fullWidth * PARALLAX_NUMERATOR / PARALLAX_DENOMINATOR },
+            )
+        },
+        popExitTransition = {
+            slideOutHorizontally(
+                animationSpec = tween(TRANSITION_DURATION_MILLIS, easing = TransitionEasing),
+                targetOffsetX = { fullWidth -> fullWidth },
+            )
+        },
     ) {
         authGraph(
             navController = navController,
@@ -50,7 +76,7 @@ fun NavigationRoot(
                     }
                     launchSingleTop = true
                 }
-            }
+            },
         )
 
         gameGraph(

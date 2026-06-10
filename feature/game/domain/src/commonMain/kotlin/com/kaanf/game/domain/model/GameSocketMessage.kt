@@ -20,6 +20,7 @@ sealed interface GameSocketMessage {
         val fromParticipantId: String,
         val fromUserId: String,
         val fromFullName: String,
+        val fromProfilePictureUrl: String?,
         val expiresAt: String,
     ) : GameSocketMessage
 
@@ -67,6 +68,13 @@ sealed interface GameSocketMessage {
         val eventId: String,
         val state: String,
         val winnerUserId: String,
+    ) : GameSocketMessage
+
+    data class MatchDisputed(
+        val matchId: String,
+        val eventId: String,
+        val state: String,
+        val disputedByUserId: String,
     ) : GameSocketMessage
 
     data class TaskOffered(

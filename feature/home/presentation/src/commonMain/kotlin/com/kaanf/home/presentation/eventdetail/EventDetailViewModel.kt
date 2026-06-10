@@ -3,7 +3,11 @@ package com.kaanf.home.presentation.eventdetail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kaanf.core.presentation.snackbar.SnackbarController
+import com.kaanf.core.presentation.snackbar.SnackbarMessage
+import com.kaanf.core.presentation.snackbar.SnackbarVariant
 import com.kaanf.core.domain.util.Result
+import com.kaanf.core.presentation.util.UIText
 import com.kaanf.home.domain.usecase.CreateTicketUseCase
 import com.kaanf.home.domain.usecase.GetEventDetailUseCase
 import com.kaanf.home.presentation.mapper.toUiModel
@@ -18,6 +22,7 @@ import kotlinx.coroutines.launch
 class EventDetailViewModel(
     private val getEventDetailUseCase: GetEventDetailUseCase,
     private val createTicketUseCase: CreateTicketUseCase,
+    private val snackbarController: SnackbarController,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     private val eventId =

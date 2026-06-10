@@ -4,6 +4,11 @@ sealed interface MatchSessionAction {
     data object OnBackClick : MatchSessionAction
     data object OnExitConfirmed : MatchSessionAction
     data object OnExitDismissed : MatchSessionAction
+
+    // Lobi aksiyonları: lobi ekranı da aynı graph-scoped session VM'ini kullanır.
+    data object OnLobbyCountdownFinished : MatchSessionAction
+    data object OnEnterGameClick : MatchSessionAction
+    data object OnLobbyExitConfirmed : MatchSessionAction
     data object OnScanClicked : MatchSessionAction
     data class OnScanResult(val scannedMatchQrToken: String) : MatchSessionAction
 

@@ -13,7 +13,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -28,9 +27,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kaanf.core.designsystem.component.button.BaseButton
+import com.kaanf.core.designsystem.component.layout.AppScaffold
 import com.kaanf.core.designsystem.component.layout.AppTopBar
-import com.kaanf.core.designsystem.component.layout.SnackbarScaffold
-import com.kaanf.core.designsystem.component.layout.showSnackbar
 import com.kaanf.core.designsystem.component.textfield.BasePasswordTextField
 import com.kaanf.core.designsystem.component.textfield.BaseTextField
 import com.kaanf.core.designsystem.theme.AccessDefaults
@@ -62,7 +60,6 @@ fun LoginRoot(
     onProfileIncomplete: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val snackbarHostState = remember { SnackbarHostState() }
 
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
@@ -81,16 +78,10 @@ fun LoginRoot(
             LoginEvent.NavigateToProfilePicture -> {
                 onProfileIncomplete.invoke()
             }
-
-            is LoginEvent.ShowSnackbar -> {
-                snackbarHostState.showSnackbar(
-                    event.message
-                )
-            }
         }
     }
 
-    SnackbarScaffold(
+    AppScaffold(
         topBar = {
             AppTopBar(
                 state = AppTopBarState.Login,
@@ -98,7 +89,6 @@ fun LoginRoot(
                 onRightClick = { viewModel.onAction(LoginAction.OnRegisterClick) },
             )
         },
-        snackbarHostState = snackbarHostState,
     ) { innerPadding ->
         LoginScreen(
             modifier = Modifier

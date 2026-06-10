@@ -3,10 +3,15 @@ package com.kaanf.game.presentation.session
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kaanf.core.designsystem.component.avatar.avatarPaletteColor
 import com.kaanf.core.domain.util.DataError
 import com.kaanf.core.domain.util.EmptyResult
+import com.kaanf.core.domain.util.Result
 import com.kaanf.core.domain.util.onFailure
 import com.kaanf.core.domain.util.onSuccess
+import com.kaanf.core.domain.repository.UserRepository
+import com.kaanf.core.presentation.model.LobbyMember
+import com.kaanf.core.presentation.model.UserAvatar
 import com.kaanf.game.domain.model.GameConnectionState
 import com.kaanf.game.domain.model.GameSocketMessage
 import com.kaanf.game.domain.model.GameTask
@@ -25,10 +30,12 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Instant
 
 class MatchSessionViewModel(
     private val eventConnectionClient: EventConnectionClient,
     private val matchRepository: MatchRepository,
+    private val userRepository: UserRepository,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     private val eventId: String = savedStateHandle.get<String>("eventId").orEmpty()
@@ -46,15 +53,20 @@ class MatchSessionViewModel(
 
     init {
         loadMyParticipant()
+        observeCurrentUser()
         observeConnectionState()
         subscribeToEvents()
     }
 
+    private fun observeCurrentUser() {
+        userRepository.observeCurrentUser()
+            .onEach { user ->
+                _state.update { it.copy(currentUserPhotoUrl = user?.profilePictureUrl) }
+            }
+            .launchIn(viewModelScope)
+    }
+
     // region Socket
-    // Her işlenen soket mesajında artar. Reconnect'te snapshot çekerken canlı bir event
-    // geldiyse (epoch değişmişse) snapshot bayatlamıştır; push-only soket reconnect sonrası
-    // yalnız yeni event verdiği için canlı mesaj her zaman snapshot'tan tazedir. Bu, ordinal
-    // tabanlı guard'ın aksine görev-reddi gibi geri geçişlerde de doğru çalışır.
     private var socketEpoch = 0
 
     private fun observeConnectionState() {
@@ -78,13 +90,27 @@ class MatchSessionViewModel(
     private fun reconcileFromSnapshot() {
         val epochAtStart = socketEpoch
         viewModelScope.launch {
-            matchRepository.getMatchSnapshot(eventId)
-                .onSuccess { snapshot ->
-                    // Snapshot uçarken canlı event geldiyse onu esas al, snapshot'ı at.
-                    if (socketEpoch != epochAtStart) return@onSuccess
-                    if (snapshot == null) onMatchEnded() else applySnapshot(snapshot)
+            // Resume sonrası ilk HTTP çağrısı sık sık bayat bağlantı yüzünden düşer; tek
+            // atımlık deneyip sessizce vazgeçmek fazı bayat bırakıyordu (rakip senin
+            // aksiyonunu beklerken iki taraf da "donar"). Birkaç kez backoff'la dene.
+            repeat(RECONCILE_MAX_ATTEMPTS) { attempt ->
+                // Canlı event geldiyse sunucu doğrusu zaten akıyor; snapshot'ı at.
+                if (socketEpoch != epochAtStart) return@launch
+
+                when (val result = matchRepository.getMatchSnapshot(eventId)) {
+                    is Result.Success -> {
+                        if (socketEpoch != epochAtStart) return@launch
+                        val snapshot = result.data
+                        if (snapshot == null) onMatchEnded() else applySnapshot(snapshot)
+                        return@launch
+                    }
+
+                    is Result.Failure -> {
+                        if (attempt == RECONCILE_MAX_ATTEMPTS - 1) return@launch
+                        delay(RECONCILE_RETRY_BASE_DELAY_MS shl attempt)
+                    }
                 }
-            // onFailure: geçici hata; mevcut state korunur, soket akmaya devam eder.
+            }
         }
     }
 
@@ -98,6 +124,8 @@ class MatchSessionViewModel(
                 currentUserId = it.currentUserId ?: snapshot.me.userId,
                 matchId = snapshot.matchId,
                 opponentFullName = snapshot.opponent.fullName,
+                opponentProfilePictureUrl =
+                    it.opponentProfilePictureUrl?.takeIf { _ -> it.matchId == snapshot.matchId },
                 amIWinner = snapshot.amIWinnerOrNull(),
                 activeTask = snapshot.task ?: it.activeTask,
                 incomingInvite = null,
@@ -106,10 +134,11 @@ class MatchSessionViewModel(
                 isSendingInvite = false,
                 showOutgoingInviteSheet = false,
                 outgoingOpponentName = null,
+                outgoingOpponentPhotoUrl = null,
                 errorMessage = null,
             )
         }
-        // Snapshot taşımayan veriler: kazananın görev listesi / puan tablosu.
+
         when (phase) {
             is MatchPhase.WinnerPicks -> loadTasks()
             is MatchPhase.Scoreboard -> loadScoreboard()
@@ -122,11 +151,16 @@ class MatchSessionViewModel(
         // İlk bağlantıda zaten Idle'daysak (maç hiç başlamadıysa) sessiz kal.
         if (current.phase == MatchPhase.Idle && current.matchId == null) return
         // Kopukken maç bitti/iptal oldu: Idle'a sıfırla ve kullanıcıyı bilgilendir.
+        // Lobi durumu maça değil etkinliğe ait; sıfırlamanın dışında tutulur.
         _state.update {
             MatchSessionState(
                 connectionState = it.connectionState,
+                lobbyTargetEpochMillis = it.lobbyTargetEpochMillis,
+                lobbyMembers = it.lobbyMembers,
+                lobbyTotalCount = it.lobbyTotalCount,
                 matchQrToken = it.matchQrToken,
                 currentUserId = it.currentUserId,
+                currentUserPhotoUrl = it.currentUserPhotoUrl,
                 errorMessage = MATCH_ENDED_MESSAGE,
             )
         }
@@ -140,9 +174,57 @@ class MatchSessionViewModel(
     }
 
     private suspend fun onSocketMessage(message: GameSocketMessage) {
-        // Canlı event geldi; uçmakta olan bir snapshot reconcile'ı varsa bayatlatır.
-        socketEpoch++
+        // Canlı bir MAÇ event'i, uçmakta olan snapshot reconcile'ını bayatlatır: sunucu
+        // doğrusu zaten push'la akıyor. CONNECTED/lobi/GAME_STARTED ise maç fazı taşımaz;
+        // üstelik CONNECTED, reconcile'ı tetikleyen durum güncellemesiyle aynı anda
+        // geldiğinden epoch'u artırması kendi tetiklediği reconcile'ı yarışta öldürüyordu
+        // (kopukken kaçan TASK_OFFERED vb. hiç telafi edilmiyordu).
         when (message) {
+            is GameSocketMessage.Connected,
+            is GameSocketMessage.GameStarted,
+            is GameSocketMessage.LobbyUserJoined,
+            is GameSocketMessage.LobbyUserLeft,
+            is GameSocketMessage.Unknown,
+            -> Unit
+
+            else -> socketEpoch++
+        }
+        when (message) {
+            // Lobi: her (yeniden) bağlanışta CONNECTED tam lobi snapshot'ı taşır,
+            // join/left push'ları aradaki farkları işler. Kopukluk penceresinde kaçan
+            // push'lar sonraki CONNECTED'ta kendiliğinden düzelir.
+            is GameSocketMessage.Connected -> {
+                val targetEpochMillis = runCatching {
+                    Instant.parse(message.doorsAt).toEpochMilliseconds()
+                }.getOrDefault(0L)
+                _state.update {
+                    it.copy(
+                        lobbyTargetEpochMillis = targetEpochMillis,
+                        lobbyMembers = message.members.take(MAX_LOBBY_AVATARS).map { member ->
+                            member.toPresentation()
+                        },
+                        lobbyTotalCount = message.totalCount,
+                    )
+                }
+            }
+
+            is GameSocketMessage.LobbyUserJoined -> {
+                _state.update { state ->
+                    val members = state.lobbyMembers.toMutableList()
+                    if (message.fullName != null && members.size < MAX_LOBBY_AVATARS) {
+                        members.add(message.toPresentation())
+                    }
+                    state.copy(lobbyMembers = members, lobbyTotalCount = message.totalCount)
+                }
+            }
+
+            is GameSocketMessage.LobbyUserLeft -> {
+                _state.update { state ->
+                    val members = state.lobbyMembers.filter { it.id != message.userId }
+                    state.copy(lobbyMembers = members, lobbyTotalCount = message.totalCount)
+                }
+            }
+
             is GameSocketMessage.MatchInviteReceived -> {
                 _state.update {
                     it.copy(
@@ -154,13 +236,19 @@ class MatchSessionViewModel(
 
             is GameSocketMessage.MatchStarted -> {
                 _state.update {
+                    // Foto MATCH_STARTED'da gelmez; davet anında yakalananı taşı.
+                    // Gelen davette karşının fotosu invite'ta, giden davette outgoing url'de.
+                    val opponentPhotoUrl =
+                        it.incomingInvite?.fromProfilePictureUrl ?: it.outgoingOpponentPhotoUrl
                     it.copy(
                         showMatchRequestSheet = false,
                         incomingInvite = null,
                         showOutgoingInviteSheet = false,
                         outgoingOpponentName = null,
+                        outgoingOpponentPhotoUrl = null,
                         matchId = message.matchId,
                         opponentFullName = message.opponentFullName,
+                        opponentProfilePictureUrl = opponentPhotoUrl,
                         phase = RpsReady(),
                     )
                 }
@@ -168,7 +256,11 @@ class MatchSessionViewModel(
 
             is GameSocketMessage.MatchInviteDeclined ->
                 _state.update {
-                    it.copy(showOutgoingInviteSheet = false, outgoingOpponentName = null)
+                    it.copy(
+                        showOutgoingInviteSheet = false,
+                        outgoingOpponentName = null,
+                        outgoingOpponentPhotoUrl = null,
+                    )
                 }
 
             is GameSocketMessage.MatchReadyCompleted -> {
@@ -203,6 +295,20 @@ class MatchSessionViewModel(
                     loadTasks()
                 } else {
                     _state.update { it.copy(phase = LoserWaits) }
+                }
+            }
+
+            is GameSocketMessage.MatchDisputed -> {
+                _state.update { state ->
+                    val phase = state.phase as? WhoWon ?: return@update state
+                    state.copy(
+                        phase = phase.copy(
+                            isReporting = false,
+                            myResultClaimWon = null,
+                            opponentClaimedWinnerUserId = null,
+                        ),
+                        amIWinner = null,
+                    )
                 }
             }
 
@@ -248,9 +354,6 @@ class MatchSessionViewModel(
             }
 
             is GameSocketMessage.GameStarted,
-            is GameSocketMessage.Connected,
-            is GameSocketMessage.LobbyUserJoined,
-            is GameSocketMessage.LobbyUserLeft,
             is GameSocketMessage.Unknown,
             is GameSocketMessage.MatchCancelled,
             is GameSocketMessage.MatchInviteExpired -> Unit
@@ -265,6 +368,18 @@ class MatchSessionViewModel(
             MatchSessionAction.OnBackClick -> _state.update { it.copy(showExitConfirmDialog = true) }
             MatchSessionAction.OnExitDismissed -> _state.update { it.copy(showExitConfirmDialog = false) }
             MatchSessionAction.OnExitConfirmed -> onExitConfirmed()
+            MatchSessionAction.OnLobbyCountdownFinished ->
+                _state.update { it.copy(showExitConfirmDialog = false, showGameStartSheet = true) }
+
+            MatchSessionAction.OnEnterGameClick -> {
+                _state.update { it.copy(showGameStartSheet = false) }
+                sendEvent(MatchSessionEvent.NavigateToGame)
+            }
+
+            MatchSessionAction.OnLobbyExitConfirmed -> {
+                _state.update { it.copy(showExitConfirmDialog = false, showGameStartSheet = false) }
+                sendEvent(MatchSessionEvent.NavigateBack)
+            }
             MatchSessionAction.OnScanClicked -> sendEvent(MatchSessionEvent.NavigateToScanOpponent)
             is MatchSessionAction.OnScanResult -> onScanResult(action.scannedMatchQrToken)
             MatchSessionAction.OnInviteAccepted -> respondToInvite { inviteId ->
@@ -341,12 +456,16 @@ class MatchSessionViewModel(
             matchRepository.finishMatch(eventId = eventId, matchId = matchId)
                 .onSuccess {
                     // Maç bitti; soket push'u yok. Ekranı QR/scan home'una (Idle) sıfırlar,
-                    // maça özel state temizlenir, soket bağlantısı ve kimlik korunur.
+                    // maça özel state temizlenir; soket bağlantısı, kimlik ve lobi korunur.
                     _state.update { current ->
                         MatchSessionState(
                             connectionState = current.connectionState,
+                            lobbyTargetEpochMillis = current.lobbyTargetEpochMillis,
+                            lobbyMembers = current.lobbyMembers,
+                            lobbyTotalCount = current.lobbyTotalCount,
                             matchQrToken = current.matchQrToken,
                             currentUserId = current.currentUserId,
+                            currentUserPhotoUrl = current.currentUserPhotoUrl,
                         )
                     }
                 }
@@ -481,9 +600,6 @@ class MatchSessionViewModel(
         }
 
         viewModelScope.launch {
-            // Kullanıcı kendi avatarının satıra düşme animasyonunu görsün diye isteği
-            // kısa bir süre geciktiriyoruz; aksi halde ikinci tıklayanda MATCH_RESULT_CONFIRMED
-            // hemen dönüp ekran animasyon görünmeden bir sonraki faza geçiyor.
             delay(RESULT_REPORT_DELAY_MS)
             matchRepository.reportResult(eventId = eventId, matchId = matchId, won = won)
                 .onFailure { error ->
@@ -495,7 +611,6 @@ class MatchSessionViewModel(
                         )
                     }
                 }
-            // Başarıda bekleme sürer; geçişi MATCH_RESULT_CONFIRMED soketi yapar.
         }
     }
 
@@ -537,6 +652,7 @@ class MatchSessionViewModel(
                         it.copy(
                             isSendingInvite = false,
                             outgoingOpponentName = invite.toFullName,
+                            outgoingOpponentPhotoUrl = invite.toProfilePictureUrl,
                             showOutgoingInviteSheet = true,
                         )
                     }
@@ -576,9 +692,35 @@ class MatchSessionViewModel(
     }
     // endregion
 
+    private fun com.kaanf.game.domain.model.LobbyMember.toPresentation(): LobbyMember {
+        return LobbyMember(
+            id = userId,
+            avatar = UserAvatar(
+                label = fullName.take(1).uppercase(),
+                color = avatarPaletteColor(userId),
+                imageUrl = profilePictureUrl,
+            ),
+        )
+    }
+
+    private fun GameSocketMessage.LobbyUserJoined.toPresentation(): LobbyMember {
+        val name = fullName.orEmpty()
+        return LobbyMember(
+            id = userId,
+            avatar = UserAvatar(
+                label = name.take(1).uppercase(),
+                color = avatarPaletteColor(userId),
+                imageUrl = profilePictureUrl,
+            ),
+        )
+    }
+
     private companion object {
         const val RESULT_REPORT_DELAY_MS = 100L
         const val RESULT_CONFIRM_REVEAL_DELAY_MS = 900L
         const val MATCH_ENDED_MESSAGE = "Maç sonlandı."
+        const val RECONCILE_MAX_ATTEMPTS = 3
+        const val RECONCILE_RETRY_BASE_DELAY_MS = 1_000L
+        const val MAX_LOBBY_AVATARS = 13
     }
 }

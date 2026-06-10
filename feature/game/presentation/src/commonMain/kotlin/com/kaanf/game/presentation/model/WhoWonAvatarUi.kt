@@ -6,6 +6,8 @@ import androidx.compose.ui.graphics.Color
 data class WhoWonAvatarUi(
     val label: String,
     val color: Color,
+    /** Profil fotosu; doluysa baş harf yerine foto gösterilir. [color] halka/fallback rengidir. */
+    val imageUrl: String? = null,
     /** Avatar belirince çevresinde tek seferlik vurgu halkası çalsın mı (rakip seçimi için). */
     val highlight: Boolean = false,
 )

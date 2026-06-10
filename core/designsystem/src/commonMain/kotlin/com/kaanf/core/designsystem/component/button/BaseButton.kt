@@ -37,10 +37,13 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Canvas
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
 import androidx.compose.ui.graphics.drawscope.rotate
 import com.kaanf.core.designsystem.theme.AccessShapes
 import org.jetbrains.compose.resources.DrawableResource
@@ -158,12 +161,20 @@ private fun AnimatedBorderPaint(
     )
 
     Spacer(
-        modifier = modifier.drawBehind {
-            drawRect(color = color.copy(alpha = 0.15f))
-
+        modifier = modifier.drawWithCache {
             val side = hypot(size.width, size.height)
+            val sideInt = side.toInt().coerceAtLeast(1)
             val topLeft = Offset((size.width - side) / 2f, (size.height - side) / 2f)
-            rotate(degrees = angle) {
+
+            // Sweep gradient'i her karede shader olarak değerlendirmek yerine bir
+            // kez bitmap'e rasterize edip dönüşte sadece basıyoruz.
+            val gradientImage = ImageBitmap(sideInt, sideInt)
+            CanvasDrawScope().draw(
+                density = this,
+                layoutDirection = layoutDirection,
+                canvas = Canvas(gradientImage),
+                size = Size(side, side),
+            ) {
                 drawRect(
                     brush = Brush.sweepGradient(
                         colors = listOf(
@@ -175,9 +186,18 @@ private fun AnimatedBorderPaint(
                         ),
                         center = center,
                     ),
-                    topLeft = topLeft,
-                    size = Size(side, side),
                 )
+            }
+
+            onDrawBehind {
+                drawRect(color = color.copy(alpha = 0.15f))
+
+                rotate(degrees = angle) {
+                    drawImage(
+                        image = gradientImage,
+                        topLeft = topLeft,
+                    )
+                }
             }
         },
     )

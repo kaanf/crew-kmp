@@ -11,7 +11,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -31,8 +30,8 @@ import com.kaanf.auth.presentation.util.PolicyUrls
 import com.kaanf.auth.presentation.util.appendPolicyLink
 import com.kaanf.core.designsystem.component.button.BaseButton
 import com.kaanf.core.designsystem.component.checkbox.BaseCheckbox
+import com.kaanf.core.designsystem.component.layout.AppScaffold
 import com.kaanf.core.designsystem.component.layout.AppTopBar
-import com.kaanf.core.designsystem.component.layout.SnackbarScaffold
 import com.kaanf.core.designsystem.component.sheet.SelectionBottomSheet
 import com.kaanf.core.designsystem.component.textfield.BasePasswordTextField
 import com.kaanf.core.designsystem.component.textfield.BaseSelectField
@@ -89,8 +88,6 @@ fun RegisterRoot(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    val snackbarHostState = remember { SnackbarHostState() }
-
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
             is RegisterEvent.RegisterSuccess -> {
@@ -103,7 +100,7 @@ fun RegisterRoot(
         }
     }
 
-    SnackbarScaffold(
+    AppScaffold(
         topBar = {
             AppTopBar(
                 state = AppTopBarState.Register,
@@ -111,7 +108,6 @@ fun RegisterRoot(
                 onRightClick = onReturnToLoginClick,
             )
         },
-        snackbarHostState = snackbarHostState,
     ) { innerPadding ->
         RegisterScreen(
             modifier =

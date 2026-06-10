@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kaanf.core.designsystem.component.avatar.AvatarCircle
 import com.kaanf.core.designsystem.component.avatar.AvatarContent
+import com.kaanf.core.designsystem.component.avatar.avatarContentFor
 import com.kaanf.core.designsystem.component.button.BaseButton
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.CrewTheme
@@ -40,6 +41,8 @@ fun RpsReadyPhase(
     isWaiting: Boolean,
     onReadyClick: () -> Unit,
     modifier: Modifier = Modifier,
+    opponentImageUrl: String? = null,
+    myImageUrl: String? = null,
 ) {
     val unknownAvatarLabel = stringResource(Res.string.match_unknown_avatar_label)
     val opponentInitial = opponentFullName.take(1).uppercase().ifBlank { unknownAvatarLabel }
@@ -63,10 +66,11 @@ fun RpsReadyPhase(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             AvatarCircle(
-                content = AvatarContent.Initials(
-                    label = stringResource(Res.string.match_you_avatar_label),
-                    color = AccessDefaults.Rose,
-                ),
+                content = myImageUrl?.let { AvatarContent.Image(it) }
+                    ?: AvatarContent.Initials(
+                        label = stringResource(Res.string.match_you_avatar_label),
+                        color = AccessDefaults.Rose,
+                    ),
                 avatarSize = 78,
                 textSize = 30.0,
                 borderColor = AccessDefaults.BorderSoft,
@@ -83,7 +87,11 @@ fun RpsReadyPhase(
             )
 
             AvatarCircle(
-                content = AvatarContent.Initials(label = opponentInitial, color = AccessDefaults.Teal),
+                content = avatarContentFor(
+                    imageUrl = opponentImageUrl,
+                    initialsLabel = opponentInitial,
+                    seed = opponentFullName,
+                ),
                 avatarSize = 78,
                 textSize = 30.0,
                 borderColor = AccessDefaults.BorderSoft,

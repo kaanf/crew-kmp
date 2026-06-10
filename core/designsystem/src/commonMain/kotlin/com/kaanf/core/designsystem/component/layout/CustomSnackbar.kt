@@ -13,7 +13,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarData
 import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.SnackbarVisuals
@@ -24,13 +23,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessShapes
-import com.kaanf.core.designsystem.theme.CrewTheme
-import com.kaanf.core.presentation.util.UIText
+import com.kaanf.core.presentation.snackbar.SnackbarMessage
+import com.kaanf.core.presentation.snackbar.SnackbarVariant
 import crew.core.designsystem.generated.resources.Res
 import crew.core.designsystem.generated.resources.ic_bolt
 import crew.core.designsystem.generated.resources.ic_check
@@ -41,34 +39,16 @@ import crew.core.designsystem.generated.resources.ic_wifi_off
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
-data class SnackbarMessage(
-    val title: UIText,
-    val description: UIText,
-    val variant: SnackbarVariant
-)
-
-enum class SnackbarVariant(
-    val icon: DrawableResource,
-) {
-    Accent(
-        icon = Res.drawable.ic_bolt
-    ),
-    Success(
-        icon = Res.drawable.ic_check
-    ),
-    Info(
-        icon = Res.drawable.ic_info
-    ),
-    Warn(
-        icon = Res.drawable.ic_wifi_off
-    ),
-    Error(
-        icon = Res.drawable.ic_close
-    ),
-    AccentALT(
-        icon = Res.drawable.ic_user
-    )
-}
+private val SnackbarVariant.icon: DrawableResource
+    get() =
+        when (this) {
+            SnackbarVariant.Accent -> Res.drawable.ic_bolt
+            SnackbarVariant.Success -> Res.drawable.ic_check
+            SnackbarVariant.Info -> Res.drawable.ic_info
+            SnackbarVariant.Warn -> Res.drawable.ic_wifi_off
+            SnackbarVariant.Error -> Res.drawable.ic_close
+            SnackbarVariant.AccentALT -> Res.drawable.ic_user
+        }
 
 private data class CustomSnackbarVisuals(
     override val message: String,

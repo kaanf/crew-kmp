@@ -6,11 +6,9 @@ import kotlinx.coroutines.flow.callbackFlow
 import platform.Foundation.NSNotificationCenter
 import platform.Foundation.NSOperationQueue
 import platform.UIKit.UIApplication
-import platform.UIKit.UIApplicationDidBecomeActiveNotification
 import platform.UIKit.UIApplicationDidEnterBackgroundNotification
 import platform.UIKit.UIApplicationState
 import platform.UIKit.UIApplicationWillEnterForegroundNotification
-import platform.UIKit.UIApplicationWillResignActiveNotification
 
 actual class AppLifecycleObserver {
     actual val isInForeground: Flow<Boolean> = callbackFlow {
@@ -23,14 +21,6 @@ actual class AppLifecycleObserver {
         send(isCurrentlyInForeground)
 
         val notificationCenter = NSNotificationCenter.defaultCenter
-
-        val foregroundObserver = notificationCenter.addObserverForName(
-            name = UIApplicationDidBecomeActiveNotification,
-            `object` = null,
-            queue = NSOperationQueue.mainQueue
-        ) {
-            trySend(true)
-        }
 
         val willEnterForegroundObserver = notificationCenter.addObserverForName(
             name = UIApplicationWillEnterForegroundNotification,
@@ -48,19 +38,9 @@ actual class AppLifecycleObserver {
             trySend(false)
         }
 
-        val willResignActiveObserver = notificationCenter.addObserverForName(
-            name = UIApplicationWillResignActiveNotification,
-            `object` = null,
-            queue = NSOperationQueue.mainQueue
-        ) {
-            trySend(false)
-        }
-
         awaitClose {
-            notificationCenter.removeObserver(foregroundObserver)
             notificationCenter.removeObserver(willEnterForegroundObserver)
             notificationCenter.removeObserver(backgroundObserver)
-            notificationCenter.removeObserver(willResignActiveObserver)
         }
     }
 }

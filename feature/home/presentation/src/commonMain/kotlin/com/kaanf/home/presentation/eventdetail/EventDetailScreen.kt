@@ -21,11 +21,9 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,8 +41,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kaanf.core.designsystem.component.button.BaseButton
 import com.kaanf.core.designsystem.component.image.BaseImage
+import com.kaanf.core.designsystem.component.layout.AppScaffold
 import com.kaanf.core.designsystem.component.layout.AppTopBar
-import com.kaanf.core.designsystem.component.layout.SnackbarScaffold
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.presentation.model.AppTopBarState
 import com.kaanf.core.presentation.util.ObserveAsEvents
@@ -68,7 +66,6 @@ fun EventDetailRoot(
     onCheckoutSuccess: (eventId: String) -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val snackbarHostState = remember { SnackbarHostState() }
 
     val listState: LazyListState = rememberLazyListState()
 
@@ -80,7 +77,7 @@ fun EventDetailRoot(
         }
     }
 
-    SnackbarScaffold(
+    AppScaffold(
         topBar = {
             AppTopBar(
                 state = AppTopBarState.EventDetail,
@@ -88,7 +85,6 @@ fun EventDetailRoot(
                 onBackClick = { onBackClick() },
             )
         },
-        snackbarHostState = snackbarHostState,
     ) { innerPadding ->
         EventDetailScreen(
             modifier = Modifier

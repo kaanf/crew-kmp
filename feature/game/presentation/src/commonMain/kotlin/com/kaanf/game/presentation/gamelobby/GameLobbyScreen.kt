@@ -11,11 +11,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -31,8 +29,8 @@ import com.kaanf.core.designsystem.component.badge.RoundedBadge
 import com.kaanf.core.designsystem.component.button.BaseButton
 import com.kaanf.core.designsystem.component.dialog.BaseDialog
 import com.kaanf.core.designsystem.component.info.InfoCard
+import com.kaanf.core.designsystem.component.layout.AppScaffold
 import com.kaanf.core.designsystem.component.layout.AppTopBar
-import com.kaanf.core.designsystem.component.layout.SnackbarScaffold
 import com.kaanf.core.designsystem.component.sheet.ContainerBottomSheet
 import com.kaanf.core.designsystem.component.sheet.TwoOptionBottomSheet
 import com.kaanf.core.designsystem.theme.AccessDefaults
@@ -48,36 +46,51 @@ import com.kaanf.game.presentation.gamelobby.component.custom.MinuteSecondCountd
 import com.kaanf.game.presentation.gamelobby.component.custom.TonightFlowCard
 import com.kaanf.game.presentation.gamelobby.component.custom.WhoIsInTonightCard
 import com.kaanf.game.presentation.gamelobby.component.dialog.LeaveEventDialog
+import com.kaanf.game.presentation.session.MatchSessionAction
+import com.kaanf.game.presentation.session.MatchSessionEvent
+import com.kaanf.game.presentation.session.MatchSessionViewModel
 import org.jetbrains.compose.ui.tooling.preview.Preview
-import org.koin.compose.viewmodel.koinViewModel
 
+/**
+ * Lobi, ScanOpponent gibi graph-scoped [MatchSessionViewModel]'in bir görünümüdür: ayrı bir
+ * soket aboneliği YOKTUR. Etkinlik boyunca tek canlı bağlantı session VM'inde yaşar; lobi
+ * üyeleri/geri sayım oradan okunur, aksiyonlar oraya delege edilir.
+ */
 @Composable
 fun GameLobbyRoot(
-    viewModel: GameLobbyViewModel = koinViewModel(),
+    viewModel: MatchSessionViewModel,
     onBack: () -> Unit,
     onNavigateToGame: () -> Unit,
 ) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
-    val snackbarHostState = remember { SnackbarHostState() }
+    val sessionState by viewModel.state.collectAsStateWithLifecycle()
 
     val scrollState: ScrollState = rememberScrollState()
 
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
-            GameLobbyEvent.NavigateBack -> onBack()
-            GameLobbyEvent.NavigateToGame -> onNavigateToGame()
+            MatchSessionEvent.NavigateBack -> onBack()
+            MatchSessionEvent.NavigateToGame -> onNavigateToGame()
+            else -> Unit
         }
     }
 
-    SnackbarScaffold(
+    // Session state → bu ekranın ihtiyaç duyduğu dilime indir.
+    val state = GameLobbyState(
+        targetEpochMillis = sessionState.lobbyTargetEpochMillis,
+        showGameStartSheet = sessionState.showGameStartSheet,
+        showExitConfirmDialog = sessionState.showExitConfirmDialog,
+        lobbyMembers = sessionState.lobbyMembers,
+        lobbyTotalCount = sessionState.lobbyTotalCount,
+    )
+
+    AppScaffold(
         topBar = {
             AppTopBar(
                 elevated = { scrollState.canScrollBackward },
                 state = AppTopBarState.GameLobby("Lobby"),
-                onBackClick = { viewModel.onAction(GameLobbyAction.OnBackClick) },
+                onBackClick = { viewModel.onAction(MatchSessionAction.OnBackClick) },
             )
         },
-        snackbarHostState = snackbarHostState,
     ) { innerPadding ->
         GameLobbyScreen(
             modifier = Modifier
@@ -85,7 +98,24 @@ fun GameLobbyRoot(
                 .consumeWindowInsets(innerPadding),
             state = state,
             scrollState = scrollState,
-            onAction = viewModel::onAction,
+            onAction = { action ->
+                when (action) {
+                    GameLobbyAction.OnBackClick ->
+                        viewModel.onAction(MatchSessionAction.OnBackClick)
+
+                    GameLobbyAction.OnCountdownFinished ->
+                        viewModel.onAction(MatchSessionAction.OnLobbyCountdownFinished)
+
+                    GameLobbyAction.OnExitDismissed ->
+                        viewModel.onAction(MatchSessionAction.OnExitDismissed)
+
+                    GameLobbyAction.OnExitConfirmed ->
+                        viewModel.onAction(MatchSessionAction.OnLobbyExitConfirmed)
+
+                    GameLobbyAction.OnEnterGameClick ->
+                        viewModel.onAction(MatchSessionAction.OnEnterGameClick)
+                }
+            },
         )
     }
 }
@@ -168,7 +198,7 @@ fun GameLobbyScreen(
 
         OnboardingInfoCard()
 
-        WhoIsInTonightCard()
+        //WhoIsInTonightCard()
 
         TonightFlowCard()
 

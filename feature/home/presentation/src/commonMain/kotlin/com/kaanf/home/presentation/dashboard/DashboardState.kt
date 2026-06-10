@@ -41,6 +41,7 @@ data class DashboardState(
             points = 20,
         ),
     ),
-    val isLoading: Boolean = false,
+    val isLoading: Boolean = true,
+    val isRefreshing: Boolean = false,
     val profilePictureUrl: String? = null
 )

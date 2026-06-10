@@ -1,6 +1,9 @@
 package com.kaanf.home.presentation.dashboard
 
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -14,18 +17,21 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.kaanf.core.designsystem.component.layout.AppScaffold
 import com.kaanf.core.designsystem.component.layout.AppTopBar
-import com.kaanf.core.designsystem.component.layout.SnackbarScaffold
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.presentation.model.AppTopBarState
 import com.kaanf.core.presentation.util.ObserveAsEvents
@@ -52,7 +58,6 @@ fun DashboardRoot(
     onEventClicked: (eventId: String) -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val snackbarHostState = remember { SnackbarHostState() }
 
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
@@ -62,7 +67,7 @@ fun DashboardRoot(
 
     val listState = rememberLazyListState()
 
-    SnackbarScaffold(
+    AppScaffold(
         topBar = {
             AppTopBar(
                 state = AppTopBarState.Dashboard(state.profilePictureUrl),
@@ -70,7 +75,6 @@ fun DashboardRoot(
                 onRightClick = {},
             )
         },
-        snackbarHostState = snackbarHostState,
     ) { innerPadding ->
         DashboardScreen(
             modifier = Modifier
@@ -83,6 +87,7 @@ fun DashboardRoot(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
     modifier: Modifier,
@@ -90,9 +95,54 @@ fun DashboardScreen(
     onAction: (DashboardAction) -> Unit,
     listState: LazyListState,
 ) {
+    Crossfade(
+        targetState = state.isLoading,
+        modifier = modifier.fillMaxSize(),
+        animationSpec = tween(durationMillis = 250),
+    ) { isLoading ->
+        if (isLoading) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator(color = AccessDefaults.Accent)
+            }
+        } else {
+            val pullToRefreshState = rememberPullToRefreshState()
+
+            PullToRefreshBox(
+                isRefreshing = state.isRefreshing,
+                onRefresh = { onAction(DashboardAction.OnRefresh) },
+                state = pullToRefreshState,
+                indicator = {
+                    PullToRefreshDefaults.Indicator(
+                        modifier = Modifier.align(Alignment.TopCenter),
+                        state = pullToRefreshState,
+                        isRefreshing = state.isRefreshing,
+                        containerColor = AccessDefaults.SurfaceElevated,
+                        color = AccessDefaults.Accent,
+                    )
+                },
+            ) {
+                DashboardContent(
+                    listState = listState,
+                    state = state,
+                    onAction = onAction,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun DashboardContent(
+    listState: LazyListState,
+    state: DashboardState,
+    onAction: (DashboardAction) -> Unit,
+) {
     LazyColumn(
         state = listState,
-        modifier = modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(bottom = 24.dp),
     ) {
         item(contentType = "header") {
