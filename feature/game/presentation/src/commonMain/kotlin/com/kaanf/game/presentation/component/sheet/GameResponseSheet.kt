@@ -126,7 +126,7 @@ fun GameResponseSheet(
         )
 
         Text(
-            text = "Accept and you'll get a 10‑second window to back out — no points either way. After that, the round starts.",
+            text = "Accept to start the round right away. Heads up — leaving mid‑match counts as a loss.",
             style = MaterialTheme.typography.titleSmall.copy(
                 color = AccessDefaults.TextMuted,
                 fontWeight = FontWeight.Medium,

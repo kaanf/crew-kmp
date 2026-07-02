@@ -21,11 +21,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.kaanf.core.designsystem.component.info.InfoCard
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessIcons
@@ -33,8 +36,10 @@ import com.kaanf.core.designsystem.theme.AccessShapes
 import com.kaanf.core.designsystem.theme.CrewTheme
 import com.kaanf.home.presentation.eventcode.component.CodeFieldStatus
 import com.kaanf.home.presentation.eventcode.component.CodeInputField
+import com.kaanf.home.presentation.ticketqr.component.doorslocked.DoorsLockedInfoCard
 import crew.feature.home.presentation.generated.resources.Res
 import crew.feature.home.presentation.generated.resources.event_code_headline
+import crew.feature.home.presentation.generated.resources.ticket_qr_clear_code_action
 import crew.feature.home.presentation.generated.resources.event_code_helper_text
 import crew.feature.home.presentation.generated.resources.event_code_info_description
 import crew.feature.home.presentation.generated.resources.event_code_info_title
@@ -49,7 +54,10 @@ fun EventCodeContent(
     eventCode: String,
     status: CodeFieldStatus,
     enabled: Boolean,
+    doorsLocked: Boolean,
+    doorTime: String,
     onCodeChanged: (String) -> Unit,
+    onClearClicked: () -> Unit,
     onShowQrClicked: () -> Unit,
     modifier: Modifier = Modifier,
     scrollState: ScrollState = rememberScrollState(),
@@ -81,7 +89,27 @@ fun EventCodeContent(
                     ),
                 )
 
+                if (doorsLocked) {
+                    DoorsLockedInfoCard(doorTime = doorTime)
+                }
+
                 Spacer(modifier = Modifier.height(6.dp))
+
+                val canClear = enabled && eventCode.isNotEmpty()
+                Text(
+                    text = stringResource(Res.string.ticket_qr_clear_code_action),
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        color = AccessDefaults.TextMuted,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.sp,
+                    ),
+                    modifier = Modifier
+                        .align(Alignment.End)
+                        .clip(AccessShapes.Small)
+                        .clickable(enabled = canClear, onClick = onClearClicked)
+                        .alpha(if (canClear) 1f else 0.4f)
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                )
 
                 CodeInputField(
                     value = eventCode,
@@ -171,7 +199,10 @@ fun EventCodePreview() {
             eventCode = "",
             status = CodeFieldStatus.Editing,
             enabled = true,
+            doorsLocked = false,
+            doorTime = "20:00",
             onCodeChanged = {},
+            onClearClicked = {},
             onShowQrClicked = {},
             modifier = Modifier,
         )

@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -58,24 +60,23 @@ fun BaseMiniButton(
         }
     val resolvedBackgroundColor =
         backgroundColor ?: when {
-            isLoading -> AccessDefaults.FieldFocusedBackground
             danger -> AccessDefaults.DangerBackground
             filled -> AccessDefaults.Accent
             else -> AccessDefaults.Surface
         }
     val resolvedContentColor =
         textColor ?: when {
-            isLoading -> AccessDefaults.LoadingButtonText
-            danger && enabled -> AccessDefaults.LeftArrowColor
-            filled && enabled -> AccessDefaults.OnAccent
-            enabled -> AccessDefaults.TextPrimary
+            danger && (enabled || isLoading) -> AccessDefaults.LeftArrowColor
+            filled && (enabled || isLoading) -> AccessDefaults.OnAccent
+            enabled || isLoading -> AccessDefaults.TextPrimary
             else -> AccessDefaults.TextFaint
         }
 
-    Row(
+    Box(
         modifier = modifier
             .height(36.dp)
-            .alpha(if (enabled) 1f else 0.5f)
+            // Loading shares the dimmed "disabled" look: normal background at 0.5 alpha.
+            .alpha(if (enabled && !isLoading) 1f else 0.5f)
             .clip(outerShape)
             .background(resolvedBorderColor)
             .padding(borderWidth)
@@ -89,25 +90,39 @@ fun BaseMiniButton(
             )
             .defaultMinSize(minWidth = 64.dp)
             .padding(horizontal = 14.dp),
-        horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
-        verticalAlignment = Alignment.CenterVertically,
+        contentAlignment = Alignment.Center,
     ) {
-        if (leadingIcon != null && !isLoading) {
-            Icon(
-                painter = painterResource(leadingIcon),
-                contentDescription = null,
-                tint = resolvedContentColor,
-                modifier = Modifier.size(16.dp),
+        // The label always defines the button width; while loading it stays laid out but
+        // invisible so the spinner overlay doesn't shrink the button.
+        Row(
+            modifier = Modifier.alpha(if (isLoading) 0f else 1f),
+            horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (leadingIcon != null) {
+                Icon(
+                    painter = painterResource(leadingIcon),
+                    contentDescription = null,
+                    tint = resolvedContentColor,
+                    modifier = Modifier.size(16.dp),
+                )
+            }
+            Text(
+                text = text,
+                style = MaterialTheme.typography.labelLarge.copy(
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = resolvedContentColor,
+                ),
             )
         }
-        Text(
-            text = if (isLoading) loadingText else text,
-            style = MaterialTheme.typography.labelLarge.copy(
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Bold,
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(16.dp),
                 color = resolvedContentColor,
-            ),
-        )
+                strokeWidth = 2.dp,
+            )
+        }
     }
 }
 

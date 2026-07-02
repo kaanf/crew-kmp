@@ -9,4 +9,5 @@ data class EventDashboardUiModel(
     val percentage: Int,
     val formattedPrice: String,
     val isFeatured: Boolean,
+    val hasMyTicket: Boolean,
 )

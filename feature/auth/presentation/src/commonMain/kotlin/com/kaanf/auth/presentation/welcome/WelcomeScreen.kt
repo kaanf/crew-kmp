@@ -32,6 +32,7 @@ import com.kaanf.auth.presentation.util.appendPolicyLink
 import com.kaanf.core.designsystem.component.button.BaseButton
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.CrewTheme
+import com.kaanf.core.presentation.util.TestTags
 import crew.feature.auth.presentation.generated.resources.Res
 import crew.feature.auth.presentation.generated.resources.welcome_body
 import crew.feature.auth.presentation.generated.resources.welcome_headline_leave_with
@@ -71,6 +72,7 @@ fun WelcomeScreen(
         modifier =
             modifier
                 .fillMaxSize()
+                .testTag(TestTags.WELCOME_SCREEN)
                 .background(AccessDefaults.Background)
                 .navigationBarsPadding(),
     ) {
@@ -161,12 +163,14 @@ private fun Footer(
         BaseButton(
             text = stringResource(Res.string.welcome_primary_action_create_account),
             onClick = onCreateAccountClick,
+            modifier = Modifier.testTag(TestTags.WELCOME_CREATE_ACCOUNT),
             filled = true,
         )
 
         BaseButton(
             text = stringResource(Res.string.welcome_secondary_action_login),
             onClick = onLoginClick,
+            modifier = Modifier.testTag(TestTags.WELCOME_LOGIN),
         )
 
         Text(

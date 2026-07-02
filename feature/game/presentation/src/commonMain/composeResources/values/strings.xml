@@ -41,6 +41,15 @@
     <string name="match_phase_who_won_lost_emoji">&#x1F605;</string>
     <string name="match_phase_who_won_waiting">%1$s is calling it...</string>
     <string name="match_phase_who_won_dispute_action">Dispute &#183; ask the host</string>
+    <string name="match_disputed_title">You both said &#8220;I won&#8221;</string>
+    <string name="match_disputed_description">Pick again &#8212; honestly this time.</string>
+    <string name="match_ended_title">Match ended</string>
+    <string name="match_ended_description">Your match wrapped up while you were away.</string>
+    <string name="match_camera_permission_title">Camera access is off</string>
+    <string name="match_camera_permission_description">Scanning your opponent&apos;s code needs the camera. Turn it on in Settings.</string>
+    <string name="match_camera_permission_settings_action">Open Settings</string>
+    <string name="match_camera_permission_dismiss_action">Not now</string>
+    <string name="match_camera_permission_retry_action">Allow camera</string>
 
     <string name="match_phase_winner_picks_eyebrow">PICK A TASK FOR %1$s</string>
     <string name="match_phase_winner_picks_title">Choose 1 of %1$d.</string>
@@ -74,6 +83,8 @@
     <string name="match_phase_scoreboard_subtitle_winner_bailed">You took the throw &#183; task bailed. Here&apos;s the tally.</string>
     <string name="match_phase_scoreboard_subtitle_loser_done">You cleared the task. Here&apos;s the tally.</string>
     <string name="match_phase_scoreboard_subtitle_loser_not_done">Task not done. Here&apos;s the tally.</string>
+    <string name="match_phase_scoreboard_subtitle_winner_forfeit">Opponent left the match &#183; the win is yours. Here&apos;s the tally.</string>
+    <string name="match_phase_scoreboard_subtitle_loser_forfeit">You left the match. Here&apos;s the tally.</string>
     <string name="match_phase_scoreboard_finish_action">Finish</string>
     <string name="match_phase_scoreboard_finish_loading">Finishing...</string>
 
@@ -87,4 +98,14 @@
     <string name="match_scoreboard_detail_completed_task_subtitle">Challenge cleared</string>
     <string name="match_scoreboard_detail_task_not_done_title">Task not done</string>
     <string name="match_scoreboard_detail_task_not_done_subtitle">No points earned</string>
+
+    <string name="match_connection_lost_title">Connection lost</string>
+    <string name="match_connection_lost_description">You\'ve been disconnected from the match. Please rejoin.</string>
+
+    <string name="match_invite_declined_title">Invite declined</string>
+    <string name="match_invite_declined_description">Your opponent didn\'t accept the match.</string>
+    <string name="match_invite_expired_title">Invite expired</string>
+    <string name="match_invite_expired_description">The match invite timed out.</string>
+    <string name="match_invite_failed_title">Couldn\'t send invite</string>
+    <string name="match_invite_failed_description">Try scanning again.</string>
 </resources>

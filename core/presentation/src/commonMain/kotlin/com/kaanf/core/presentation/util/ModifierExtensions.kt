@@ -21,9 +21,14 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun Modifier.clearFocusOnTap(): Modifier {
     val focusManager = LocalFocusManager.current
+    // Compose's FocusManager only knows about Compose focus. The auth fields are native interop
+    // views (UITextField / EditText) whose focus + keyboard live outside Compose, so we also have
+    // to resign the native first responder, otherwise tapping outside leaves the keyboard up.
+    val clearNativeFocus = rememberNativeFocusClearer()
     return this.pointerInput(Unit) {
         detectTapGestures {
             focusManager.clearFocus()
+            clearNativeFocus()
         }
     }
 }

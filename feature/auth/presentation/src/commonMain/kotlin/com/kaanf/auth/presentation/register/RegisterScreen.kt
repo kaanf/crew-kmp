@@ -20,12 +20,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kaanf.auth.domain.model.Gender
+import com.kaanf.auth.presentation.component.textfield.NativeAuthPasswordTextField
+import com.kaanf.auth.presentation.component.textfield.NativeAuthTextField
+import com.kaanf.auth.presentation.component.textfield.NativeAuthTextFieldFormat
 import com.kaanf.auth.presentation.util.PolicyUrls
 import com.kaanf.auth.presentation.util.appendPolicyLink
 import com.kaanf.core.designsystem.component.button.BaseButton
@@ -33,15 +37,12 @@ import com.kaanf.core.designsystem.component.checkbox.BaseCheckbox
 import com.kaanf.core.designsystem.component.layout.AppScaffold
 import com.kaanf.core.designsystem.component.layout.AppTopBar
 import com.kaanf.core.designsystem.component.sheet.SelectionBottomSheet
-import com.kaanf.core.designsystem.component.textfield.BasePasswordTextField
 import com.kaanf.core.designsystem.component.textfield.BaseSelectField
-import com.kaanf.core.designsystem.component.textfield.BaseTextField
-import com.kaanf.core.designsystem.component.textfield.DateInputTransformation
-import com.kaanf.core.designsystem.component.textfield.DateOutputTransformation
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.CrewTheme
 import com.kaanf.core.presentation.model.AppTopBarState
 import com.kaanf.core.presentation.util.ObserveAsEvents
+import com.kaanf.core.presentation.util.TestTags
 import com.kaanf.core.presentation.util.clearFocusOnTap
 import crew.feature.auth.presentation.generated.resources.Res
 import crew.feature.auth.presentation.generated.resources.auth_email_label
@@ -133,6 +134,7 @@ fun RegisterScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
+            .testTag(TestTags.REGISTER_SCREEN)
             .clearFocusOnTap(),
     ) {
         Column(
@@ -169,40 +171,43 @@ fun RegisterScreen(
                     modifier = Modifier.padding(top = 32.dp),
                     verticalArrangement = Arrangement.spacedBy(20.dp),
                 ) {
-                    BaseTextField(
+                    NativeAuthTextField(
                         state = state.emailTextState,
                         label = stringResource(Res.string.auth_email_label),
                         placeholder = stringResource(Res.string.auth_email_placeholder),
                         keyboardType = KeyboardType.Email,
+                        testTag = TestTags.REGISTER_EMAIL,
                     )
 
-                    BasePasswordTextField(
+                    NativeAuthPasswordTextField(
                         state = state.passwordTextState,
                         label = stringResource(Res.string.auth_password_label),
                         hint = stringResource(Res.string.register_password_requirements_hint),
+                        isError = state.passwordTextState.text.isNotEmpty() && !state.isPasswordValid,
                         placeholder = stringResource(Res.string.register_password_placeholder),
+                        testTag = TestTags.REGISTER_PASSWORD,
                     )
 
-                    BasePasswordTextField(
+                    NativeAuthPasswordTextField(
                         state = state.rePasswordTextState,
                         label = stringResource(Res.string.register_confirm_password_label),
                         placeholder = stringResource(Res.string.register_confirm_password_placeholder),
+                        testTag = TestTags.REGISTER_RE_PASSWORD,
                     )
 
-                    BaseTextField(
+                    NativeAuthTextField(
                         state = state.fullNameTextState,
                         label = stringResource(Res.string.register_full_name_label),
                         hint = stringResource(Res.string.register_full_name_hint),
                         placeholder = stringResource(Res.string.register_full_name_placeholder),
                     )
 
-                    BaseTextField(
+                    NativeAuthTextField(
                         state = state.dateOfBirthTextState,
                         label = stringResource(Res.string.register_date_of_birth_label),
                         placeholder = stringResource(Res.string.register_date_of_birth_placeholder),
                         keyboardType = KeyboardType.Number,
-                        inputTransformation = DateInputTransformation,
-                        outputTransformation = DateOutputTransformation,
+                        format = NativeAuthTextFieldFormat.Date,
                     )
 
                     BaseSelectField(
@@ -236,7 +241,9 @@ fun RegisterScreen(
                             )
                             append(stringResource(Res.string.register_terms_suffix))
                         },
-                        modifier = Modifier.padding(top = 8.dp),
+                        modifier = Modifier
+                            .padding(top = 8.dp)
+                            .testTag(TestTags.REGISTER_TERMS),
                     )
 
                     BaseButton(
@@ -248,7 +255,8 @@ fun RegisterScreen(
                         modifier =
                             Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 4.dp, vertical = 20.dp),
+                                .padding(horizontal = 4.dp, vertical = 20.dp)
+                                .testTag(TestTags.REGISTER_SUBMIT),
                         isLoading = state.isRegistering,
                         enabled = state.canSubmit,
                         filled = true,

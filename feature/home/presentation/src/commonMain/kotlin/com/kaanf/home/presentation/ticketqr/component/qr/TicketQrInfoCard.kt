@@ -21,11 +21,11 @@ import androidx.compose.ui.unit.sp
 import com.kaanf.core.designsystem.component.badge.RoundedBadge
 import com.kaanf.core.designsystem.component.button.BaseMiniButton
 import com.kaanf.core.designsystem.component.divider.SectionDivider
-import com.kaanf.core.designsystem.component.qr.UserQrCard
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessShapes
 import com.kaanf.core.designsystem.theme.CrewTheme
 import crew.feature.home.presentation.generated.resources.Res
+import crew.feature.home.presentation.generated.resources.ticket_qr_door_code_label
 import crew.feature.home.presentation.generated.resources.ticket_qr_enter_event_code_action
 import crew.feature.home.presentation.generated.resources.ticket_qr_entry_badge
 import crew.feature.home.presentation.generated.resources.ticket_qr_event_date
@@ -33,10 +33,7 @@ import crew.feature.home.presentation.generated.resources.ticket_qr_event_series
 import crew.feature.home.presentation.generated.resources.ticket_qr_event_venue
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
-import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
 
-@OptIn(ExperimentalUuidApi::class)
 @Composable
 fun TicketQrInfoCard(
     eventTitle: String,
@@ -112,15 +109,21 @@ fun TicketQrInfoCard(
 
         SectionDivider()
 
-        UserQrCard(
-            inputText = entryCode + Uuid.random(),
+        // Kapıdaki tek çalışan giriş yolu bu kod (QR'ı okuyan bir uç yok) — kahraman o.
+        Text(
+            text = entryCode,
+            style = MaterialTheme.typography.displayMedium.copy(
+                color = AccessDefaults.TextPrimary,
+                letterSpacing = 12.sp,
+            ),
         )
 
         Text(
-            text = entryCode,
+            text = stringResource(Res.string.ticket_qr_door_code_label),
             style = MaterialTheme.typography.labelSmall.copy(
                 color = AccessDefaults.TextMuted,
                 fontSize = 12.sp,
+                letterSpacing = 1.sp,
             ),
         )
     }

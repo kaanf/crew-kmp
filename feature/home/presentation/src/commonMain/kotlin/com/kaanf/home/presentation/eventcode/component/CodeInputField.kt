@@ -70,8 +70,7 @@ fun CodeInputField(
             .onFocusChanged { isFocused = it.isFocused },
         enabled = editable,
         keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.Text,
-            capitalization = KeyboardCapitalization.Characters,
+            keyboardType = KeyboardType.Number,
         ),
         cursorBrush = SolidColor(Color.Transparent),
         decorationBox = {
@@ -169,14 +168,12 @@ private fun BlinkingCursor(
         modifier = Modifier
             .width(2.dp)
             .height(height)
-            // alpha is read inside graphicsLayer (draw phase), so the 60fps blink only
-            // redraws this box — it never recomposes it.
             .graphicsLayer { this.alpha = alpha }
             .background(color, RoundedCornerShape(1.dp)),
     )
 }
 
-private const val DISABLED_ALPHA = 0.4f
+private const val DISABLED_ALPHA = 0.7f
 
 private val Accent = Color(0xFFA4D63C)
 private val Cream = Color(0xFFF2EDE0)

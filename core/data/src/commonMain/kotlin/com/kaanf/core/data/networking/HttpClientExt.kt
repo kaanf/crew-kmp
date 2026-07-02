@@ -5,10 +5,13 @@ import com.kaanf.core.domain.util.Result
 import io.ktor.client.HttpClient
 import io.ktor.client.call.NoTransformationFoundException
 import io.ktor.client.call.body
+import io.ktor.client.plugins.auth.authProvider
+import io.ktor.client.plugins.auth.providers.BearerAuthProvider
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
+import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
@@ -134,6 +137,24 @@ suspend inline fun <reified Request, reified Response : Any> HttpClient.put(
     }
 }
 
+suspend inline fun <reified Request, reified Response : Any> HttpClient.patch(
+    route: String,
+    queryParams: Map<String, Any> = mapOf(),
+    body: Request,
+    crossinline builder: HttpRequestBuilder.() -> Unit = {},
+): Result<Response, DataError.Remote> {
+    return safeCall {
+        patch {
+            url(constructRoute(route))
+            queryParams.forEach { (key, value) ->
+                parameter(key, value)
+            }
+            setBody(body)
+            builder()
+        }
+    }
+}
+
 suspend inline fun <reified T> safeCall(noinline execute: suspend () -> HttpResponse): Result<T, DataError.Remote> {
     return platformSafeCall(execute = execute) { response ->
         responseToResult(response)
@@ -161,6 +182,32 @@ suspend inline fun <reified T> responseToResult(response: HttpResponse): Result<
         500 -> Result.Failure(DataError.Remote.SERVER_ERROR)
         503 -> Result.Failure(DataError.Remote.SERVICE_UNAVAILABLE)
         else -> Result.Failure(DataError.Remote.UNKNOWN)
+    }
+}
+
+/**
+ * Bearer plugin token'ı bir kez okuyup cache'ler ve session storage değişse de kendi
+ * kendine yenilemez. Session her değiştiğinde (login/logout/refresh) cache'i düşürerek
+ * bir sonraki isteğin storage'dan taze token okumasını sağlar; aksi halde logout sonrası
+ * eski kullanıcının token'ı aynı process'te canlı kalır.
+ */
+fun HttpClient.clearBearerToken() {
+    authProvider<BearerAuthProvider>()?.clearToken()
+}
+
+/**
+ * [map] gibi, ama transform'daki beklenmedik hatayı (Instant.parse, enum valueOf vb.)
+ * SERIALIZATION hatasına çevirir. safeCall yalnız HTTP çağrısını sarar; mapper'daki bir
+ * exception aksi halde ViewModel scope'una fırlayıp uygulamayı çökertir.
+ */
+inline fun <T, R> Result<T, DataError.Remote>.mapCatching(transform: (T) -> R): Result<R, DataError.Remote> {
+    return when (this) {
+        is Result.Failure -> this
+        is Result.Success -> try {
+            Result.Success(transform(data))
+        } catch (e: Exception) {
+            Result.Failure(DataError.Remote.SERIALIZATION)
+        }
     }
 }
 

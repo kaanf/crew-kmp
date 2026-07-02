@@ -5,6 +5,7 @@ import com.kaanf.game.data.dto.LobbyUserJoinedDto
 import com.kaanf.game.data.dto.LobbyUserLeftDto
 import com.kaanf.game.data.dto.GameStartedPayloadDto
 import com.kaanf.game.data.dto.LobbyMemberDto
+import com.kaanf.game.data.dto.MatchCancelledPayloadDto
 import com.kaanf.game.data.dto.MatchDisputedPayloadDto
 import com.kaanf.game.data.dto.MatchInviteReceivedPayloadDto
 import com.kaanf.game.data.dto.MatchInviteResolvedPayloadDto
@@ -17,8 +18,11 @@ import com.kaanf.game.data.dto.TaskFinishedPayloadDto
 import com.kaanf.game.data.dto.TaskOfferedPayloadDto
 import com.kaanf.game.data.dto.TaskRejectedPayloadDto
 import com.kaanf.game.data.dto.TaskStartedPayloadDto
+import com.kaanf.game.data.dto.ViewerStatsDto
+import com.kaanf.game.domain.model.CurrentUserStats
 import com.kaanf.game.domain.model.GameSocketMessage
 import com.kaanf.game.domain.model.LobbyMember
+import com.kaanf.game.domain.model.MatchOutcome
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.decodeFromJsonElement
@@ -31,16 +35,33 @@ private fun LobbyMemberDto.toDomain(): LobbyMember {
     )
 }
 
+private fun ViewerStatsDto.toDomain(): CurrentUserStats {
+    return CurrentUserStats(
+        score = score,
+        winCount = winCount,
+        matchesCount = matchesCount,
+        recentResults = recentResults.mapNotNull { result ->
+            when (result) {
+                "WIN" -> MatchOutcome.WIN
+                "LOSS" -> MatchOutcome.LOSS
+                else -> null
+            }
+        },
+    )
+}
+
 fun SocketEnvelopeDto.toDomain(json: Json): GameSocketMessage = when (type) {
     "CONNECTED" -> json.decodePayloadOrNull<ConnectedPayloadDto>(payload)
         ?.let {
             GameSocketMessage.Connected(
                 eventId = it.eventId,
-                doorsAt = it.gameStartsAt,
+                gameStartsAt = it.gameStartsAt,
+                gameEndsAt = it.gameEndsAt,
                 totalCount = it.totalCount,
                 members = it.members.map { member ->
                     member.toDomain()
-                }
+                },
+                me = it.me?.toDomain(),
             )
         }
         ?: GameSocketMessage.Unknown(type)
@@ -77,6 +98,17 @@ fun SocketEnvelopeDto.toDomain(json: Json): GameSocketMessage = when (type) {
                 opponentParticipantId = it.opponentParticipantId,
                 opponentUserId = it.opponentUserId,
                 opponentFullName = it.opponentFullName,
+            )
+        }
+        ?: GameSocketMessage.Unknown(type)
+
+    "MATCH_CANCELLED" -> json.decodePayloadOrNull<MatchCancelledPayloadDto>(payload)
+        ?.let {
+            GameSocketMessage.MatchCancelled(
+                matchId = it.matchId,
+                eventId = it.eventId,
+                state = it.state,
+                cancelledByUserId = it.cancelledByUserId,
             )
         }
         ?: GameSocketMessage.Unknown(type)
@@ -164,6 +196,10 @@ fun SocketEnvelopeDto.toDomain(json: Json): GameSocketMessage = when (type) {
                 loserPointsAwarded = it.loserPointsAwarded,
                 winnerTotalScore = it.winnerTotalScore,
                 loserTotalScore = it.loserTotalScore,
+                winnerWinCount = it.winnerWinCount,
+                winnerMatchesCount = it.winnerMatchesCount,
+                loserWinCount = it.loserWinCount,
+                loserMatchesCount = it.loserMatchesCount,
             )
         }
         ?: GameSocketMessage.Unknown(type)
@@ -182,6 +218,15 @@ fun SocketEnvelopeDto.toDomain(json: Json): GameSocketMessage = when (type) {
     "MATCH_INVITE_DECLINED" -> json.decodePayloadOrNull<MatchInviteResolvedPayloadDto>(payload)
         ?.let {
             GameSocketMessage.MatchInviteDeclined(
+                inviteId = it.inviteId,
+                eventId = it.eventId,
+            )
+        }
+        ?: GameSocketMessage.Unknown(type)
+
+    "MATCH_INVITE_EXPIRED" -> json.decodePayloadOrNull<MatchInviteResolvedPayloadDto>(payload)
+        ?.let {
+            GameSocketMessage.MatchInviteExpired(
                 inviteId = it.inviteId,
                 eventId = it.eventId,
             )

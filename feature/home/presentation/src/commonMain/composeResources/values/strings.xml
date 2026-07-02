@@ -9,6 +9,10 @@
     <string name="dashboard_game_preview_section_title">A TASTE OF THE GAME</string>
     <string name="dashboard_game_preview_section_description">Real cards from past nights &#183; swipe &#8594;</string>
     <string name="dashboard_game_preview_cta">120+ DECK</string>
+    <string name="dashboard_your_events_title">YOUR EVENTS</string>
+    <string name="dashboard_your_events_count">%1$d events</string>
+    <string name="dashboard_doors_open_events_title">DOORS OPEN</string>
+    <string name="dashboard_doors_open_events_count">%1$d events</string>
     <string name="dashboard_upcoming_events_title">UPCOMING EVENTS</string>
     <string name="dashboard_upcoming_events_count">%1$d events</string>
     <string name="dashboard_snackbar_load_failed_title">Couldn't load events</string>
@@ -18,16 +22,17 @@
     <string name="event_detail_hero_date">SATURDAY - MAY 30</string>
     <string name="event_detail_hero_title">One night.\nOne bar.\n80 strangers.</string>
     <string name="event_code_headline">Type the\ndoor code.</string>
-    <string name="event_code_helper_text">Camera not co-operating? Use the 4-character code on tonight&apos;s welcome card instead.</string>
-    <string name="event_code_input_hint">Letters or numbers &#183; case doesn&apos;t matter</string>
+    <string name="event_code_helper_text">Type the 4-digit code from your ticket screen.</string>
+    <string name="event_code_input_hint">4 digits &#183; it&apos;s on your ticket</string>
     <string name="event_code_info_title">Where to find tonight&apos;s code</string>
-    <string name="event_code_info_description">Printed on the welcome card by the host&apos;s table. Rotates every 15 minutes so screenshots can&apos;t sneak anyone in.</string>
-    <string name="event_code_show_qr_action">Show my QR instead</string>
+    <string name="event_code_info_description">It&apos;s the 4-digit code on your ticket, right under the event details.</string>
+    <string name="event_code_show_qr_action">Back to my ticket</string>
     <string name="ticket_qr_success_on_list">You&apos;re on the list.</string>
-    <string name="ticket_qr_success_see_you">See you saturday!</string>
-    <string name="ticket_qr_info_prefix">Show the QR at the door &#8212; or if the camera&apos;s slow, tap\u0020</string>
+    <string name="ticket_qr_success_see_you">See you there!</string>
+    <string name="ticket_qr_info_prefix">At the door, tap\u0020</string>
+    <string name="ticket_qr_door_code_label">YOUR DOOR CODE</string>
     <string name="ticket_qr_info_action">enter event code</string>
-    <string name="ticket_qr_info_suffix">\u0020and type the 4 letters on the welcome card.</string>
+    <string name="ticket_qr_info_suffix">\u0020and type the code below.</string>
     <string name="ticket_qr_event_series">CREW &#183; VOL. 14</string>
     <string name="ticket_qr_event_date">Sat May 30 &#183; 20:00</string>
     <string name="ticket_qr_event_venue">Bar Skutek &#183; Vinohrady</string>
@@ -37,4 +42,38 @@
     <string name="ticket_qr_countdown_hours_label">HRS</string>
     <string name="ticket_qr_countdown_minutes_label">MIN</string>
     <string name="ticket_qr_countdown_seconds_label">SEC</string>
+
+    <string name="ticket_qr_doors_locked_icon">&#x23F3;</string>
+    <string name="ticket_qr_doors_locked_title">Doors haven&apos;t opened yet</string>
+    <string name="ticket_qr_doors_locked_description">Check-in goes live at %1$s. Hang tight &#8212; we&apos;ll unlock this screen automatically.</string>
+
+    <string name="ticket_qr_clear_code_action">CLEAR</string>
+    <string name="ticket_qr_wrong_code_title">Wrong code</string>
+    <string name="ticket_qr_wrong_code_description">That code didn&apos;t match. Check tonight&apos;s welcome card and try again.</string>
+    <string name="ticket_qr_no_connection_title">No connection</string>
+    <string name="ticket_qr_no_connection_description">You&apos;re offline. Check your connection and try again.</string>
+    <string name="ticket_qr_server_unreachable_title">Can&apos;t reach check-in</string>
+    <string name="ticket_qr_server_unreachable_description">Something&apos;s off on our end. Try again in a moment.</string>
+    <string name="ticket_qr_ticket_not_found_title">No ticket found</string>
+    <string name="ticket_qr_ticket_not_found_description">We couldn&apos;t find a ticket for this event on your account.</string>
+    <string name="ticket_qr_checkin_unavailable_title">Check-in isn&apos;t open</string>
+    <string name="ticket_qr_checkin_unavailable_description">Check-in isn&apos;t available right now. Try again once doors are open.</string>
+    <string name="ticket_qr_checkin_failed_title">Check-in failed</string>
+    <string name="ticket_qr_checkin_failed_description">Something went wrong. Please try again.</string>
+
+    <string name="ticket_qr_load_error_title">Couldn&apos;t load your ticket</string>
+    <string name="ticket_qr_load_error_description">Check your connection and try again.</string>
+    <string name="ticket_qr_retry_action">TRY AGAIN</string>
+    <string name="event_detail_load_error_title">Couldn&apos;t load this event</string>
+    <string name="event_detail_load_error_description">Check your connection and try again.</string>
+
+    <string name="profile_changes_saved_title">Profile updated</string>
+    <string name="profile_changes_saved_description">Your changes have been saved.</string>
+    <string name="profile_save_error_title">Couldn't save changes</string>
+    <string name="profile_save_error_description">Something went wrong. Please try again.</string>
+
+    <string name="profile_language_label">Language</string>
+    <string name="profile_language_sheet_title">Select language</string>
+    <string name="profile_language_english">English</string>
+    <string name="profile_language_czech">Czech</string>
 </resources>

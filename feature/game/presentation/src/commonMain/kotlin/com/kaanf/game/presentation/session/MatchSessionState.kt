@@ -5,6 +5,7 @@ import com.kaanf.core.presentation.model.LobbyMember
 import com.kaanf.game.domain.model.GameConnectionState
 import com.kaanf.game.domain.model.GameSocketMessage
 import com.kaanf.game.domain.model.GameTask
+import com.kaanf.game.domain.model.MatchOutcome
 import com.kaanf.game.domain.model.MatchScoreboardEntry
 
 @Immutable
@@ -22,6 +23,14 @@ data class MatchSessionState(
     val currentUserId: String? = null,
     /** Kendi profil fotomuz (kimliğe bağlı, maça özel değil); "ben" avatarlarında kullanılır. */
     val currentUserPhotoUrl: String? = null,
+    /** Kendi tam adımız; QR home app bar'ında gösterilir. */
+    val currentUserName: String? = null,
+    // QR home app bar istatistikleri. CONNECTED snapshot'ından gelir (her bağlanışta tazelenir),
+    // TASK_FINISHED ile maç bitince anlık güncellenir. recentResults en yeni maç başta.
+    val currentUserScore: Int = 0,
+    val currentUserWinCount: Int = 0,
+    val currentUserMatchesCount: Int = 0,
+    val currentUserRecentResults: List<MatchOutcome> = emptyList(),
     val matchId: String? = null,
     val opponentFullName: String? = null,
     /**
@@ -106,6 +115,7 @@ sealed interface MatchPhase {
 
     data class Scoreboard(
         val completed: Boolean,
+        val forfeit: Boolean = false,
         val isLoading: Boolean = true,
         val entries: List<MatchScoreboardEntry> = emptyList(),
         val isFinishing: Boolean = false,

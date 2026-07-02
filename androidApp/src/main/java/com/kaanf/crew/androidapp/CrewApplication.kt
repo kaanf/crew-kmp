@@ -14,5 +14,8 @@ class CrewApplication : Application() {
             androidContext(this@CrewApplication)
             androidLogger()
         }
+
+        // Debug-only: installs the Wiretap launcher. No-op in release (see release source set).
+        installDevTools()
     }
 }

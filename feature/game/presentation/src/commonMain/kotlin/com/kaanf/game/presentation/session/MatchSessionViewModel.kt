@@ -12,9 +12,15 @@ import com.kaanf.core.domain.util.onSuccess
 import com.kaanf.core.domain.repository.UserRepository
 import com.kaanf.core.presentation.model.LobbyMember
 import com.kaanf.core.presentation.model.UserAvatar
+import com.kaanf.core.presentation.snackbar.SnackbarController
+import com.kaanf.core.presentation.snackbar.SnackbarMessage
+import com.kaanf.core.presentation.snackbar.SnackbarVariant
+import com.kaanf.core.presentation.snackbar.toSnackbarMessage
+import com.kaanf.core.presentation.util.UIText
 import com.kaanf.game.domain.model.GameConnectionState
 import com.kaanf.game.domain.model.GameSocketMessage
 import com.kaanf.game.domain.model.GameTask
+import com.kaanf.game.domain.model.MatchOutcome
 import com.kaanf.game.domain.model.MatchSnapshot
 import com.kaanf.game.domain.event.EventConnectionClient
 import com.kaanf.game.domain.repository.MatchRepository
@@ -31,11 +37,25 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
+import crew.feature.game.presentation.generated.resources.Res
+import crew.feature.game.presentation.generated.resources.match_connection_lost_description
+import crew.feature.game.presentation.generated.resources.match_disputed_description
+import crew.feature.game.presentation.generated.resources.match_disputed_title
+import crew.feature.game.presentation.generated.resources.match_ended_description
+import crew.feature.game.presentation.generated.resources.match_ended_title
+import crew.feature.game.presentation.generated.resources.match_connection_lost_title
+import crew.feature.game.presentation.generated.resources.match_invite_declined_description
+import crew.feature.game.presentation.generated.resources.match_invite_declined_title
+import crew.feature.game.presentation.generated.resources.match_invite_expired_description
+import crew.feature.game.presentation.generated.resources.match_invite_expired_title
+import crew.feature.game.presentation.generated.resources.match_invite_failed_description
+import crew.feature.game.presentation.generated.resources.match_invite_failed_title
 
 class MatchSessionViewModel(
     private val eventConnectionClient: EventConnectionClient,
     private val matchRepository: MatchRepository,
     private val userRepository: UserRepository,
+    private val snackbarController: SnackbarController,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     private val eventId: String = savedStateHandle.get<String>("eventId").orEmpty()
@@ -61,7 +81,12 @@ class MatchSessionViewModel(
     private fun observeCurrentUser() {
         userRepository.observeCurrentUser()
             .onEach { user ->
-                _state.update { it.copy(currentUserPhotoUrl = user?.profilePictureUrl) }
+                _state.update {
+                    it.copy(
+                        currentUserPhotoUrl = user?.profilePictureUrl,
+                        currentUserName = user?.fullName,
+                    )
+                }
             }
             .launchIn(viewModelScope)
     }
@@ -73,28 +98,67 @@ class MatchSessionViewModel(
         eventConnectionClient
             .observeConnectionState(eventId)
             .onEach { connectionState ->
+                val previous = _state.value.connectionState
                 _state.update {
                     it.copy(
                         connectionState = connectionState
                     )
                 }
-                // Her (yeniden) bağlanmada sunucu doğrusuyla uzlaş: kopukken kaçırılan
-                // push'lara rağmen faz snapshot'tan kurulur (ilk bağlantı dahil).
+
                 if (connectionState is GameConnectionState.Connected) {
                     reconcileFromSnapshot()
+                }
+
+                if (connectionState is GameConnectionState.Disconnected &&
+                    connectionState.isError &&
+                    previous != connectionState
+                ) {
+                    snackbarController.show(connectionLostSnackbar())
                 }
             }
             .launchIn(viewModelScope)
     }
 
+    private fun connectionLostSnackbar() = SnackbarMessage(
+        title = UIText.Resource(Res.string.match_connection_lost_title),
+        description = UIText.Resource(Res.string.match_connection_lost_description),
+        variant = SnackbarVariant.Error,
+    )
+
+    private fun inviteDeclinedSnackbar() = SnackbarMessage(
+        title = UIText.Resource(Res.string.match_invite_declined_title),
+        description = UIText.Resource(Res.string.match_invite_declined_description),
+        variant = SnackbarVariant.Warn,
+    )
+
+    private fun inviteExpiredSnackbar() = SnackbarMessage(
+        title = UIText.Resource(Res.string.match_invite_expired_title),
+        description = UIText.Resource(Res.string.match_invite_expired_description),
+        variant = SnackbarVariant.Info,
+    )
+
+    private fun matchDisputedSnackbar() = SnackbarMessage(
+        title = UIText.Resource(Res.string.match_disputed_title),
+        description = UIText.Resource(Res.string.match_disputed_description),
+        variant = SnackbarVariant.Warn,
+    )
+
+    private fun matchEndedSnackbar() = SnackbarMessage(
+        title = UIText.Resource(Res.string.match_ended_title),
+        description = UIText.Resource(Res.string.match_ended_description),
+        variant = SnackbarVariant.Info,
+    )
+
+    private fun inviteFailedSnackbar() = SnackbarMessage(
+        title = UIText.Resource(Res.string.match_invite_failed_title),
+        description = UIText.Resource(Res.string.match_invite_failed_description),
+        variant = SnackbarVariant.Error,
+    )
+
     private fun reconcileFromSnapshot() {
         val epochAtStart = socketEpoch
         viewModelScope.launch {
-            // Resume sonrası ilk HTTP çağrısı sık sık bayat bağlantı yüzünden düşer; tek
-            // atımlık deneyip sessizce vazgeçmek fazı bayat bırakıyordu (rakip senin
-            // aksiyonunu beklerken iki taraf da "donar"). Birkaç kez backoff'la dene.
             repeat(RECONCILE_MAX_ATTEMPTS) { attempt ->
-                // Canlı event geldiyse sunucu doğrusu zaten akıyor; snapshot'ı at.
                 if (socketEpoch != epochAtStart) return@launch
 
                 when (val result = matchRepository.getMatchSnapshot(eventId)) {
@@ -116,8 +180,6 @@ class MatchSessionViewModel(
 
     private fun applySnapshot(snapshot: MatchSnapshot) {
         val phase = snapshot.toMatchPhase()
-        // Karar: server kazanır. Faz tamamen snapshot'tan kurulur, in-flight loading
-        // bayrakları ve davet sheet'leri sıfırlanır (zaten kopuktun).
         _state.update {
             it.copy(
                 phase = phase,
@@ -151,7 +213,15 @@ class MatchSessionViewModel(
         // İlk bağlantıda zaten Idle'daysak (maç hiç başlamadıysa) sessiz kal.
         if (current.phase == MatchPhase.Idle && current.matchId == null) return
         // Kopukken maç bitti/iptal oldu: Idle'a sıfırla ve kullanıcıyı bilgilendir.
-        // Lobi durumu maça değil etkinliğe ait; sıfırlamanın dışında tutulur.
+        resetToIdle()
+        viewModelScope.launch { snackbarController.show(matchEndedSnackbar()) }
+    }
+
+    /**
+     * Maça özel state'i temizleyip QR/scan home'una (Idle) döner; soket bağlantısı, kimlik ve
+     * lobi (maça değil etkinliğe ait) korunur.
+     */
+    private fun resetToIdle() {
         _state.update {
             MatchSessionState(
                 connectionState = it.connectionState,
@@ -161,7 +231,11 @@ class MatchSessionViewModel(
                 matchQrToken = it.matchQrToken,
                 currentUserId = it.currentUserId,
                 currentUserPhotoUrl = it.currentUserPhotoUrl,
-                errorMessage = MATCH_ENDED_MESSAGE,
+                currentUserName = it.currentUserName,
+                currentUserScore = it.currentUserScore,
+                currentUserWinCount = it.currentUserWinCount,
+                currentUserMatchesCount = it.currentUserMatchesCount,
+                currentUserRecentResults = it.currentUserRecentResults,
             )
         }
     }
@@ -174,11 +248,6 @@ class MatchSessionViewModel(
     }
 
     private suspend fun onSocketMessage(message: GameSocketMessage) {
-        // Canlı bir MAÇ event'i, uçmakta olan snapshot reconcile'ını bayatlatır: sunucu
-        // doğrusu zaten push'la akıyor. CONNECTED/lobi/GAME_STARTED ise maç fazı taşımaz;
-        // üstelik CONNECTED, reconcile'ı tetikleyen durum güncellemesiyle aynı anda
-        // geldiğinden epoch'u artırması kendi tetiklediği reconcile'ı yarışta öldürüyordu
-        // (kopukken kaçan TASK_OFFERED vb. hiç telafi edilmiyordu).
         when (message) {
             is GameSocketMessage.Connected,
             is GameSocketMessage.GameStarted,
@@ -190,12 +259,9 @@ class MatchSessionViewModel(
             else -> socketEpoch++
         }
         when (message) {
-            // Lobi: her (yeniden) bağlanışta CONNECTED tam lobi snapshot'ı taşır,
-            // join/left push'ları aradaki farkları işler. Kopukluk penceresinde kaçan
-            // push'lar sonraki CONNECTED'ta kendiliğinden düzelir.
             is GameSocketMessage.Connected -> {
                 val targetEpochMillis = runCatching {
-                    Instant.parse(message.doorsAt).toEpochMilliseconds()
+                    Instant.parse(message.gameStartsAt).toEpochMilliseconds()
                 }.getOrDefault(0L)
                 _state.update {
                     it.copy(
@@ -204,6 +270,10 @@ class MatchSessionViewModel(
                             member.toPresentation()
                         },
                         lobbyTotalCount = message.totalCount,
+                        currentUserScore = message.me?.score ?: it.currentUserScore,
+                        currentUserWinCount = message.me?.winCount ?: it.currentUserWinCount,
+                        currentUserMatchesCount = message.me?.matchesCount ?: it.currentUserMatchesCount,
+                        currentUserRecentResults = message.me?.recentResults ?: it.currentUserRecentResults,
                     )
                 }
             }
@@ -236,8 +306,6 @@ class MatchSessionViewModel(
 
             is GameSocketMessage.MatchStarted -> {
                 _state.update {
-                    // Foto MATCH_STARTED'da gelmez; davet anında yakalananı taşı.
-                    // Gelen davette karşının fotosu invite'ta, giden davette outgoing url'de.
                     val opponentPhotoUrl =
                         it.incomingInvite?.fromProfilePictureUrl ?: it.outgoingOpponentPhotoUrl
                     it.copy(
@@ -254,7 +322,7 @@ class MatchSessionViewModel(
                 }
             }
 
-            is GameSocketMessage.MatchInviteDeclined ->
+            is GameSocketMessage.MatchInviteDeclined -> {
                 _state.update {
                     it.copy(
                         showOutgoingInviteSheet = false,
@@ -262,6 +330,8 @@ class MatchSessionViewModel(
                         outgoingOpponentPhotoUrl = null,
                     )
                 }
+                snackbarController.show(inviteDeclinedSnackbar())
+            }
 
             is GameSocketMessage.MatchReadyCompleted -> {
                 _state.update { it.copy(phase = WhoWon()) }
@@ -310,6 +380,8 @@ class MatchSessionViewModel(
                         amIWinner = null,
                     )
                 }
+                // Sessiz reset kafa karıştırıyordu: seçimler nedensiz kayboluyordu.
+                snackbarController.show(matchDisputedSnackbar())
             }
 
             is GameSocketMessage.TaskOffered -> {
@@ -349,14 +421,67 @@ class MatchSessionViewModel(
             }
 
             is GameSocketMessage.TaskFinished -> {
-                _state.update { it.copy(phase = Scoreboard(completed = message.completed)) }
+                _state.update { state ->
+                    val myId = state.currentUserId
+                    val iWon = myId != null && myId == message.winnerUserId
+                    val iPlayed = myId != null && (myId == message.winnerUserId || myId == message.loserUserId)
+                    state.copy(
+                        phase = Scoreboard(completed = message.completed),
+                        currentUserScore = when {
+                            !iPlayed -> state.currentUserScore
+                            iWon -> message.winnerTotalScore
+                            else -> message.loserTotalScore
+                        },
+                        currentUserWinCount = when {
+                            !iPlayed -> state.currentUserWinCount
+                            iWon -> message.winnerWinCount
+                            else -> message.loserWinCount
+                        },
+                        currentUserMatchesCount = when {
+                            !iPlayed -> state.currentUserMatchesCount
+                            iWon -> message.winnerMatchesCount
+                            else -> message.loserMatchesCount
+                        },
+                        currentUserRecentResults = if (!iPlayed) {
+                            state.currentUserRecentResults
+                        } else {
+                            (listOf(if (iWon) MatchOutcome.WIN else MatchOutcome.LOSS) +
+                                state.currentUserRecentResults).take(MAX_RECENT_RESULTS)
+                        },
+                    )
+                }
+                loadScoreboard()
+            }
+
+            is GameSocketMessage.MatchInviteExpired -> {
+                val wasOutgoing = _state.value.incomingInvite?.inviteId != message.inviteId
+                _state.update { state ->
+                    if (state.incomingInvite?.inviteId == message.inviteId) {
+                        state.copy(incomingInvite = null, showMatchRequestSheet = false)
+                    } else {
+                        state.copy(
+                            showOutgoingInviteSheet = false,
+                            outgoingOpponentName = null,
+                            outgoingOpponentPhotoUrl = null,
+                        )
+                    }
+                }
+                // Yalnız giden davetin süresi dolunca bilgilendir; gelen davet sessizce kaybolur.
+                if (wasOutgoing) snackbarController.show(inviteExpiredSnackbar())
+            }
+
+            is GameSocketMessage.MatchCancelled -> {
+                // Yalnızca ayrılmayan tarafa gelir: rakip forfeit etti, sunucu beni kazanan sayıp
+                // scoreboard'u (winner=5, loser=0) doldurdu. Puan tablosunu "rakip maçtan ayrıldı"
+                // (forfeit=true → kazanan tarafı için ayrıldı altyazısı) olarak göster.
+                _state.update {
+                    it.copy(matchId = message.matchId, phase = Scoreboard(completed = false, forfeit = true))
+                }
                 loadScoreboard()
             }
 
             is GameSocketMessage.GameStarted,
-            is GameSocketMessage.Unknown,
-            is GameSocketMessage.MatchCancelled,
-            is GameSocketMessage.MatchInviteExpired -> Unit
+            is GameSocketMessage.Unknown -> Unit
         }
     }
 
@@ -409,6 +534,16 @@ class MatchSessionViewModel(
 
         viewModelScope.launch {
             matchRepository.confirmTask(eventId = eventId, matchId = matchId, completed = completed)
+                .onSuccess {
+                    // Kazanan otoriter HTTP 200'ü (state=Completed) aldı; geçişi kendine gelen
+                    // TASK_FINISHED push'una bırakma — push kaçarsa spinner'da sonsuza dek takılırdı.
+                    // Soket yine gelirse handler aynı fazı idempotent set eder + app bar stat'larını tazeler.
+                    _state.update { state ->
+                        if (state.phase !is WinnerConfirms) return@update state
+                        state.copy(phase = Scoreboard(completed = completed))
+                    }
+                    loadScoreboard()
+                }
                 .onFailure { error ->
                     _state.update { state ->
                         val current = state.phase as? WinnerConfirms ?: return@update state
@@ -417,8 +552,8 @@ class MatchSessionViewModel(
                             errorMessage = error.toString(),
                         )
                     }
+                    snackbarController.show(error.toSnackbarMessage())
                 }
-            // Başarıda bekleme sürer; geçişi (puan tablosu) TASK_FINISHED soketi yapar.
         }
     }
 
@@ -442,6 +577,7 @@ class MatchSessionViewModel(
                             errorMessage = error.toString(),
                         )
                     }
+                    snackbarController.show(error.toSnackbarMessage())
                 }
         }
     }
@@ -450,24 +586,19 @@ class MatchSessionViewModel(
         val matchId = _state.value.matchId ?: return
         val phase = _state.value.phase as? Scoreboard ?: return
         if (phase.isFinishing) return
+        // Forfeit: backend cancel() her iki katılımcıyı zaten Available yaptı ve /finish yalnızca
+        // Completed maçı kabul eder (Cancelled'da MatchNotCompletedException atar). Lokal sıfırla.
+        if (phase.forfeit) {
+            resetToIdle()
+            return
+        }
         _state.update { it.copy(phase = phase.copy(isFinishing = true), errorMessage = null) }
 
         viewModelScope.launch {
             matchRepository.finishMatch(eventId = eventId, matchId = matchId)
                 .onSuccess {
-                    // Maç bitti; soket push'u yok. Ekranı QR/scan home'una (Idle) sıfırlar,
-                    // maça özel state temizlenir; soket bağlantısı, kimlik ve lobi korunur.
-                    _state.update { current ->
-                        MatchSessionState(
-                            connectionState = current.connectionState,
-                            lobbyTargetEpochMillis = current.lobbyTargetEpochMillis,
-                            lobbyMembers = current.lobbyMembers,
-                            lobbyTotalCount = current.lobbyTotalCount,
-                            matchQrToken = current.matchQrToken,
-                            currentUserId = current.currentUserId,
-                            currentUserPhotoUrl = current.currentUserPhotoUrl,
-                        )
-                    }
+                    // Maç bitti; soket push'u yok. Ekranı QR/scan home'una (Idle) sıfırlar.
+                    resetToIdle()
                 }
                 .onFailure { error ->
                     _state.update { state ->
@@ -477,6 +608,7 @@ class MatchSessionViewModel(
                             errorMessage = error.toString(),
                         )
                     }
+                    snackbarController.show(error.toSnackbarMessage())
                 }
         }
     }
@@ -509,6 +641,7 @@ class MatchSessionViewModel(
                             errorMessage = error.toString(),
                         )
                     }
+                    snackbarController.show(error.toSnackbarMessage())
                 }
         }
     }
@@ -530,6 +663,7 @@ class MatchSessionViewModel(
                             errorMessage = error.toString(),
                         )
                     }
+                    snackbarController.show(error.toSnackbarMessage())
                 }
         }
     }
@@ -563,6 +697,7 @@ class MatchSessionViewModel(
                             errorMessage = error.toString(),
                         )
                     }
+                    snackbarController.show(error.toSnackbarMessage())
                 }
         }
     }
@@ -583,6 +718,7 @@ class MatchSessionViewModel(
                             errorMessage = error.toString(),
                         )
                     }
+                    snackbarController.show(error.toSnackbarMessage())
                 }
             // Başarıda bekleme sürer; geçişi MATCH_READY_COMPLETED soketi yapar.
         }
@@ -610,6 +746,7 @@ class MatchSessionViewModel(
                             errorMessage = error.toString(),
                         )
                     }
+                    snackbarController.show(error.toSnackbarMessage())
                 }
         }
     }
@@ -637,6 +774,7 @@ class MatchSessionViewModel(
                             errorMessage = error.toString(),
                         )
                     }
+                    snackbarController.show(error.toSnackbarMessage())
                 }
         }
     }
@@ -657,18 +795,15 @@ class MatchSessionViewModel(
                         )
                     }
                 }
-                .onFailure { error ->
-                    _state.update {
-                        it.copy(
-                            isSendingInvite = false,
-                            errorMessage = error.toString(),
-                        )
-                    }
+                .onFailure {
+                    // Bayat QR / rakip meşgul / ağ: kullanıcıya bildir, scanner yeniden kurulur.
+                    _state.update { it.copy(isSendingInvite = false) }
+                    snackbarController.show(inviteFailedSnackbar())
                 }
         }
     }
 
-    private fun loadMyParticipant() {
+    private fun loadMyParticipant(attempt: Int = 0) {
         viewModelScope.launch {
             matchRepository.getMyParticipant(eventId)
                 .onSuccess { participant ->
@@ -679,12 +814,41 @@ class MatchSessionViewModel(
                         )
                     }
                 }
+                .onFailure { error ->
+                    // QR üretimi ve kazanan tespiti currentUserId'ye bağlı; sessiz bırakma.
+                    if (attempt < 4) {
+                        delay(2_000L * (attempt + 1))
+                        loadMyParticipant(attempt + 1)
+                    } else {
+                        snackbarController.show(error.toSnackbarMessage())
+                    }
+                }
         }
     }
 
     private fun onExitConfirmed() {
         _state.update { it.copy(showExitConfirmDialog = false) }
-        sendEvent(MatchSessionEvent.NavigateToDashboard)
+        val matchId = _state.value.matchId
+        val phase = _state.value.phase
+        val shouldForfeit =
+            matchId != null && phase != MatchPhase.Idle && phase !is MatchPhase.Scoreboard
+        if (!shouldForfeit) {
+            sendEvent(MatchSessionEvent.NavigateToDashboard)
+            return
+        }
+        // Maçtan ayrılmak = forfeit. Etkinlikten çıkmıyoruz; rakiple aynı sonuç (scoreboard)
+        // ekranına düşüp oradan QR home'a dönüyoruz. Backend cancel() ikisini de Available yapar.
+        viewModelScope.launch {
+            matchRepository.cancelMatch(eventId = eventId, matchId = matchId)
+                .onSuccess {
+                    _state.update { it.copy(phase = Scoreboard(completed = false, forfeit = true)) }
+                    loadScoreboard()
+                }
+                .onFailure { error ->
+                    _state.update { it.copy(errorMessage = error.toString()) }
+                    snackbarController.show(error.toSnackbarMessage())
+                }
+        }
     }
 
     private fun sendEvent(event: MatchSessionEvent) {
@@ -718,9 +882,9 @@ class MatchSessionViewModel(
     private companion object {
         const val RESULT_REPORT_DELAY_MS = 100L
         const val RESULT_CONFIRM_REVEAL_DELAY_MS = 900L
-        const val MATCH_ENDED_MESSAGE = "Maç sonlandı."
         const val RECONCILE_MAX_ATTEMPTS = 3
         const val RECONCILE_RETRY_BASE_DELAY_MS = 1_000L
         const val MAX_LOBBY_AVATARS = 13
+        const val MAX_RECENT_RESULTS = 10
     }
 }

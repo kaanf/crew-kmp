@@ -7,6 +7,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -119,7 +120,7 @@ fun GradientChallengeCard(
                 brush = Brush.verticalGradient(colors.borderColors),
                 shape = RoundedCornerShape(28.dp),
             )
-            .padding(16.dp),
+            .padding(vertical = 12.dp, horizontal = 16.dp),
         content = {
             Column(
                 modifier = Modifier.wrapContentSize(),
@@ -144,6 +145,8 @@ fun GradientChallengeCard(
                     lineHeight = 20.sp,
                     fontWeight = FontWeight.SemiBold,
                 )
+
+                Spacer(modifier = Modifier.weight(1f))
 
                 Text(
                     modifier = Modifier.fillMaxWidth(),
@@ -171,7 +174,6 @@ private data class ChallengeCardColors(
 
 private fun getChallengeCardColor(variant: ChallengeCardVariant): ChallengeCardColors {
     return when (variant) {
-
         ChallengeCardVariant.Social -> ChallengeCardColors(
             backgroundColors = listOf(
                 Color(0xFF101923),

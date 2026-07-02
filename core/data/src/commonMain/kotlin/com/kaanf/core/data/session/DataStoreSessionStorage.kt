@@ -15,6 +15,7 @@ import kotlinx.serialization.json.Json
 
 class DataStoreSessionStorage(
     private val dataStore: DataStore<Preferences>,
+    private val onSessionChanged: () -> Unit,
 ) : SessionStorage {
     private val authInfoKey = stringPreferencesKey("KEY_AUTH_INFO")
 
@@ -48,5 +49,7 @@ class DataStoreSessionStorage(
                 prefs[authInfoKey] = json.encodeToString(updated.toSerializable())
             }
         }
+        // Bearer token cache'ini session ile senkron tut (bkz. HttpClient.clearBearerToken).
+        onSessionChanged()
     }
 }

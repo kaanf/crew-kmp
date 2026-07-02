@@ -53,8 +53,11 @@ import com.kaanf.home.presentation.model.EventDetailUiModel
 import com.kaanf.home.presentation.util.toClockText
 import crew.feature.home.presentation.generated.resources.Res
 import crew.feature.home.presentation.generated.resources.event_detail_free_ticket_cta
+import crew.feature.home.presentation.generated.resources.event_detail_load_error_description
+import crew.feature.home.presentation.generated.resources.event_detail_load_error_title
 import crew.feature.home.presentation.generated.resources.event_detail_my_ticket_cta
 import crew.feature.home.presentation.generated.resources.event_detail_ticket_cta
+import crew.feature.home.presentation.generated.resources.ticket_qr_retry_action
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
@@ -114,7 +117,13 @@ fun EventDetailScreen(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center,
             ) {
-                CircularProgressIndicator(color = AccessDefaults.Accent)
+                if (state.loadFailed) {
+                    EventDetailLoadErrorContent(
+                        onRetry = { onAction(EventDetailAction.OnRetryLoad) },
+                    )
+                } else {
+                    CircularProgressIndicator(color = AccessDefaults.Accent)
+                }
             }
         } else {
             EventDetailContent(
@@ -124,6 +133,35 @@ fun EventDetailScreen(
                 onAction = onAction,
             )
         }
+    }
+}
+
+@Composable
+private fun EventDetailLoadErrorContent(
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier.padding(horizontal = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            text = stringResource(Res.string.event_detail_load_error_title),
+            style = MaterialTheme.typography.titleMedium,
+            color = AccessDefaults.TextPrimary,
+        )
+        Spacer(Modifier.height(8.dp))
+        Text(
+            text = stringResource(Res.string.event_detail_load_error_description),
+            style = MaterialTheme.typography.bodyMedium,
+            color = AccessDefaults.TextMuted,
+        )
+        Spacer(Modifier.height(24.dp))
+        BaseButton(
+            text = stringResource(Res.string.ticket_qr_retry_action),
+            onClick = onRetry,
+            filled = true,
+        )
     }
 }
 

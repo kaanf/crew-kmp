@@ -31,6 +31,7 @@ import kotlin.time.Clock
 @Composable
 fun TicketSuccessCard(
     doorsAtEpochMillis: Long,
+    serverClockOffsetMillis: Long,
 ) {
     Column(
         modifier = Modifier
@@ -81,7 +82,8 @@ fun TicketSuccessCard(
         )
 
         CountdownCard(
-            targetEpochMillis = doorsAtEpochMillis
+            targetEpochMillis = doorsAtEpochMillis,
+            serverClockOffsetMillis = serverClockOffsetMillis,
         )
     }
 }
@@ -92,6 +94,7 @@ fun TicketSuccessCardPreview() {
     CrewTheme {
         TicketSuccessCard(
             doorsAtEpochMillis = Clock.System.now().toEpochMilliseconds() + 81342605,
+            serverClockOffsetMillis = 0L,
         )
     }
 }

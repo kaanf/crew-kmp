@@ -36,15 +36,16 @@ import kotlin.time.Clock
 @Composable
 fun CountdownCard(
     targetEpochMillis: Long,
+    serverClockOffsetMillis: Long,
     modifier: Modifier = Modifier,
 ) {
-    var nowMillis by remember {
-        mutableLongStateOf(Clock.System.now().toEpochMilliseconds())
+    var nowMillis by remember(serverClockOffsetMillis) {
+        mutableLongStateOf(Clock.System.now().toEpochMilliseconds() + serverClockOffsetMillis)
     }
 
-    LaunchedEffect(targetEpochMillis) {
+    LaunchedEffect(targetEpochMillis, serverClockOffsetMillis) {
         while (isActive) {
-            nowMillis = Clock.System.now().toEpochMilliseconds()
+            nowMillis = Clock.System.now().toEpochMilliseconds() + serverClockOffsetMillis
             delay(1000)
         }
     }

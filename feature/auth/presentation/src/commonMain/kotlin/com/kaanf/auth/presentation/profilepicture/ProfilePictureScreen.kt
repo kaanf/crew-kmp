@@ -9,17 +9,23 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.backhandler.BackHandler
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.kaanf.auth.presentation.util.mediapicker.rememberImagePickerLauncher
 import com.kaanf.core.designsystem.component.layout.AppScaffold
 import com.kaanf.core.designsystem.component.layout.AppTopBar
+import com.kaanf.core.designsystem.component.mediapicker.CropImageContent
+import com.kaanf.core.designsystem.component.mediapicker.ImageSourceBottomSheet
 import com.kaanf.core.presentation.model.AppTopBarState
 import com.kaanf.core.presentation.util.ObserveAsEvents
+import com.kaanf.core.presentation.util.mediapicker.PickedImageData
+import com.kaanf.core.presentation.util.mediapicker.rememberCameraLauncher
+import com.kaanf.core.presentation.util.mediapicker.rememberImagePickerLauncher
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -38,7 +44,7 @@ fun ProfilePictureRoot(
         }
     }
 
-    val launcher = rememberImagePickerLauncher { pickedImageData ->
+    val onPicked = { pickedImageData: PickedImageData ->
         viewModel.onAction(
             ProfilePictureAction.OnPictureSelected(
                 pickedImageData.bytes,
@@ -46,12 +52,30 @@ fun ProfilePictureRoot(
             ),
         )
     }
+    val galleryLauncher = rememberImagePickerLauncher(onResult = onPicked)
+    val cameraLauncher = rememberCameraLauncher(onResult = onPicked)
+
+    var showSourceSheet by remember { mutableStateOf(false) }
+
+    if (showSourceSheet) {
+        ImageSourceBottomSheet(
+            onTakePhoto = {
+                showSourceSheet = false
+                cameraLauncher.launch()
+            },
+            onChooseFromGallery = {
+                showSourceSheet = false
+                galleryLauncher.launch()
+            },
+            onDismiss = { showSourceSheet = false },
+        )
+    }
 
     ProfilePictureScreen(
         state = state,
         onAction = { action ->
             if (action is ProfilePictureAction.OnUploadPictureClick) {
-                launcher.launch()
+                showSourceSheet = true
             }
             viewModel.onAction(action)
         },

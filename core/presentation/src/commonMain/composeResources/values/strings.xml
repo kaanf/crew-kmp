@@ -14,4 +14,8 @@
     <string name="error_server">Oops, a server-side error happened</string>
     <string name="error_service_unavailable">Service unavailable, please try again later</string>
     <string name="error_serialization">Serialization error</string>
+    <string name="snackbar_generic_error_title">Something went wrong</string>
+    <string name="snackbar_connection_title">Connection issue</string>
+    <string name="snackbar_not_allowed_title">Not allowed</string>
+    <string name="snackbar_heads_up_title">Heads up</string>
 </resources>

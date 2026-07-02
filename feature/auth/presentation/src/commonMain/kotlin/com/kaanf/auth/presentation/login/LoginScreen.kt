@@ -1,7 +1,5 @@
 package com.kaanf.auth.presentation.login
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,21 +14,19 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.kaanf.auth.presentation.component.textfield.NativeAuthPasswordTextField
+import com.kaanf.auth.presentation.component.textfield.NativeAuthTextField
 import com.kaanf.core.designsystem.component.button.BaseButton
 import com.kaanf.core.designsystem.component.layout.AppScaffold
 import com.kaanf.core.designsystem.component.layout.AppTopBar
-import com.kaanf.core.designsystem.component.textfield.BasePasswordTextField
-import com.kaanf.core.designsystem.component.textfield.BaseTextField
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.CrewTheme
 import com.kaanf.core.presentation.model.AppTopBarState
@@ -42,7 +38,6 @@ import crew.feature.auth.presentation.generated.resources.auth_email_label
 import crew.feature.auth.presentation.generated.resources.auth_email_placeholder
 import crew.feature.auth.presentation.generated.resources.auth_password_label
 import crew.feature.auth.presentation.generated.resources.login_description
-import crew.feature.auth.presentation.generated.resources.login_forgot_password_action
 import crew.feature.auth.presentation.generated.resources.login_headline
 import crew.feature.auth.presentation.generated.resources.login_password_placeholder
 import crew.feature.auth.presentation.generated.resources.login_primary_action_sign_in
@@ -113,6 +108,7 @@ private fun LoginScreen(
         modifier =
             modifier
                 .fillMaxSize()
+                .testTag(TestTags.LOGIN_SCREEN)
                 .clearFocusOnTap(),
     ) {
         Column(
@@ -148,7 +144,7 @@ private fun LoginScreen(
                     modifier = Modifier.padding(top = 32.dp),
                     verticalArrangement = Arrangement.spacedBy(20.dp),
                 ) {
-                    BaseTextField(
+                    NativeAuthTextField(
                         state = state.emailTextState,
                         label = stringResource(Res.string.auth_email_label),
                         placeholder = stringResource(Res.string.auth_email_placeholder),
@@ -156,28 +152,12 @@ private fun LoginScreen(
                         testTag = TestTags.LOGIN_EMAIL,
                     )
 
-                    BasePasswordTextField(
+                    NativeAuthPasswordTextField(
                         state = state.passwordTextState,
                         label = stringResource(Res.string.auth_password_label),
                         placeholder = stringResource(Res.string.login_password_placeholder),
                         testTag = TestTags.LOGIN_PASSWORD,
-                        trailing = {
-                            Text(
-                                text = stringResource(Res.string.login_forgot_password_action),
-                                modifier =
-                                    Modifier
-                                        .testTag(TestTags.LOGIN_FORGOT_PASSWORD)
-                                        .clickable(
-                                            interactionSource = remember { MutableInteractionSource() },
-                                            indication = null,
-                                            onClick = { onAction(LoginAction.OnForgotPasswordClick) },
-                                        ),
-                                style = MaterialTheme.typography.bodySmall.copy(
-                                    color = AccessDefaults.Accent,
-                                    fontWeight = FontWeight.Medium,
-                                ),
-                            )
-                        },
+                        // ponytail: forgot-password hidden — ForgotPassword destination not registered (crash). Restore when the screen exists.
                     )
                 }
             }
@@ -193,7 +173,8 @@ private fun LoginScreen(
                 Modifier
                     .fillMaxWidth()
                     .padding(20.dp)
-                    .align(Alignment.BottomCenter),
+                    .align(Alignment.BottomCenter)
+                    .testTag(TestTags.LOGIN_SUBMIT),
             isLoading = state.isSubmitting,
             enabled = state.canSubmit,
             filled = true,

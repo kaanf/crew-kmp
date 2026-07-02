@@ -8,7 +8,9 @@ import crew.core.designsystem.generated.resources.ic_chevron_left_24
 import crew.core.designsystem.generated.resources.ic_chevron_right_24
 import crew.core.designsystem.generated.resources.ic_close
 import crew.core.designsystem.generated.resources.ic_clock
+import crew.core.designsystem.generated.resources.ic_image
 import crew.core.designsystem.generated.resources.ic_info
+import crew.core.designsystem.generated.resources.ic_key_lock
 import crew.core.designsystem.generated.resources.ic_left_arrow
 import crew.core.designsystem.generated.resources.ic_more
 import crew.core.designsystem.generated.resources.ic_pin
@@ -34,4 +36,6 @@ object AccessIcons {
     val WifiOff = Res.drawable.ic_wifi_off
     val Camera = Res.drawable.ic_camera
     val Clock = Res.drawable.ic_clock
+    val Image = Res.drawable.ic_image
+    val Lock = Res.drawable.ic_key_lock
 }

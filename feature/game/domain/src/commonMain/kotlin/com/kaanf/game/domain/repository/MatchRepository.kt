@@ -106,6 +106,15 @@ interface MatchRepository {
     ): Result<MatchScoreboard, DataError.Remote>
 
     /**
+     * Aktif (terminal olmayan) bir maçtan ayrılır = forfeit. Sunucu çağıranı kaybeden,
+     * rakibi kazanan sayar ve rakibe MATCH_CANCELLED push'lar. Yalnızca devam eden maçlarda
+     * çağrılmalı; biten/iptal/ret maçlarda sunucu hata döner.
+     */
+    suspend fun cancelMatch(
+        eventId: String, matchId: String,
+    ): EmptyResult<DataError.Remote>
+
+    /**
      * Puan tablosu ekranındaki "Finish" ile maçı sonlandırır; yalnızca çağıran oyuncuyu serbest
      * bırakır (her oyuncu kendi adına çağırır). Soket push'u yoktur.
      */

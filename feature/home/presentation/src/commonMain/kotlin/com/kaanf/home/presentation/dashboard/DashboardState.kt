@@ -12,8 +12,11 @@ data class DashboardState(
         formattedPrice = "220 CZK",
         percentage = 42,
         isFeatured = false,
+        hasMyTicket = false,
     ),
-    val events: List<EventDashboardUiModel> = emptyList(),
+    val myEvents: List<EventDashboardUiModel> = emptyList(),
+    val doorsOpenEvents: List<EventDashboardUiModel> = emptyList(),
+    val upcomingEvents: List<EventDashboardUiModel> = emptyList(),
     val tasks: List<ChallengeCardUiModel> = listOf(
         ChallengeCardUiModel(
             description = "Get two strangers to teach you the same word in their language. Both of them, same word.",
@@ -43,5 +46,6 @@ data class DashboardState(
     ),
     val isLoading: Boolean = true,
     val isRefreshing: Boolean = false,
-    val profilePictureUrl: String? = null
+    val profilePictureUrl: String? = null,
+    val userName: String? = null
 )

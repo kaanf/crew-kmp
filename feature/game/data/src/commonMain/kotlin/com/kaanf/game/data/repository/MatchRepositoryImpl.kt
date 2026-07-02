@@ -10,6 +10,7 @@ import com.kaanf.core.domain.util.asEmptyResult
 import com.kaanf.core.domain.util.map
 import com.kaanf.game.data.dto.ConfirmTaskRequest
 import com.kaanf.game.data.dto.CreateMatchInviteRequest
+import com.kaanf.game.data.dto.MatchCancelDto
 import com.kaanf.game.data.dto.MatchDto
 import com.kaanf.game.data.dto.MatchFinishDto
 import com.kaanf.game.data.dto.MatchInviteDto
@@ -153,6 +154,15 @@ class MatchRepositoryImpl(
         return httpClient.getOrNull<MatchSnapshotDto>(
             route = "/events/$eventId/matches/current",
         ).map { it?.toDomain() }
+    }
+
+    override suspend fun cancelMatch(
+        eventId: String, matchId: String,
+    ): EmptyResult<DataError.Remote> {
+        // Çağırana giden push yok; rakibe MATCH_CANCELLED gider. Yanıt gövdesi okunup atılır.
+        return httpClient.post<MatchCancelDto>(
+            route = "/events/$eventId/matches/$matchId/cancel",
+        ).asEmptyResult()
     }
 
     override suspend fun finishMatch(

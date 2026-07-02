@@ -52,6 +52,13 @@ class ScanOpponentViewModel(
                         eventChannel.send(ScanOpponentEvent.CloseScreen)
                     }
 
+                    // Süre dolunca bekleyen sheet'i bırakıp lobiye dön; bilgi snackbar'ını tek
+                    // kaynak olarak MatchSessionViewModel gösterir (çift snackbar olmaz).
+                    is GameSocketMessage.MatchInviteExpired -> {
+                        _state.update { it.copy(showGameRequestSheet = false) }
+                        eventChannel.send(ScanOpponentEvent.CloseScreen)
+                    }
+
                     else -> Unit
                 }
             }

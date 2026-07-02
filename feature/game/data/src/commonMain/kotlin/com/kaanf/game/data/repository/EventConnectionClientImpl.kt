@@ -2,6 +2,7 @@
 
 package com.kaanf.game.data.repository
 
+import com.kaanf.core.data.networking.JwtTokenInspector
 import com.kaanf.core.data.networking.SessionRefresher
 import com.kaanf.core.data.networking.UrlConstants
 import com.kaanf.core.domain.logging.CrewLogger
@@ -64,6 +65,7 @@ import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.Json
 import kotlin.random.Random
+import kotlin.time.Clock
 import kotlin.time.Duration.Companion.seconds
 
 class EventConnectionClientImpl(
@@ -87,7 +89,11 @@ class EventConnectionClientImpl(
         .stateIn(scope, SharingStarted.WhileSubscribed(5_000L), initialValue = false)
 
     // App ön planda mı? Background'a düşünce soketi proaktif kapatmak için gate'e girer.
+    // Hızlı lock/unlock toggle'larını yut: her gate değişimi flatMapLatest'i yeniden kurup
+    // backoff sayacını sıfırlar; kısa titreşimleri debounce'layarak gereksiz reconnect/refresh
+    // thrash'ini önle.
     private val isInForeground = appLifecycleObserver.isInForeground
+        .debounce(FOREGROUND_DEBOUNCE_MS)
         .stateIn(scope, SharingStarted.WhileSubscribed(5_000L), initialValue = false)
 
     private class Stream(
@@ -181,19 +187,47 @@ class EventConnectionClientImpl(
 
     private fun connectedSignalFlow(eventId: String): Flow<SocketSignal> = flow {
         var attempt = 0L
+        var everConnected = false
         var authRefreshAttempted = false
         while (true) {
             emit(
                 SocketSignal.Update(
-                    if (attempt == 0L) GameConnectionState.Connecting else GameConnectionState.Reconnecting,
+                    if (attempt == 0L && !everConnected) GameConnectionState.Connecting else GameConnectionState.Reconnecting,
                 ),
             )
+
+            // Proaktif yenileme: access token (wall-clock + marj) dolduysa el sıkışmayı denemeden
+            // yenile. Backend bayat token'lı handshake'i upgrade'den ÖNCE 401 ile reddediyor; o
+            // 401'i Ktor/Darwin platformlar arası güvenilir okuyamadığımız için doomed denemeye
+            // hiç girmemek en sağlamı (asıl 30 dk lock senaryosunu burası kapatır). Refresh
+            // otoritesi ortak SessionRefresher (WS+REST tek mutex + tek storage → tek-uçuş).
+            // Guard yok: başarılı yenileme sonrası token artık bayat değil, sonraki turda tekrar
+            // tetiklenmez; geçici (ağ) hatada backoff'la tekrar dener — token'sız bağlanmak imkânsız.
+            if (isAccessTokenExpired()) {
+                when (refreshSession()) {
+                    RefreshOutcome.Refreshed -> Unit
+                    RefreshOutcome.AuthCleared -> {
+                        emit(SocketSignal.Update(GameConnectionState.Disconnected(null, REASON_UNAUTHENTICATED)))
+                        return@flow
+                    }
+                    RefreshOutcome.Transient -> {
+                        delay(backoffMillis(attempt))
+                        attempt++
+                        continue
+                    }
+                }
+            }
+
+            var connectedThisAttempt = false
             try {
                 rawSocketFlow(eventId).collect { message ->
                     if (message is GameSocketMessage.Connected) {
-                        // Sağlıklı bağlantı kuruldu: tek seferlik refresh hakkı tazelenir,
-                        // saatler sonra token yine dolarsa aynı kurtarma tekrar çalışabilsin.
+                        // Sağlıklı bağlantı kuruldu: reaktif refresh hakkı tazelenir ve backoff
+                        // sıfırlanır — yoksa akşam boyu her kopuş kalıcı olarak cezayı büyütür.
+                        connectedThisAttempt = true
+                        everConnected = true
                         authRefreshAttempted = false
+                        attempt = 0L
                         emit(SocketSignal.Update(GameConnectionState.Connected))
                     }
                     emit(SocketSignal.Message(message))
@@ -202,20 +236,27 @@ class EventConnectionClientImpl(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: TerminalSocketException) {
-                // Açık WS 401 alamaz: backend bayat access token'lı el sıkışmayı 1008 ile
-                // kapatır. Bir kereliğine token yenileyip anında yeniden dene; 1008'in diğer
-                // sebeplerinde (check-in yok vb.) yenileme boşa gider ve ikinci 1008 aşağıda
-                // vazgeçirir, döngüye girilmez.
-                if (e.code == AUTH_CLOSE_CODE && !authRefreshAttempted) {
-                    authRefreshAttempted = true
-                    if (sessionRefresher.refresh(httpClient) != null) continue
-                    // Refresh reddedildiyse (401/403) storage temizlenmiştir; auth gate'i
-                    // bu akışı zaten kapatacak, yine de kopuşu raporlayıp çık.
-                }
-                // Sunucunun "tekrar deneme" dediği temiz kapanış (1008/1003 vb.).
+                // Sunucunun "tekrar deneme" dediği temiz kapanış (1008 check-in yok / user yok,
+                // 1003 geçersiz eventId vb.). Auth artık buraya düşmez (handshake'te 401), bu
+                // yüzden burada yenileme yok — bunlar gerçekten terminal.
                 emit(SocketSignal.Update(GameConnectionState.Disconnected(e.code, e.message)))
                 return@flow
             } catch (e: Throwable) {
+                // Reaktif kurtarma: proaktif kontrol kaçırdıysa (ör. cihaz saati kayması) ve hiç
+                // bağlanamadan düştüysek, sebebi (handshake 401'ini okuyamasak bile) auth varsayıp
+                // bu turda bir kez yenile. Tespit status'a değil guard'a bağlı (status iOS'ta
+                // okunamıyor). Yenileme başarılıysa taze token'la anında tekrar dene.
+                if (!authRefreshAttempted && !connectedThisAttempt) {
+                    authRefreshAttempted = true
+                    when (refreshSession()) {
+                        RefreshOutcome.Refreshed -> continue
+                        RefreshOutcome.AuthCleared -> {
+                            emit(SocketSignal.Update(GameConnectionState.Disconnected(null, REASON_UNAUTHENTICATED)))
+                            return@flow
+                        }
+                        RefreshOutcome.Transient -> Unit // ağ hatası: aşağıdaki retriable backoff'a düş
+                    }
+                }
                 if (e is RetryableSocketException || connectionErrorHandler.isRetriableError(e)) {
                     // Temiz ama geçici kapanış ya da geçici sayılan ham transport hatası → backoff.
                     delay(backoffMillis(attempt))
@@ -229,6 +270,28 @@ class EventConnectionClientImpl(
             }
         }
     }
+
+    // Access token dolmuş mu? Wall-clock + marj kullanır. kotlinx monotonic saat derin uykuda
+    // ilerlemediği için (tam da 30 dk lock senaryosunu kaçırırdı) bilerek wall-clock; tek zayıflığı
+    // kullanıcının saatini elle yanlış kurması — o nadir durumda reaktif yol (yukarıda) backstop.
+    private suspend fun isAccessTokenExpired(): Boolean {
+        val token = sessionStorage.observeAuthInfo().firstOrNull()?.accessToken ?: return false
+        val expiresAt = JwtTokenInspector.expiresAtEpochSeconds(token) ?: return false
+        return Clock.System.now().epochSeconds >= expiresAt - TOKEN_EXPIRY_MARGIN_SECONDS
+    }
+
+    private suspend fun refreshSession(): RefreshOutcome {
+        val refreshed = sessionRefresher.refresh(httpClient)
+        return when {
+            refreshed != null -> RefreshOutcome.Refreshed
+            // Refresh 401/403 alınca SessionRefresher storage'ı temizler → terminal, re-login.
+            sessionStorage.observeAuthInfo().firstOrNull() == null -> RefreshOutcome.AuthCleared
+            // Token hâlâ duruyor: yenileme geçici (ağ) sebeple başarısız → yeniden denenebilir.
+            else -> RefreshOutcome.Transient
+        }
+    }
+
+    private enum class RefreshOutcome { Refreshed, AuthCleared, Transient }
 
     private fun rawSocketFlow(eventId: String): Flow<GameSocketMessage> = flow {
         val accessToken = sessionStorage.observeAuthInfo().firstOrNull()?.accessToken
@@ -323,9 +386,17 @@ class EventConnectionClientImpl(
         const val MAX_BACKOFF_MS = 15_000L
         const val MAX_BACKOFF_EXP = 5L
 
-        const val REASON_UNAUTHENTICATED = "unauthenticated"
-        const val REASON_BACKGROUND = "background"
-        const val REASON_NO_NETWORK = "no_network"
+        /** Proaktif yenileme marjı: exp'ten bu kadar saniye önce dolmuş say (clock skew tamponu). */
+        const val TOKEN_EXPIRY_MARGIN_SECONDS = 60L
+
+        /** Lock/unlock thrash'ini yutmak için ön plan sinyalinin debounce penceresi. */
+        const val FOREGROUND_DEBOUNCE_MS = 300L
+
+        // Beklenen kopuş sebepleri domain'de tek kaynaktan tanımlı (Disconnected.isError bunlara bakar);
+        // burada referans alıyoruz ki data ↔ domain string'leri birbirinden sapmasın.
+        val REASON_UNAUTHENTICATED = GameConnectionState.REASON_UNAUTHENTICATED
+        val REASON_BACKGROUND = GameConnectionState.REASON_BACKGROUND
+        val REASON_NO_NETWORK = GameConnectionState.REASON_NO_NETWORK
         const val REASON_CONNECT_TIMEOUT = "connect_timeout"
         const val REASON_HEARTBEAT_TIMEOUT = "heartbeat_timeout"
 
@@ -339,8 +410,5 @@ class EventConnectionClientImpl(
          * kaçırdıysak hat half-open kabul edilir ve yeniden bağlanılır.
          */
         const val HEARTBEAT_WATCHDOG_MS = 75_000L
-
-        /** Backend'in auth reddinde kullandığı kapanış kodu (1008 VIOLATED_POLICY). */
-        val AUTH_CLOSE_CODE = CloseReason.Codes.VIOLATED_POLICY.code.toInt()
     }
 }

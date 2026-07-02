@@ -4,6 +4,8 @@
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Crew uses your camera so you can take a profile photo.</string>
 	<key>CFBundleURLTypes</key>
 	<array/>
 </dict>

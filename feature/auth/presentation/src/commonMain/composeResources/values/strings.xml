@@ -18,6 +18,7 @@
     <string name="welcome_terms_suffix">. 18+ only.</string>
     <string name="error_account_exists">An account with that email or username already exists.</string>
     <string name="error_email_exists">An account with that email already exists.</string>
+    <string name="register_snackbar_email_taken_title">Email already in use</string>
     <string name="error_username_exists">An account with that username already exists.</string>
     <string name="error_invalid_password">Password must be at least 9 characters and include one digit and one uppercase letter</string>
     <string name="error_password_mismatch">Passcodes do not match. Please re-enter your credentials.</string>

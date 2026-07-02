@@ -34,6 +34,7 @@ import com.kaanf.core.presentation.util.ObserveAsEvents
 import com.kaanf.game.domain.model.GameConnectionState
 import com.kaanf.game.presentation.component.sheet.GameResponseSheet
 import com.kaanf.game.presentation.gamelobby.component.dialog.LeaveEventDialog
+import com.kaanf.game.presentation.session.component.GameHomeTopBar
 import com.kaanf.game.presentation.session.phase.LoserAcceptsPhase
 import com.kaanf.game.presentation.session.phase.LoserActiveTaskPhase
 import com.kaanf.game.presentation.session.phase.LoserWaitsPhase
@@ -80,11 +81,24 @@ fun MatchContainerScreen(
     }
 
     if (state.showExitConfirmDialog) {
+        // Maç ortasındaysa çıkış = forfeit (etkinlikte kalırsın); Idle/Scoreboard'da = etkinlikten ayrıl.
+        val isMidMatch = state.phase != MatchPhase.Idle && state.phase !is MatchPhase.Scoreboard
         BaseDialog(onDismissRequest = { onAction(MatchSessionAction.OnExitDismissed) }) {
-            LeaveEventDialog(
-                onStay = { onAction(MatchSessionAction.OnExitDismissed) },
-                onLeave = { onAction(MatchSessionAction.OnExitConfirmed) },
-            )
+            if (isMidMatch) {
+                LeaveEventDialog(
+                    onStay = { onAction(MatchSessionAction.OnExitDismissed) },
+                    onLeave = { onAction(MatchSessionAction.OnExitConfirmed) },
+                    title = "Maçtan ayrılmak\nistediğine emin misin?",
+                    subtitle = "Şimdi ayrılırsan bu maçı kaybetmiş sayılırsın. Etkinlikte kalır, yeni maç yapabilirsin.",
+                    stayLabel = "Maça Dön",
+                    leaveLabel = "Maçtan Ayrıl",
+                )
+            } else {
+                LeaveEventDialog(
+                    onStay = { onAction(MatchSessionAction.OnExitDismissed) },
+                    onLeave = { onAction(MatchSessionAction.OnExitConfirmed) },
+                )
+            }
         }
     }
 
@@ -108,10 +122,22 @@ fun MatchContainerScreen(
 
     AppScaffold(
         topBar = {
-            AppTopBar(
-                state = topBarStateFor(state.phase),
-                onBackClick = { onAction(MatchSessionAction.OnBackClick) },
-            )
+            if (state.phase == MatchPhase.Idle) {
+                GameHomeTopBar(
+                    userName = state.currentUserName.orEmpty(),
+                    photoUrl = state.currentUserPhotoUrl,
+                    score = state.currentUserScore,
+                    winCount = state.currentUserWinCount,
+                    matchesCount = state.currentUserMatchesCount,
+                    recentResults = state.currentUserRecentResults,
+                    onCloseClick = { onAction(MatchSessionAction.OnBackClick) },
+                )
+            } else {
+                AppTopBar(
+                    state = topBarStateFor(state.phase),
+                    onBackClick = { onAction(MatchSessionAction.OnBackClick) },
+                )
+            }
         },
     ) { innerPadding ->
         Column(
@@ -239,6 +265,7 @@ private fun MatchPhaseContent(
             currentUserId = state.currentUserId,
             isLoading = phase.isLoading,
             completed = phase.completed,
+            forfeit = phase.forfeit,
             isFinishing = phase.isFinishing,
             onFinish = { onAction(MatchSessionAction.OnFinishMatch) },
             modifier = modifier,
@@ -255,7 +282,9 @@ private fun ConnectionBanner(
         GameConnectionState.Connecting -> "Bağlanılıyor…"
         GameConnectionState.Reconnecting -> "Bağlantı koptu, yeniden bağlanılıyor…"
         is GameConnectionState.Disconnected ->
-            "Bağlantı sorunu" + (connectionState.reason?.let { ": $it" } ?: "")
+            // Gerçek terminal hata snackbar'la gösterilir; banner gizli. Beklenen kopuşlar
+            // (arka plan/ağ/oturum) kendiliğinden toparlanır → "yeniden bağlanılıyor".
+            if (connectionState.isError) return else "Bağlantı koptu, yeniden bağlanılıyor…"
         GameConnectionState.Connected -> return
     }
 

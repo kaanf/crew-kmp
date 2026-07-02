@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -29,6 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kaanf.core.designsystem.component.layout.AppScaffold
 import com.kaanf.core.designsystem.component.layout.AppTopBar
@@ -40,6 +42,7 @@ import com.kaanf.core.designsystem.component.card.MoreDeckCard
 import com.kaanf.home.presentation.dashboard.component.eventcard.DashboardEventCard
 import com.kaanf.home.presentation.dashboard.component.eventinfo.DashboardEventInfoRow
 import com.kaanf.home.presentation.dashboard.component.featuredevent.DashboardFeaturedEventCard
+import com.kaanf.home.presentation.model.EventDashboardUiModel
 import crew.feature.home.presentation.generated.resources.Res
 import crew.feature.home.presentation.generated.resources.dashboard_featured_event_section_title
 import crew.feature.home.presentation.generated.resources.dashboard_game_preview_cta
@@ -47,6 +50,10 @@ import crew.feature.home.presentation.generated.resources.dashboard_game_preview
 import crew.feature.home.presentation.generated.resources.dashboard_game_preview_section_title
 import crew.feature.home.presentation.generated.resources.dashboard_header_description
 import crew.feature.home.presentation.generated.resources.dashboard_header_title
+import crew.feature.home.presentation.generated.resources.dashboard_doors_open_events_count
+import crew.feature.home.presentation.generated.resources.dashboard_doors_open_events_title
+import crew.feature.home.presentation.generated.resources.dashboard_your_events_count
+import crew.feature.home.presentation.generated.resources.dashboard_your_events_title
 import crew.feature.home.presentation.generated.resources.dashboard_upcoming_events_count
 import crew.feature.home.presentation.generated.resources.dashboard_upcoming_events_title
 import org.jetbrains.compose.resources.stringResource
@@ -56,8 +63,14 @@ import org.koin.compose.viewmodel.koinViewModel
 fun DashboardRoot(
     viewModel: DashboardViewModel = koinViewModel(),
     onEventClicked: (eventId: String) -> Unit,
+    onProfileClicked: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    LifecycleResumeEffect(Unit) {
+        viewModel.onAction(DashboardAction.OnResume)
+        onPauseOrDispose { }
+    }
 
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
@@ -70,9 +83,9 @@ fun DashboardRoot(
     AppScaffold(
         topBar = {
             AppTopBar(
-                state = AppTopBarState.Dashboard(state.profilePictureUrl),
+                state = AppTopBarState.Dashboard(state.profilePictureUrl, state.userName),
                 elevated = { listState.canScrollBackward },
-                onRightClick = {},
+                onRightClick = onProfileClicked,
             )
         },
     ) { innerPadding ->
@@ -140,6 +153,13 @@ private fun DashboardContent(
     state: DashboardState,
     onAction: (DashboardAction) -> Unit,
 ) {
+    val yourEventsTitle = stringResource(Res.string.dashboard_your_events_title)
+    val yourEventsCount = stringResource(Res.string.dashboard_your_events_count, state.myEvents.size)
+    val doorsOpenTitle = stringResource(Res.string.dashboard_doors_open_events_title)
+    val doorsOpenCount = stringResource(Res.string.dashboard_doors_open_events_count, state.doorsOpenEvents.size)
+    val upcomingTitle = stringResource(Res.string.dashboard_upcoming_events_title)
+    val upcomingCount = stringResource(Res.string.dashboard_upcoming_events_count, state.upcomingEvents.size)
+
     LazyColumn(
         state = listState,
         modifier = Modifier.fillMaxSize(),
@@ -153,6 +173,7 @@ private fun DashboardContent(
             Spacer(modifier = Modifier.height(24.dp))
         }
 
+        /*
         state.featuredEvent?.let { featuredEvent ->
             item(contentType = "featured-card-section") {
                 DashboardSection(
@@ -175,6 +196,7 @@ private fun DashboardContent(
                 Spacer(modifier = Modifier.height(24.dp))
             }
         }
+         */
 
         item(contentType = "deck-card-section") {
             DashboardSection(
@@ -210,36 +232,65 @@ private fun DashboardContent(
             Spacer(modifier = Modifier.height(24.dp))
         }
 
-        item(contentType = "upcoming-events-header") {
-            DashboardEventInfoRow(
-                leftText = stringResource(Res.string.dashboard_upcoming_events_title),
-                description = null,
-                rightText = stringResource(
-                    Res.string.dashboard_upcoming_events_count,
-                    state.events.size,
-                ),
-            )
-        }
+        eventSection(
+            title = yourEventsTitle,
+            countText = yourEventsCount,
+            events = state.myEvents,
+            onEventClicked = { onAction(DashboardAction.OnEventClicked(it.id)) },
+        )
 
-        item(contentType = "space-after-upcoming-header") {
-            Spacer(modifier = Modifier.height(12.dp))
-        }
+        eventSection(
+            title = doorsOpenTitle,
+            countText = doorsOpenCount,
+            events = state.doorsOpenEvents,
+            onEventClicked = { onAction(DashboardAction.OnEventClicked(it.id)) },
+        )
 
-        items(
-            items = state.events,
-            key = { it.id },
-            contentType = { "event_card" },
-        ) { event ->
-            DashboardEventCard(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .padding(bottom = 12.dp),
-                event = event,
-                onClicked = {
-                    onAction(DashboardAction.OnEventClicked(event.id))
-                },
-            )
-        }
+        eventSection(
+            title = upcomingTitle,
+            countText = upcomingCount,
+            events = state.upcomingEvents,
+            onEventClicked = { onAction(DashboardAction.OnEventClicked(it.id)) },
+        )
+    }
+}
+
+private fun LazyListScope.eventSection(
+    title: String,
+    countText: String,
+    events: List<EventDashboardUiModel>,
+    onEventClicked: (EventDashboardUiModel) -> Unit,
+) {
+    if (events.isEmpty()) return
+
+    item(contentType = "events-header") {
+        DashboardEventInfoRow(
+            leftText = title,
+            description = null,
+            rightText = countText,
+        )
+    }
+
+    item(contentType = "space-after-events-header") {
+        Spacer(modifier = Modifier.height(12.dp))
+    }
+
+    items(
+        items = events,
+        key = { it.id },
+        contentType = { "event_card" },
+    ) { event ->
+        DashboardEventCard(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 12.dp),
+            event = event,
+            onClicked = { onEventClicked(event) },
+        )
+    }
+
+    item(contentType = "space-after-events") {
+        Spacer(modifier = Modifier.height(24.dp))
     }
 }
 

@@ -29,4 +29,9 @@ object TestTags {
     const val VERIFICATION_RESULT_CONTINUE = "verification_result_continue"
 
     const val CHARACTER_SCREEN = "character_screen"
+
+    const val PROFILE_PICTURE_SCREEN = "profile_picture_screen"
+    const val PROFILE_PICTURE_ADD = "profile_picture_add"
+    const val PROFILE_PICTURE_SUBMIT = "profile_picture_submit"
+    const val PROFILE_PICTURE_SKIP = "profile_picture_skip"
 }

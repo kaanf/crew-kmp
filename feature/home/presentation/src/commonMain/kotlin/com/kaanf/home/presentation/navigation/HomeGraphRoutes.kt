@@ -10,6 +10,9 @@ sealed interface HomeGraphRoutes {
     data object Dashboard : HomeGraphRoutes
 
     @Serializable
+    data object Profile : HomeGraphRoutes
+
+    @Serializable
     data class EventDetail(val eventId: String) : HomeGraphRoutes
 
     @Serializable

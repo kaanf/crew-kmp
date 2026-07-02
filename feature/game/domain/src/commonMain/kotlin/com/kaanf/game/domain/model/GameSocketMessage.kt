@@ -3,9 +3,12 @@ package com.kaanf.game.domain.model
 sealed interface GameSocketMessage {
     data class Connected(
         val eventId: String,
-        val doorsAt: String,
+        val gameStartsAt: String,
+        val gameEndsAt: String,
         val totalCount: Int,
-        val members: List<LobbyMember>
+        val members: List<LobbyMember>,
+        /** Bağlanan kullanıcının kendi app bar istatistikleri; katılımcı değilse null. */
+        val me: CurrentUserStats?,
     ) : GameSocketMessage
 
     data class GameStarted(
@@ -113,6 +116,10 @@ sealed interface GameSocketMessage {
         val loserPointsAwarded: Int,
         val winnerTotalScore: Int,
         val loserTotalScore: Int,
+        val winnerWinCount: Int,
+        val winnerMatchesCount: Int,
+        val loserWinCount: Int,
+        val loserMatchesCount: Int,
     ) : GameSocketMessage
 
     data class LobbyUserJoined(

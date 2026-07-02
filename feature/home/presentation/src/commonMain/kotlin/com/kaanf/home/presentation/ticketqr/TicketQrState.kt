@@ -5,6 +5,7 @@ import com.kaanf.home.presentation.model.TicketQrUiModel
 
 data class TicketQrState(
     val isLoading: Boolean = false,
+    val loadFailed: Boolean = false,
     val ticket: TicketQrUiModel? = null,
     val phase: TicketPhase = TicketPhase.Qr,
     val eventCode: String = "",

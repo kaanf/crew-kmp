@@ -8,26 +8,25 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.kaanf.core.designsystem.theme.AccessDefaults
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun <T> SelectionBottomSheet(
     title: String,
@@ -37,40 +36,50 @@ fun <T> SelectionBottomSheet(
     onSelect: (T) -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
+    description: String? = null,
 ) {
-    val sheetState = rememberModalBottomSheetState()
-
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        modifier = modifier,
-        containerColor = AccessDefaults.Surface,
-        scrimColor = AccessDefaults.LoadingOverlayScrim,
-    ) {
-        Column(
-            modifier =
-                Modifier
+    ContainerBottomSheet(
+        onDismiss = onDismiss,
+        dismissible = true,
+        showDragHandle = true,
+        content = {
+            Column(
+                modifier = modifier
                     .fillMaxWidth()
-                    .navigationBarsPadding()
                     .padding(horizontal = 16.dp)
                     .padding(bottom = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium.copy(color = AccessDefaults.TextPrimary),
-                modifier = Modifier.padding(start = 4.dp, bottom = 8.dp),
-            )
-
-            options.forEach { option ->
-                SelectionRow(
-                    label = labelOf(option),
-                    isSelected = option == selected,
-                    onClick = { onSelect(option) },
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.headlineLarge.copy(
+                        color = AccessDefaults.TextPrimary,
+                        textAlign = TextAlign.Start,
+                    ),
                 )
+
+                if (description != null) {
+                    Text(
+                        text = description,
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            color = AccessDefaults.TextSecondary,
+                            fontSize = 13.sp,
+                        ),
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                options.forEach { option ->
+                    SelectionRow(
+                        label = labelOf(option),
+                        isSelected = option == selected,
+                        onClick = { onSelect(option) },
+                    )
+                }
             }
-        }
-    }
+        },
+    )
 }
 
 @Composable

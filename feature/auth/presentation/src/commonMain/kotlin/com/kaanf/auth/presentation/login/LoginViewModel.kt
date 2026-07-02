@@ -6,13 +6,14 @@ import com.kaanf.auth.domain.repository.AuthRepository
 import com.kaanf.core.presentation.snackbar.SnackbarController
 import com.kaanf.core.presentation.snackbar.SnackbarMessage
 import com.kaanf.core.presentation.snackbar.SnackbarVariant
+import com.kaanf.core.presentation.snackbar.toSnackbarMessage
 import com.kaanf.core.domain.repository.SessionStorage
+import com.kaanf.core.domain.util.DataError
 import com.kaanf.core.domain.util.Result
 import com.kaanf.core.presentation.util.UIText
-import com.kaanf.core.presentation.util.toUiText
 import crew.feature.auth.presentation.generated.resources.Res
-import crew.feature.auth.presentation.generated.resources.snackbar_access_granted_title
-import crew.feature.auth.presentation.generated.resources.snackbar_uplink_failure_title
+import crew.feature.auth.presentation.generated.resources.login_snackbar_auth_failed_description
+import crew.feature.auth.presentation.generated.resources.login_snackbar_auth_failed_title
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -83,7 +84,7 @@ class LoginViewModel(
                 when (
                     val result =
                         authRepository.login(
-                            email = currentState.emailTextState.text.toString(),
+                            email = currentState.emailTextState.text.toString().trim(),
                             password = currentState.passwordTextState.text.toString(),
                         )
                 ) {
@@ -98,6 +99,18 @@ class LoginViewModel(
                     }
 
                     is Result.Failure -> {
+                        val message = when (result.error) {
+                            DataError.Remote.UNAUTHORIZED,
+                            DataError.Remote.FORBIDDEN,
+                            DataError.Remote.NOT_FOUND -> SnackbarMessage(
+                                title = UIText.Resource(Res.string.login_snackbar_auth_failed_title),
+                                description = UIText.Resource(Res.string.login_snackbar_auth_failed_description),
+                                variant = SnackbarVariant.Error,
+                            )
+
+                            else -> result.error.toSnackbarMessage()
+                        }
+                        snackbarController.show(message)
                     }
                 }
             } finally {

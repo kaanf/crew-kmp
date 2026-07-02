@@ -6,6 +6,8 @@ import kotlinx.serialization.Serializable
 data class ConnectedPayloadDto(
     val eventId: String,
     val gameStartsAt: String,
+    val gameEndsAt: String,
     val totalCount: Int,
-    val members: List<LobbyMemberDto>
+    val members: List<LobbyMemberDto>,
+    val me: ViewerStatsDto? = null,
 )

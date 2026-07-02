@@ -18,7 +18,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kaanf.core.designsystem.component.avatar.avatarPaletteColor
-import com.kaanf.core.designsystem.component.button.BaseMiniButton
 import com.kaanf.core.designsystem.component.progressbar.ThreeDotsAnimatedCard
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.CrewTheme
@@ -27,7 +26,6 @@ import com.kaanf.game.presentation.model.WhoWonAvatarUi
 import com.kaanf.game.presentation.session.component.WhoWonRow
 import crew.feature.game.presentation.generated.resources.Res
 import crew.feature.game.presentation.generated.resources.match_phase_who_won_description
-import crew.feature.game.presentation.generated.resources.match_phase_who_won_dispute_action
 import crew.feature.game.presentation.generated.resources.match_phase_who_won_eyebrow
 import crew.feature.game.presentation.generated.resources.match_phase_who_won_lost_description
 import crew.feature.game.presentation.generated.resources.match_phase_who_won_lost_emoji
@@ -168,13 +166,9 @@ fun WhoWonPhase(
                     ),
                 )
             }
-        } else {
-            BaseMiniButton(
-                text = stringResource(Res.string.match_phase_who_won_dispute_action),
-                filled = false,
-                onClick = {}
-            )
         }
+        // Dispute butonu kaldırıldı: onClick boştu, geçen etkinlikte kafa karıştırdı.
+        // Host'a itiraz akışı gelince geri ekle (string kaynağı duruyor).
     }
 }
 

@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.kaanf.core.presentation.snackbar.SnackbarController
 import com.kaanf.core.presentation.snackbar.SnackbarMessage
 import com.kaanf.core.presentation.snackbar.SnackbarVariant
+import com.kaanf.core.presentation.snackbar.toSnackbarMessage
 import com.kaanf.core.domain.util.Result
 import com.kaanf.core.presentation.util.UIText
 import com.kaanf.home.domain.usecase.CreateTicketUseCase
@@ -48,6 +49,7 @@ class EventDetailViewModel(
         when (action) {
             EventDetailAction.OnCheckoutClicked -> checkout()
             EventDetailAction.GoToTicketQr -> navigate()
+            EventDetailAction.OnRetryLoad -> loadEventDetail()
         }
     }
 
@@ -66,7 +68,7 @@ class EventDetailViewModel(
 
         _state.update { it.copy(isCheckingOut = true) }
 
-        when (createTicketUseCase(eventId)) {
+        when (val result = createTicketUseCase(eventId)) {
             is Result.Success -> {
                 _state.update { it.copy(isCheckingOut = false) }
                 navigate()
@@ -74,12 +76,13 @@ class EventDetailViewModel(
 
             is Result.Failure -> {
                 _state.update { it.copy(isCheckingOut = false) }
+                snackbarController.show(result.error.toSnackbarMessage())
             }
         }
     }
 
     private fun loadEventDetail() = viewModelScope.launch {
-        _state.update { it.copy(isLoading = true) }
+        _state.update { it.copy(isLoading = true, loadFailed = false) }
 
         when (val result = getEventDetailUseCase(eventId)) {
             is Result.Success -> {
@@ -92,7 +95,7 @@ class EventDetailViewModel(
             }
 
             is Result.Failure -> {
-                _state.update { it.copy(isLoading = false) }
+                _state.update { it.copy(isLoading = false, loadFailed = true) }
             }
         }
     }

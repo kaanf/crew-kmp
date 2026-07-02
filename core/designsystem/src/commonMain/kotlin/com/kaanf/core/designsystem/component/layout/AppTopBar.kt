@@ -52,6 +52,8 @@ import crew.core.designsystem.generated.resources.loser_active_task_title
 import crew.core.designsystem.generated.resources.loser_waits_title
 import crew.core.designsystem.generated.resources.login_text
 import crew.core.designsystem.generated.resources.loser_active_task_skip
+import crew.core.designsystem.generated.resources.profile_sign_out
+import crew.core.designsystem.generated.resources.profile_title
 import crew.core.designsystem.generated.resources.register_text
 import crew.core.designsystem.generated.resources.rps_ready_title
 import crew.core.designsystem.generated.resources.scan_opponent_title
@@ -190,6 +192,7 @@ fun AppTopBar(
                 AppTopBarState.Register,
                 AppTopBarState.Login,
                 AppTopBarState.ProfilePicture,
+                AppTopBarState.Profile,
                 is AppTopBarState.Dashboard,
                 AppTopBarState.Game,
                 AppTopBarState.LoserActiveTask,
@@ -207,21 +210,28 @@ fun AppTopBar(
                     contentPadding = PaddingValues(horizontal = 0.dp),
                 ) {
                     if (state is AppTopBarState.Dashboard) {
-                        state.profileImageUrl?.let { url ->
-                            AvatarCircle(
-                                AvatarContent.Image(url),
-                                avatarSize = 40,
-                                borderColor = AccessDefaults.Border,
-                                borderSize = 1
-                            )
-                        }
+                        AvatarCircle(
+                            content = state.profileImageUrl?.let { AvatarContent.Image(it) }
+                                ?: AvatarContent.Initials(
+                                    label = state.userName
+                                        ?.trim()
+                                        ?.firstOrNull()
+                                        ?.uppercase()
+                                        .orEmpty(),
+                                    color = AccessDefaults.Accent,
+                                ),
+                            avatarSize = 40,
+                            borderColor = AccessDefaults.Border,
+                            borderSize = 1
+                        )
                     } else {
                         Text(
                             text = stringResource(
                                 when (state) {
-                                    AppTopBarState.Register -> Res.string.register_text
-                                    AppTopBarState.Login -> Res.string.login_text
+                                    AppTopBarState.Register -> Res.string.login_text
+                                    AppTopBarState.Login -> Res.string.register_text
                                     AppTopBarState.Game -> Res.string.game_how_to_play
+                                    AppTopBarState.Profile -> Res.string.profile_sign_out
                                     AppTopBarState.ProfilePicture,
                                     AppTopBarState.LoserActiveTask,
                                         -> Res.string.loser_active_task_skip
@@ -255,6 +265,7 @@ private val AppTopBarState.titleResource: StringResource
         is AppTopBarState.GameLobby,
             -> Res.string.empty
 
+        AppTopBarState.Profile -> Res.string.profile_title
         AppTopBarState.EventDetail -> Res.string.event_detail_title
         AppTopBarState.ImageCrop -> Res.string.image_crop_title
         AppTopBarState.TicketQr -> Res.string.ticket_qr_title
@@ -283,6 +294,7 @@ private val AppTopBarState.navigationIcon: DrawableResource?
 
         AppTopBarState.Login,
         AppTopBarState.Register,
+        AppTopBarState.Profile,
         AppTopBarState.EventDetail,
         AppTopBarState.TicketQr,
         AppTopBarState.EventCode,

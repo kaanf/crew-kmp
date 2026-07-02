@@ -56,7 +56,7 @@ fun LostThrowInfoCard(
 
                 val glowBrush = Brush.radialGradient(
                     colors = listOf(
-                        AccessDefaults.Coral.copy(alpha = 0.08f),
+                        AccessDefaults.Coral.copy(alpha = 0.15f),
                         Color.Transparent
                     ),
                     center = Offset(0f, 0f),
@@ -65,7 +65,7 @@ fun LostThrowInfoCard(
 
                 val borderBrush = Brush.radialGradient(
                     colors = listOf(
-                        AccessDefaults.Coral.copy(alpha = 0.35f),
+                        AccessDefaults.Coral.copy(alpha = 0.45f),
                         AccessDefaults.Surface.copy(alpha = 0.8f)
                     ),
                     center = Offset(0f, 0f),

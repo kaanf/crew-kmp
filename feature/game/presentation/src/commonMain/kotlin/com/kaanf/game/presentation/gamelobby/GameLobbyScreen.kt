@@ -1,7 +1,10 @@
 package com.kaanf.game.presentation.gamelobby
 
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -10,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -51,11 +55,6 @@ import com.kaanf.game.presentation.session.MatchSessionEvent
 import com.kaanf.game.presentation.session.MatchSessionViewModel
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
-/**
- * Lobi, ScanOpponent gibi graph-scoped [MatchSessionViewModel]'in bir görünümüdür: ayrı bir
- * soket aboneliği YOKTUR. Etkinlik boyunca tek canlı bağlantı session VM'inde yaşar; lobi
- * üyeleri/geri sayım oradan okunur, aksiyonlar oraya delege edilir.
- */
 @Composable
 fun GameLobbyRoot(
     viewModel: MatchSessionViewModel,
@@ -76,6 +75,9 @@ fun GameLobbyRoot(
 
     // Session state → bu ekranın ihtiyaç duyduğu dilime indir.
     val state = GameLobbyState(
+        // Lobi snapshot'ı CONNECTED'ta geliyor ve gameStartsAt'i set ediyor;
+        // 0 olduğu sürece veri henüz yok → loading. Reconnect'te tekrar 0'a düşmez.
+        isLoading = sessionState.lobbyTargetEpochMillis == 0L,
         targetEpochMillis = sessionState.lobbyTargetEpochMillis,
         showGameStartSheet = sessionState.showGameStartSheet,
         showExitConfirmDialog = sessionState.showExitConfirmDialog,
@@ -167,20 +169,50 @@ fun GameLobbyScreen(
         }
     }
 
+    Crossfade(
+        targetState = state.isLoading,
+        modifier = modifier.fillMaxSize(),
+        animationSpec = tween(durationMillis = 250),
+    ) { isLoading ->
+        if (isLoading) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator(color = AccessDefaults.Accent)
+            }
+        } else {
+            GameLobbyContent(
+                scrollState = scrollState,
+                state = state,
+                onAction = onAction,
+            )
+        }
+    }
+}
+
+@Composable
+private fun GameLobbyContent(
+    scrollState: ScrollState,
+    state: GameLobbyState,
+    onAction: (GameLobbyAction) -> Unit,
+) {
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
             .verticalScroll(scrollState)
             .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        /*
         RoundedBadge(
             text = "Lobby - Doors Open",
             backgroundColor = AccessDefaults.OnAccent,
             borderColor = AccessDefaults.AccentGlow,
             textColor = AccessDefaults.Accent,
         )
+         */
 
         LobbyPresenceCluster(
             members = state.lobbyMembers,
@@ -242,7 +274,7 @@ fun GameLobbyScreenPreview() {
     CrewTheme {
         GameLobbyScreen(
             scrollState = rememberScrollState(),
-            state = GameLobbyState(),
+            state = GameLobbyState(isLoading = false),
             onAction = {},
         )
     }

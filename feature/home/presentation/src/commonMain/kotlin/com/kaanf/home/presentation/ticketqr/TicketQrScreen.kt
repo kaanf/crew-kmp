@@ -2,6 +2,7 @@ package com.kaanf.home.presentation.ticketqr
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ScrollState
@@ -13,22 +14,32 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.kaanf.core.designsystem.component.button.BaseButton
 import com.kaanf.core.designsystem.component.info.InfoCard
 import com.kaanf.core.designsystem.component.layout.AppScaffold
 import com.kaanf.core.designsystem.component.layout.AppTopBar
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.presentation.model.AppTopBarState
+import com.kaanf.core.presentation.util.KeepScreenOn
 import com.kaanf.core.presentation.util.ObserveAsEvents
 import com.kaanf.home.presentation.eventcode.EventCodeContent
 import com.kaanf.home.presentation.ticketqr.component.qr.TicketQrInfoCard
@@ -37,6 +48,9 @@ import crew.feature.home.presentation.generated.resources.Res
 import crew.feature.home.presentation.generated.resources.ticket_qr_info_action
 import crew.feature.home.presentation.generated.resources.ticket_qr_info_prefix
 import crew.feature.home.presentation.generated.resources.ticket_qr_info_suffix
+import crew.feature.home.presentation.generated.resources.ticket_qr_load_error_description
+import crew.feature.home.presentation.generated.resources.ticket_qr_load_error_title
+import crew.feature.home.presentation.generated.resources.ticket_qr_retry_action
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -69,8 +83,16 @@ fun TicketContainerScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // Kapı kuyruğunda ekran pasif gösterilirken kararmasın.
+    KeepScreenOn()
+
     val qrScrollState: ScrollState = rememberScrollState()
     val eventCodeScrollState: ScrollState = rememberScrollState()
+
+    val doorsLocked = rememberDoorsLocked(
+        doorsOpenAtMillis = state.ticket?.doorsOpenAt ?: 0L,
+        serverClockOffsetMillis = state.ticket?.serverClockOffsetMillis ?: 0L,
+    )
 
     BackHandler(enabled = state.phase == TicketPhase.EventCode) {
         onAction(TicketQrAction.OnBackClick)
@@ -128,9 +150,12 @@ fun TicketContainerScreen(
                 TicketPhase.EventCode -> EventCodeContent(
                     eventCode = state.eventCode,
                     status = state.codeStatus,
-                    enabled = !state.isCheckingIn,
+                    enabled = !state.isCheckingIn && !doorsLocked,
+                    doorsLocked = doorsLocked,
+                    doorTime = state.ticket?.formattedDoorClock.orEmpty(),
                     scrollState = eventCodeScrollState,
                     onCodeChanged = { onAction(TicketQrAction.OnCodeChanged(it)) },
+                    onClearClicked = { onAction(TicketQrAction.OnClearCode) },
                     onShowQrClicked = { onAction(TicketQrAction.OnBackClick) },
                     modifier = Modifier.fillMaxSize(),
                 )
@@ -146,46 +171,97 @@ private fun TicketQrContent(
     onAction: (TicketQrAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Box(
+    Crossfade(
+        targetState = state.ticket,
         modifier = modifier.fillMaxSize(),
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp)
-                .verticalScroll(scrollState),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            TicketSuccessCard(
-                doorsAtEpochMillis = state.ticket?.doorsOpenAt ?: 0L,
-            )
+        animationSpec = tween(durationMillis = 250),
+    ) { ticket ->
+        if (ticket == null) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ) {
+                if (state.loadFailed) {
+                    TicketLoadErrorContent(
+                        onRetry = { onAction(TicketQrAction.OnRetryLoad) },
+                    )
+                } else {
+                    CircularProgressIndicator(color = AccessDefaults.Accent)
+                }
+            }
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp)
+                    .verticalScroll(scrollState),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                TicketSuccessCard(
+                    doorsAtEpochMillis = ticket.doorsOpenAt,
+                    serverClockOffsetMillis = ticket.serverClockOffsetMillis,
+                )
 
-            InfoCard(
-                text = buildAnnotatedString {
-                    append(stringResource(Res.string.ticket_qr_info_prefix))
+                InfoCard(
+                    text = buildAnnotatedString {
+                        append(stringResource(Res.string.ticket_qr_info_prefix))
 
-                    withStyle(
-                        style = SpanStyle(
-                            fontWeight = FontWeight.Bold,
-                            color = AccessDefaults.TextPrimary,
-                        ),
-                    ) {
-                        append(stringResource(Res.string.ticket_qr_info_action))
-                    }
+                        withStyle(
+                            style = SpanStyle(
+                                fontWeight = FontWeight.Bold,
+                                color = AccessDefaults.TextPrimary,
+                            ),
+                        ) {
+                            append(stringResource(Res.string.ticket_qr_info_action))
+                        }
 
-                    append(stringResource(Res.string.ticket_qr_info_suffix))
-                },
-            )
+                        append(stringResource(Res.string.ticket_qr_info_suffix))
+                    },
+                )
 
-            TicketQrInfoCard(
-                eventTitle = state.ticket?.eventTitle.orEmpty(),
-                entryCode = state.ticket?.entryCode.orEmpty(),
-                formattedDoorTime = state.ticket?.formattedDoorTime.orEmpty(),
-                formattedVenueAddress = state.ticket?.formattedVenueAddress.orEmpty(),
-                onEventCodeClicked = {
-                    onAction(TicketQrAction.OnEventCodeClicked)
-                },
-            )
+                TicketQrInfoCard(
+                    eventTitle = ticket.eventTitle,
+                    entryCode = ticket.entryCode,
+                    formattedDoorTime = ticket.formattedDoorTime,
+                    formattedVenueAddress = ticket.formattedVenueAddress,
+                    onEventCodeClicked = {
+                        onAction(TicketQrAction.OnEventCodeClicked)
+                    },
+                )
+            }
         }
+    }
+}
+
+@Composable
+private fun TicketLoadErrorContent(
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier
+            .widthIn(max = 320.dp)
+            .padding(horizontal = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            text = stringResource(Res.string.ticket_qr_load_error_title),
+            style = MaterialTheme.typography.titleMedium,
+            color = AccessDefaults.TextPrimary,
+            textAlign = TextAlign.Center,
+        )
+        Spacer(Modifier.height(8.dp))
+        Text(
+            text = stringResource(Res.string.ticket_qr_load_error_description),
+            style = MaterialTheme.typography.bodyMedium,
+            color = AccessDefaults.TextMuted,
+            textAlign = TextAlign.Center,
+        )
+        Spacer(Modifier.height(24.dp))
+        BaseButton(
+            text = stringResource(Res.string.ticket_qr_retry_action),
+            onClick = onRetry,
+            filled = true,
+        )
     }
 }

@@ -7,11 +7,13 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.toRoute
 import com.kaanf.home.presentation.dashboard.DashboardRoot
 import com.kaanf.home.presentation.eventdetail.EventDetailRoot
+import com.kaanf.home.presentation.profile.ProfileRoot
 import com.kaanf.home.presentation.ticketqr.TicketQrRoot
 
 fun NavGraphBuilder.homeGraph(
     navController: NavController,
     onGameCodeSuccess: (eventId: String) -> Unit,
+    onSignOut: () -> Unit,
 ) {
     navigation<HomeGraphRoutes.Graph>(
         startDestination = HomeGraphRoutes.Dashboard,
@@ -24,6 +26,21 @@ fun NavGraphBuilder.homeGraph(
                         launchSingleTop = true
                     }
                 },
+                onProfileClicked = {
+                    navController.navigate(HomeGraphRoutes.Profile) {
+                        restoreState = true
+                        launchSingleTop = true
+                    }
+                },
+            )
+        }
+
+        composable<HomeGraphRoutes.Profile> {
+            ProfileRoot(
+                onBack = {
+                    navController.popBackStack()
+                },
+                onSignedOut = onSignOut,
             )
         }
 

@@ -11,7 +11,7 @@ import com.kaanf.core.domain.model.participant.CheckInResult
 import com.kaanf.core.domain.model.ticket.EventTicketResponse
 import com.kaanf.core.domain.util.DataError
 import com.kaanf.core.domain.util.Result
-import com.kaanf.core.domain.util.map
+import com.kaanf.core.data.networking.mapCatching
 import com.kaanf.home.domain.repository.TicketRepository
 import io.ktor.client.HttpClient
 
@@ -21,13 +21,13 @@ class TicketRepositoryImpl(
     override suspend fun createTicket(eventId: EventId): Result<EventTicketResponse, DataError.Remote> {
         return httpClient.post<EventTicketResponseDto>(
             route = "/events/$eventId/tickets",
-        ).map { it.toDomain() }
+        ).mapCatching { it.toDomain() }
     }
 
     override suspend fun getMyTicket(eventId: EventId): Result<EventTicketResponse, DataError.Remote> {
         return httpClient.get<EventTicketResponseDto>(
             route = "/events/$eventId/my-ticket",
-        ).map { it.toDomain() }
+        ).mapCatching { it.toDomain() }
     }
 
     override suspend fun checkIn(
@@ -37,6 +37,6 @@ class TicketRepositoryImpl(
         return httpClient.post<CheckInRequestDto, CheckInResultDto>(
             route = "/events/$eventId/check-in",
             body = CheckInRequestDto(entryCode = entryCode),
-        ).map { it.toDomain() }
+        ).mapCatching { it.toDomain() }
     }
 }

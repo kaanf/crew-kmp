@@ -25,9 +25,11 @@ import crew.feature.game.presentation.generated.resources.match_phase_scoreboard
 import crew.feature.game.presentation.generated.resources.match_phase_scoreboard_finish_loading
 import crew.feature.game.presentation.generated.resources.match_phase_scoreboard_subtitle_loading
 import crew.feature.game.presentation.generated.resources.match_phase_scoreboard_subtitle_loser_done
+import crew.feature.game.presentation.generated.resources.match_phase_scoreboard_subtitle_loser_forfeit
 import crew.feature.game.presentation.generated.resources.match_phase_scoreboard_subtitle_loser_not_done
 import crew.feature.game.presentation.generated.resources.match_phase_scoreboard_subtitle_winner_bailed
 import crew.feature.game.presentation.generated.resources.match_phase_scoreboard_subtitle_winner_done
+import crew.feature.game.presentation.generated.resources.match_phase_scoreboard_subtitle_winner_forfeit
 import crew.feature.game.presentation.generated.resources.match_phase_scoreboard_title_highlight
 import crew.feature.game.presentation.generated.resources.match_phase_scoreboard_title_prefix
 import org.jetbrains.compose.resources.stringResource
@@ -38,6 +40,7 @@ fun MatchScoreboardPhase(
     currentUserId: String?,
     isLoading: Boolean,
     completed: Boolean,
+    forfeit: Boolean,
     isFinishing: Boolean,
     onFinish: () -> Unit,
     modifier: Modifier = Modifier,
@@ -74,7 +77,7 @@ fun MatchScoreboardPhase(
         )
 
         Text(
-            text = scoreboardSubtitle(myEntry = myEntry, completed = completed),
+            text = scoreboardSubtitle(myEntry = myEntry, completed = completed, forfeit = forfeit),
             style = MaterialTheme.typography.titleSmall.copy(
                 color = AccessDefaults.TextSecondary,
                 fontWeight = FontWeight.Medium,
@@ -92,6 +95,7 @@ fun MatchScoreboardPhase(
                     entry = entry,
                     isYou = entry.userId == currentUserId,
                     taskCompleted = completed,
+                    forfeit = forfeit,
                 )
             }
         }
@@ -111,8 +115,13 @@ fun MatchScoreboardPhase(
 private fun scoreboardSubtitle(
     myEntry: MatchScoreboardEntry?,
     completed: Boolean,
+    forfeit: Boolean,
 ): String = when {
     myEntry == null -> stringResource(Res.string.match_phase_scoreboard_subtitle_loading)
+    // Forfeit: ayrılan her zaman kaybeden, kalan her zaman kazanan.
+    forfeit && myEntry.isWinner ->
+        stringResource(Res.string.match_phase_scoreboard_subtitle_winner_forfeit)
+    forfeit -> stringResource(Res.string.match_phase_scoreboard_subtitle_loser_forfeit)
     myEntry.isWinner && completed -> stringResource(
         Res.string.match_phase_scoreboard_subtitle_winner_done,
     )

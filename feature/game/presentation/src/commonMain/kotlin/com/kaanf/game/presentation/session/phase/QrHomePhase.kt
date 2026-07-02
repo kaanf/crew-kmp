@@ -13,6 +13,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,10 +31,12 @@ import com.kaanf.core.designsystem.component.qr.UserQrCard
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessIcons
 import com.kaanf.core.designsystem.theme.CrewTheme
+import com.kaanf.core.designsystem.component.dialog.BaseDialog
 import com.kaanf.core.presentation.permission.Permission
 import com.kaanf.core.presentation.permission.PermissionState
 import com.kaanf.core.presentation.permission.rememberPermissionController
 import com.kaanf.game.presentation.component.OnboardingInfoCard
+import com.kaanf.game.presentation.component.dialog.CameraPermissionDialog
 import com.kaanf.game.presentation.session.MatchSessionAction
 import com.kaanf.game.presentation.session.MatchSessionState
 import com.kaanf.game.presentation.session.component.LostThrowInfoCard
@@ -52,6 +58,19 @@ fun QrHomePhase(
     val scrollState = rememberScrollState()
     val permissionController = rememberPermissionController()
     val scope = rememberCoroutineScope()
+    var showCameraPermissionDialog by remember { mutableStateOf(false) }
+
+    if (showCameraPermissionDialog) {
+        BaseDialog(onDismissRequest = { showCameraPermissionDialog = false }) {
+            CameraPermissionDialog(
+                onOpenSettings = {
+                    showCameraPermissionDialog = false
+                    permissionController.openAppSettings()
+                },
+                onDismiss = { showCameraPermissionDialog = false },
+            )
+        }
+    }
     val titlePrefix = stringResource(Res.string.match_phase_qr_home_title_prefix)
     val titleHighlight = stringResource(Res.string.match_phase_qr_home_title_highlight)
 
@@ -60,52 +79,58 @@ fun QrHomePhase(
             .fillMaxSize()
             .verticalScroll(scrollState)
             .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(
+            space = 12.dp,
+            alignment = Alignment.CenterVertically
+        ),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(
-            text = buildAnnotatedString {
-                withStyle(style = SpanStyle(color = AccessDefaults.TextPrimary)) {
-                    append(titlePrefix)
-                }
-                withStyle(
-                    style = SpanStyle(
-                        color = AccessDefaults.Accent,
-                        fontWeight = FontWeight.Bold,
-                    ),
-                ) {
-                    append(titleHighlight)
-                }
-            },
-            style = MaterialTheme.typography.headlineLarge,
-            textAlign = TextAlign.Center,
-        )
-
-        Text(
-            text = stringResource(Res.string.match_phase_qr_home_description),
-            style = MaterialTheme.typography.titleSmall.copy(
-                color = AccessDefaults.TextSecondary,
-                fontWeight = FontWeight.Medium,
+        Column(
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = buildAnnotatedString {
+                    withStyle(style = SpanStyle(color = AccessDefaults.TextPrimary)) {
+                        append(titlePrefix)
+                    }
+                    withStyle(
+                        style = SpanStyle(
+                            color = AccessDefaults.Accent,
+                            fontWeight = FontWeight.Bold,
+                        ),
+                    ) {
+                        append(titleHighlight)
+                    }
+                },
+                style = MaterialTheme.typography.displaySmall,
                 textAlign = TextAlign.Center,
-            ),
-        )
+            )
 
-        Spacer(modifier = Modifier.height(1.dp))
+            Text(
+                text = stringResource(Res.string.match_phase_qr_home_description),
+                style = MaterialTheme.typography.titleSmall.copy(
+                    color = AccessDefaults.TextSecondary,
+                    fontWeight = FontWeight.Medium,
+                    textAlign = TextAlign.Center,
+                ),
+            )
+        }
 
         UserQrCard(
             inputText = state.matchQrToken.orEmpty(),
         )
-
-        Spacer(modifier = Modifier.height(1.dp))
 
         BaseButton(
             text = stringResource(Res.string.match_phase_qr_home_scan_action),
             backgroundColor = AccessDefaults.Surface,
             onClick = {
                 scope.launch {
-                    val result = permissionController.requestPermission(Permission.CAMERA)
-                    if (result == PermissionState.GRANTED) {
-                        onAction(MatchSessionAction.OnScanClicked)
+                    when (permissionController.requestPermission(Permission.CAMERA)) {
+                        PermissionState.GRANTED -> onAction(MatchSessionAction.OnScanClicked)
+                        // Kalıcı ret: sistem artık sormaz, buton sessiz kalıyordu.
+                        PermissionState.PERMANENTLY_DENIED -> showCameraPermissionDialog = true
+                        else -> Unit // yumuşak ret: tekrar dokununca sistem yeniden sorar
                     }
                 }
             },
@@ -113,8 +138,6 @@ fun QrHomePhase(
             contentColor = AccessDefaults.TextPrimary,
             leadingIcon = AccessIcons.QR,
         )
-
-        Spacer(modifier = Modifier.height(1.dp))
 
         // LostThrowInfoCard()
     }

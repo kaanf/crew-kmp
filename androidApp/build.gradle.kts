@@ -17,6 +17,8 @@ dependencies {
 
     implementation(libs.koin.android)
 
+    debugImplementation(libs.wiretap.launcher)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.core.splashscreen)

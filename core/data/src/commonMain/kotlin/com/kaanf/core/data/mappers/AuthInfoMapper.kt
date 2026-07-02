@@ -1,6 +1,7 @@
 package com.kaanf.core.data.mappers
 
 import com.kaanf.core.data.dto.AuthInfoSerializable
+import com.kaanf.core.data.dto.UpdateUserRequest
 import com.kaanf.core.data.dto.UserSerializable
 import com.kaanf.core.domain.model.auth.AuthInfo
 import com.kaanf.core.domain.model.user.User
@@ -40,6 +41,15 @@ fun User.toSerializable(): UserSerializable {
         role = role,
         status = status,
         hasVerifiedEmail = hasVerifiedEmail,
+    )
+}
+
+fun User.toUpdateUserRequest(): UpdateUserRequest {
+    return UpdateUserRequest(
+        fullName = fullName,
+        dateOfBirth = dateOfBirth,
+        gender = gender,
+        profilePictureUrl = profilePictureUrl,
     )
 }
 

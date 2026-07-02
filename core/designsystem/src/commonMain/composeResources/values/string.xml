@@ -8,6 +8,9 @@
     <string name="login_text">Sign in</string>
     <string name="register_text">Sign up</string>
 
+    <string name="profile_title">Profile</string>
+    <string name="profile_sign_out">Sign out</string>
+
     <string name="event_detail_title">Event detail</string>
     <string name="ticket_qr_title">Your ticket</string>
     <string name="event_code_title">Check in</string>

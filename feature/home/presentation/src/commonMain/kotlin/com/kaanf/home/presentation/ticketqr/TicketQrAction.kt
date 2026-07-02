@@ -8,4 +8,10 @@ sealed interface TicketQrAction {
     data object OnBackClick : TicketQrAction
 
     data class OnCodeChanged(val code: String) : TicketQrAction
+
+    // Event-code fazında girilen kodu temizler.
+    data object OnClearCode : TicketQrAction
+
+    // Bilet yüklemesi başarısız olduğunda tekrar dener.
+    data object OnRetryLoad : TicketQrAction
 }

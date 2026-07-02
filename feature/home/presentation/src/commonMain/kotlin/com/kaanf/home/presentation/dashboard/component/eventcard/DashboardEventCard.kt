@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -46,13 +47,13 @@ fun DashboardEventCard(
             )
             .border(
                 width = 1.dp,
-                color = AccessDefaults.BorderSoft,
+                color = if (event.hasMyTicket) AccessDefaults.Accent else AccessDefaults.BorderSoft,
                 shape = RoundedCornerShape(16.dp),
             )
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
-                onClick = { onClicked.invoke("") },
+                onClick = { onClicked.invoke(event.id) },
             )
             .padding(start = 12.dp, end = 12.dp, bottom = 12.dp),
     ) {
@@ -77,13 +78,29 @@ fun DashboardEventCard(
                         alignment = Alignment.CenterVertically
                     )
                 ) {
-                    Text(
-                        text = event.date,
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            color = AccessDefaults.TextMuted,
-                            fontSize = 12.sp
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Text(
+                            text = event.date,
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                color = AccessDefaults.TextMuted,
+                                fontSize = 12.sp
+                            )
                         )
-                    )
+
+                        if (event.hasMyTicket) {
+                            Text(
+                                text = "YOU'RE IN.",
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    color = AccessDefaults.Accent,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    fontSize = 12.sp
+                                )
+                            )
+                        }
+                    }
 
                     Text(
                         text = event.title,
@@ -95,7 +112,7 @@ fun DashboardEventCard(
                     )
 
                     Text(
-                        text = "Holesovice",
+                        text = "Drunken Monkey Hostel",
                         style = MaterialTheme.typography.titleMedium.copy(
                             color = AccessDefaults.TextMuted,
                             fontSize = 12.sp
@@ -124,7 +141,7 @@ fun DashboardEventCard(
                     )
 
                     RoundedBadge(
-                        text = "%${event.percentage} Full"
+                        text = if (event.hasMyTicket) "TICKET" else "%${event.percentage} Full"
                     )
                 }
             }
@@ -138,15 +155,30 @@ fun DashboardEventCard(
 @Composable
 fun EventRowPreview() {
     CrewTheme {
-        DashboardEventCard(
-            event = EventDashboardUiModel(
-                id = "1",
-                title = "Live bar games. You show up solo, leave with a story.",
-                date = "FRI, 12 MAR",
-                formattedPrice = "220 CZK",
-                percentage = 42,
-                isFeatured = false,
-            ), onClicked = {}
-        )
+        Column {
+            DashboardEventCard(
+                event = EventDashboardUiModel(
+                    id = "1",
+                    title = "Crew Event Vol 25.",
+                    date = "FRI, 12 MAR",
+                    formattedPrice = "220 CZK",
+                    percentage = 42,
+                    isFeatured = false,
+                    hasMyTicket = false,
+                ), onClicked = {}
+            )
+
+            DashboardEventCard(
+                event = EventDashboardUiModel(
+                    id = "2",
+                    title = "Crew Event Vol 25.",
+                    date = "FRI, 12 MAR",
+                    formattedPrice = "220 CZK",
+                    percentage = 42,
+                    isFeatured = false,
+                    hasMyTicket = true,
+                ), onClicked = {}
+            )
+        }
     }
 }

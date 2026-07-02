@@ -21,6 +21,7 @@ fun EventDashboardDto.toDomain(): EventDashboard {
         startsAt = Instant.parse(startsAt),
         endsAt = Instant.parse(endsAt),
         status = EventStatus.valueOf(status),
+        hasMyTicket = hasMyTicket,
     )
 }
 

@@ -33,6 +33,10 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 fun LeaveEventDialog(
     onStay: () -> Unit,
     onLeave: () -> Unit,
+    title: String = "Etkinlikten ayrılmak\nistediğine emin misin?",
+    subtitle: String = "İstediğin zaman geri dönebilirsin; yerin korunur.",
+    stayLabel: String = "Oyunda Kal",
+    leaveLabel: String = "Etkinlikten Ayrıl",
 ) {
     Column(
         modifier = Modifier
@@ -64,7 +68,7 @@ fun LeaveEventDialog(
         Spacer(modifier = Modifier.height(4.dp))
 
         Text(
-            text = "Etkinlikten ayrılmak\nistediğine emin misin?",
+            text = title,
             style = MaterialTheme.typography.headlineMedium.copy(
                 color = AccessDefaults.TextPrimary,
                 textAlign = TextAlign.Center,
@@ -72,7 +76,7 @@ fun LeaveEventDialog(
         )
 
         Text(
-            text = "Oyun yeni başladı. Şimdi ayrılırsan bu geceki yerini bırakmış olursun ve tekrar girmek için yeniden katılman gerekir.",
+            text = subtitle,
             style = MaterialTheme.typography.bodySmall.copy(
                 color = AccessDefaults.TextSecondary,
                 fontSize = 12.sp,
@@ -83,7 +87,7 @@ fun LeaveEventDialog(
         Spacer(modifier = Modifier.height(12.dp))
 
         BaseButton(
-            text = "Oyunda Kal",
+            text = stayLabel,
             onClick = onStay,
             filled = true,
         )
@@ -91,7 +95,7 @@ fun LeaveEventDialog(
         Spacer(modifier = Modifier.height(6.dp))
 
         Text(
-            text = "Etkinlikten Ayrıl",
+            text = leaveLabel,
             modifier = Modifier.clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,

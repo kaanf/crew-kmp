@@ -58,6 +58,7 @@ fun MatchScoreboardCard(
     entry: MatchScoreboardEntry,
     isYou: Boolean,
     taskCompleted: Boolean,
+    forfeit: Boolean = false,
 ) {
     Column(
         modifier = Modifier
@@ -96,7 +97,7 @@ fun MatchScoreboardCard(
                 ),
         )
 
-        ScoreboardDetailRow(entry = entry, taskCompleted = taskCompleted)
+        ScoreboardDetailRow(entry = entry, taskCompleted = taskCompleted, forfeit = forfeit)
     }
 }
 
@@ -104,6 +105,7 @@ fun MatchScoreboardCard(
 private fun ScoreboardDetailRow(
     entry: MatchScoreboardEntry,
     taskCompleted: Boolean,
+    forfeit: Boolean,
 ) {
     if (entry.isWinner) {
         DetailRow(
@@ -122,6 +124,9 @@ private fun ScoreboardDetailRow(
         title = stringResource(Res.string.match_scoreboard_detail_lost_throw_title),
         subtitle = stringResource(Res.string.match_scoreboard_detail_rps_subtitle),
     )
+
+    // Forfeit'te görev hiç oynanmadı; "görev yapılmadı" satırını gösterme.
+    if (forfeit) return
 
     if (taskCompleted) {
         DetailRow(

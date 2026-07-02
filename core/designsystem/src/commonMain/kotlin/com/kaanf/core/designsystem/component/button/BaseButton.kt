@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -79,8 +80,8 @@ fun BaseButton(
         }
     val resolvedContentColor = contentColor
         ?: when {
-            filled && isInteractionEnabled -> AccessDefaults.OnAccent
-            isInteractionEnabled -> AccessDefaults.TextPrimary
+            filled && (isInteractionEnabled || isLoading) -> AccessDefaults.OnAccent
+            isInteractionEnabled || isLoading -> AccessDefaults.TextPrimary
             else -> AccessDefaults.TextFaint
         }
 
@@ -91,6 +92,7 @@ fun BaseButton(
             modifier
                 .fillMaxWidth()
                 .height(52.dp)
+                // Loading shares the dimmed "disabled" look: normal background at 0.5 alpha.
                 .alpha(if (isInteractionEnabled) 1f else 0.5f)
                 .clip(outerShape),
         contentAlignment = Alignment.Center,
@@ -120,25 +122,33 @@ fun BaseButton(
                     .padding(horizontal = 16.dp),
             contentAlignment = Alignment.Center,
         ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                if (leadingIcon != null && !isLoading) {
-                    Icon(
-                        painter = painterResource(leadingIcon),
-                        contentDescription = null,
-                        tint = resolvedContentColor,
-                        modifier = Modifier.size(20.dp),
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(22.dp),
+                    color = resolvedContentColor,
+                    strokeWidth = 2.dp,
+                )
+            } else {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    if (leadingIcon != null) {
+                        Icon(
+                            painter = painterResource(leadingIcon),
+                            contentDescription = null,
+                            tint = resolvedContentColor,
+                            modifier = Modifier.size(20.dp),
+                        )
+                    }
+                    Text(
+                        text = text,
+                        style = MaterialTheme.typography.titleSmall.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = resolvedContentColor,
+                        ),
                     )
                 }
-                Text(
-                    text = if (isLoading) loadingText else text,
-                    style = MaterialTheme.typography.titleSmall.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = resolvedContentColor,
-                    ),
-                )
             }
         }
     }

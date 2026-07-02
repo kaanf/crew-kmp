@@ -22,9 +22,11 @@ kotlin {
 
         androidMain {
             dependencies {
-                // Add Android-specific dependencies here. Note that this source set depends on
-                // commonMain by default and will correctly pull the Android artifacts of any KMP
-                // dependencies declared in commonMain.
+                // Media picker (gallery/camera) needs Activity Result APIs, FileProvider/ContextCompat
+                // and EXIF orientation handling for the shared image-decode step.
+                implementation(libs.androidx.activity.compose)
+                implementation(libs.androidx.core.ktx)
+                implementation(libs.androidx.exifinterface)
             }
         }
 

@@ -22,13 +22,26 @@
         android:theme="@style/Theme.App.Starting">
         <activity
             android:exported="true"
-            android:name=".androidapp.MainActivity">
+            android:name=".androidapp.MainActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Exposes the cached camera capture file to the camera app via a content:// URI.
+             Authority matches ComposeFileProvider's "${packageName}.fileprovider". -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 
 </manifest>

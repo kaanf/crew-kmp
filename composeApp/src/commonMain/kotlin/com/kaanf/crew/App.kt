@@ -61,9 +61,12 @@ fun App(
         when(event) {
             is MainEvent.OnSessionExpired -> {
                 navController.navigate(AuthGraphRoutes.Graph) {
-                    popUpTo(AuthGraphRoutes.Graph) {
-                        inclusive = false
+                    // Wipe the entire home back stack so back can't return into the signed-out app.
+                    // Mirrors onSignOut; popUpTo(AuthGraph) was a no-op on cold-start-from-Home.
+                    popUpTo(HomeGraphRoutes.Graph) {
+                        inclusive = true
                     }
+                    launchSingleTop = true
                 }
             }
         }

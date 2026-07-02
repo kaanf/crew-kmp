@@ -10,6 +10,8 @@ data class TicketQrUiModel(
     val status: String,
     val eventTitle: String,
     val doorsOpenAt: Long,
+    val serverClockOffsetMillis: Long,
     val formattedVenueAddress: String,
     val formattedDoorTime: String,
+    val formattedDoorClock: String,
 )

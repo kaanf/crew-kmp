@@ -12,5 +12,6 @@ fun EventDashboard.toUiModel(): EventDashboardUiModel {
         date = startsAt.toEventDateText(),
         percentage = percentage,
         formattedPrice = price.format(),
+        hasMyTicket = hasMyTicket,
     )
 }

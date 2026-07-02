@@ -164,6 +164,7 @@ fun DashboardFeaturedEventCardPreview() {
                 formattedPrice = "220 CZK",
                 percentage = 42,
                 isFeatured = false,
+                hasMyTicket = false,
             ),
             onClicked = {},
         )

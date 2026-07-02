@@ -22,6 +22,20 @@ class PermissionController(
             PermissionState.DENIED
         }
     }
+
+    /** Sistem dialogu tetiklemeden mevcut izin durumunu okur (ör. Ayarlar'dan dönüşte). */
+    suspend fun checkPermission(permission: Permission): PermissionState {
+        return when (mokoPermissionsController.getPermissionState(permission.toMokoPermission())) {
+            dev.icerock.moko.permissions.PermissionState.Granted -> PermissionState.GRANTED
+            dev.icerock.moko.permissions.PermissionState.DeniedAlways -> PermissionState.PERMANENTLY_DENIED
+            dev.icerock.moko.permissions.PermissionState.Denied -> PermissionState.DENIED
+            else -> PermissionState.NOT_DETERMINED
+        }
+    }
+
+    fun openAppSettings() {
+        mokoPermissionsController.openAppSettings()
+    }
 }
 
 fun Permission.toMokoPermission(): dev.icerock.moko.permissions.Permission {

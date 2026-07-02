@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.kaanf.core.domain.repository.UserRepository
 import com.kaanf.core.domain.util.onFailure
 import com.kaanf.core.domain.util.onSuccess
+import com.kaanf.core.presentation.snackbar.SnackbarController
+import com.kaanf.core.presentation.snackbar.toSnackbarMessage
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -14,7 +16,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ProfilePictureViewModel(
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val snackbarController: SnackbarController,
 ): ViewModel() {
     private val eventChannel = Channel<ProfilePictureEvent>()
     val events = eventChannel.receiveAsFlow()
@@ -116,6 +119,7 @@ class ProfilePictureViewModel(
                     _state.update { it.copy(
                         isUploadingImage = false
                     ) }
+                    snackbarController.show(error.toSnackbarMessage())
                     eventChannel.send(ProfilePictureEvent.UploadError)
                 }
         }
