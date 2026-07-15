@@ -31,13 +31,15 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
-fun BailOnTaskSheet(
+fun LeaveMatchSheet(
+    opponentName: String,
     onStay: () -> Unit,
     onLeave: () -> Unit,
 ) {
     Column(
         modifier = Modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .padding(start = 20.dp, end = 20.dp, bottom = 20.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -65,7 +67,7 @@ fun BailOnTaskSheet(
         Spacer(modifier = Modifier.height(4.dp))
 
         Text(
-            text = "Bail on the task?",
+            text = "Maçtan ayrılmak\nistediğine emin misin?",
             style = MaterialTheme.typography.headlineMedium.copy(
                 color = AccessDefaults.TextPrimary,
                 textAlign = TextAlign.Center,
@@ -73,7 +75,7 @@ fun BailOnTaskSheet(
         )
 
         Text(
-            text = "You're mid-task. Leaving now costs you.",
+            text = "Şimdi ayrılırsan bu maçı kaybetmiş sayılırsın. Etkinlikte kalır, yeni maç yapabilirsin.",
             style = MaterialTheme.typography.bodySmall.copy(
                 color = AccessDefaults.TextSecondary,
                 fontSize = 12.sp,
@@ -85,6 +87,7 @@ fun BailOnTaskSheet(
 
         Column(
             modifier = Modifier
+                .fillMaxWidth()
                 .background(
                     color = AccessDefaults.SurfaceElevated,
                     shape = AccessShapes.Medium
@@ -98,14 +101,20 @@ fun BailOnTaskSheet(
             verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            MatchPenaltyRow()
-            MatchPenaltyRow()
+            MatchPenaltyRow(
+                label = "Hükmen galibiyet",
+                value = "+5 · ${opponentName.ifBlank { "Rakip" }}",
+            )
+            MatchPenaltyRow(
+                label = "Senin puanın",
+                value = "+0",
+            )
         }
 
         Spacer(modifier = Modifier.height(6.dp))
 
         BaseButton(
-            text = "Keep playing",
+            text = "Maça Dön",
             onClick = onStay,
             filled = true,
         )
@@ -113,7 +122,7 @@ fun BailOnTaskSheet(
         Spacer(modifier = Modifier.height(6.dp))
 
         Text(
-            text = "Leave anyway",
+            text = "Maçtan Ayrıl",
             modifier = Modifier.clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
@@ -129,12 +138,12 @@ fun BailOnTaskSheet(
 
 @Composable
 @Preview
-fun BailOnTaskSheetPreview() {
+fun LeaveMatchSheetPreview() {
     CrewTheme {
-        BailOnTaskSheet(
+        LeaveMatchSheet(
+            opponentName = "Mira",
             onStay = {},
             onLeave = {},
         )
     }
 }
-

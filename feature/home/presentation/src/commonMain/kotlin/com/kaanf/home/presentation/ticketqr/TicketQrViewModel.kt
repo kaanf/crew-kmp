@@ -8,6 +8,7 @@ import com.kaanf.core.domain.util.Result
 import com.kaanf.core.presentation.snackbar.SnackbarController
 import com.kaanf.core.presentation.snackbar.SnackbarMessage
 import com.kaanf.core.presentation.snackbar.SnackbarVariant
+import com.kaanf.core.presentation.snackbar.toSnackbarMessage
 import com.kaanf.core.presentation.util.UIText
 import com.kaanf.home.domain.usecase.CheckInUseCase
 import com.kaanf.home.domain.usecase.GetMyTicketUseCase
@@ -16,16 +17,10 @@ import com.kaanf.home.presentation.mapper.toUiModel
 import crew.feature.home.presentation.generated.resources.Res
 import crew.feature.home.presentation.generated.resources.ticket_qr_checkin_failed_description
 import crew.feature.home.presentation.generated.resources.ticket_qr_checkin_failed_title
-import crew.feature.home.presentation.generated.resources.ticket_qr_checkin_unavailable_description
-import crew.feature.home.presentation.generated.resources.ticket_qr_checkin_unavailable_title
 import crew.feature.home.presentation.generated.resources.ticket_qr_no_connection_description
 import crew.feature.home.presentation.generated.resources.ticket_qr_no_connection_title
 import crew.feature.home.presentation.generated.resources.ticket_qr_server_unreachable_description
 import crew.feature.home.presentation.generated.resources.ticket_qr_server_unreachable_title
-import crew.feature.home.presentation.generated.resources.ticket_qr_ticket_not_found_description
-import crew.feature.home.presentation.generated.resources.ticket_qr_ticket_not_found_title
-import crew.feature.home.presentation.generated.resources.ticket_qr_wrong_code_description
-import crew.feature.home.presentation.generated.resources.ticket_qr_wrong_code_title
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -125,9 +120,10 @@ class TicketQrViewModel(
             }
 
             is Result.Failure -> {
-                // Yalnız "yanlış kod" (403 → FORBIDDEN) hücreleri kırmızıya boyar; ağ/sunucu
+                // Yalnız "yanlış kod" (INVALID_ENTRY_CODE) hücreleri kırmızıya boyar; ağ/sunucu
                 // hatalarında kod yerinde kalır, kullanıcı tekrar deneyebilir.
-                val isWrongCode = result.error == DataError.Remote.FORBIDDEN
+                val isWrongCode =
+                    (result.error as? DataError.Remote.Business)?.code == "INVALID_ENTRY_CODE"
                 _state.update {
                     it.copy(
                         isCheckingIn = false,
@@ -149,17 +145,12 @@ class TicketQrViewModel(
 }
 
 /**
- * Check-in başarısızlıklarını kullanıcıya net mesaja çevirir. Networking katmanı yalnız HTTP
- * status'u taşıdığı için ayrımı [DataError.Remote] üzerinden yaparız:
- * FORBIDDEN (403) = backend'in INVALID_ENTRY_CODE'u (yanlış kod), CONFLICT (409) = check-in
- * kapalı (EVENT_NOT_OPEN_FOR_ENTRY / TICKET_NOT_ACTIVE), NOT_FOUND (404) = bilet yok.
+ * Check-in başarısızlıklarını kullanıcıya net mesaja çevirir. İş-kuralı hataları (INVALID_ENTRY_CODE,
+ * EVENT_NOT_OPEN_FOR_ENTRY, TICKET_NOT_ACTIVE, TICKET_NOT_FOUND vb.) merkezi code→mesaj eşlemesine
+ * delege edilir; yalnız ağ/sunucu erişim hataları için check-in'e özel copy gösterilir.
  */
 private fun DataError.Remote.toCheckInSnackbarMessage(): SnackbarMessage = when (this) {
-    DataError.Remote.FORBIDDEN -> SnackbarMessage(
-        title = UIText.Resource(Res.string.ticket_qr_wrong_code_title),
-        description = UIText.Resource(Res.string.ticket_qr_wrong_code_description),
-        variant = SnackbarVariant.Error,
-    )
+    is DataError.Remote.Business -> toSnackbarMessage()
 
     DataError.Remote.NO_INTERNET -> SnackbarMessage(
         title = UIText.Resource(Res.string.ticket_qr_no_connection_title),
@@ -173,18 +164,6 @@ private fun DataError.Remote.toCheckInSnackbarMessage(): SnackbarMessage = when 
         title = UIText.Resource(Res.string.ticket_qr_server_unreachable_title),
         description = UIText.Resource(Res.string.ticket_qr_server_unreachable_description),
         variant = SnackbarVariant.Error,
-    )
-
-    DataError.Remote.NOT_FOUND -> SnackbarMessage(
-        title = UIText.Resource(Res.string.ticket_qr_ticket_not_found_title),
-        description = UIText.Resource(Res.string.ticket_qr_ticket_not_found_description),
-        variant = SnackbarVariant.Error,
-    )
-
-    DataError.Remote.CONFLICT -> SnackbarMessage(
-        title = UIText.Resource(Res.string.ticket_qr_checkin_unavailable_title),
-        description = UIText.Resource(Res.string.ticket_qr_checkin_unavailable_description),
-        variant = SnackbarVariant.Warn,
     )
 
     else -> SnackbarMessage(

@@ -14,4 +14,7 @@ data class EventDetailUiModel(
     val crew: String,
     val formattedPrice: String,
     val isFree: Boolean,
+    /** Sunucunun yükleme anındaki fazı: Gameplay → başladı, Finished → bitti; CTA kilitlenir. */
+    val isStarted: Boolean,
+    val isEnded: Boolean,
 )

@@ -7,6 +7,7 @@ import com.kaanf.core.designsystem.component.avatar.avatarPaletteColor
 import com.kaanf.core.domain.util.DataError
 import com.kaanf.core.domain.util.EmptyResult
 import com.kaanf.core.domain.util.Result
+import com.kaanf.core.domain.logging.CrewLogger
 import com.kaanf.core.domain.util.onFailure
 import com.kaanf.core.domain.util.onSuccess
 import com.kaanf.core.domain.repository.UserRepository
@@ -25,6 +26,8 @@ import com.kaanf.game.domain.model.MatchSnapshot
 import com.kaanf.game.domain.event.EventConnectionClient
 import com.kaanf.game.domain.repository.MatchRepository
 import com.kaanf.game.presentation.session.MatchPhase.*
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,6 +40,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
+import kotlin.time.Clock
 import crew.feature.game.presentation.generated.resources.Res
 import crew.feature.game.presentation.generated.resources.match_connection_lost_description
 import crew.feature.game.presentation.generated.resources.match_disputed_description
@@ -56,6 +60,7 @@ class MatchSessionViewModel(
     private val matchRepository: MatchRepository,
     private val userRepository: UserRepository,
     private val snackbarController: SnackbarController,
+    private val logger: CrewLogger,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     private val eventId: String = savedStateHandle.get<String>("eventId").orEmpty()
@@ -242,7 +247,18 @@ class MatchSessionViewModel(
 
     private fun subscribeToEvents() {
         eventConnectionClient.observeEvents(eventId)
-            .onEach(::onSocketMessage)
+            .onEach { message ->
+                // Handler hatası tek mesajı feda etsin, aboneliği değil: hata catch'e
+                // düşünce akış kalıcı ölüyor ve banner "Connected" gösterirken davet/faz/
+                // stats push'ları sessizce kayboluyordu.
+                try {
+                    onSocketMessage(message)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Throwable) {
+                    logger.error("Socket message handling failed: ${message::class.simpleName}", e)
+                }
+            }
             .catch { error -> _state.update { it.copy(errorMessage = error.message) } }
             .launchIn(viewModelScope)
     }
@@ -276,6 +292,7 @@ class MatchSessionViewModel(
                         currentUserRecentResults = message.me?.recentResults ?: it.currentUserRecentResults,
                     )
                 }
+                scheduleGameEnd(message.gameEndsAt)
             }
 
             is GameSocketMessage.LobbyUserJoined -> {
@@ -482,6 +499,25 @@ class MatchSessionViewModel(
 
             is GameSocketMessage.GameStarted,
             is GameSocketMessage.Unknown -> Unit
+        }
+    }
+
+    private var gameEndJob: Job? = null
+
+    /**
+     * Backend oyun bitişi için push göndermez (ServerMessageType'ta GAME_ENDED yok);
+     * bitiş CONNECTED'taki gameEndsAt'e kurulan client zamanlayıcısıyla tespit edilir.
+     * Her (yeniden) bağlantıda tazelenir; süre geçmişse anında tetiklenir.
+     */
+    private fun scheduleGameEnd(gameEndsAt: String) {
+        val endEpochMillis = runCatching {
+            Instant.parse(gameEndsAt).toEpochMilliseconds()
+        }.getOrNull() ?: return
+        gameEndJob?.cancel()
+        gameEndJob = viewModelScope.launch {
+            val remaining = endEpochMillis - Clock.System.now().toEpochMilliseconds()
+            delay(remaining.coerceAtLeast(0L))
+            eventChannel.send(MatchSessionEvent.NavigateToLeaderboard)
         }
     }
 

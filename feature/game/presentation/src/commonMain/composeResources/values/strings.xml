@@ -108,4 +108,14 @@
     <string name="match_invite_expired_description">The match invite timed out.</string>
     <string name="match_invite_failed_title">Couldn\'t send invite</string>
     <string name="match_invite_failed_description">Try scanning again.</string>
+
+    <string name="leaderboard_top_bar_title">Tonight</string>
+    <string name="leaderboard_eyebrow">FINAL</string>
+    <string name="leaderboard_title_prefix">That\'s a </string>
+    <string name="leaderboard_title_highlight">wrap.</string>
+    <string name="leaderboard_full_board_label">FULL BOARD</string>
+    <string name="leaderboard_players_count_format">%1$d players</string>
+    <string name="leaderboard_points_format">%1$d pts</string>
+    <string name="leaderboard_you_label">YOU</string>
+    <string name="leaderboard_go_home_action">Back to home</string>
 </resources>

@@ -18,6 +18,14 @@ import crew.core.presentation.generated.resources.error_unauthorized
 import crew.core.presentation.generated.resources.error_unknown
 
 fun DataError.toUiText(): UIText {
+    if (this is DataError.Remote.Business) {
+        val ui = apiErrorUi(code)
+        return when {
+            ui != null -> UIText.Resource(ui.description)
+            message.isNotBlank() -> UIText.DynamicString(message)
+            else -> UIText.Resource(Res.string.error_unknown)
+        }
+    }
     val resource =
         when (this) {
             DataError.Local.DISK_FULL -> Res.string.error_disk_full
@@ -36,6 +44,7 @@ fun DataError.toUiText(): UIText {
             DataError.Remote.SERVICE_UNAVAILABLE -> Res.string.error_service_unavailable
             DataError.Remote.SERIALIZATION -> Res.string.error_serialization
             DataError.Remote.UNKNOWN -> Res.string.error_unknown
+            is DataError.Remote.Business -> Res.string.error_unknown // yukarıda erken döner
         }
     return UIText.Resource(resource)
 }

@@ -13,7 +13,10 @@ import androidx.compose.ui.unit.sp
 import com.kaanf.core.designsystem.theme.AccessDefaults
 
 @Composable
-fun MatchPenaltyRow() {
+fun MatchPenaltyRow(
+    label: String,
+    value: String,
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth(),
@@ -21,7 +24,7 @@ fun MatchPenaltyRow() {
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
-            text = "RPS Bonus",
+            text = label,
             style = MaterialTheme.typography.titleMedium.copy(
                 color = AccessDefaults.TextSecondary,
                 fontWeight = FontWeight.Normal,
@@ -30,7 +33,7 @@ fun MatchPenaltyRow() {
         )
 
         Text(
-            text = "+3 to Mira",
+            text = value,
             style = MaterialTheme.typography.titleSmall.copy(
                 color = AccessDefaults.LeftArrowColor,
                 fontSize = 12.sp

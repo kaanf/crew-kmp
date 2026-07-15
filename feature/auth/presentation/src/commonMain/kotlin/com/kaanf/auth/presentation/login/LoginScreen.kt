@@ -37,10 +37,12 @@ import crew.feature.auth.presentation.generated.resources.Res
 import crew.feature.auth.presentation.generated.resources.auth_email_label
 import crew.feature.auth.presentation.generated.resources.auth_email_placeholder
 import crew.feature.auth.presentation.generated.resources.auth_password_label
+import crew.feature.auth.presentation.generated.resources.error_invalid_email
 import crew.feature.auth.presentation.generated.resources.login_description
 import crew.feature.auth.presentation.generated.resources.login_headline
 import crew.feature.auth.presentation.generated.resources.login_password_placeholder
 import crew.feature.auth.presentation.generated.resources.login_primary_action_sign_in
+import crew.feature.auth.presentation.generated.resources.register_password_requirements_hint
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
@@ -144,17 +146,24 @@ private fun LoginScreen(
                     modifier = Modifier.padding(top = 32.dp),
                     verticalArrangement = Arrangement.spacedBy(20.dp),
                 ) {
+                    val showEmailError = state.emailTextState.text.isNotEmpty() && !state.isEmailValid
                     NativeAuthTextField(
                         state = state.emailTextState,
                         label = stringResource(Res.string.auth_email_label),
+                        hint = if (showEmailError) stringResource(Res.string.error_invalid_email) else null,
+                        isError = showEmailError,
                         placeholder = stringResource(Res.string.auth_email_placeholder),
                         keyboardType = KeyboardType.Email,
                         testTag = TestTags.LOGIN_EMAIL,
                     )
 
+                    val showPasswordError =
+                        state.passwordTextState.text.isNotEmpty() && !state.isPasswordValid
                     NativeAuthPasswordTextField(
                         state = state.passwordTextState,
                         label = stringResource(Res.string.auth_password_label),
+                        hint = if (showPasswordError) stringResource(Res.string.register_password_requirements_hint) else null,
+                        isError = showPasswordError,
                         placeholder = stringResource(Res.string.login_password_placeholder),
                         testTag = TestTags.LOGIN_PASSWORD,
                         // ponytail: forgot-password hidden — ForgotPassword destination not registered (crash). Restore when the screen exists.

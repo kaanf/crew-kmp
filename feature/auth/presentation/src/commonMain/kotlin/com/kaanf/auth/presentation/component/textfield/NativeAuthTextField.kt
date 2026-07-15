@@ -50,6 +50,7 @@ internal fun NativeAuthTextField(
     modifier: Modifier = Modifier,
     label: String? = null,
     hint: String? = null,
+    isError: Boolean = false,
     trailing: (@Composable () -> Unit)? = null,
     keyboardType: KeyboardType = KeyboardType.Text,
     format: NativeAuthTextFieldFormat = NativeAuthTextFieldFormat.Plain,
@@ -59,6 +60,7 @@ internal fun NativeAuthTextField(
         modifier = modifier,
         label = label,
         hint = hint,
+        isError = isError,
         trailing = trailing,
     ) {
         NativeAuthInputSurface(

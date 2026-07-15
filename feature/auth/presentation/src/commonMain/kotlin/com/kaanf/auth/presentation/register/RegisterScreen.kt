@@ -48,6 +48,9 @@ import crew.feature.auth.presentation.generated.resources.Res
 import crew.feature.auth.presentation.generated.resources.auth_email_label
 import crew.feature.auth.presentation.generated.resources.auth_email_placeholder
 import crew.feature.auth.presentation.generated.resources.auth_password_label
+import crew.feature.auth.presentation.generated.resources.error_invalid_date_of_birth
+import crew.feature.auth.presentation.generated.resources.error_invalid_email
+import crew.feature.auth.presentation.generated.resources.error_password_mismatch
 import crew.feature.auth.presentation.generated.resources.register_confirm_password_label
 import crew.feature.auth.presentation.generated.resources.register_confirm_password_placeholder
 import crew.feature.auth.presentation.generated.resources.register_date_of_birth_label
@@ -171,9 +174,12 @@ fun RegisterScreen(
                     modifier = Modifier.padding(top = 32.dp),
                     verticalArrangement = Arrangement.spacedBy(20.dp),
                 ) {
+                    val showEmailError = state.emailTextState.text.isNotEmpty() && !state.isEmailValid
                     NativeAuthTextField(
                         state = state.emailTextState,
                         label = stringResource(Res.string.auth_email_label),
+                        hint = if (showEmailError) stringResource(Res.string.error_invalid_email) else null,
+                        isError = showEmailError,
                         placeholder = stringResource(Res.string.auth_email_placeholder),
                         keyboardType = KeyboardType.Email,
                         testTag = TestTags.REGISTER_EMAIL,
@@ -188,9 +194,13 @@ fun RegisterScreen(
                         testTag = TestTags.REGISTER_PASSWORD,
                     )
 
+                    val showPasswordMismatch =
+                        state.rePasswordTextState.text.isNotEmpty() && !state.isPasswordMatch
                     NativeAuthPasswordTextField(
                         state = state.rePasswordTextState,
                         label = stringResource(Res.string.register_confirm_password_label),
+                        hint = if (showPasswordMismatch) stringResource(Res.string.error_password_mismatch) else null,
+                        isError = showPasswordMismatch,
                         placeholder = stringResource(Res.string.register_confirm_password_placeholder),
                         testTag = TestTags.REGISTER_RE_PASSWORD,
                     )
@@ -199,12 +209,17 @@ fun RegisterScreen(
                         state = state.fullNameTextState,
                         label = stringResource(Res.string.register_full_name_label),
                         hint = stringResource(Res.string.register_full_name_hint),
+                        isError = state.fullNameTextState.text.isNotEmpty() && !state.isFullNameValid,
                         placeholder = stringResource(Res.string.register_full_name_placeholder),
                     )
 
+                    val showDateOfBirthError =
+                        state.dateOfBirthTextState.text.isNotEmpty() && !state.isDateOfBirthValid
                     NativeAuthTextField(
                         state = state.dateOfBirthTextState,
                         label = stringResource(Res.string.register_date_of_birth_label),
+                        hint = if (showDateOfBirthError) stringResource(Res.string.error_invalid_date_of_birth) else null,
+                        isError = showDateOfBirthError,
                         placeholder = stringResource(Res.string.register_date_of_birth_placeholder),
                         keyboardType = KeyboardType.Number,
                         format = NativeAuthTextFieldFormat.Date,

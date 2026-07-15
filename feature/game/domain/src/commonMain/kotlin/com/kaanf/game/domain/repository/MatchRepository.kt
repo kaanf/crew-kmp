@@ -4,6 +4,7 @@ import com.kaanf.core.domain.util.DataError
 import com.kaanf.core.domain.util.EmptyResult
 import com.kaanf.core.domain.util.Result
 import com.kaanf.game.domain.model.GameTask
+import com.kaanf.game.domain.model.LeaderboardEntry
 import com.kaanf.game.domain.model.MatchInvite
 import com.kaanf.game.domain.model.MatchParticipant
 import com.kaanf.game.domain.model.MatchScoreboard
@@ -104,6 +105,14 @@ interface MatchRepository {
     suspend fun getScoreboard(
         eventId: String, matchId: String,
     ): Result<MatchScoreboard, DataError.Remote>
+
+    /**
+     * Etkinliğin genel puan sıralamasını döner (skora göre azalan, rank dahil).
+     * Oyun bitiminde leaderboard ekranı açılınca çağrılır.
+     */
+    suspend fun getLeaderboard(
+        eventId: String,
+    ): Result<List<LeaderboardEntry>, DataError.Remote>
 
     /**
      * Aktif (terminal olmayan) bir maçtan ayrılır = forfeit. Sunucu çağıranı kaybeden,

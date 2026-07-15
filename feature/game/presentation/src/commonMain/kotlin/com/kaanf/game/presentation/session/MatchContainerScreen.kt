@@ -35,6 +35,7 @@ import com.kaanf.game.domain.model.GameConnectionState
 import com.kaanf.game.presentation.component.sheet.GameResponseSheet
 import com.kaanf.game.presentation.gamelobby.component.dialog.LeaveEventDialog
 import com.kaanf.game.presentation.session.component.GameHomeTopBar
+import com.kaanf.game.presentation.session.component.LeaveMatchSheet
 import com.kaanf.game.presentation.session.phase.LoserAcceptsPhase
 import com.kaanf.game.presentation.session.phase.LoserActiveTaskPhase
 import com.kaanf.game.presentation.session.phase.LoserWaitsPhase
@@ -50,6 +51,7 @@ fun MatchContainerRoot(
     viewModel: MatchSessionViewModel,
     onNavigateToScanOpponent: () -> Unit,
     onNavigateToDashboard: () -> Unit,
+    onNavigateToLeaderboard: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -57,6 +59,7 @@ fun MatchContainerRoot(
         when (event) {
             MatchSessionEvent.NavigateToScanOpponent -> onNavigateToScanOpponent()
             MatchSessionEvent.NavigateToDashboard -> onNavigateToDashboard()
+            MatchSessionEvent.NavigateToLeaderboard -> onNavigateToLeaderboard()
             // Lobi event'leri; bu ekranda tüketilmez.
             MatchSessionEvent.NavigateToGame,
             MatchSessionEvent.NavigateBack -> Unit
@@ -83,17 +86,18 @@ fun MatchContainerScreen(
     if (state.showExitConfirmDialog) {
         // Maç ortasındaysa çıkış = forfeit (etkinlikte kalırsın); Idle/Scoreboard'da = etkinlikten ayrıl.
         val isMidMatch = state.phase != MatchPhase.Idle && state.phase !is MatchPhase.Scoreboard
-        BaseDialog(onDismissRequest = { onAction(MatchSessionAction.OnExitDismissed) }) {
-            if (isMidMatch) {
-                LeaveEventDialog(
+        if (isMidMatch) {
+            ContainerBottomSheet(
+                onDismiss = { onAction(MatchSessionAction.OnExitDismissed) },
+            ) {
+                LeaveMatchSheet(
+                    opponentName = state.formattedOpponentName,
                     onStay = { onAction(MatchSessionAction.OnExitDismissed) },
                     onLeave = { onAction(MatchSessionAction.OnExitConfirmed) },
-                    title = "Maçtan ayrılmak\nistediğine emin misin?",
-                    subtitle = "Şimdi ayrılırsan bu maçı kaybetmiş sayılırsın. Etkinlikte kalır, yeni maç yapabilirsin.",
-                    stayLabel = "Maça Dön",
-                    leaveLabel = "Maçtan Ayrıl",
                 )
-            } else {
+            }
+        } else {
+            BaseDialog(onDismissRequest = { onAction(MatchSessionAction.OnExitDismissed) }) {
                 LeaveEventDialog(
                     onStay = { onAction(MatchSessionAction.OnExitDismissed) },
                     onLeave = { onAction(MatchSessionAction.OnExitConfirmed) },

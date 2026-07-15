@@ -7,6 +7,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.toRoute
 import com.kaanf.game.presentation.gamelobby.GameLobbyRoot
+import com.kaanf.game.presentation.leaderboard.LeaderboardRoot
 import com.kaanf.game.presentation.scanopponent.ScanOpponentRoot
 import com.kaanf.game.presentation.session.MatchContainerRoot
 import com.kaanf.game.presentation.session.MatchSessionViewModel
@@ -50,6 +51,14 @@ fun NavGraphBuilder.gameGraph(
                     navController.navigate(GameGraphRoutes.ScanOpponent(eventId = eventId))
                 },
                 onNavigateToDashboard = onNavigateToDashboard,
+                onNavigateToLeaderboard = {
+                    // Oyun bitti: leaderboard'a geçerken oyun graph'ını (graph-scoped
+                    // session VM + soket dahil) tamamen kapat.
+                    navController.navigate(GameGraphRoutes.Leaderboard(eventId = eventId)) {
+                        popUpTo(GameGraphRoutes.Graph(eventId = eventId)) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                },
             )
         }
 
@@ -65,5 +74,14 @@ fun NavGraphBuilder.gameGraph(
                 onClose = { navController.popBackStack() },
             )
         }
+    }
+
+    // Kasıtlı olarak navigation<Graph> bloğunun dışında: bu ekrana gelindiğinde etkinlik
+    // bitmiştir, oyun graph'ı pop edilir; soket kapanır, sadece HTTP leaderboard çekilir.
+    composable<GameGraphRoutes.Leaderboard> {
+        LeaderboardRoot(
+            viewModel = koinViewModel(),
+            onNavigateToDashboard = onNavigateToDashboard,
+        )
     }
 }

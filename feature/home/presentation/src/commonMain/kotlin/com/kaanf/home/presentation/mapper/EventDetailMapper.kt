@@ -17,5 +17,8 @@ fun EventDetail.toUiModel(): EventDetailUiModel {
         crew = "$soldCount / $capacity in",
         formattedPrice = price.format(),
         isFree = price.amount == 0L,
+        // Backend EventPhase.name gönderir: NotOpened / EntryOpen / Gameplay / Finished.
+        isStarted = phase == "Gameplay",
+        isEnded = phase == "Finished",
     )
 }

@@ -2,6 +2,7 @@ package com.kaanf.core.presentation.snackbar
 
 import com.kaanf.core.domain.util.DataError
 import com.kaanf.core.presentation.util.UIText
+import com.kaanf.core.presentation.util.apiErrorUi
 import crew.core.presentation.generated.resources.Res
 import crew.core.presentation.generated.resources.error_bad_request
 import crew.core.presentation.generated.resources.error_conflict
@@ -29,11 +30,34 @@ import org.jetbrains.compose.resources.StringResource
  */
 fun DataError.Remote.toSnackbarMessage(
     title: UIText = UIText.Resource(defaultTitleRes()),
-): SnackbarMessage = SnackbarMessage(
-    title = title,
-    description = UIText.Resource(descriptionRes()),
-    variant = variant(),
-)
+): SnackbarMessage {
+    if (this is DataError.Remote.Business) {
+        val ui = apiErrorUi(code)
+        return if (ui != null) {
+            SnackbarMessage(
+                title = UIText.Resource(ui.title),
+                description = UIText.Resource(ui.description),
+                variant = ui.variant,
+            )
+        } else {
+            // Bilinmeyen code: en azından backend'in mesajını göster (boşsa generic'e düş).
+            SnackbarMessage(
+                title = UIText.Resource(Res.string.snackbar_generic_error_title),
+                description = if (message.isNotBlank()) {
+                    UIText.DynamicString(message)
+                } else {
+                    UIText.Resource(Res.string.error_unknown)
+                },
+                variant = SnackbarVariant.Error,
+            )
+        }
+    }
+    return SnackbarMessage(
+        title = title,
+        description = UIText.Resource(descriptionRes()),
+        variant = variant(),
+    )
+}
 
 private fun DataError.Remote.defaultTitleRes(): StringResource = when (this) {
     DataError.Remote.NO_INTERNET,
@@ -73,4 +97,5 @@ private fun DataError.Remote.descriptionRes(): StringResource = when (this) {
     DataError.Remote.SERVICE_UNAVAILABLE -> Res.string.error_service_unavailable
     DataError.Remote.SERIALIZATION -> Res.string.error_serialization
     DataError.Remote.UNKNOWN -> Res.string.error_unknown
+    is DataError.Remote.Business -> Res.string.error_unknown // Business toSnackbarMessage'ta erken döner
 }

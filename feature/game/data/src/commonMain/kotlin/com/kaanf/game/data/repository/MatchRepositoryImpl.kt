@@ -10,6 +10,7 @@ import com.kaanf.core.domain.util.asEmptyResult
 import com.kaanf.core.domain.util.map
 import com.kaanf.game.data.dto.ConfirmTaskRequest
 import com.kaanf.game.data.dto.CreateMatchInviteRequest
+import com.kaanf.game.data.dto.LeaderboardEntryDto
 import com.kaanf.game.data.dto.MatchCancelDto
 import com.kaanf.game.data.dto.MatchDto
 import com.kaanf.game.data.dto.MatchFinishDto
@@ -26,6 +27,7 @@ import com.kaanf.game.data.dto.ReportResultRequest
 import com.kaanf.game.data.dto.TaskDto
 import com.kaanf.game.data.mappers.toDomain
 import com.kaanf.game.domain.model.GameTask
+import com.kaanf.game.domain.model.LeaderboardEntry
 import com.kaanf.game.domain.model.MatchInvite
 import com.kaanf.game.domain.model.MatchParticipant
 import com.kaanf.game.domain.model.MatchScoreboard
@@ -154,6 +156,14 @@ class MatchRepositoryImpl(
         return httpClient.getOrNull<MatchSnapshotDto>(
             route = "/events/$eventId/matches/current",
         ).map { it?.toDomain() }
+    }
+
+    override suspend fun getLeaderboard(
+        eventId: String,
+    ): Result<List<LeaderboardEntry>, DataError.Remote> {
+        return httpClient.get<List<LeaderboardEntryDto>>(
+            route = "/events/$eventId/leaderboard",
+        ).map { entries -> entries.map { it.toDomain() } }
     }
 
     override suspend fun cancelMatch(

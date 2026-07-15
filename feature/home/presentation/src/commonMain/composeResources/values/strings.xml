@@ -19,6 +19,8 @@
     <string name="event_detail_ticket_cta">Get my ticket - %1$s</string>
     <string name="event_detail_free_ticket_cta">Get your free ticket</string>
     <string name="event_detail_my_ticket_cta">Go to ticket detail</string>
+    <string name="event_detail_started_cta">Event has started</string>
+    <string name="event_detail_ended_cta">Event has ended</string>
     <string name="event_detail_hero_date">SATURDAY - MAY 30</string>
     <string name="event_detail_hero_title">One night.\nOne bar.\n80 strangers.</string>
     <string name="event_code_headline">Type the\ndoor code.</string>

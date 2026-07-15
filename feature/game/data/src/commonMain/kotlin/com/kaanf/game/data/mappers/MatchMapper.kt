@@ -1,9 +1,11 @@
 package com.kaanf.game.data.mappers
 
+import com.kaanf.game.data.dto.LeaderboardEntryDto
 import com.kaanf.game.data.dto.MatchDto
 import com.kaanf.game.data.dto.MatchInviteDto
 import com.kaanf.game.data.dto.MatchScoreboardDto
 import com.kaanf.game.data.dto.MyParticipantDto
+import com.kaanf.game.domain.model.LeaderboardEntry
 import com.kaanf.game.domain.model.Match
 import com.kaanf.game.domain.model.MatchInvite
 import com.kaanf.game.domain.model.MatchParticipant
@@ -32,6 +34,14 @@ fun MatchDto.toDomain(): Match = Match(
     opponentParticipantId = opponentParticipantId,
     opponentUserId = opponentUserId,
     opponentFullName = opponentFullName,
+)
+
+fun LeaderboardEntryDto.toDomain(): LeaderboardEntry = LeaderboardEntry(
+    rank = rank,
+    userId = userId,
+    fullName = fullName,
+    profilePictureUrl = profilePictureUrl,
+    score = score,
 )
 
 fun MatchScoreboardDto.toDomain(): MatchScoreboard = MatchScoreboard(

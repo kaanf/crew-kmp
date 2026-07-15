@@ -100,14 +100,14 @@ class LoginViewModel(
 
                     is Result.Failure -> {
                         val message = when (result.error) {
-                            DataError.Remote.UNAUTHORIZED,
-                            DataError.Remote.FORBIDDEN,
-                            DataError.Remote.NOT_FOUND -> SnackbarMessage(
+                            // 401 = INVALID_CREDENTIALS: kimlik hatasını tek generic mesajda topla.
+                            DataError.Remote.UNAUTHORIZED -> SnackbarMessage(
                                 title = UIText.Resource(Res.string.login_snackbar_auth_failed_title),
                                 description = UIText.Resource(Res.string.login_snackbar_auth_failed_description),
                                 variant = SnackbarVariant.Error,
                             )
 
+                            // EMAIL_NOT_VERIFIED (403) / USER_NOT_FOUND (404) vb. merkezi eşlemeden.
                             else -> result.error.toSnackbarMessage()
                         }
                         snackbarController.show(message)

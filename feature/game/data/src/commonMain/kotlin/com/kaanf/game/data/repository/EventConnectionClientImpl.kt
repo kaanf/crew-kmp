@@ -52,8 +52,10 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onSubscription
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transform
@@ -97,8 +99,9 @@ class EventConnectionClientImpl(
         .stateIn(scope, SharingStarted.WhileSubscribed(5_000L), initialValue = false)
 
     private class Stream(
-        val signals: Flow<SocketSignal>,
+        val signals: SharedFlow<SocketSignal>,
         val connectionState: StateFlow<GameConnectionState>,
+        val lastConnected: StateFlow<GameSocketMessage.Connected?>,
     )
 
     // Soketin tek kaynağı: hem mesajlar hem de bağlantı durumu aynı paylaşılan akıştan
@@ -111,7 +114,16 @@ class EventConnectionClientImpl(
 
     override fun observeEvents(eventId: String): Flow<GameSocketMessage> = flow {
         val stream = getOrCreate(eventId)
-        emitAll(stream.signals.filterIsInstance<SocketSignal.Message>().map { it.message })
+        // CONNECTED app-bar stats'ının (skor/W-L/history) TEK kaynağı ve akış replay'siz:
+        // canlı sokete sonradan abone olan VM (ör. graph'tan çıkıp 5 sn içinde yeniden giriş)
+        // onu kaçırır, stats sıfır kalırdı. Son CONNECTED aboneliğe replay'lenir; handler
+        // idempotent olduğundan nadir çift teslim zararsız.
+        emitAll(
+            stream.signals
+                .onSubscription { stream.lastConnected.value?.let { emit(SocketSignal.Message(it)) } }
+                .filterIsInstance<SocketSignal.Message>()
+                .map { it.message },
+        )
     }
 
     override fun observeConnectionState(eventId: String): Flow<GameConnectionState> = flow {
@@ -136,6 +148,8 @@ class EventConnectionClientImpl(
         // (ör. lobi yalnız event'leri dinlerken) güncellenir, böylece CONNECTED kaçmaz ve
         // ekran geçişinde "Bağlanılıyor"da takılı kalmaz. StateFlow son değeri saklar.
         val connectionState = MutableStateFlow<GameConnectionState>(GameConnectionState.Connecting)
+        // Son CONNECTED snapshot'ı: observeEvents geç aboneye bunu replay'ler (üstte açıklandı).
+        val lastConnected = MutableStateFlow<GameSocketMessage.Connected?>(null)
 
         // Soketin yaşam döngüsü auth + ağ + foreground kapısına bağlı. Kapı her açıldığında
         // flatMapLatest yeni bir bağlantı kurar; bu da backoff sayacını 0'a çekerek ağ/ön plan
@@ -163,7 +177,11 @@ class EventConnectionClientImpl(
             // Durum güncellemesini paylaşılan upstream'e yerleştir; her abone için değil,
             // upstream başına bir kez çalışır ve connectionState'i abonesiz de besler.
             .onEach { signal ->
-                if (signal is SocketSignal.Update) connectionState.value = signal.state
+                when {
+                    signal is SocketSignal.Update -> connectionState.value = signal.state
+                    signal is SocketSignal.Message && signal.message is GameSocketMessage.Connected ->
+                        lastConnected.value = signal.message
+                }
             }
             // Aboneliği kalmayan stream'i map'ten düşür; aksi halde her distinct event kalıcı
             // birikir (#4). shareIn upstream'i (WhileSubscribed) iptal edince burası tetiklenir.
@@ -178,7 +196,11 @@ class EventConnectionClientImpl(
             }
             .shareIn(scope, SharingStarted.WhileSubscribed(stopTimeoutMillis = 5_000L))
 
-        stream = Stream(signals = signals, connectionState = connectionState)
+        stream = Stream(
+            signals = signals,
+            connectionState = connectionState,
+            lastConnected = lastConnected,
+        )
         return stream
     }
 
