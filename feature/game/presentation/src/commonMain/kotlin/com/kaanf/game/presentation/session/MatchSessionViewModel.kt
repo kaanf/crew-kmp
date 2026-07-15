@@ -21,7 +21,6 @@ import com.kaanf.core.presentation.util.UIText
 import com.kaanf.game.domain.model.GameConnectionState
 import com.kaanf.game.domain.model.GameSocketMessage
 import com.kaanf.game.domain.model.GameTask
-import com.kaanf.game.domain.model.MatchOutcome
 import com.kaanf.game.domain.model.MatchSnapshot
 import com.kaanf.game.domain.event.EventConnectionClient
 import com.kaanf.game.domain.repository.MatchRepository
@@ -240,7 +239,6 @@ class MatchSessionViewModel(
                 currentUserScore = it.currentUserScore,
                 currentUserWinCount = it.currentUserWinCount,
                 currentUserMatchesCount = it.currentUserMatchesCount,
-                currentUserRecentResults = it.currentUserRecentResults,
             )
         }
     }
@@ -289,7 +287,6 @@ class MatchSessionViewModel(
                         currentUserScore = message.me?.score ?: it.currentUserScore,
                         currentUserWinCount = message.me?.winCount ?: it.currentUserWinCount,
                         currentUserMatchesCount = message.me?.matchesCount ?: it.currentUserMatchesCount,
-                        currentUserRecentResults = message.me?.recentResults ?: it.currentUserRecentResults,
                     )
                 }
                 scheduleGameEnd(message.gameEndsAt)
@@ -458,12 +455,6 @@ class MatchSessionViewModel(
                             !iPlayed -> state.currentUserMatchesCount
                             iWon -> message.winnerMatchesCount
                             else -> message.loserMatchesCount
-                        },
-                        currentUserRecentResults = if (!iPlayed) {
-                            state.currentUserRecentResults
-                        } else {
-                            (listOf(if (iWon) MatchOutcome.WIN else MatchOutcome.LOSS) +
-                                state.currentUserRecentResults).take(MAX_RECENT_RESULTS)
                         },
                     )
                 }
@@ -840,13 +831,25 @@ class MatchSessionViewModel(
     }
 
     private fun loadMyParticipant(attempt: Int = 0) {
+        // App-bar stats'ının HTTP'den tazelenme sebebi: soketin replay'lediği CONNECTED
+        // snapshot'ı bağlantı anına ait — ekrandan çıkıp soket ölmeden (5 sn) dönen VM'e
+        // bayat skor gelir. Bu istek DB gerçeğini getirir; epoch guard, yanıt uçuştayken
+        // TASK_FINISHED ile artan skorun geri ezilmesini önler.
+        val epochAtStart = socketEpoch
         viewModelScope.launch {
             matchRepository.getMyParticipant(eventId)
                 .onSuccess { participant ->
+                    val statsFresh = socketEpoch == epochAtStart
                     _state.update {
                         it.copy(
                             matchQrToken = participant.matchQrToken,
                             currentUserId = participant.userId,
+                            currentUserScore =
+                                if (statsFresh) participant.score else it.currentUserScore,
+                            currentUserWinCount =
+                                if (statsFresh) participant.winCount else it.currentUserWinCount,
+                            currentUserMatchesCount =
+                                if (statsFresh) participant.matchesCount else it.currentUserMatchesCount,
                         )
                     }
                 }
@@ -921,6 +924,5 @@ class MatchSessionViewModel(
         const val RECONCILE_MAX_ATTEMPTS = 3
         const val RECONCILE_RETRY_BASE_DELAY_MS = 1_000L
         const val MAX_LOBBY_AVATARS = 13
-        const val MAX_RECENT_RESULTS = 10
     }
 }

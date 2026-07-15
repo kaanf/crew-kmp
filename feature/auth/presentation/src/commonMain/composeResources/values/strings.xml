@@ -21,7 +21,7 @@
     <string name="register_snackbar_email_taken_title">Email already in use</string>
     <string name="error_username_exists">An account with that username already exists.</string>
     <string name="error_invalid_password">Password must be at least 9 characters and include one digit and one uppercase letter</string>
-    <string name="error_password_mismatch">Passcodes do not match. Please re-enter your credentials.</string>
+    <string name="error_password_mismatch">Passwords do not match. Please re-enter your password.</string>
     <string name="error_invalid_email">This is not a valid email</string>
     <string name="error_invalid_date_of_birth">Please enter a valid date of birth.</string>
     <string name="error_accept_terms">Please accept Terms and House Rules to continue.</string>

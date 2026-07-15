@@ -22,7 +22,6 @@ import com.kaanf.game.data.dto.ViewerStatsDto
 import com.kaanf.game.domain.model.CurrentUserStats
 import com.kaanf.game.domain.model.GameSocketMessage
 import com.kaanf.game.domain.model.LobbyMember
-import com.kaanf.game.domain.model.MatchOutcome
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.decodeFromJsonElement
@@ -40,13 +39,6 @@ private fun ViewerStatsDto.toDomain(): CurrentUserStats {
         score = score,
         winCount = winCount,
         matchesCount = matchesCount,
-        recentResults = recentResults.mapNotNull { result ->
-            when (result) {
-                "WIN" -> MatchOutcome.WIN
-                "LOSS" -> MatchOutcome.LOSS
-                else -> null
-            }
-        },
     )
 }
 

@@ -25,7 +25,7 @@
 
     <string name="match_phase_rps_ready_vs_label">VS.</string>
     <string name="match_phase_rps_ready_title">Throw on three.</string>
-    <string name="match_phase_rps_ready_description">Lock eyes, count it yourselves, play it out, then both tap button and report the winner.</string>
+    <string name="match_phase_rps_ready_description">Lock eyes, count it yourselves, play it out, then both tap the button and report the winner.</string>
     <string name="match_phase_rps_ready_action">We played</string>
     <string name="match_phase_rps_ready_loading">Waiting on %1$s...</string>
 

@@ -39,6 +39,7 @@ import com.kaanf.core.presentation.model.AppTopBarState
 import com.kaanf.core.presentation.util.ObserveAsEvents
 import com.kaanf.core.designsystem.component.card.GradientChallengeCard
 import com.kaanf.core.designsystem.component.card.MoreDeckCard
+import com.kaanf.home.presentation.dashboard.component.emptystate.DashboardEmptyState
 import com.kaanf.home.presentation.dashboard.component.eventcard.DashboardEventCard
 import com.kaanf.home.presentation.dashboard.component.eventinfo.DashboardEventInfoRow
 import com.kaanf.home.presentation.dashboard.component.featuredevent.DashboardFeaturedEventCard
@@ -160,11 +161,27 @@ private fun DashboardContent(
     val upcomingTitle = stringResource(Res.string.dashboard_upcoming_events_title)
     val upcomingCount = stringResource(Res.string.dashboard_upcoming_events_count, state.upcomingEvents.size)
 
+    val hasNoEvents = state.myEvents.isEmpty() &&
+        state.doorsOpenEvents.isEmpty() &&
+        state.upcomingEvents.isEmpty()
+
     LazyColumn(
         state = listState,
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(bottom = 24.dp),
     ) {
+        if (hasNoEvents) {
+            item(contentType = "empty-state") {
+                Box(
+                    modifier = Modifier.fillParentMaxSize(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    DashboardEmptyState()
+                }
+            }
+            return@LazyColumn
+        }
+
         item(contentType = "header") {
             DashboardHeader()
         }

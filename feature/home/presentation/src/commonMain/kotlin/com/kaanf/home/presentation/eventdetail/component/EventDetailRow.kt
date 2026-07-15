@@ -13,6 +13,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -22,12 +25,16 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun EventDetailInformationCard(
+    title: String,
+    date: String,
     doorsTime: String,
     gameTime: String,
     crew: String,
     price: String,
 ) {
     val items = listOf(
+        EventDetailInfoItem("Event", title, valueBrush = TitleGradient),
+        EventDetailInfoItem("Date", date),
         EventDetailInfoItem("Doors", doorsTime),
         EventDetailInfoItem("Game", gameTime),
         EventDetailInfoItem("Crew", crew),
@@ -43,7 +50,8 @@ fun EventDetailInformationCard(
         items.forEachIndexed { index, item ->
             EventDetailRow(
                 title = item.title,
-                value = item.value
+                value = item.value,
+                valueBrush = item.valueBrush,
             )
 
             if (index != items.lastIndex) {
@@ -66,7 +74,8 @@ private fun EventDetailDivider() {
 @Composable
 fun EventDetailRow(
     title: String,
-    value: String
+    value: String,
+    valueBrush: Brush? = null,
 ) {
     Row(
         modifier = Modifier
@@ -87,28 +96,48 @@ fun EventDetailRow(
             )
         )
 
+        val valueStyle = MaterialTheme.typography.labelSmall.copy(
+            color = AccessDefaults.TextPrimary,
+            fontWeight = FontWeight.Bold,
+            fontSize = 13.sp,
+            letterSpacing = -(0.2).sp
+        )
+
         Text(
             textAlign = TextAlign.Start,
             text = value,
-            style = MaterialTheme.typography.labelSmall.copy(
-                color = AccessDefaults.TextPrimary,
-                fontWeight = FontWeight.Bold,
-                fontSize = 13.sp,
-                letterSpacing = -(0.2).sp
-            )
+            style = if (valueBrush != null) {
+                valueStyle.merge(TextStyle(brush = valueBrush))
+            } else {
+                valueStyle
+            },
         )
     }
 }
 
+private val TitleGradient = Brush.linearGradient(
+    listOf(
+        AccessDefaults.Accent,
+        AccessDefaults.Teal,
+        AccessDefaults.Sky,
+        Color(0xFFB86BFF),
+        AccessDefaults.Rose,
+        Color(0xFFFF5252),
+    ),
+)
+
 private data class EventDetailInfoItem(
     val title: String,
     val value: String,
+    val valueBrush: Brush? = null,
 )
 
 @Composable
 @Preview
 fun EventDetailRowPreview() {
     EventDetailInformationCard(
+        title = "Crew Night",
+        date = "Fri, 12 Sep",
         doorsTime = "20:00",
         gameTime = "20:30 - 23:00",
         crew = "42 / 80 in",

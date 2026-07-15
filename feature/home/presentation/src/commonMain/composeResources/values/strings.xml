@@ -16,6 +16,13 @@
     <string name="dashboard_upcoming_events_title">UPCOMING EVENTS</string>
     <string name="dashboard_upcoming_events_count">%1$d events</string>
     <string name="dashboard_snackbar_load_failed_title">Couldn't load events</string>
+    <string name="dashboard_empty_eyebrow">PRAGUE &#183; NOTHING LIVE</string>
+    <string name="dashboard_empty_title">No nights on\nthe board yet.</string>
+    <string name="dashboard_empty_description">Crew runs in waves. The next batch of venues drops soon &#8212; we&apos;ll ping you the second tickets open.</string>
+    <string name="dashboard_empty_notify_cta">Notify me when it&apos;s on</string>
+    <string name="dashboard_empty_notified_cta">You&apos;re on the list</string>
+    <string name="dashboard_empty_waiting_highlight">in Prague</string>
+    <string name="dashboard_empty_waiting_rest">waiting on the next drop</string>
     <string name="event_detail_ticket_cta">Get my ticket - %1$s</string>
     <string name="event_detail_free_ticket_cta">Get your free ticket</string>
     <string name="event_detail_my_ticket_cta">Go to ticket detail</string>

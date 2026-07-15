@@ -10,5 +10,7 @@ data class MyParticipantDto(
     val attendanceState: String,
     val matchState: String? = null,
     val score: Int,
+    val winCount: Int = 0,
+    val matchesCount: Int = 0,
     val matchQrToken: String,
 )

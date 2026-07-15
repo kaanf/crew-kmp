@@ -9,4 +9,6 @@ data class MatchParticipant(
     val userId: String,
     val matchQrToken: String,
     val score: Int,
+    val winCount: Int,
+    val matchesCount: Int,
 )

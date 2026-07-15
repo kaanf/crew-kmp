@@ -32,11 +32,8 @@ import com.kaanf.core.designsystem.component.avatar.avatarContentFor
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessIcons
 import com.kaanf.core.designsystem.theme.CrewTheme
-import com.kaanf.game.domain.model.MatchOutcome
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
-
-private const val MATCH_SLOTS = 10
 
 @Composable
 fun GameHomeTopBar(
@@ -45,7 +42,6 @@ fun GameHomeTopBar(
     score: Int,
     winCount: Int,
     matchesCount: Int,
-    recentResults: List<MatchOutcome>,
     onCloseClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -101,8 +97,8 @@ fun GameHomeTopBar(
                     )
                 }
 
-                MatchStepBar(
-                    results = recentResults,
+                WinRateBar(
+                    winRate = winRate,
                     modifier = Modifier.fillMaxWidth(),
                 )
 
@@ -136,35 +132,24 @@ fun GameHomeTopBar(
     }
 }
 
-/**
- * [MATCH_SLOTS] eşit parçaya bölünmüş şerit; her kutu bir maçı temsil eder.
- * [results] backend'den en yeni maç başta gelir; burada eskiden yeniye (soldan sağa)
- * gösterilir. WIN accent, LOSS kırmızı, oynanmamış kutular sönük.
- */
+/** Kazanma oranı şeridi: [winRate] (0-100) kadarı accent dolu, kalanı sönük. */
 @Composable
-private fun MatchStepBar(
-    results: List<MatchOutcome>,
+private fun WinRateBar(
+    winRate: Int,
     modifier: Modifier = Modifier,
 ) {
-    val ordered = results.take(MATCH_SLOTS).asReversed()
-    Row(
-        modifier = modifier.height(6.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    Box(
+        modifier = modifier
+            .height(6.dp)
+            .clip(RoundedCornerShape(3.dp))
+            .background(AccessDefaults.SurfaceElevated),
     ) {
-        repeat(MATCH_SLOTS) { index ->
-            val color = when (ordered.getOrNull(index)) {
-                MatchOutcome.WIN -> AccessDefaults.Accent
-                MatchOutcome.LOSS -> AccessDefaults.Rose
-                null -> AccessDefaults.SurfaceElevated
-            }
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(6.dp)
-                    .clip(RoundedCornerShape(3.dp))
-                    .background(color),
-            )
-        }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(winRate.coerceIn(0, 100) / 100f)
+                .height(6.dp)
+                .background(AccessDefaults.Accent),
+        )
     }
 }
 
@@ -178,11 +163,6 @@ private fun GameHomeTopBarPreview() {
             score = 1240,
             winCount = 6,
             matchesCount = 9,
-            recentResults = listOf(
-                MatchOutcome.WIN, MatchOutcome.LOSS, MatchOutcome.WIN,
-                MatchOutcome.WIN, MatchOutcome.LOSS, MatchOutcome.WIN,
-                MatchOutcome.WIN, MatchOutcome.LOSS, MatchOutcome.WIN,
-            ),
             onCloseClick = {},
         )
     }

@@ -33,10 +33,10 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 fun LeaveEventDialog(
     onStay: () -> Unit,
     onLeave: () -> Unit,
-    title: String = "Etkinlikten ayrılmak\nistediğine emin misin?",
-    subtitle: String = "İstediğin zaman geri dönebilirsin; yerin korunur.",
-    stayLabel: String = "Oyunda Kal",
-    leaveLabel: String = "Etkinlikten Ayrıl",
+    title: String = "Sure you want to\nleave the event?",
+    subtitle: String = "You can come back anytime; your spot is saved.",
+    stayLabel: String = "Stay in the game",
+    leaveLabel: String = "Leave event",
 ) {
     Column(
         modifier = Modifier

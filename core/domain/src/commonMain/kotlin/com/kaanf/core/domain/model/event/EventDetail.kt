@@ -20,4 +20,5 @@ data class EventDetail(
     val phase: String,
     val createdAt: Instant,
     val updatedAt: Instant,
+    val imageUrls: List<String>,
 )

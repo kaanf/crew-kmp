@@ -26,6 +26,8 @@ fun MyParticipantDto.toDomain(): MatchParticipant = MatchParticipant(
     userId = userId,
     matchQrToken = matchQrToken,
     score = score,
+    winCount = winCount,
+    matchesCount = matchesCount,
 )
 
 fun MatchDto.toDomain(): Match = Match(

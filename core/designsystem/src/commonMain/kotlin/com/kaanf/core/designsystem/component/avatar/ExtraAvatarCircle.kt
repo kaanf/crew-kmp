@@ -39,7 +39,7 @@ fun ExtraAvatarCircle(
         Text(
             text = "+$count",
             color = Color(0xFFD3C9BA),
-            fontSize = (avatarSize/2.6).sp,
+            fontSize = (avatarSize/2.8).sp,
             fontWeight = FontWeight.Bold
         )
     }

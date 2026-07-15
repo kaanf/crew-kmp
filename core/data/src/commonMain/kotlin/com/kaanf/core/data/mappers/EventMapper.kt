@@ -43,6 +43,7 @@ fun EventDetailDto.toDomain(): EventDetail {
         phase = phase,
         createdAt = Instant.parse(createdAt),
         updatedAt = Instant.parse(updatedAt),
+        imageUrls = imageUrls,
     )
 }
 

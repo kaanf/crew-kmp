@@ -72,14 +72,14 @@ private fun BaseDialogPreview() {
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Text(
-                    text = "Oyundan çıkılsın mı?",
+                    text = "Leave the game?",
                     style =
                         MaterialTheme.typography.titleMedium.copy(
                             color = AccessDefaults.TextPrimary,
                         ),
                 )
                 Text(
-                    text = "Şu an çıkarsan lobiden ayrılırsın ve tekrar katılman gerekir.",
+                    text = "If you leave now, you'll exit the lobby and need to rejoin.",
                     style =
                         MaterialTheme.typography.bodySmall.copy(
                             color = AccessDefaults.TextSecondary,
@@ -87,13 +87,13 @@ private fun BaseDialogPreview() {
                         ),
                 )
                 BaseButton(
-                    text = "Oyundan çık",
+                    text = "Leave game",
                     onClick = {},
                     filled = true,
                     modifier = Modifier.padding(top = 8.dp),
                 )
                 BaseButton(
-                    text = "Vazgeç",
+                    text = "Cancel",
                     onClick = {},
                 )
             }

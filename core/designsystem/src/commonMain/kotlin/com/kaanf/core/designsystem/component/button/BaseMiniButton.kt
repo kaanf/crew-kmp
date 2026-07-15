@@ -163,7 +163,7 @@ private fun BaseMiniButtonPreview() {
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 BaseMiniButton(
-                    text = "Etkinlikten çık",
+                    text = "Leave event",
                     onClick = {},
                     danger = true,
                 )

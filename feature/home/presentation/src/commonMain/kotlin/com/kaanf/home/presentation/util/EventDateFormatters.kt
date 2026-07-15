@@ -41,6 +41,18 @@ internal fun Instant.toEventDateText(
     return "$dayText · $monthText ${date.day}"
 }
 
+internal fun Instant.toEventDetailDateText(
+    timeZone: TimeZone = TimeZone.currentSystemDefault(),
+): String {
+    val date = toLocalDateTime(timeZone).date
+    val day = date.day.toString().padStart(2, '0')
+    val month = date.month.number.toString().padStart(2, '0')
+    val dayName = date.dayOfWeek.name
+        .lowercase()
+        .replaceFirstChar { it.uppercase() }
+    return "$day.$month.${date.year}, $dayName"
+}
+
 internal fun Instant.toClockText(
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
 ): String {

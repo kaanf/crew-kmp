@@ -67,7 +67,7 @@ fun LeaveMatchSheet(
         Spacer(modifier = Modifier.height(4.dp))
 
         Text(
-            text = "Maçtan ayrılmak\nistediğine emin misin?",
+            text = "Sure you want to\nleave the match?",
             style = MaterialTheme.typography.headlineMedium.copy(
                 color = AccessDefaults.TextPrimary,
                 textAlign = TextAlign.Center,
@@ -75,7 +75,7 @@ fun LeaveMatchSheet(
         )
 
         Text(
-            text = "Şimdi ayrılırsan bu maçı kaybetmiş sayılırsın. Etkinlikte kalır, yeni maç yapabilirsin.",
+            text = "If you leave now, this match counts as a loss. You stay in the event and can start a new match.",
             style = MaterialTheme.typography.bodySmall.copy(
                 color = AccessDefaults.TextSecondary,
                 fontSize = 12.sp,
@@ -102,11 +102,11 @@ fun LeaveMatchSheet(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             MatchPenaltyRow(
-                label = "Hükmen galibiyet",
-                value = "+5 · ${opponentName.ifBlank { "Rakip" }}",
+                label = "Win by forfeit",
+                value = "+5 · ${opponentName.ifBlank { "Opponent" }}",
             )
             MatchPenaltyRow(
-                label = "Senin puanın",
+                label = "Your points",
                 value = "+0",
             )
         }
@@ -114,7 +114,7 @@ fun LeaveMatchSheet(
         Spacer(modifier = Modifier.height(6.dp))
 
         BaseButton(
-            text = "Maça Dön",
+            text = "Back to the match",
             onClick = onStay,
             filled = true,
         )
@@ -122,7 +122,7 @@ fun LeaveMatchSheet(
         Spacer(modifier = Modifier.height(6.dp))
 
         Text(
-            text = "Maçtan Ayrıl",
+            text = "Leave match",
             modifier = Modifier.clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,

@@ -133,7 +133,6 @@ fun MatchContainerScreen(
                     score = state.currentUserScore,
                     winCount = state.currentUserWinCount,
                     matchesCount = state.currentUserMatchesCount,
-                    recentResults = state.currentUserRecentResults,
                     onCloseClick = { onAction(MatchSessionAction.OnBackClick) },
                 )
             } else {
@@ -283,12 +282,12 @@ private fun ConnectionBanner(
     modifier: Modifier = Modifier,
 ) {
     val text = when (connectionState) {
-        GameConnectionState.Connecting -> "Bağlanılıyor…"
-        GameConnectionState.Reconnecting -> "Bağlantı koptu, yeniden bağlanılıyor…"
+        GameConnectionState.Connecting -> "Connecting…"
+        GameConnectionState.Reconnecting -> "Connection lost, reconnecting…"
         is GameConnectionState.Disconnected ->
             // Gerçek terminal hata snackbar'la gösterilir; banner gizli. Beklenen kopuşlar
             // (arka plan/ağ/oturum) kendiliğinden toparlanır → "yeniden bağlanılıyor".
-            if (connectionState.isError) return else "Bağlantı koptu, yeniden bağlanılıyor…"
+            if (connectionState.isError) return else "Connection lost, reconnecting…"
         GameConnectionState.Connected -> return
     }
 

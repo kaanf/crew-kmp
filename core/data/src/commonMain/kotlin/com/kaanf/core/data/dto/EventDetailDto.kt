@@ -20,4 +20,5 @@ data class EventDetailDto(
     val phase: String,
     val createdAt: String,
     val updatedAt: String,
+    val imageUrls: List<String> = emptyList(),
 )

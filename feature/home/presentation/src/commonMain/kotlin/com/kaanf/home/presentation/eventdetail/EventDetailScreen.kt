@@ -4,9 +4,9 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -18,26 +18,26 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Canvas
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kaanf.core.designsystem.component.button.BaseButton
 import com.kaanf.core.designsystem.component.image.BaseImage
@@ -47,7 +47,9 @@ import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.presentation.model.AppTopBarState
 import com.kaanf.core.presentation.util.ObserveAsEvents
 import com.kaanf.home.presentation.eventdetail.component.EventDetailInformationCard
+import com.kaanf.home.presentation.eventdetail.component.EventImageViewer
 import com.kaanf.home.presentation.eventdetail.component.EventOnboardingCard
+import com.kaanf.home.presentation.eventdetail.component.PagerDots
 import com.kaanf.home.presentation.eventdetail.component.SafetyBadge
 import com.kaanf.home.presentation.model.EventDetailUiModel
 import com.kaanf.home.presentation.util.toClockText
@@ -174,6 +176,9 @@ private fun EventDetailContent(
     isCheckingOut: Boolean,
     onAction: (EventDetailAction) -> Unit,
 ) {
+    // null = kapalı; saf UI durumu olduğu için ViewModel'e taşınmaz.
+    var viewerPage by rememberSaveable { mutableStateOf<Int?>(null) }
+
     Box(
         modifier = Modifier.fillMaxSize(),
     ) {
@@ -186,13 +191,15 @@ private fun EventDetailContent(
         ) {
             item(contentType = "hero-card") {
                 EventDetailHeroCard(
-                    date = event.heroDate,
-                    title = event.title,
+                    imageUrls = event.imageUrls,
+                    onImageClick = { page -> viewerPage = page },
                 )
             }
 
             item(contentType = "information-card") {
                 EventDetailInformationCard(
+                    title = event.title,
+                    date = event.heroDate,
                     doorsTime = event.doorsOpenAt.toClockText(),
                     gameTime = event.gameTime,
                     crew = event.crew,
@@ -245,43 +252,35 @@ private fun EventDetailContent(
             animatedBorder = !ctaLocked,
         )
     }
+
+    viewerPage?.let { page ->
+        EventImageViewer(
+            imageUrls = event.imageUrls,
+            initialPage = page,
+            onDismiss = { viewerPage = null },
+        )
+    }
 }
 
 @Composable
 private fun EventDetailHeroCard(
-    date: String,
-    title: String,
+    imageUrls: List<String>,
+    onImageClick: (Int) -> Unit,
 ) {
-    EventHeroBackground(
-        imageUrl = "https://hostel-drunken-monkey.praguehotelsweb.com/data/Photos/OriginalPhoto/16920/1692044/1692044305/drunken-monkey-hostel-prague-photo-15.JPEG",
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(240.dp),
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(
-                space = 12.dp,
-                alignment = Alignment.Bottom,
-            ),
-        ) {
-            Text(
-                text = date,
-                style = MaterialTheme.typography.labelSmall.copy(
-                    color = AccessDefaults.TextMuted,
-                    fontSize = 12.sp,
-                ),
-            )
+    val pagerState = rememberPagerState(pageCount = { imageUrls.size })
 
-            Text(
-                text = title,
-                style = MaterialTheme.typography.displaySmall.copy(
-                    color = AccessDefaults.TextPrimary,
-                ),
-            )
-        }
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        EventHeroBackground(
+            imageUrls = imageUrls,
+            pagerState = pagerState,
+            onImageClick = onImageClick,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(300.dp),
+        )
     }
 }
 
@@ -298,10 +297,11 @@ fun EventDetailScreenPreview() {
 
 @Composable
 fun EventHeroBackground(
-    imageUrl: String,
+    imageUrls: List<String>,
+    pagerState: PagerState,
+    onImageClick: (Int) -> Unit,
     modifier: Modifier = Modifier,
     shape: Shape = RoundedCornerShape(20.dp),
-    content: @Composable BoxScope.() -> Unit,
 ) {
     Box(
         modifier = modifier
@@ -312,56 +312,52 @@ fun EventHeroBackground(
                 shape = shape,
             ),
     ) {
-        BaseImage(
-            imageUrl = imageUrl,
-            modifier = Modifier.matchParentSize(),
-            contentScale = ContentScale.Crop,
-        )
+        if (imageUrls.size > 1) {
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.matchParentSize(),
+            ) { page ->
+                BaseImage(
+                    imageUrl = imageUrls[page],
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable { onImageClick(page) },
+                    contentScale = ContentScale.Crop,
+                )
+            }
+        } else {
+            BaseImage(
+                imageUrl = imageUrls.first(),
+                modifier = Modifier
+                    .matchParentSize()
+                    .clickable { onImageClick(0) },
+                contentScale = ContentScale.Crop,
+            )
+        }
 
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .background(Color.Black.copy(alpha = 0.75f)),
-        )
+        if (imageUrls.size > 1) {
+            // Dots'un okunması için yalnız alt kenarda ince bir scrim.
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .height(56.dp)
+                    .background(
+                        Brush.verticalGradient(
+                            0f to Color.Transparent,
+                            1f to Color.Black.copy(alpha = 0.55f),
+                        ),
+                    ),
+            )
 
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .drawWithCache {
-                    val stripeColor = Color.White.copy(alpha = 0.035f)
-                    val stripeStep = 18.dp.toPx()
-                    val stripeStroke = 2.dp.toPx()
-
-                    // Çizgi desenini her karede ~20+ drawLine ile çizmek yerine bir
-                    // kez bitmap'e rasterize edip scroll/crossfade'de sadece basıyoruz.
-                    val width = size.width.toInt().coerceAtLeast(1)
-                    val height = size.height.toInt().coerceAtLeast(1)
-                    val stripeImage = ImageBitmap(width, height)
-                    CanvasDrawScope().draw(
-                        density = this,
-                        layoutDirection = layoutDirection,
-                        canvas = Canvas(stripeImage),
-                        size = Size(size.width, size.height),
-                    ) {
-                        var x = -size.height
-
-                        while (x < size.width + size.height) {
-                            drawLine(
-                                color = stripeColor,
-                                start = Offset(x, 0f),
-                                end = Offset(x + size.height, size.height),
-                                strokeWidth = stripeStroke,
-                            )
-                            x += stripeStep
-                        }
-                    }
-
-                    onDrawBehind {
-                        drawImage(stripeImage)
-                    }
-                },
-        )
-
-        content()
+            PagerDots(
+                pagerState = pagerState,
+                activeColor = AccessDefaults.Accent,
+                inactiveColor = AccessDefaults.TextMuted.copy(alpha = 0.4f),
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 12.dp),
+            )
+        }
     }
 }
