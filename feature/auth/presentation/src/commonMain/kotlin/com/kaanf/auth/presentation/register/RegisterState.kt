@@ -15,6 +15,7 @@ data class RegisterState(
     val hasAcceptedTerms: Boolean = false,
     val isRegistering: Boolean = false,
     val isPasswordVisible: Boolean = false,
+    val showUnderageDialog: Boolean = false,
 ) {
     val isEmailValid: Boolean
         get() = EmailValidator.validate(emailTextState.text.toString())
@@ -33,9 +34,6 @@ data class RegisterState(
     val isDateOfBirthValid: Boolean
         get() = dateOfBirthTextState.text.length == DATE_OF_BIRTH_DIGIT_COUNT
 
-    val isGenderSelected: Boolean
-        get() = gender != null
-
     val canSubmit: Boolean
         get() =
             isEmailValid &&
@@ -43,8 +41,7 @@ data class RegisterState(
                 isPasswordMatch &&
                 hasAcceptedTerms &&
                 isFullNameValid &&
-                isDateOfBirthValid &&
-                isGenderSelected
+                isDateOfBirthValid
 }
 
 private const val DATE_OF_BIRTH_DIGIT_COUNT = 8 // DDMMYYYY, separators are not stored

@@ -37,10 +37,9 @@ fun ProfileDetailsCard(
     fullName: String,
     email: String,
     gender: String,
-    dateOfBirth: String,
     language: String,
     onEditName: () -> Unit,
-    onLanguageClick: () -> Unit,
+    onDeleteAccount: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -68,17 +67,43 @@ fun ProfileDetailsCard(
 
         RowDivider()
 
-        ProfileDetailRow(label = "Date of Birth", value = dateOfBirth, locked = true)
+        // Language selection is temporarily locked; re-enable by restoring the selection sheet.
+        ProfileDetailRow(label = "Language", value = language, locked = true)
 
         RowDivider()
 
-        // Language is an actionable setting — tap opens the selection sheet.
-        ProfileDetailRow(
-            label = "Language",
-            value = language,
-            valueColor = AccessDefaults.TextPrimary,
-            trailingIcon = AccessIcons.RightChevron,
-            onClick = onLanguageClick,
+        DeleteAccountRow(onClick = onDeleteAccount)
+    }
+}
+
+@Composable
+private fun DeleteAccountRow(onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = onClick,
+            )
+            .padding(vertical = 14.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            modifier = Modifier.weight(1f),
+            text = "Delete my account",
+            style = MaterialTheme.typography.titleSmall.copy(
+                color = AccessDefaults.LeftArrowColor,
+                fontSize = 12.sp,
+            ),
+        )
+
+        Icon(
+            modifier = Modifier.size(14.dp),
+            painter = painterResource(AccessIcons.RightChevron),
+            tint = AccessDefaults.LeftArrowColor,
+            contentDescription = null,
         )
     }
 }
@@ -160,10 +185,9 @@ private fun ProfileDetailsCardPreview() {
                 fullName = "Kaan Fırat",
                 email = "frtpkaan@gmail.com",
                 gender = "Male",
-                dateOfBirth = "12 May 1998",
                 language = "English",
                 onEditName = {},
-                onLanguageClick = {},
+                onDeleteAccount = {},
             )
         }
     }

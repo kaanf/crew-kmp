@@ -73,10 +73,7 @@ fun GameLobbyRoot(
         }
     }
 
-    // Session state → bu ekranın ihtiyaç duyduğu dilime indir.
     val state = GameLobbyState(
-        // Lobi snapshot'ı CONNECTED'ta geliyor ve gameStartsAt'i set ediyor;
-        // 0 olduğu sürece veri henüz yok → loading. Reconnect'te tekrar 0'a düşmez.
         isLoading = sessionState.lobbyTargetEpochMillis == 0L,
         targetEpochMillis = sessionState.lobbyTargetEpochMillis,
         showGameStartSheet = sessionState.showGameStartSheet,

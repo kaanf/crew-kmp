@@ -6,12 +6,19 @@ sealed interface AppTopBarState {
     data object ProfilePicture : AppTopBarState
     data object ImageCrop : AppTopBarState
     data class Dashboard(val profileImageUrl: String?, val userName: String? = null) : AppTopBarState
-    data object Profile : AppTopBarState
+    data class Profile(
+        val hasUnsavedChanges: Boolean = false,
+        val isSaving: Boolean = false,
+    ) : AppTopBarState
     data object EventDetail : AppTopBarState
     data object TicketQr : AppTopBarState
     data object EventCode : AppTopBarState
     data class GameLobby(val title: String) : AppTopBarState
-    data object Game : AppTopBarState
+    data class Game(
+        val title: String? = null,
+        /** Solda quest ikonunu gösterir (yalnız oyun ana ekranında). */
+        val showQuestsAction: Boolean = false,
+    ) : AppTopBarState
     data object ScanOpponent : AppTopBarState
     data object RpsReady : AppTopBarState
     data object RpsConfirmation : AppTopBarState

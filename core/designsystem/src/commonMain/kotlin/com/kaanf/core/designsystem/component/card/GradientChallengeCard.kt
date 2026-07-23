@@ -293,6 +293,9 @@ private fun getChallengeCardColor(variant: ChallengeCardVariant): ChallengeCardC
             ),
             accent = AccessDefaults.Amber,
         )
+
+        // Final round da Amber ailesini kullanır; vitrin kartında ayrı palet gerekmedi.
+        ChallengeCardVariant.FinalRound -> getChallengeCardColor(ChallengeCardVariant.Funny)
     }
 }
 
@@ -304,6 +307,7 @@ private fun ChallengeCardVariant.getColor(): Color {
         ChallengeCardVariant.Flirty -> AccessDefaults.Rose
         ChallengeCardVariant.Team -> AccessDefaults.Teal
         ChallengeCardVariant.Funny -> AccessDefaults.Amber
+        ChallengeCardVariant.FinalRound -> AccessDefaults.Amber
     }
 }
 

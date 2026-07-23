@@ -27,27 +27,50 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessShapes
+import com.kaanf.core.presentation.snackbar.SnackbarIcon
 import com.kaanf.core.presentation.snackbar.SnackbarMessage
 import com.kaanf.core.presentation.snackbar.SnackbarVariant
 import crew.core.designsystem.generated.resources.Res
 import crew.core.designsystem.generated.resources.ic_bolt
+import crew.core.designsystem.generated.resources.ic_camera
 import crew.core.designsystem.generated.resources.ic_check
-import crew.core.designsystem.generated.resources.ic_close
+import crew.core.designsystem.generated.resources.ic_clock
 import crew.core.designsystem.generated.resources.ic_info
+import crew.core.designsystem.generated.resources.ic_refresh
+import crew.core.designsystem.generated.resources.ic_snackbar_failure
+import crew.core.designsystem.generated.resources.ic_snackbar_warning
+import crew.core.designsystem.generated.resources.ic_trophy
 import crew.core.designsystem.generated.resources.ic_user
+import crew.core.designsystem.generated.resources.ic_wifi
 import crew.core.designsystem.generated.resources.ic_wifi_off
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
-private val SnackbarVariant.icon: DrawableResource
+private val SnackbarIcon.drawable: DrawableResource
     get() =
         when (this) {
-            SnackbarVariant.Accent -> Res.drawable.ic_bolt
-            SnackbarVariant.Success -> Res.drawable.ic_check
-            SnackbarVariant.Info -> Res.drawable.ic_info
-            SnackbarVariant.Warn -> Res.drawable.ic_wifi_off
-            SnackbarVariant.Error -> Res.drawable.ic_close
-            SnackbarVariant.AccentALT -> Res.drawable.ic_user
+            SnackbarIcon.Success -> Res.drawable.ic_check
+            SnackbarIcon.Error -> Res.drawable.ic_snackbar_failure
+            SnackbarIcon.Warning -> Res.drawable.ic_snackbar_warning
+            SnackbarIcon.Info -> Res.drawable.ic_info
+            SnackbarIcon.Celebration -> Res.drawable.ic_bolt
+            SnackbarIcon.Person -> Res.drawable.ic_user
+            SnackbarIcon.Offline -> Res.drawable.ic_wifi_off
+            SnackbarIcon.Online -> Res.drawable.ic_wifi
+            SnackbarIcon.Pending -> Res.drawable.ic_clock
+            SnackbarIcon.Match -> Res.drawable.ic_trophy
+            SnackbarIcon.Photo -> Res.drawable.ic_camera
+            SnackbarIcon.Syncing -> Res.drawable.ic_refresh
+        }
+
+private val SnackbarVariant.iconTint: Color
+    get() =
+        when (this) {
+            SnackbarVariant.Accent, SnackbarVariant.AccentALT -> AccessDefaults.Accent
+            SnackbarVariant.Success -> AccessDefaults.Teal
+            SnackbarVariant.Info -> AccessDefaults.Sky
+            SnackbarVariant.Warn -> AccessDefaults.Warning
+            SnackbarVariant.Error -> AccessDefaults.Error
         }
 
 private data class CustomSnackbarVisuals(
@@ -57,6 +80,7 @@ private data class CustomSnackbarVisuals(
     override val duration: SnackbarDuration = SnackbarDuration.Short,
     val title: String? = null,
     val variant: SnackbarVariant,
+    val icon: SnackbarIcon,
 ) : SnackbarVisuals
 
 suspend fun SnackbarHostState.showSnackbar(
@@ -68,6 +92,7 @@ suspend fun SnackbarHostState.showSnackbar(
                 title = snackbarMessage.title.asStringAsync(),
                 message = snackbarMessage.description.asStringAsync(),
                 variant = snackbarMessage.variant,
+                icon = snackbarMessage.icon,
                 duration = SnackbarDuration.Short,
             ),
     )
@@ -78,7 +103,8 @@ internal fun CustomSnackbar(
     modifier: Modifier = Modifier,
 ) {
     val visuals = snackbarData.visuals as? CustomSnackbarVisuals
-    val variant = visuals?.variant?.icon
+    val icon = visuals?.icon?.drawable
+    val iconTint = visuals?.variant?.iconTint ?: Color.Unspecified
     val title = visuals?.title
 
     Row(
@@ -102,12 +128,12 @@ internal fun CustomSnackbar(
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        if (variant != null) {
+        if (icon != null) {
             Icon(
                 modifier = Modifier.size(20.dp),
-                painter = painterResource(variant),
+                painter = painterResource(icon),
                 contentDescription = null,
-                tint = Color.Unspecified,
+                tint = iconTint,
             )
         }
 

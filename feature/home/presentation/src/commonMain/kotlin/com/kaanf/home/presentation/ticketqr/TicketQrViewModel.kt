@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.kaanf.core.domain.util.DataError
 import com.kaanf.core.domain.util.Result
 import com.kaanf.core.presentation.snackbar.SnackbarController
+import com.kaanf.core.presentation.snackbar.SnackbarIcon
 import com.kaanf.core.presentation.snackbar.SnackbarMessage
 import com.kaanf.core.presentation.snackbar.SnackbarVariant
 import com.kaanf.core.presentation.snackbar.toSnackbarMessage
@@ -156,6 +157,7 @@ private fun DataError.Remote.toCheckInSnackbarMessage(): SnackbarMessage = when 
         title = UIText.Resource(Res.string.ticket_qr_no_connection_title),
         description = UIText.Resource(Res.string.ticket_qr_no_connection_description),
         variant = SnackbarVariant.Warn,
+        icon = SnackbarIcon.Offline,
     )
 
     DataError.Remote.REQUEST_TIMEOUT,

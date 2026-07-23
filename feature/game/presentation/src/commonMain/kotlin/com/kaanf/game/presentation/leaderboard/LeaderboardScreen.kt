@@ -5,11 +5,13 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -37,53 +39,53 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kaanf.core.designsystem.component.avatar.AvatarCircle
 import com.kaanf.core.designsystem.component.avatar.avatarContentFor
-import com.kaanf.core.designsystem.component.button.BaseButton
-import com.kaanf.core.designsystem.component.layout.AppScaffold
-import com.kaanf.core.designsystem.component.layout.AppTopBar
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessShapes
-import com.kaanf.core.presentation.model.AppTopBarState
 import com.kaanf.game.domain.model.LeaderboardEntry
+import com.kaanf.game.presentation.memories.MemoriesRevealEntry
 import crew.feature.game.presentation.generated.resources.Res
 import crew.feature.game.presentation.generated.resources.leaderboard_eyebrow
 import crew.feature.game.presentation.generated.resources.leaderboard_full_board_label
-import crew.feature.game.presentation.generated.resources.leaderboard_go_home_action
 import crew.feature.game.presentation.generated.resources.leaderboard_players_count_format
 import crew.feature.game.presentation.generated.resources.leaderboard_points_format
 import crew.feature.game.presentation.generated.resources.leaderboard_title_highlight
 import crew.feature.game.presentation.generated.resources.leaderboard_title_prefix
-import crew.feature.game.presentation.generated.resources.leaderboard_top_bar_title
 import crew.feature.game.presentation.generated.resources.leaderboard_you_label
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
 
+/**
+ * MatchContainerScreen içindeki sıralama tab'ı. Yalnız etkinlik bittiğinde açılır
+ * (oyun sürerken tab kilitli), o yüzden tek varyant: kutlama başlığı + podyum.
+ * Scaffold/top bar/bottom bar container'a ait; burası yalnız içerik.
+ * VM, Game route entry'sine scope'lanır (eventId oradaki SavedStateHandle'dan).
+ */
 @Composable
-fun LeaderboardRoot(
-    viewModel: LeaderboardViewModel,
-    onNavigateToDashboard: () -> Unit,
-) {
+fun LeaderboardTab(modifier: Modifier = Modifier) {
+    val viewModel: LeaderboardViewModel = koinViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    LeaderboardScreen(
+    LeaderboardContent(
         state = state,
-        onGoHomeClick = onNavigateToDashboard,
+        modifier = modifier,
     )
 }
 
 @Composable
-fun LeaderboardScreen(
+fun LeaderboardContent(
     state: LeaderboardState,
-    onGoHomeClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val listState = rememberLazyListState()
-    val showPodium = state.entries.size >= 3
+    val showPodium = state.entries.size >= 2
 
     // Kullanıcının satırını viewport'ta ortala. İki aşama: önce satırı görünür yap ki
     // viewport ve satır yüksekliği layout'tan okunabilsin, sonra ortalayan offset'le kaydır.
     LaunchedEffect(state.entries, state.currentUserId) {
         val index = state.entries.indexOfFirst { it.userId == state.currentUserId }
         if (index < 0) return@LaunchedEffect
-        val headerCount = if (state.entries.size >= 3) 3 else 2
+        // header + (podium) + memories + board_header; memories item boş da olsa index sayar.
+        val headerCount = if (showPodium) 4 else 3
         val itemIndex = index + headerCount
         listState.scrollToItem(itemIndex)
         val layoutInfo = listState.layoutInfo
@@ -93,59 +95,39 @@ fun LeaderboardScreen(
         listState.scrollToItem(itemIndex, scrollOffset = -(viewport - itemSize) / 2)
     }
 
-    AppScaffold(
-        topBar = {
-            AppTopBar(
-                state = AppTopBarState.GameLobby(stringResource(Res.string.leaderboard_top_bar_title)),
-                elevated = { listState.canScrollBackward },
-                onBackClick = onGoHomeClick,
-            )
-        },
-    ) { innerPadding ->
-        Column(
+    if (state.isLoading) {
+        Box(
+            modifier = modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center,
+        ) {
+            CircularProgressIndicator()
+        }
+    } else {
+        LazyColumn(
+            state = listState,
             modifier = modifier
                 .fillMaxSize()
-                .padding(innerPadding)
                 .padding(horizontal = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            contentPadding = PaddingValues(bottom = 84.dp),
         ) {
-            if (state.isLoading) {
-                Box(
-                    modifier = Modifier.fillMaxWidth().weight(1f),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    CircularProgressIndicator()
-                }
-            } else {
-                LazyColumn(
-                    state = listState,
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    item(key = "header") { WrapHeader() }
-                    if (showPodium) {
-                        item(key = "podium") {
-                            Podium(
-                                topThree = state.entries.take(3),
-                                currentUserId = state.currentUserId,
-                            )
-                        }
-                    }
-                    item(key = "board_header") { FullBoardHeader(playerCount = state.entries.size) }
-                    items(state.entries, key = { it.userId }) { entry ->
-                        LeaderboardRow(
-                            entry = entry,
-                            isCurrentUser = entry.userId == state.currentUserId,
-                        )
-                    }
+            item(key = "header") { WrapHeader() }
+            if (showPodium) {
+                item(key = "podium") {
+                    Podium(
+                        topEntries = state.entries.take(3),
+                        currentUserId = state.currentUserId,
+                    )
                 }
             }
-
-            BaseButton(
-                text = stringResource(Res.string.leaderboard_go_home_action),
-                onClick = onGoHomeClick,
-                filled = true,
-                modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
-            )
+            item(key = "memories") { MemoriesRevealEntry() }
+            item(key = "board_header") { FullBoardHeader(playerCount = state.entries.size) }
+            items(state.entries, key = { it.userId }) { entry ->
+                LeaderboardRow(
+                    entry = entry,
+                    isCurrentUser = entry.userId == state.currentUserId,
+                )
+            }
         }
     }
 }
@@ -176,7 +158,7 @@ private fun WrapHeader(modifier: Modifier = Modifier) {
                     append(stringResource(Res.string.leaderboard_title_highlight))
                 }
             },
-            style = MaterialTheme.typography.displayMedium,
+            style = MaterialTheme.typography.displayMedium.copy(color = AccessDefaults.TextPrimary),
             textAlign = TextAlign.Center,
         )
     }
@@ -184,12 +166,16 @@ private fun WrapHeader(modifier: Modifier = Modifier) {
 
 @Composable
 private fun Podium(
-    topThree: List<LeaderboardEntry>,
+    topEntries: List<LeaderboardEntry>,
     currentUserId: String?,
     modifier: Modifier = Modifier,
 ) {
-    // Tasarımdaki sıralama: 2. — 1. — 3.
-    val ordered = listOf(topThree[1], topThree[0], topThree[2])
+    // Tasarımdaki sıralama: 2. — 1. — 3. Üçüncü yoksa (2 oyunculu oda) 2. — 1. kalır.
+    val ordered = if (topEntries.size >= 3) {
+        listOf(topEntries[1], topEntries[0], topEntries[2])
+    } else {
+        listOf(topEntries[1], topEntries[0])
+    }
     Row(
         modifier = modifier.fillMaxWidth().padding(vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -243,7 +229,9 @@ private fun PodiumColumn(
             ),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(top = 8.dp),
+            // Uzun isim sütunun tamamını kaplayınca metin kendi kutusunda sola yaslanıyordu.
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
         )
         Text(
             text = stringResource(Res.string.leaderboard_points_format, entry.score),
@@ -251,6 +239,8 @@ private fun PodiumColumn(
                 color = AccessDefaults.TextMuted,
                 fontSize = 11.sp,
             ),
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth(),
         )
         Box(
             modifier = Modifier
@@ -300,6 +290,7 @@ private fun PodiumColumn(
 private fun FullBoardHeader(
     playerCount: Int,
     modifier: Modifier = Modifier,
+    label: String = stringResource(Res.string.leaderboard_full_board_label),
 ) {
     Row(
         modifier = modifier.fillMaxWidth().padding(top = 16.dp, bottom = 4.dp),
@@ -307,7 +298,7 @@ private fun FullBoardHeader(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = stringResource(Res.string.leaderboard_full_board_label),
+            text = label,
             style = MaterialTheme.typography.labelSmall.copy(
                 color = AccessDefaults.TextMuted,
                 fontSize = 12.sp,
@@ -362,6 +353,7 @@ private fun LeaderboardRow(
             Text(
                 text = entry.fullName,
                 style = MaterialTheme.typography.bodyMedium.copy(
+                    color = AccessDefaults.TextPrimary,
                     fontWeight = if (isCurrentUser) FontWeight.SemiBold else FontWeight.Normal,
                 ),
                 maxLines = 1,
@@ -376,7 +368,10 @@ private fun LeaderboardRow(
         }
         Text(
             text = "${entry.score}",
-            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+            style = MaterialTheme.typography.titleMedium.copy(
+                color = AccessDefaults.TextPrimary,
+                fontWeight = FontWeight.Bold,
+            ),
         )
     }
 }

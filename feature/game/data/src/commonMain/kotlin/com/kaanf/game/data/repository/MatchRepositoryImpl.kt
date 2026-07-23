@@ -1,7 +1,9 @@
 package com.kaanf.game.data.repository
 
+import com.kaanf.core.data.networking.delete
 import com.kaanf.core.data.networking.get
 import com.kaanf.core.data.networking.getOrNull
+import com.kaanf.core.data.networking.mapCatching
 import com.kaanf.core.data.networking.post
 import com.kaanf.core.domain.util.DataError
 import com.kaanf.core.domain.util.EmptyResult
@@ -10,10 +12,12 @@ import com.kaanf.core.domain.util.asEmptyResult
 import com.kaanf.core.domain.util.map
 import com.kaanf.game.data.dto.ConfirmTaskRequest
 import com.kaanf.game.data.dto.CreateMatchInviteRequest
+import com.kaanf.game.data.dto.EventMemoryDto
 import com.kaanf.game.data.dto.LeaderboardEntryDto
 import com.kaanf.game.data.dto.MatchCancelDto
 import com.kaanf.game.data.dto.MatchDto
 import com.kaanf.game.data.dto.MatchFinishDto
+import com.kaanf.game.data.dto.MatchHistoryEntryDto
 import com.kaanf.game.data.dto.MatchInviteDto
 import com.kaanf.game.data.dto.MatchReadyDto
 import com.kaanf.game.data.dto.MatchResultDto
@@ -23,17 +27,25 @@ import com.kaanf.game.data.dto.MatchTaskOfferDto
 import com.kaanf.game.data.dto.MatchTaskStateDto
 import com.kaanf.game.data.dto.MyParticipantDto
 import com.kaanf.game.data.dto.OfferTaskRequest
+import com.kaanf.game.data.dto.QuestDto
 import com.kaanf.game.data.dto.ReportResultRequest
 import com.kaanf.game.data.dto.TaskDto
 import com.kaanf.game.data.mappers.toDomain
+import com.kaanf.game.domain.model.EventMemory
 import com.kaanf.game.domain.model.GameTask
 import com.kaanf.game.domain.model.LeaderboardEntry
+import com.kaanf.game.domain.model.MatchHistoryEntry
 import com.kaanf.game.domain.model.MatchInvite
 import com.kaanf.game.domain.model.MatchParticipant
 import com.kaanf.game.domain.model.MatchScoreboard
 import com.kaanf.game.domain.model.MatchSnapshot
+import com.kaanf.game.domain.model.Quest
 import com.kaanf.game.domain.repository.MatchRepository
 import io.ktor.client.HttpClient
+import io.ktor.client.request.forms.MultiPartFormDataContent
+import io.ktor.client.request.forms.formData
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
 
 class MatchRepositoryImpl(
     private val httpClient: HttpClient,
@@ -98,9 +110,10 @@ class MatchRepositoryImpl(
         ).asEmptyResult()
     }
 
-    override suspend fun getTasks(): Result<List<GameTask>, DataError.Remote> {
+    override suspend fun getTasks(eventId: String): Result<List<GameTask>, DataError.Remote> {
         return httpClient.get<List<TaskDto>>(
             route = "/tasks",
+            queryParams = mapOf("eventId" to eventId),
         ).map { tasks -> tasks.map { it.toDomain() } }
     }
 
@@ -166,6 +179,15 @@ class MatchRepositoryImpl(
         ).map { entries -> entries.map { it.toDomain() } }
     }
 
+    override suspend fun getMatchHistory(
+        eventId: String, page: Int, size: Int,
+    ): Result<List<MatchHistoryEntry>, DataError.Remote> {
+        return httpClient.get<List<MatchHistoryEntryDto>>(
+            route = "/events/$eventId/matches/history",
+            queryParams = mapOf("page" to page, "size" to size),
+        ).map { entries -> entries.map { it.toDomain() } }
+    }
+
     override suspend fun cancelMatch(
         eventId: String, matchId: String,
     ): EmptyResult<DataError.Remote> {
@@ -182,5 +204,61 @@ class MatchRepositoryImpl(
         return httpClient.post<MatchFinishDto>(
             route = "/events/$eventId/matches/$matchId/finish",
         ).asEmptyResult()
+    }
+
+    override suspend fun getMemories(
+        eventId: String, page: Int, size: Int,
+    ): Result<List<EventMemory>, DataError.Remote> {
+        return httpClient.get<List<EventMemoryDto>>(
+            route = "/events/$eventId/memories",
+            queryParams = mapOf("page" to page, "size" to size),
+        ).mapCatching { memories -> memories.map { it.toDomain() } }
+    }
+
+    override suspend fun uploadMemory(
+        eventId: String, imageBytes: ByteArray, mimeType: String,
+    ): Result<EventMemory, DataError.Remote> {
+        // Ham kamera baytları olduğu gibi gönderilir; boyut optimizasyonunu sunucu yapar
+        // (1600px'e küçültüp JPEG'e çevirir). setBody, OutgoingContent'i serialize etmeden geçirir.
+        return httpClient.post<MultiPartFormDataContent, EventMemoryDto>(
+            route = "/events/$eventId/memories",
+            body = MultiPartFormDataContent(
+                formData {
+                    append(
+                        key = "file",
+                        value = imageBytes,
+                        headers = Headers.build {
+                            append(HttpHeaders.ContentType, mimeType)
+                            append(HttpHeaders.ContentDisposition, "filename=\"memory.jpg\"")
+                        },
+                    )
+                },
+            ),
+        ).mapCatching { it.toDomain() }
+    }
+
+    override suspend fun deleteMemory(
+        eventId: String, memoryId: String,
+    ): EmptyResult<DataError.Remote> {
+        // Sunucu 204 (gövdesiz) döner.
+        return httpClient.delete<Unit>(
+            route = "/events/$eventId/memories/$memoryId",
+        )
+    }
+
+    override suspend fun getQuests(
+        eventId: String,
+    ): Result<List<Quest>, DataError.Remote> {
+        return httpClient.get<List<QuestDto>>(
+            route = "/events/$eventId/quests",
+        ).map { quests -> quests.map { it.toDomain() } }
+    }
+
+    override suspend fun claimQuest(
+        eventId: String, questKey: String,
+    ): Result<Quest, DataError.Remote> {
+        return httpClient.post<QuestDto>(
+            route = "/events/$eventId/quests/$questKey/claim",
+        ).map { it.toDomain() }
     }
 }

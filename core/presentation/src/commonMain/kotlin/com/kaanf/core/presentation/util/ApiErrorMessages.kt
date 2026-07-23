@@ -54,6 +54,8 @@ import crew.core.presentation.generated.resources.err_same_password_desc
 import crew.core.presentation.generated.resources.err_same_password_title
 import crew.core.presentation.generated.resources.err_self_match_invite_desc
 import crew.core.presentation.generated.resources.err_self_match_invite_title
+import crew.core.presentation.generated.resources.err_task_not_allowed_phase_desc
+import crew.core.presentation.generated.resources.err_task_not_allowed_phase_title
 import crew.core.presentation.generated.resources.err_task_not_found_desc
 import crew.core.presentation.generated.resources.err_task_not_found_title
 import crew.core.presentation.generated.resources.err_ticket_already_exists_desc
@@ -121,6 +123,7 @@ fun apiErrorUi(code: String): ApiErrorUi? = when (code) {
     "MATCH_NOT_IN_TASK_ACTIVE" -> ApiErrorUi(Res.string.err_match_not_task_active_title, Res.string.err_match_not_task_active_desc, SnackbarVariant.Warn)
     "MATCH_NOT_COMPLETED" -> ApiErrorUi(Res.string.err_match_not_completed_title, Res.string.err_match_not_completed_desc, SnackbarVariant.Warn)
     "TASK_NOT_FOUND" -> ApiErrorUi(Res.string.err_task_not_found_title, Res.string.err_task_not_found_desc, SnackbarVariant.Error)
+    "TASK_NOT_ALLOWED_IN_PHASE" -> ApiErrorUi(Res.string.err_task_not_allowed_phase_title, Res.string.err_task_not_allowed_phase_desc, SnackbarVariant.Warn)
 
     else -> null
 }

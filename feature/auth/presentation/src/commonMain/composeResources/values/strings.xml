@@ -82,4 +82,10 @@
     <string name="register_terms_conjunction">, and </string>
     <string name="register_privacy_policy">Privacy Policy</string>
     <string name="register_terms_suffix">.</string>
+    <string name="register_underage_title">You have to be 18 to join Crew.</string>
+    <string name="register_underage_description">Crew plays out live in bars and every door cards on the way in. We can’t set up an account yet.</string>
+    <string name="register_underage_go_back">Go back</string>
+
+    <string name="profile_picture_uploaded_title">Photo uploaded</string>
+    <string name="profile_picture_uploaded_description">Your profile picture is set.</string>
 </resources>

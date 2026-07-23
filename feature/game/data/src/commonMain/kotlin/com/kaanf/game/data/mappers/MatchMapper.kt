@@ -2,15 +2,18 @@ package com.kaanf.game.data.mappers
 
 import com.kaanf.game.data.dto.LeaderboardEntryDto
 import com.kaanf.game.data.dto.MatchDto
+import com.kaanf.game.data.dto.MatchHistoryEntryDto
 import com.kaanf.game.data.dto.MatchInviteDto
 import com.kaanf.game.data.dto.MatchScoreboardDto
 import com.kaanf.game.data.dto.MyParticipantDto
 import com.kaanf.game.domain.model.LeaderboardEntry
 import com.kaanf.game.domain.model.Match
+import com.kaanf.game.domain.model.MatchHistoryEntry
 import com.kaanf.game.domain.model.MatchInvite
 import com.kaanf.game.domain.model.MatchParticipant
 import com.kaanf.game.domain.model.MatchScoreboard
 import com.kaanf.game.domain.model.MatchScoreboardEntry
+import kotlin.time.Instant
 
 fun MatchInviteDto.toDomain(): MatchInvite = MatchInvite(
     inviteId = inviteId,
@@ -44,6 +47,18 @@ fun LeaderboardEntryDto.toDomain(): LeaderboardEntry = LeaderboardEntry(
     fullName = fullName,
     profilePictureUrl = profilePictureUrl,
     score = score,
+)
+
+fun MatchHistoryEntryDto.toDomain(): MatchHistoryEntry = MatchHistoryEntry(
+    matchId = matchId,
+    won = won,
+    cancelled = state == "Cancelled",
+    opponentUserId = opponentUserId,
+    opponentFullName = opponentFullName,
+    opponentAvatarUrl = opponentAvatarUrl,
+    myPoints = myPoints,
+    taskTitle = taskTitle,
+    occurredAt = Instant.parse(completedAt ?: startedAt),
 )
 
 fun MatchScoreboardDto.toDomain(): MatchScoreboard = MatchScoreboard(

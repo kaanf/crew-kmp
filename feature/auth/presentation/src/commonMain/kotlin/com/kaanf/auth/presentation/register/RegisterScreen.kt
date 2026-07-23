@@ -5,7 +5,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.input.TextFieldState
@@ -23,6 +25,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -36,6 +39,7 @@ import com.kaanf.core.designsystem.component.button.BaseButton
 import com.kaanf.core.designsystem.component.checkbox.BaseCheckbox
 import com.kaanf.core.designsystem.component.layout.AppScaffold
 import com.kaanf.core.designsystem.component.layout.AppTopBar
+import com.kaanf.core.designsystem.component.dialog.BaseDialog
 import com.kaanf.core.designsystem.component.sheet.SelectionBottomSheet
 import com.kaanf.core.designsystem.component.textfield.BaseSelectField
 import com.kaanf.core.designsystem.theme.AccessDefaults
@@ -78,6 +82,9 @@ import crew.feature.auth.presentation.generated.resources.register_terms_conjunc
 import crew.feature.auth.presentation.generated.resources.register_terms_prefix
 import crew.feature.auth.presentation.generated.resources.register_terms_separator
 import crew.feature.auth.presentation.generated.resources.register_terms_suffix
+import crew.feature.auth.presentation.generated.resources.register_underage_description
+import crew.feature.auth.presentation.generated.resources.register_underage_go_back
+import crew.feature.auth.presentation.generated.resources.register_underage_title
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -100,6 +107,10 @@ fun RegisterRoot(
 
             is RegisterEvent.NavigateToLogin -> {
                 onReturnToLoginClick.invoke()
+            }
+
+            is RegisterEvent.NavigateBack -> {
+                onBackClick()
             }
         }
     }
@@ -293,6 +304,50 @@ fun RegisterScreen(
                 onDismiss = { showGenderSheet = false },
             )
         }
+
+        if (state.showUnderageDialog) {
+            UnderageDialog(
+                onGoBack = { onAction(RegisterAction.OnUnderageGoBack) },
+            )
+        }
+    }
+}
+
+@Composable
+private fun UnderageDialog(onGoBack: () -> Unit) {
+    BaseDialog(
+        onDismissRequest = onGoBack,
+        dismissOnBackPress = false,
+        dismissOnClickOutside = false,
+    ) {
+        Text(
+            text = stringResource(Res.string.register_underage_title),
+            modifier = Modifier.fillMaxWidth(),
+            style = MaterialTheme.typography.headlineMedium.copy(
+                color = AccessDefaults.TextPrimary,
+                textAlign = TextAlign.Center,
+            ),
+        )
+
+        Spacer(modifier = Modifier.height(6.dp))
+
+        Text(
+            text = stringResource(Res.string.register_underage_description),
+            modifier = Modifier.fillMaxWidth(),
+            style = MaterialTheme.typography.bodySmall.copy(
+                color = AccessDefaults.TextSecondary,
+                fontSize = 12.sp,
+                textAlign = TextAlign.Center,
+            ),
+        )
+
+        Spacer(modifier = Modifier.height(18.dp))
+
+        BaseButton(
+            text = stringResource(Res.string.register_underage_go_back),
+            onClick = onGoBack,
+            filled = true,
+        )
     }
 }
 

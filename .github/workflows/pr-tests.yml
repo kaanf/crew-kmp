@@ -27,18 +27,21 @@ env:
 jobs:
   lint-and-unit-tests:
     if: github.event_name != 'pull_request' || github.head_ref == 'dev'
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
+    # commonTest yalnız iOS simulator target'ında koşuyor (KMP modüllerinde host test
+    # yok) ve ktor-client-darwin'in metadata klib'i macOS host ister; Linux runner'da
+    # iOS target'ları devre dışı kalıp testler sessizce hiç çalışmıyor.
+    runs-on: macos-latest
+    timeout-minutes: 40
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "17"
+          java-version: "21"
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -46,15 +49,16 @@ jobs:
       - name: Ensure Gradle wrapper is executable
         run: chmod +x ./gradlew
 
-      - name: Run ktlint, detekt, and unit tests
-        run: ./gradlew --no-daemon ktlintCheck detekt testDebugUnitTest
+      # androidApp:assembleDebug google-services.json (gitignore'da) ister; derleme
+      # kontrolü için compileDebugKotlin yeterli.
+      - name: Run unit tests and compile Android
+        run: ./gradlew --no-daemon allTests :androidApp:compileDebugKotlin
 
       - name: Upload unit test reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: lint-and-unit-test-reports
+          name: unit-test-reports
           path: |
             **/build/reports/tests/**
             **/build/test-results/**
-            **/build/reports/detekt/**

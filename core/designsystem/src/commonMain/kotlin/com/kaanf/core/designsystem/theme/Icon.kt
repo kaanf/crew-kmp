@@ -5,6 +5,7 @@ import crew.core.designsystem.generated.resources.crew_logo_qr
 import crew.core.designsystem.generated.resources.crew_pixel_art
 import crew.core.designsystem.generated.resources.ic_bell
 import crew.core.designsystem.generated.resources.ic_camera
+import crew.core.designsystem.generated.resources.ic_case
 import crew.core.designsystem.generated.resources.ic_check
 import crew.core.designsystem.generated.resources.ic_chevron_left_24
 import crew.core.designsystem.generated.resources.ic_chevron_right_24
@@ -13,12 +14,16 @@ import crew.core.designsystem.generated.resources.ic_clock
 import crew.core.designsystem.generated.resources.ic_image
 import crew.core.designsystem.generated.resources.ic_info
 import crew.core.designsystem.generated.resources.ic_key_lock
+import crew.core.designsystem.generated.resources.ic_key_open
 import crew.core.designsystem.generated.resources.ic_left_arrow
 import crew.core.designsystem.generated.resources.ic_more
 import crew.core.designsystem.generated.resources.ic_pin
 import crew.core.designsystem.generated.resources.ic_qr
 import crew.core.designsystem.generated.resources.ic_safety
 import crew.core.designsystem.generated.resources.ic_sparkle
+import crew.core.designsystem.generated.resources.ic_target
+import crew.core.designsystem.generated.resources.ic_trash
+import crew.core.designsystem.generated.resources.ic_trophy
 import crew.core.designsystem.generated.resources.ic_user
 import crew.core.designsystem.generated.resources.ic_wifi_off
 
@@ -40,6 +45,11 @@ object AccessIcons {
     val Camera = Res.drawable.ic_camera
     val Check = Res.drawable.ic_check
     val Clock = Res.drawable.ic_clock
+    val Trophy = Res.drawable.ic_trophy
     val Image = Res.drawable.ic_image
     val Lock = Res.drawable.ic_key_lock
+    val LockOpen = Res.drawable.ic_key_open
+    val Case = Res.drawable.ic_case
+    val Trash = Res.drawable.ic_trash
+    val Target = Res.drawable.ic_target
 }

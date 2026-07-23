@@ -2,7 +2,6 @@ package com.kaanf.home.presentation.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kaanf.core.domain.model.settings.AppLanguage
 import com.kaanf.core.domain.model.user.User
 import com.kaanf.core.domain.repository.AuthSessionRepository
 import com.kaanf.core.domain.repository.LanguageStore
@@ -11,15 +10,16 @@ import com.kaanf.core.domain.util.Result
 import com.kaanf.core.presentation.snackbar.SnackbarController
 import com.kaanf.core.presentation.snackbar.SnackbarMessage
 import com.kaanf.core.presentation.snackbar.SnackbarVariant
+import com.kaanf.core.presentation.snackbar.toSnackbarMessage
 import com.kaanf.core.presentation.util.UIText
 import crew.feature.home.presentation.generated.resources.Res
+import crew.feature.home.presentation.generated.resources.profile_account_deleted_description
+import crew.feature.home.presentation.generated.resources.profile_account_deleted_title
 import crew.feature.home.presentation.generated.resources.profile_changes_saved_description
 import crew.feature.home.presentation.generated.resources.profile_changes_saved_title
 import crew.feature.home.presentation.generated.resources.profile_save_error_description
 import crew.feature.home.presentation.generated.resources.profile_save_error_title
 import kotlinx.coroutines.NonCancellable
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.number
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.launchIn
@@ -61,9 +61,10 @@ class ProfileViewModel(
             is ProfileAction.OnEditNameClick -> Unit
             is ProfileAction.OnNameEdited -> onNameEdited(action.name)
             is ProfileAction.OnSaveChanges -> saveChanges()
-            is ProfileAction.OnLanguageClick -> Unit
-            is ProfileAction.OnLanguageSelected -> onLanguageSelected(action.language)
+            is ProfileAction.OnCancelEdit -> cancelEdit()
             is ProfileAction.OnSignOutClick -> signOut()
+            is ProfileAction.OnDeleteAccountClick -> Unit
+            is ProfileAction.OnDeleteAccountConfirm -> deleteAccount()
         }
     }
 
@@ -74,8 +75,31 @@ class ProfileViewModel(
             .launchIn(viewModelScope)
     }
 
-    private fun onLanguageSelected(language: AppLanguage) {
-        viewModelScope.launch { languageStore.setLanguage(language) }
+    private fun deleteAccount() {
+        if (state.value.isDeletingAccount) return
+        _state.update { it.copy(isDeletingAccount = true) }
+
+        viewModelScope.launch {
+            when (val result = authSessionRepository.deleteAccount()) {
+                is Result.Success -> {
+                    snackbarController.show(
+                        SnackbarMessage(
+                            title = UIText.Resource(Res.string.profile_account_deleted_title),
+                            description = UIText.Resource(Res.string.profile_account_deleted_description),
+                            variant = SnackbarVariant.Success,
+                        ),
+                    )
+                    // The screen observes this flag and navigates to auth; the session was
+                    // already cleared by the repository.
+                    _state.update { it.copy(isDeletingAccount = false, accountDeleted = true) }
+                }
+
+                is Result.Failure -> {
+                    _state.update { it.copy(isDeletingAccount = false) }
+                    snackbarController.show(result.error.toSnackbarMessage())
+                }
+            }
+        }
     }
 
     private fun signOut() {
@@ -99,7 +123,6 @@ class ProfileViewModel(
                         fullName = user?.fullName.orEmpty(),
                         email = user?.email.orEmpty(),
                         gender = formatGender(user?.gender),
-                        dateOfBirth = formatDateOfBirth(user?.dateOfBirth),
                     )
                 }
             }
@@ -134,6 +157,19 @@ class ProfileViewModel(
             it.copy(
                 pendingPhotoBytes = null,
                 pendingPhotoRemoval = true,
+            )
+        }
+    }
+
+    // Drop every staged edit and leave edit mode; server-side values remain untouched.
+    private fun cancelEdit() {
+        if (state.value.isSaving) return
+        _state.update {
+            it.copy(
+                editedName = null,
+                pendingPhotoBytes = null,
+                pendingPhotoRemoval = false,
+                pendingCropBytes = null,
             )
         }
     }
@@ -212,19 +248,4 @@ private fun formatGender(raw: String?): String {
         .replace('_', ' ')
         .lowercase()
         .replaceFirstChar { it.uppercase() }
-}
-
-private val MONTH_NAMES = listOf(
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December",
-)
-
-// ISO "1998-05-12" -> "12 May 1998"; falls back to the raw value if it can't be parsed.
-private fun formatDateOfBirth(raw: String?): String {
-    val value = raw?.trim().orEmpty()
-    if (value.isBlank()) return ""
-    return runCatching {
-        val date = LocalDate.parse(value)
-        "${date.day} ${MONTH_NAMES[date.month.number - 1]} ${date.year}"
-    }.getOrDefault(value)
 }

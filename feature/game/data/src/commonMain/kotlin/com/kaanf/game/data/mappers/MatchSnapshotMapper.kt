@@ -23,6 +23,7 @@ fun MatchSnapshotDto.toDomain(): MatchSnapshot = MatchSnapshot(
             id = it.taskId,
             title = it.title,
             points = it.points,
+            rejectPoints = it.rejectPoints,
             categories = it.categories.map { category -> category.toTaskCategory() },
         )
     },

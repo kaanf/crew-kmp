@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -46,12 +47,15 @@ import crew.core.designsystem.generated.resources.empty
 import crew.core.designsystem.generated.resources.event_code_title
 import crew.core.designsystem.generated.resources.event_detail_title
 import crew.core.designsystem.generated.resources.game_how_to_play
+import crew.core.designsystem.generated.resources.game_qr_home_title
 import crew.core.designsystem.generated.resources.image_crop_title
 import crew.core.designsystem.generated.resources.loser_accepts_title
 import crew.core.designsystem.generated.resources.loser_active_task_title
 import crew.core.designsystem.generated.resources.loser_waits_title
 import crew.core.designsystem.generated.resources.login_text
 import crew.core.designsystem.generated.resources.loser_active_task_skip
+import crew.core.designsystem.generated.resources.profile_cancel
+import crew.core.designsystem.generated.resources.profile_save_changes
 import crew.core.designsystem.generated.resources.profile_sign_out
 import crew.core.designsystem.generated.resources.profile_title
 import crew.core.designsystem.generated.resources.register_text
@@ -74,6 +78,7 @@ fun AppTopBar(
     elevated: () -> Boolean = { false },
     onBackClick: (() -> Unit) = {},
     onRightClick: (() -> Unit) = {},
+    onLeftClick: (() -> Unit) = {},
 ) {
     val overlayAlpha by animateFloatAsState(
         targetValue = if (elevated()) 1f else 0f,
@@ -82,6 +87,7 @@ fun AppTopBar(
     )
     val title = when (state) {
         is AppTopBarState.GameLobby -> state.title
+        is AppTopBarState.Game -> state.title ?: stringResource(state.titleResource)
         else -> stringResource(state.titleResource)
     }
     val navigationIcon = state.navigationIcon
@@ -149,26 +155,47 @@ fun AppTopBar(
                 overflow = TextOverflow.Ellipsis,
             )
 
-            navigationIcon?.let { icon ->
-                IconButton(
+            val profileEditing = state is AppTopBarState.Profile && state.hasUnsavedChanges
+
+            if (profileEditing) {
+                // In edit mode the back chevron becomes a Cancel action that discards changes.
+                TextButton(
                     onClick = onBackClick,
                     modifier = Modifier
                         .align(Alignment.CenterStart)
-                        .clip(CircleShape)
-                        .background(AccessDefaults.SurfaceElevated)
-                        .border(
-                            width = 1.dp,
-                            color = AccessDefaults.BorderSoft,
-                            shape = CircleShape,
-                        )
-                        .size(32.dp),
+                        .widthIn(min = 36.dp),
+                    contentPadding = PaddingValues(horizontal = 0.dp),
                 ) {
-                    Icon(
-                        painter = painterResource(icon),
-                        contentDescription = null,
-                        tint = AccessDefaults.TextPrimary,
-                        modifier = Modifier.size(24.dp),
+                    Text(
+                        text = stringResource(Res.string.profile_cancel),
+                        style = MaterialTheme.typography.titleSmall.copy(
+                            color = AccessDefaults.TextMuted,
+                            fontSize = 12.sp,
+                        ),
                     )
+                }
+            } else {
+                navigationIcon?.let { icon ->
+                    IconButton(
+                        onClick = onBackClick,
+                        modifier = Modifier
+                            .align(Alignment.CenterStart)
+                            .clip(CircleShape)
+                            .background(AccessDefaults.SurfaceElevated)
+                            .border(
+                                width = 1.dp,
+                                color = AccessDefaults.BorderSoft,
+                                shape = CircleShape,
+                            )
+                            .size(32.dp),
+                    ) {
+                        Icon(
+                            painter = painterResource(icon),
+                            contentDescription = null,
+                            tint = AccessDefaults.TextPrimary,
+                            modifier = Modifier.size(24.dp),
+                        )
+                    }
                 }
             }
 
@@ -192,16 +219,72 @@ fun AppTopBar(
                 AppTopBarState.Register,
                 AppTopBarState.Login,
                 AppTopBarState.ProfilePicture,
-                AppTopBarState.Profile,
+                is AppTopBarState.Profile,
                 is AppTopBarState.Dashboard,
-                AppTopBarState.Game,
                 AppTopBarState.LoserActiveTask,
                     -> true
 
                 else -> false
             }
 
-            if (isRightIconVisible) {
+            // QR home: solda (varsa) quest ikonu.
+            if (state is AppTopBarState.Game && state.showQuestsAction) {
+                IconButton(
+                    onClick = onLeftClick,
+                    modifier = Modifier
+                        .align(Alignment.CenterStart)
+                        .clip(CircleShape)
+                        .background(AccessDefaults.SurfaceElevated)
+                        .border(
+                            width = 1.dp,
+                            color = AccessDefaults.BorderSoft,
+                            shape = CircleShape,
+                        )
+                        .size(32.dp),
+                ) {
+                    Icon(
+                        painter = painterResource(AccessIcons.Target),
+                        contentDescription = null,
+                        tint = AccessDefaults.TextPrimary,
+                        modifier = Modifier.size(20.dp),
+                    )
+                }
+            }
+
+            // QR home: sol nav yok, kapatma çarpısı sağda durur.
+            if (state is AppTopBarState.Game) {
+                IconButton(
+                    onClick = onRightClick,
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .clip(CircleShape)
+                        .background(AccessDefaults.SurfaceElevated)
+                        .border(
+                            width = 1.dp,
+                            color = AccessDefaults.BorderSoft,
+                            shape = CircleShape,
+                        )
+                        .size(32.dp),
+                ) {
+                    Icon(
+                        painter = painterResource(AccessIcons.Close),
+                        contentDescription = null,
+                        tint = AccessDefaults.TextPrimary,
+                        modifier = Modifier.size(24.dp),
+                    )
+                }
+            }
+
+            if (state is AppTopBarState.Profile && state.isSaving) {
+                // Saving replaces the action label with an accent spinner until it settles.
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .size(20.dp),
+                    color = AccessDefaults.Accent,
+                    strokeWidth = 2.dp,
+                )
+            } else if (isRightIconVisible) {
                 TextButton(
                     onClick = onRightClick,
                     modifier = Modifier
@@ -209,7 +292,16 @@ fun AppTopBar(
                         .widthIn(min = 36.dp),
                     contentPadding = PaddingValues(horizontal = 0.dp),
                 ) {
-                    if (state is AppTopBarState.Dashboard) {
+                    if (profileEditing) {
+                        Text(
+                            text = stringResource(Res.string.profile_save_changes),
+                            style = MaterialTheme.typography.titleSmall.copy(
+                                color = AccessDefaults.Accent,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 12.sp,
+                            ),
+                        )
+                    } else if (state is AppTopBarState.Dashboard) {
                         AvatarCircle(
                             content = state.profileImageUrl?.let { AvatarContent.Image(it) }
                                 ?: AvatarContent.Initials(
@@ -230,8 +322,7 @@ fun AppTopBar(
                                 when (state) {
                                     AppTopBarState.Register -> Res.string.login_text
                                     AppTopBarState.Login -> Res.string.register_text
-                                    AppTopBarState.Game -> Res.string.game_how_to_play
-                                    AppTopBarState.Profile -> Res.string.profile_sign_out
+                                    is AppTopBarState.Profile -> Res.string.profile_sign_out
                                     AppTopBarState.ProfilePicture,
                                     AppTopBarState.LoserActiveTask,
                                         -> Res.string.loser_active_task_skip
@@ -261,11 +352,12 @@ private val AppTopBarState.titleResource: StringResource
         AppTopBarState.Register,
         AppTopBarState.ProfilePicture,
         is AppTopBarState.Dashboard,
-        AppTopBarState.Game,
         is AppTopBarState.GameLobby,
             -> Res.string.empty
 
-        AppTopBarState.Profile -> Res.string.profile_title
+        is AppTopBarState.Game -> Res.string.game_qr_home_title
+
+        is AppTopBarState.Profile -> Res.string.profile_title
         AppTopBarState.EventDetail -> Res.string.event_detail_title
         AppTopBarState.ImageCrop -> Res.string.image_crop_title
         AppTopBarState.TicketQr -> Res.string.ticket_qr_title
@@ -283,18 +375,14 @@ private val AppTopBarState.titleResource: StringResource
 private val AppTopBarState.navigationIcon: DrawableResource?
     get() = when (this) {
         is AppTopBarState.Dashboard,
-        AppTopBarState.RpsConfirmation,
-        AppTopBarState.WinnerPicks,
-        AppTopBarState.WinnerConfirms,
-        AppTopBarState.LoserWaits,
-        AppTopBarState.LoserAccepts,
         AppTopBarState.ProfilePicture,
-        AppTopBarState.LoserActiveTask,
+        // QR home çıkışı sağdaki çarpıdan; solda nav ikonu yok.
+        is AppTopBarState.Game,
             -> null
 
         AppTopBarState.Login,
         AppTopBarState.Register,
-        AppTopBarState.Profile,
+        is AppTopBarState.Profile,
         AppTopBarState.EventDetail,
         AppTopBarState.TicketQr,
         AppTopBarState.EventCode,
@@ -302,9 +390,14 @@ private val AppTopBarState.navigationIcon: DrawableResource?
         is AppTopBarState.GameLobby,
             -> AccessIcons.LeftChevron
 
-        AppTopBarState.Game,
         AppTopBarState.ScanOpponent,
         AppTopBarState.RpsReady,
+        AppTopBarState.RpsConfirmation,
+        AppTopBarState.WinnerPicks,
+        AppTopBarState.WinnerConfirms,
+        AppTopBarState.LoserWaits,
+        AppTopBarState.LoserAccepts,
+        AppTopBarState.LoserActiveTask,
             -> AccessIcons.Close
     }
 

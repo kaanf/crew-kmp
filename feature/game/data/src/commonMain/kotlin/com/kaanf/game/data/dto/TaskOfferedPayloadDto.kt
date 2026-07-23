@@ -12,5 +12,6 @@ data class TaskOfferedPayloadDto(
     val taskId: String,
     val taskTitle: String,
     val taskPoints: Int,
+    val taskRejectPoints: Int = -5,
     val taskCategories: List<String> = emptyList(),
 )

@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import com.kaanf.core.designsystem.component.button.BaseButton
 import com.kaanf.core.designsystem.component.progressbar.ThreeDotsAnimatedCard
 import com.kaanf.core.designsystem.theme.AccessDefaults
+import com.kaanf.core.designsystem.theme.CrewTheme
 import com.kaanf.game.domain.model.MatchScoreboardEntry
 import com.kaanf.game.presentation.session.component.MatchScoreboardCard
 import crew.feature.game.presentation.generated.resources.Res
@@ -33,6 +34,7 @@ import crew.feature.game.presentation.generated.resources.match_phase_scoreboard
 import crew.feature.game.presentation.generated.resources.match_phase_scoreboard_title_highlight
 import crew.feature.game.presentation.generated.resources.match_phase_scoreboard_title_prefix
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun MatchScoreboardPhase(
@@ -44,6 +46,9 @@ fun MatchScoreboardPhase(
     isFinishing: Boolean,
     onFinish: () -> Unit,
     modifier: Modifier = Modifier,
+    // Fotolar scoreboard payload'ında yok; session state'ten gelir, yoksa initials'a düşülür.
+    currentUserPhotoUrl: String? = null,
+    opponentPhotoUrl: String? = null,
 ) {
     val myEntry = entries.firstOrNull { it.userId == currentUserId }
     val titlePrefix = stringResource(Res.string.match_phase_scoreboard_title_prefix)
@@ -96,6 +101,7 @@ fun MatchScoreboardPhase(
                     isYou = entry.userId == currentUserId,
                     taskCompleted = completed,
                     forfeit = forfeit,
+                    photoUrl = if (entry.userId == currentUserId) currentUserPhotoUrl else opponentPhotoUrl,
                 )
             }
         }
@@ -128,4 +134,35 @@ private fun scoreboardSubtitle(
     myEntry.isWinner -> stringResource(Res.string.match_phase_scoreboard_subtitle_winner_bailed)
     completed -> stringResource(Res.string.match_phase_scoreboard_subtitle_loser_done)
     else -> stringResource(Res.string.match_phase_scoreboard_subtitle_loser_not_done)
+}
+
+@Composable
+@Preview
+private fun Preview() {
+    CrewTheme {
+        MatchScoreboardPhase(
+            entries = listOf(
+                MatchScoreboardEntry(
+                    participantId = "p1",
+                    userId = "u1",
+                    fullName = "Kaan",
+                    isWinner = true,
+                    points = 30,
+                ),
+                MatchScoreboardEntry(
+                    participantId = "p2",
+                    userId = "u2",
+                    fullName = "Mira",
+                    isWinner = false,
+                    points = 20,
+                ),
+            ),
+            currentUserId = "u1",
+            isLoading = false,
+            completed = true,
+            forfeit = false,
+            isFinishing = false,
+            onFinish = {},
+        )
+    }
 }

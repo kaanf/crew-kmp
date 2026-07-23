@@ -90,4 +90,6 @@
     <string name="err_match_not_completed_desc">This match isn't completed yet.</string>
     <string name="err_task_not_found_title">Task not found</string>
     <string name="err_task_not_found_desc">We couldn't find that task.</string>
+    <string name="err_task_not_allowed_phase_title">Task unavailable</string>
+    <string name="err_task_not_allowed_phase_desc">That task isn't available in the current round — pick another one.</string>
 </resources>

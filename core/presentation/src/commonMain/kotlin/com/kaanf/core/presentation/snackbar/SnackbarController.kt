@@ -22,10 +22,11 @@ data class SnackbarMessage(
     val title: UIText,
     val description: UIText,
     val variant: SnackbarVariant,
+    val icon: SnackbarIcon = variant.defaultIcon,
 )
 
 /**
- * Mesajın anlamsal türü; görsel karşılığı (ikon vb.) design system tarafında belirlenir.
+ * Mesajın anlamsal türü; renk karşılığı design system tarafında belirlenir.
  */
 enum class SnackbarVariant {
     Accent,
@@ -35,3 +36,32 @@ enum class SnackbarVariant {
     Error,
     AccentALT,
 }
+
+/**
+ * Mesajın senaryo başlığı; glif karşılığı design system tarafında belirlenir.
+ * Renk her zaman varyanttan gelir, ikon yalnız "ne oldu"yu söyler.
+ */
+enum class SnackbarIcon {
+    Success,
+    Error,
+    Warning,
+    Info,
+    Celebration,
+    Person,
+    Offline,
+    Online,
+    Pending,
+    Match,
+    Photo,
+    Syncing,
+}
+
+val SnackbarVariant.defaultIcon: SnackbarIcon
+    get() = when (this) {
+        SnackbarVariant.Accent -> SnackbarIcon.Celebration
+        SnackbarVariant.Success -> SnackbarIcon.Success
+        SnackbarVariant.Info -> SnackbarIcon.Info
+        SnackbarVariant.Warn -> SnackbarIcon.Warning
+        SnackbarVariant.Error -> SnackbarIcon.Error
+        SnackbarVariant.AccentALT -> SnackbarIcon.Person
+    }

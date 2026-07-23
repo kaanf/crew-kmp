@@ -115,7 +115,8 @@ fun WhoWonPhase(
         WhoWonRow(
             optionUi = GameResultOptionUi(
                 title = stringResource(Res.string.match_phase_who_won_won_title),
-                pointText = stringResource(Res.string.match_points_format, 10),
+                // Backend'deki WIN_BONUS_POINTS ile aynı: kazanan her maçta sabit 5 bonus alır.
+                pointText = stringResource(Res.string.match_points_format, 5),
                 description = stringResource(
                     Res.string.match_phase_who_won_won_description,
                     opponentName,

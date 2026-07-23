@@ -3,10 +3,17 @@
     <string name="match_you_avatar_label">Y</string>
     <string name="match_unknown_avatar_label">?</string>
     <string name="match_points_format">+%1$d PTS</string>
+    <string name="match_points_signed_format">%1$d PTS</string>
 
     <string name="match_onboarding_info_text">&#10024;\t\tNew here? See how a night plays out</string>
 
-    <string name="match_task_card_accept_label">ACCEPT</string>
+    <string name="how_to_play_step_1_title">Find someone.\nScan them.</string>
+    <string name="how_to_play_step_1_subtitle">Walk up to a player you don't know. Open your match QR, or scan theirs. The app pairs the two of you.</string>
+    <string name="how_to_play_step_2_title">Real-world\nRock paper scissors.</string>
+    <string name="how_to_play_step_2_subtitle">Throw on three, in real life. Winner gets +3 pts and picks a task. Loser does it.</string>
+    <string name="how_to_play_step_3_title">Do the task.\nThey confirm.</string>
+    <string name="how_to_play_step_3_subtitle">Tasks are short &#8212; say hi to a stranger, swap a story. The other player confirms you actually did it.</string>
+
     <string name="match_task_card_reject_label">REJECT</string>
     <string name="match_task_card_variant_social">SOCIAL</string>
     <string name="match_task_card_variant_bold">BOLD</string>
@@ -14,11 +21,10 @@
     <string name="match_task_card_variant_flirty">FLIRTY</string>
     <string name="match_task_card_variant_team">TEAM</string>
     <string name="match_task_card_variant_funny">FUNNY</string>
+    <string name="match_task_card_variant_final">FINAL ROUND</string>
 
-    <string name="match_phase_qr_home_title_prefix">Your pass is </string>
-    <string name="match_phase_qr_home_title_highlight">live</string>
-    <string name="match_phase_qr_home_description">Flash your code at a stranger, throw hands, and bank points before the lights come up.</string>
-    <string name="match_phase_qr_home_scan_action">Scan Someone Instead</string>
+    <string name="match_phase_qr_home_description">Walk up to someone. Ask if they want to play.\nLet them scan you.</string>
+    <string name="match_phase_qr_home_scan_action">Or Scan Them Instead</string>
     <string name="match_phase_lost_throw_icon">&#x1F525;</string>
     <string name="match_phase_lost_throw_title">Lost the throw? Still worth it.</string>
     <string name="match_phase_lost_throw_description">You bank points just for playing &#8212; win or lose. Keep the night moving.</string>
@@ -63,9 +69,10 @@
     <string name="match_phase_loser_waits_status">Waiting for response</string>
 
     <string name="match_phase_loser_accepts_eyebrow">%1$s PICKED THIS FOR YOU</string>
-    <string name="match_phase_loser_accepts_title">Up to you.</string>
-    <string name="match_phase_loser_accepts_reject_action">Reject</string>
-    <string name="match_phase_loser_accepts_accept_action">Accept</string>
+    <string name="match_phase_loser_accepts_title">Read it. Don't start yet.</string>
+    <string name="match_phase_loser_accepts_subtitle">%1$s watches and confirms when you\'re done. Anything you do before accepting doesn\'t count.</string>
+    <string name="match_phase_loser_accepts_reject_action">Request another task · %1$d PTS</string>
+    <string name="match_phase_loser_accepts_accept_action">Accept and start</string>
     <string name="match_phase_loser_accepts_loading">Starting...</string>
 
     <string name="match_phase_loser_active_title">%1$s is watching.</string>
@@ -100,22 +107,85 @@
     <string name="match_scoreboard_detail_task_not_done_subtitle">No points earned</string>
 
     <string name="match_connection_lost_title">Connection lost</string>
-    <string name="match_connection_lost_description">You\'ve been disconnected from the match. Please rejoin.</string>
+    <string name="match_connection_lost_description">You've been disconnected from the match. Please rejoin.</string>
+    <string name="match_reconnecting_title">Weak connection</string>
+    <string name="match_reconnecting_description">Reconnecting to the live match…</string>
+    <string name="match_opponent_disconnected_title">Opponent disconnected</string>
+    <string name="match_opponent_disconnected_description">They have a minute to reconnect — hang tight.</string>
+    <string name="match_opponent_reconnected_title">Opponent is back</string>
+    <string name="match_opponent_reconnected_description">Back in sync — game on.</string>
+    <string name="match_points_earned_title">+%1$d pts</string>
+    <string name="match_points_earned_description">Added to your score.</string>
+    <string name="match_task_rejected_points_title">%1$d pts</string>
+    <string name="match_task_rejected_points_description">Deducted for rejecting the task.</string>
+    <string name="match_task_reject_confirm_title">Reject this task?</string>
+    <string name="match_task_reject_confirm_subtitle">You'll lose %1$d pts — your opponent picks another task.</string>
+    <string name="match_task_reject_confirm_stay">Keep the task</string>
+    <string name="match_task_reject_confirm_reject">Reject anyway</string>
+
+    <string name="phase_bold_started_title">Bold round has begun</string>
+    <string name="phase_bold_started_description">Braver challenges just entered the deck.</string>
+    <string name="phase_final_started_title">Final round!</string>
+    <string name="phase_final_started_description">Last stretch — the boldest tasks are in play.</string>
 
     <string name="match_invite_declined_title">Invite declined</string>
-    <string name="match_invite_declined_description">Your opponent didn\'t accept the match.</string>
+    <string name="match_invite_declined_description">Your opponent didn't accept the match.</string>
     <string name="match_invite_expired_title">Invite expired</string>
     <string name="match_invite_expired_description">The match invite timed out.</string>
-    <string name="match_invite_failed_title">Couldn\'t send invite</string>
+    <string name="match_invite_failed_title">Couldn't send invite</string>
     <string name="match_invite_failed_description">Try scanning again.</string>
 
-    <string name="leaderboard_top_bar_title">Tonight</string>
+    <string name="leaderboard_top_bar_title">Leaderboard</string>
     <string name="leaderboard_eyebrow">FINAL</string>
-    <string name="leaderboard_title_prefix">That\'s a </string>
+    <string name="leaderboard_title_prefix">That's a </string>
     <string name="leaderboard_title_highlight">wrap.</string>
     <string name="leaderboard_full_board_label">FULL BOARD</string>
     <string name="leaderboard_players_count_format">%1$d players</string>
-    <string name="leaderboard_points_format">%1$d pts</string>
+    <string name="leaderboard_points_format">%1$d Points</string>
     <string name="leaderboard_you_label">YOU</string>
-    <string name="leaderboard_go_home_action">Back to home</string>
+
+    <string name="game_tab_leaderboard">Leaderboard</string>
+    <string name="game_tab_play">Play</string>
+    <string name="game_tab_history">History</string>
+
+    <string name="memories_roll_title">Tonight's roll</string>
+    <string name="memories_roll_subtitle">Opens at the end</string>
+    <string name="memories_roll_shots_label">shots</string>
+    <string name="memories_sheet_seal_label">Sealed roll</string>
+    <string name="memories_sheet_title">Snap the night</string>
+    <string name="memories_sheet_description">Straight from the camera, no gallery. Everyone shares one roll; it develops when the night ends.</string>
+    <string name="memories_snap_action">Snap a memory</string>
+    <string name="memories_limit_reached">You've reached the limit</string>
+    <string name="memories_snap_uploading">Adding to the roll…</string>
+    <string name="memories_your_shots_label">YOUR SHOTS</string>
+    <string name="memories_delete_confirm_title">Delete?</string>
+    <string name="memories_delete_keep">Keep</string>
+    <string name="memories_delete_action">Delete</string>
+    <string name="memories_reveal_card_title">The roll developed</string>
+    <string name="memories_reveal_card_subtitle_format">%1$d sealed memories from tonight. Now unlocked!</string>
+    <string name="memories_reveal_eyebrow">The roll developed</string>
+    <string name="memories_reveal_title">Tonight, unsealed</string>
+    <string name="memories_reveal_subtitle_format">%1$d memories from tonight. Tap any shot to see it full-screen.</string>
+    <string name="memories_you_badge">YOU</string>
+    <string name="memories_shared_by_you">Shared by you</string>
+    <string name="memories_shared_by_format">Shared by %1$s</string>
+
+    <string name="quests_top_bar_title">Quests</string>
+    <string name="quests_eyebrow">TONIGHT'S QUESTS</string>
+    <string name="quests_title_prefix">Earn </string>
+    <string name="quests_title_highlight">bonus points</string>
+    <string name="quests_reward_format">+%1$d</string>
+    <string name="quests_progress_format">%1$d of %2$d done</string>
+    <string name="quests_completed_format">Completed · +%1$d Points</string>
+    <string name="quests_claim_format">Claim +%1$d</string>
+    <string name="quests_claimed_label">Claimed</string>
+
+    <string name="history_top_bar_title">Your night</string>
+    <string name="history_empty_title">Nothing logged yet</string>
+    <string name="history_empty_description">Your matches and tasks will show up here as you play.</string>
+    <string name="history_match_log_label">MATCH LOG</string>
+    <string name="history_kind_won">Match won</string>
+    <string name="history_kind_lost">Match lost</string>
+    <string name="history_kind_opponent_left">Opponent left</string>
+    <string name="history_kind_you_left">You left the match</string>
 </resources>

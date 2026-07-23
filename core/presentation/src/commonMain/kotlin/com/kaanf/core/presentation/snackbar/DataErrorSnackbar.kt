@@ -27,9 +27,11 @@ import org.jetbrains.compose.resources.StringResource
  * DataError.Remote'u kullanıcıya gösterilebilir bir snackbar mesajına çevirir. Networking katmanı
  * yalnız HTTP status taşıdığı için ayrımı buradan yaparız. [title] override'ı, ekrana özel bir
  * başlık gerektiğinde (ör. "Couldn't load events") kullanılır; açıklama ve varyant paylaşılır.
+ * [icon] override'ı, ekrana özel bir senaryo ikonu gerektiğinde (ör. foto yükleme) kullanılır.
  */
 fun DataError.Remote.toSnackbarMessage(
     title: UIText = UIText.Resource(defaultTitleRes()),
+    icon: SnackbarIcon? = null,
 ): SnackbarMessage {
     if (this is DataError.Remote.Business) {
         val ui = apiErrorUi(code)
@@ -38,6 +40,7 @@ fun DataError.Remote.toSnackbarMessage(
                 title = UIText.Resource(ui.title),
                 description = UIText.Resource(ui.description),
                 variant = ui.variant,
+                icon = icon ?: ui.variant.defaultIcon,
             )
         } else {
             // Bilinmeyen code: en azından backend'in mesajını göster (boşsa generic'e düş).
@@ -49,14 +52,22 @@ fun DataError.Remote.toSnackbarMessage(
                     UIText.Resource(Res.string.error_unknown)
                 },
                 variant = SnackbarVariant.Error,
+                icon = icon ?: SnackbarVariant.Error.defaultIcon,
             )
         }
     }
+    val variant = variant()
     return SnackbarMessage(
         title = title,
         description = UIText.Resource(descriptionRes()),
-        variant = variant(),
+        variant = variant,
+        icon = icon ?: defaultIcon(variant),
     )
+}
+
+private fun DataError.Remote.defaultIcon(variant: SnackbarVariant): SnackbarIcon = when (this) {
+    DataError.Remote.NO_INTERNET -> SnackbarIcon.Offline
+    else -> variant.defaultIcon
 }
 
 private fun DataError.Remote.defaultTitleRes(): StringResource = when (this) {

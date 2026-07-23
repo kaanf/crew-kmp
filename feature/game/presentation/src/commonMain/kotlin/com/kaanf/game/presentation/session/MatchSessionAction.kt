@@ -10,6 +10,10 @@ sealed interface MatchSessionAction {
     data object OnEnterGameClick : MatchSessionAction
     data object OnLobbyExitConfirmed : MatchSessionAction
     data object OnScanClicked : MatchSessionAction
+
+    // Ekran yeniden compose olduğunda stats'ı tazeler: quest claim / scan gibi
+    // başka destination'larda artan skor VM hayatta kaldığı için bayat kalıyordu.
+    data object OnStatsRefreshRequested : MatchSessionAction
     data class OnScanResult(val scannedMatchQrToken: String) : MatchSessionAction
 
     data object OnInviteAccepted : MatchSessionAction

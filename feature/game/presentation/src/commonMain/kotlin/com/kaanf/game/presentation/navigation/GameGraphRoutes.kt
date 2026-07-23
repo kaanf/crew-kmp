@@ -19,7 +19,6 @@ sealed interface GameGraphRoutes {
     @Serializable
     data class ScanOpponent(val eventId: String) : GameGraphRoutes
 
-    // Graph dışında yaşar: leaderboard'a geçerken oyun graph'ı (soketiyle birlikte) pop edilir.
     @Serializable
-    data class Leaderboard(val eventId: String) : GameGraphRoutes
+    data class Quests(val eventId: String) : GameGraphRoutes
 }

@@ -8,5 +8,7 @@
 	<string>Crew uses your camera so you can take a profile photo.</string>
 	<key>CFBundleURLTypes</key>
 	<array/>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 </dict>
 </plist>

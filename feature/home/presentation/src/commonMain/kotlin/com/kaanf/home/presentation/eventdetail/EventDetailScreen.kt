@@ -59,7 +59,6 @@ import crew.feature.home.presentation.generated.resources.event_detail_ended_cta
 import crew.feature.home.presentation.generated.resources.event_detail_load_error_description
 import crew.feature.home.presentation.generated.resources.event_detail_load_error_title
 import crew.feature.home.presentation.generated.resources.event_detail_my_ticket_cta
-import crew.feature.home.presentation.generated.resources.event_detail_started_cta
 import crew.feature.home.presentation.generated.resources.event_detail_ticket_cta
 import crew.feature.home.presentation.generated.resources.ticket_qr_retry_action
 import org.jetbrains.compose.resources.stringResource
@@ -220,15 +219,12 @@ private fun EventDetailContent(
             }
         }
 
-        // Bilet satışı yalnız oyun başlayana kadar açık (backend TICKETABLE_PHASES ile aynı kural).
-        // Bileti olan kullanıcı Gameplay sırasında QR'ına hâlâ erişebilmeli; kilit yalnız
-        // biletsizler (başladı) ve herkes (bitti) için geçerli.
-        val ctaLocked = event.isEnded || (event.isStarted && !event.hasMyTicket)
+        // Bilet satışı Gameplay boyunca da açık (backend TICKETABLE_PHASES ile aynı kural);
+        // kilit yalnız etkinlik bittiğinde.
+        val ctaLocked = event.isEnded
         BaseButton(
             text = when {
                 event.isEnded -> stringResource(Res.string.event_detail_ended_cta)
-                event.isStarted && !event.hasMyTicket ->
-                    stringResource(Res.string.event_detail_started_cta)
                 event.hasMyTicket -> stringResource(Res.string.event_detail_my_ticket_cta)
                 event.isFree -> stringResource(Res.string.event_detail_free_ticket_cta)
                 else -> stringResource(Res.string.event_detail_ticket_cta, event.formattedPrice)

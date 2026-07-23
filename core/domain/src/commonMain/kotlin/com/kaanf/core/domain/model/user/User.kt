@@ -4,7 +4,6 @@ data class User(
     val id: String,
     val email: String,
     val fullName: String,
-    val dateOfBirth: String,
     val profilePictureUrl: String? = null,
     val gender: String,
     val role: String,

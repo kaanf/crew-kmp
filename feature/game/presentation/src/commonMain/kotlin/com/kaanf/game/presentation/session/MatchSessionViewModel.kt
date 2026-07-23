@@ -14,6 +14,7 @@ import com.kaanf.core.domain.repository.UserRepository
 import com.kaanf.core.presentation.model.LobbyMember
 import com.kaanf.core.presentation.model.UserAvatar
 import com.kaanf.core.presentation.snackbar.SnackbarController
+import com.kaanf.core.presentation.snackbar.SnackbarIcon
 import com.kaanf.core.presentation.snackbar.SnackbarMessage
 import com.kaanf.core.presentation.snackbar.SnackbarVariant
 import com.kaanf.core.presentation.snackbar.toSnackbarMessage
@@ -49,10 +50,24 @@ import crew.feature.game.presentation.generated.resources.match_ended_title
 import crew.feature.game.presentation.generated.resources.match_connection_lost_title
 import crew.feature.game.presentation.generated.resources.match_invite_declined_description
 import crew.feature.game.presentation.generated.resources.match_invite_declined_title
+import crew.feature.game.presentation.generated.resources.match_opponent_disconnected_description
+import crew.feature.game.presentation.generated.resources.match_opponent_disconnected_title
+import crew.feature.game.presentation.generated.resources.match_opponent_reconnected_description
+import crew.feature.game.presentation.generated.resources.match_opponent_reconnected_title
+import crew.feature.game.presentation.generated.resources.match_points_earned_description
+import crew.feature.game.presentation.generated.resources.match_points_earned_title
+import crew.feature.game.presentation.generated.resources.match_task_rejected_points_description
+import crew.feature.game.presentation.generated.resources.match_task_rejected_points_title
+import crew.feature.game.presentation.generated.resources.match_reconnecting_description
+import crew.feature.game.presentation.generated.resources.match_reconnecting_title
 import crew.feature.game.presentation.generated.resources.match_invite_expired_description
 import crew.feature.game.presentation.generated.resources.match_invite_expired_title
 import crew.feature.game.presentation.generated.resources.match_invite_failed_description
 import crew.feature.game.presentation.generated.resources.match_invite_failed_title
+import crew.feature.game.presentation.generated.resources.phase_bold_started_description
+import crew.feature.game.presentation.generated.resources.phase_bold_started_title
+import crew.feature.game.presentation.generated.resources.phase_final_started_description
+import crew.feature.game.presentation.generated.resources.phase_final_started_title
 
 class MatchSessionViewModel(
     private val eventConnectionClient: EventConnectionClient,
@@ -119,6 +134,13 @@ class MatchSessionViewModel(
                 ) {
                     snackbarController.show(connectionLostSnackbar())
                 }
+
+                // Banner yerine snackbar: yalnız bağlıyken kopup retry'a düşünce bir kez göster.
+                val isRetrying = connectionState is GameConnectionState.Reconnecting ||
+                    (connectionState is GameConnectionState.Disconnected && !connectionState.isError)
+                if (isRetrying && previous is GameConnectionState.Connected) {
+                    snackbarController.show(reconnectingSnackbar())
+                }
             }
             .launchIn(viewModelScope)
     }
@@ -127,36 +149,92 @@ class MatchSessionViewModel(
         title = UIText.Resource(Res.string.match_connection_lost_title),
         description = UIText.Resource(Res.string.match_connection_lost_description),
         variant = SnackbarVariant.Error,
+        icon = SnackbarIcon.Offline,
     )
 
     private fun inviteDeclinedSnackbar() = SnackbarMessage(
         title = UIText.Resource(Res.string.match_invite_declined_title),
         description = UIText.Resource(Res.string.match_invite_declined_description),
         variant = SnackbarVariant.Warn,
+        icon = SnackbarIcon.Person,
     )
 
     private fun inviteExpiredSnackbar() = SnackbarMessage(
         title = UIText.Resource(Res.string.match_invite_expired_title),
         description = UIText.Resource(Res.string.match_invite_expired_description),
         variant = SnackbarVariant.Info,
+        icon = SnackbarIcon.Pending,
     )
 
     private fun matchDisputedSnackbar() = SnackbarMessage(
         title = UIText.Resource(Res.string.match_disputed_title),
         description = UIText.Resource(Res.string.match_disputed_description),
         variant = SnackbarVariant.Warn,
+        icon = SnackbarIcon.Match,
     )
 
     private fun matchEndedSnackbar() = SnackbarMessage(
         title = UIText.Resource(Res.string.match_ended_title),
         description = UIText.Resource(Res.string.match_ended_description),
         variant = SnackbarVariant.Info,
+        icon = SnackbarIcon.Match,
     )
 
     private fun inviteFailedSnackbar() = SnackbarMessage(
         title = UIText.Resource(Res.string.match_invite_failed_title),
         description = UIText.Resource(Res.string.match_invite_failed_description),
         variant = SnackbarVariant.Error,
+        icon = SnackbarIcon.Person,
+    )
+
+    private fun opponentReconnectedSnackbar() = SnackbarMessage(
+        title = UIText.Resource(Res.string.match_opponent_reconnected_title),
+        description = UIText.Resource(Res.string.match_opponent_reconnected_description),
+        variant = SnackbarVariant.Success,
+        icon = SnackbarIcon.Online,
+    )
+
+    private fun opponentDisconnectedSnackbar() = SnackbarMessage(
+        title = UIText.Resource(Res.string.match_opponent_disconnected_title),
+        description = UIText.Resource(Res.string.match_opponent_disconnected_description),
+        variant = SnackbarVariant.Warn,
+        icon = SnackbarIcon.Offline,
+    )
+
+    private fun reconnectingSnackbar() = SnackbarMessage(
+        title = UIText.Resource(Res.string.match_reconnecting_title),
+        description = UIText.Resource(Res.string.match_reconnecting_description),
+        variant = SnackbarVariant.Warn,
+        icon = SnackbarIcon.Syncing,
+    )
+
+    private fun boldPhaseSnackbar() = SnackbarMessage(
+        title = UIText.Resource(Res.string.phase_bold_started_title),
+        description = UIText.Resource(Res.string.phase_bold_started_description),
+        variant = SnackbarVariant.Success,
+        icon = SnackbarIcon.Celebration,
+    )
+
+    private fun finalPhaseSnackbar() = SnackbarMessage(
+        title = UIText.Resource(Res.string.phase_final_started_title),
+        description = UIText.Resource(Res.string.phase_final_started_description),
+        variant = SnackbarVariant.Success,
+        icon = SnackbarIcon.Celebration,
+    )
+
+    private fun taskRejectedSnackbar(points: Int) = SnackbarMessage(
+        // rejectPoints işaretli gelir (örn. -5), format +'sızdır.
+        title = UIText.Resource(Res.string.match_task_rejected_points_title, arrayOf(points)),
+        description = UIText.Resource(Res.string.match_task_rejected_points_description),
+        variant = SnackbarVariant.Warn,
+        icon = SnackbarIcon.Warning,
+    )
+
+    private fun pointsEarnedSnackbar(points: Int) = SnackbarMessage(
+        title = UIText.Resource(Res.string.match_points_earned_title, arrayOf(points)),
+        description = UIText.Resource(Res.string.match_points_earned_description),
+        variant = SnackbarVariant.Accent,
+        icon = SnackbarIcon.Celebration,
     )
 
     private fun reconcileFromSnapshot() {
@@ -189,6 +267,7 @@ class MatchSessionViewModel(
                 phase = phase,
                 currentUserId = it.currentUserId ?: snapshot.me.userId,
                 matchId = snapshot.matchId,
+                opponentUserId = snapshot.opponent.userId,
                 opponentFullName = snapshot.opponent.fullName,
                 opponentProfilePictureUrl =
                     it.opponentProfilePictureUrl?.takeIf { _ -> it.matchId == snapshot.matchId },
@@ -290,6 +369,7 @@ class MatchSessionViewModel(
                     )
                 }
                 scheduleGameEnd(message.gameEndsAt)
+                schedulePhaseSnackbars(message)
             }
 
             is GameSocketMessage.LobbyUserJoined -> {
@@ -300,12 +380,26 @@ class MatchSessionViewModel(
                     }
                     state.copy(lobbyMembers = members, lobbyTotalCount = message.totalCount)
                 }
+                // Kopan rakip forfeit süresi dolmadan döndüyse haber ver. JOINED yalnız
+                // LEFT yayınlandıktan sonraki dönüşte gelir; kısa kopuşlar sessiz kalır.
+                val current = _state.value
+                val isMidMatch = current.phase != MatchPhase.Idle && current.phase !is Scoreboard
+                if (isMidMatch && message.userId == current.opponentUserId) {
+                    snackbarController.show(opponentReconnectedSnackbar())
+                }
             }
 
             is GameSocketMessage.LobbyUserLeft -> {
                 _state.update { state ->
                     val members = state.lobbyMembers.filter { it.id != message.userId }
                     state.copy(lobbyMembers = members, lobbyTotalCount = message.totalCount)
+                }
+                // Maç ortasında kopan kişi rakibimse haber ver; forfeit zamanlayıcısı
+                // (backend, ~60 sn) dolarsa MATCH_CANCELLED zaten scoreboard'a düşürür.
+                val current = _state.value
+                val isMidMatch = current.phase != MatchPhase.Idle && current.phase !is Scoreboard
+                if (isMidMatch && message.userId == current.opponentUserId) {
+                    snackbarController.show(opponentDisconnectedSnackbar())
                 }
             }
 
@@ -329,6 +423,7 @@ class MatchSessionViewModel(
                         outgoingOpponentName = null,
                         outgoingOpponentPhotoUrl = null,
                         matchId = message.matchId,
+                        opponentUserId = message.opponentUserId,
                         opponentFullName = message.opponentFullName,
                         opponentProfilePictureUrl = opponentPhotoUrl,
                         phase = RpsReady(),
@@ -406,6 +501,7 @@ class MatchSessionViewModel(
                                 id = message.taskId,
                                 title = message.taskTitle,
                                 points = message.taskPoints,
+                                rejectPoints = message.taskRejectPoints,
                                 categories = message.taskCategories,
                             ),
                         ),
@@ -414,9 +510,19 @@ class MatchSessionViewModel(
             }
 
             is GameSocketMessage.TaskRejected -> {
+                val rejectedTotal = message.rejectedByTotalScore
+                if (_state.value.currentUserId == message.rejectedByUserId && message.rejectPoints != 0) {
+                    snackbarController.show(taskRejectedSnackbar(message.rejectPoints))
+                }
                 _state.update { state ->
-                    val phase = state.phase as? WinnerPicks ?: return@update state
-                    state.copy(phase = phase.copy(isOffering = false, selectedTaskId = null))
+                    // Reddeden tarafsak cezalı güncel skoru işle; kazanan tarafsak seçim ekranını sıfırla.
+                    val withScore = if (state.currentUserId == message.rejectedByUserId && rejectedTotal != null) {
+                        state.copy(currentUserScore = rejectedTotal)
+                    } else {
+                        state
+                    }
+                    val phase = withScore.phase as? WinnerPicks ?: return@update withScore
+                    withScore.copy(phase = phase.copy(isOffering = false, selectedTaskId = null))
                 }
             }
 
@@ -435,6 +541,7 @@ class MatchSessionViewModel(
             }
 
             is GameSocketMessage.TaskFinished -> {
+                val previousScore = _state.value.currentUserScore
                 _state.update { state ->
                     val myId = state.currentUserId
                     val iWon = myId != null && myId == message.winnerUserId
@@ -458,6 +565,10 @@ class MatchSessionViewModel(
                         },
                     )
                 }
+                val earnedPoints = _state.value.currentUserScore - previousScore
+                if (earnedPoints > 0) {
+                    snackbarController.show(pointsEarnedSnackbar(earnedPoints))
+                }
                 loadScoreboard()
             }
 
@@ -479,11 +590,20 @@ class MatchSessionViewModel(
             }
 
             is GameSocketMessage.MatchCancelled -> {
-                // Yalnızca ayrılmayan tarafa gelir: rakip forfeit etti, sunucu beni kazanan sayıp
-                // scoreboard'u (winner=5, loser=0) doldurdu. Puan tablosunu "rakip maçtan ayrıldı"
-                // (forfeit=true → kazanan tarafı için ayrıldı altyazısı) olarak göster.
-                _state.update {
-                    it.copy(matchId = message.matchId, phase = Scoreboard(completed = false, forfeit = true))
+                // Yalnızca ayrılmayan tarafa gelir: rakip forfeit etti (ayrıldı ya da bağlantısı
+                // kalıcı koptu), sunucu beni kazanan sayıp scoreboard'u (winner=5, loser=0)
+                // doldurdu. Ayrılanın puanına dokunulmaz; kazanan bonusu payload'dan işlenir.
+                val winnerTotal = message.winnerTotalScore
+                _state.update { state ->
+                    val withScore = if (state.currentUserId == message.winnerUserId && winnerTotal != null) {
+                        state.copy(currentUserScore = winnerTotal)
+                    } else {
+                        state
+                    }
+                    withScore.copy(matchId = message.matchId, phase = Scoreboard(completed = false, forfeit = true))
+                }
+                if (_state.value.currentUserId == message.winnerUserId && message.winnerPointsAwarded > 0) {
+                    snackbarController.show(pointsEarnedSnackbar(message.winnerPointsAwarded))
                 }
                 loadScoreboard()
             }
@@ -494,11 +614,13 @@ class MatchSessionViewModel(
     }
 
     private var gameEndJob: Job? = null
+    private var phaseSnackbarJob: Job? = null
 
     /**
      * Backend oyun bitişi için push göndermez (ServerMessageType'ta GAME_ENDED yok);
      * bitiş CONNECTED'taki gameEndsAt'e kurulan client zamanlayıcısıyla tespit edilir.
      * Her (yeniden) bağlantıda tazelenir; süre geçmişse anında tetiklenir.
+     * Süre dolunca oyun ekranı kilitlenir; kullanıcı leaderboard tab'ına düşer.
      */
     private fun scheduleGameEnd(gameEndsAt: String) {
         val endEpochMillis = runCatching {
@@ -508,9 +630,47 @@ class MatchSessionViewModel(
         gameEndJob = viewModelScope.launch {
             val remaining = endEpochMillis - Clock.System.now().toEpochMilliseconds()
             delay(remaining.coerceAtLeast(0L))
-            eventChannel.send(MatchSessionEvent.NavigateToLeaderboard)
+            _state.update {
+                it.copy(
+                    isGameEnded = true,
+                    phase = MatchPhase.Idle,
+                    showMatchRequestSheet = false,
+                    incomingInvite = null,
+                )
+            }
         }
     }
+
+    /**
+     * Phase geçiş snackbar'ları sunucudan push beklemez: sınırlar + serverNow
+     * CONNECTED'ta gelir, geçiş anı cihazda offset düzeltilmiş saatle hesaplanır.
+     * Geçmiş sınırlar atlanır; reconnect'te eski fazlar tekrar duyurulmaz.
+     */
+    private fun schedulePhaseSnackbars(message: GameSocketMessage.Connected) {
+        val boldAtMillis = parseEpochMillisOrNull(message.boldStartsAt) ?: return
+        val finalAtMillis = parseEpochMillisOrNull(message.finalStartsAt) ?: return
+        val clockOffsetMillis = parseEpochMillisOrNull(message.serverNow)
+            ?.let { it - Clock.System.now().toEpochMilliseconds() }
+            ?: 0L
+
+        phaseSnackbarJob?.cancel()
+        phaseSnackbarJob = viewModelScope.launch {
+            listOf(
+                boldAtMillis to ::boldPhaseSnackbar,
+                finalAtMillis to ::finalPhaseSnackbar,
+            ).forEach { (startsAtMillis, snackbar) ->
+                val serverNowMillis = Clock.System.now().toEpochMilliseconds() + clockOffsetMillis
+                val remaining = startsAtMillis - serverNowMillis
+                if (remaining > 0) {
+                    delay(remaining)
+                    snackbarController.show(snackbar())
+                }
+            }
+        }
+    }
+
+    private fun parseEpochMillisOrNull(instant: String?): Long? =
+        instant?.let { runCatching { Instant.parse(it).toEpochMilliseconds() }.getOrNull() }
 
     // endregion
 
@@ -533,6 +693,7 @@ class MatchSessionViewModel(
                 sendEvent(MatchSessionEvent.NavigateBack)
             }
             MatchSessionAction.OnScanClicked -> sendEvent(MatchSessionEvent.NavigateToScanOpponent)
+            MatchSessionAction.OnStatsRefreshRequested -> loadMyParticipant()
             is MatchSessionAction.OnScanResult -> onScanResult(action.scannedMatchQrToken)
             MatchSessionAction.OnInviteAccepted -> respondToInvite { inviteId ->
                 matchRepository.acceptInvite(eventId = eventId, inviteId = inviteId)
@@ -675,7 +836,7 @@ class MatchSessionViewModel(
 
     private fun loadTasks() {
         viewModelScope.launch {
-            matchRepository.getTasks()
+            matchRepository.getTasks(eventId = eventId)
                 .onSuccess { tasks ->
                     _state.update { state ->
                         val phase = state.phase as? WinnerPicks ?: return@update state

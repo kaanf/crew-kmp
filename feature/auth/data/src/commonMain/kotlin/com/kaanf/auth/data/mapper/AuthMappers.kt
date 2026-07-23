@@ -10,9 +10,8 @@ fun RegisterParams.toDto(): RegisterRequest =
         email = email,
         password = password,
         fullName = fullName,
-        dateOfBirth = dateOfBirth,
         profilePictureUrl = profilePictureUrl,
-        gender = gender.toDto(),
+        gender = gender?.toDto(),
     )
 
 private fun Gender.toDto(): GenderDto =

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -21,12 +22,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kaanf.core.designsystem.component.avatar.EditableProfilePhoto
 import com.kaanf.core.designsystem.component.avatar.ProfilePhoto
-import com.kaanf.core.designsystem.component.button.BaseMiniButton
 import com.kaanf.core.designsystem.component.layout.AppScaffold
 import com.kaanf.core.designsystem.component.layout.AppTopBar
 import com.kaanf.core.designsystem.component.mediapicker.CropImageContent
 import com.kaanf.core.designsystem.component.mediapicker.ImageSourceBottomSheet
-import com.kaanf.core.designsystem.component.sheet.SelectionBottomSheet
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.CrewTheme
 import com.kaanf.core.domain.model.settings.AppLanguage
@@ -34,12 +33,12 @@ import com.kaanf.core.presentation.model.AppTopBarState
 import com.kaanf.core.presentation.util.mediapicker.PickedImageData
 import com.kaanf.core.presentation.util.mediapicker.rememberCameraLauncher
 import com.kaanf.core.presentation.util.mediapicker.rememberImagePickerLauncher
+import com.kaanf.home.presentation.profile.component.DeleteAccountDialog
 import com.kaanf.home.presentation.profile.component.EditNameDialog
 import com.kaanf.home.presentation.profile.component.ProfileDetailsCard
 import crew.feature.home.presentation.generated.resources.Res
 import crew.feature.home.presentation.generated.resources.profile_language_czech
 import crew.feature.home.presentation.generated.resources.profile_language_english
-import crew.feature.home.presentation.generated.resources.profile_language_sheet_title
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -55,7 +54,12 @@ fun ProfileRoot(
 
     var showSourceSheet by remember { mutableStateOf(false) }
     var showNameDialog by remember { mutableStateOf(false) }
-    var showLanguageSheet by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+
+    // Deletion is confirmed by the backend before this flips; leaving here wipes the home stack.
+    LaunchedEffect(state.accountDeleted) {
+        if (state.accountDeleted) onSignedOut()
+    }
 
     val onPicked = { picked: PickedImageData ->
         viewModel.onAction(ProfileAction.OnPhotoPicked(picked.bytes, picked.mimeType))
@@ -88,17 +92,11 @@ fun ProfileRoot(
         )
     }
 
-    if (showLanguageSheet) {
-        SelectionBottomSheet(
-            title = stringResource(Res.string.profile_language_sheet_title),
-            options = AppLanguage.entries,
-            selected = state.language,
-            labelOf = { stringResource(it.labelRes()) },
-            onSelect = { language ->
-                showLanguageSheet = false
-                viewModel.onAction(ProfileAction.OnLanguageSelected(language))
-            },
-            onDismiss = { showLanguageSheet = false },
+    if (showDeleteDialog) {
+        DeleteAccountDialog(
+            isDeleting = state.isDeletingAccount,
+            onConfirm = { viewModel.onAction(ProfileAction.OnDeleteAccountConfirm) },
+            onDismiss = { showDeleteDialog = false },
         )
     }
 
@@ -110,7 +108,7 @@ fun ProfileRoot(
             when (action) {
                 is ProfileAction.OnChangePhotoClick -> showSourceSheet = true
                 is ProfileAction.OnEditNameClick -> showNameDialog = true
-                is ProfileAction.OnLanguageClick -> showLanguageSheet = true
+                is ProfileAction.OnDeleteAccountClick -> showDeleteDialog = true
                 // Session is cleared NonCancellable in the VM; navigating here wipes the home stack.
                 is ProfileAction.OnSignOutClick -> onSignedOut()
                 else -> Unit
@@ -135,15 +133,24 @@ fun ProfileScreen(
         modifier = modifier,
         topBar = {
             AppTopBar(
-                state = AppTopBarState.Profile,
+                state = AppTopBarState.Profile(
+                    hasUnsavedChanges = state.hasUnsavedChanges,
+                    isSaving = state.isSaving,
+                ),
                 onBackClick = {
-                    if (state.isCropping) {
-                        onAction(ProfileAction.OnCropCancelled)
-                    } else {
-                        onBack()
+                    when {
+                        state.isCropping -> onAction(ProfileAction.OnCropCancelled)
+                        state.hasUnsavedChanges -> onAction(ProfileAction.OnCancelEdit)
+                        else -> onBack()
                     }
                 },
-                onRightClick = { onAction(ProfileAction.OnSignOutClick) },
+                onRightClick = {
+                    if (state.hasUnsavedChanges) {
+                        onAction(ProfileAction.OnSaveChanges)
+                    } else {
+                        onAction(ProfileAction.OnSignOutClick)
+                    }
+                },
             )
         },
     ) { innerPadding ->
@@ -168,22 +175,9 @@ fun ProfileScreen(
                     fullName = state.displayedName,
                     email = state.email,
                     gender = state.gender,
-                    dateOfBirth = state.dateOfBirth,
                     language = stringResource(state.language.labelRes()),
                     onEditName = { onAction(ProfileAction.OnEditNameClick) },
-                    onLanguageClick = { onAction(ProfileAction.OnLanguageClick) },
-                )
-            }
-
-            if (state.hasUnsavedChanges) {
-                BaseMiniButton(
-                    text = "Save your changes",
-                    onClick = { onAction(ProfileAction.OnSaveChanges) },
-                    filled = true,
-                    isLoading = state.isSaving,
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(bottom = 24.dp),
+                    onDeleteAccount = { onAction(ProfileAction.OnDeleteAccountClick) },
                 )
             }
 

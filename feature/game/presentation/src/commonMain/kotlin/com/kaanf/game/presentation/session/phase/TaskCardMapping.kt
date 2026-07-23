@@ -9,12 +9,13 @@ internal fun GameTask.toUiModel(): ChallengeCardUiModel = ChallengeCardUiModel(
     description = title,
     variant = categories.firstOrNull().toVariant(),
     points = points,
+    rejectPoints = rejectPoints,
 )
 
 internal fun TaskCategory?.toVariant(): ChallengeCardVariant = when (this) {
     TaskCategory.Icebreaker -> ChallengeCardVariant.Icebreaker
     TaskCategory.Social -> ChallengeCardVariant.Social
     TaskCategory.Bold -> ChallengeCardVariant.Bold
-    TaskCategory.FinalRound -> ChallengeCardVariant.Team
+    TaskCategory.FinalRound -> ChallengeCardVariant.FinalRound
     TaskCategory.Unknown, null -> ChallengeCardVariant.Social
 }

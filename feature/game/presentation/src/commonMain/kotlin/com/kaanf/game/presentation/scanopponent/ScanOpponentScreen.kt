@@ -37,6 +37,7 @@ import com.kaanf.core.presentation.model.AppTopBarState
 import com.kaanf.core.presentation.permission.Permission
 import com.kaanf.core.presentation.permission.PermissionState
 import com.kaanf.core.presentation.permission.rememberPermissionController
+import com.kaanf.game.presentation.scanopponent.component.QrCameraScanner
 import com.kaanf.game.presentation.scanopponent.component.overlay.ScannerOverlay
 import com.kaanf.game.presentation.component.sheet.GameRequestSheet
 import com.kaanf.game.presentation.session.MatchPhase
@@ -49,9 +50,6 @@ import crew.feature.game.presentation.generated.resources.match_camera_permissio
 import crew.feature.game.presentation.generated.resources.match_camera_permission_title
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
-import qrscanner.CameraLens
-import qrscanner.OverlayShape
-import qrscanner.QrScanner
 
 /**
  * Scan, container'ın ÜSTÜNE açılan ayrı bir destination'dır ama socket'e DOKUNMAZ:
@@ -161,22 +159,14 @@ fun ScanOpponentScreen(
     ) {
         when (cameraPermission) {
             PermissionState.GRANTED -> {
-                QrScanner(
+                QrCameraScanner(
                     modifier = Modifier.fillMaxSize(),
-                    flashlightOn = false,
-                    cameraLens = CameraLens.Back,
-                    openImagePicker = false,
-                    onCompletion = { result ->
+                    onResult = { result ->
                         if (!handled) {
                             handled = true
                             onAction(ScanOpponentAction.OnScanResult(scannedMatchQrToken = result))
                         }
                     },
-                    imagePickerHandler = {},
-                    onFailure = {},
-                    overlayShape = OverlayShape.Rectangle,
-                    overlayColor = Color.Transparent,
-                    overlayBorderColor = Color.Transparent,
                 )
 
                 ScannerOverlay()

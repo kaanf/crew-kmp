@@ -8,33 +8,32 @@ import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.consumeWindowInsets
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.backhandler.BackHandler
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kaanf.core.designsystem.component.dialog.BaseDialog
 import com.kaanf.core.designsystem.component.layout.AppScaffold
 import com.kaanf.core.designsystem.component.layout.AppTopBar
 import com.kaanf.core.designsystem.component.sheet.ContainerBottomSheet
-import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.presentation.model.AppTopBarState
 import com.kaanf.core.presentation.util.ObserveAsEvents
-import com.kaanf.game.domain.model.GameConnectionState
 import com.kaanf.game.presentation.component.sheet.GameResponseSheet
 import com.kaanf.game.presentation.gamelobby.component.dialog.LeaveEventDialog
-import com.kaanf.game.presentation.session.component.GameHomeTopBar
+import com.kaanf.game.presentation.history.HistoryTab
+import com.kaanf.game.presentation.leaderboard.LeaderboardTab
+import com.kaanf.game.presentation.session.component.GameBottomBar
+import com.kaanf.game.presentation.session.component.GameBottomTab
 import com.kaanf.game.presentation.session.component.LeaveMatchSheet
 import com.kaanf.game.presentation.session.phase.LoserAcceptsPhase
 import com.kaanf.game.presentation.session.phase.LoserActiveTaskPhase
@@ -44,6 +43,10 @@ import com.kaanf.game.presentation.session.phase.QrHomePhase
 import com.kaanf.game.presentation.session.phase.RpsReadyPhase
 import com.kaanf.game.presentation.session.phase.WhoWonPhase
 import com.kaanf.game.presentation.session.phase.WinnerConfirmsPhase
+import crew.feature.game.presentation.generated.resources.Res
+import crew.feature.game.presentation.generated.resources.history_top_bar_title
+import crew.feature.game.presentation.generated.resources.leaderboard_top_bar_title
+import org.jetbrains.compose.resources.stringResource
 import com.kaanf.game.presentation.session.phase.WinnerPicksPhase
 
 @Composable
@@ -51,7 +54,7 @@ fun MatchContainerRoot(
     viewModel: MatchSessionViewModel,
     onNavigateToScanOpponent: () -> Unit,
     onNavigateToDashboard: () -> Unit,
-    onNavigateToLeaderboard: () -> Unit,
+    onNavigateToQuests: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -59,16 +62,36 @@ fun MatchContainerRoot(
         when (event) {
             MatchSessionEvent.NavigateToScanOpponent -> onNavigateToScanOpponent()
             MatchSessionEvent.NavigateToDashboard -> onNavigateToDashboard()
-            MatchSessionEvent.NavigateToLeaderboard -> onNavigateToLeaderboard()
             // Lobi event'leri; bu ekranda tüketilmez.
             MatchSessionEvent.NavigateToGame,
             MatchSessionEvent.NavigateBack -> Unit
         }
     }
 
+    // Quests/scan gibi başka destination'lardan dönünce bu ekran yeniden compose olur;
+    // graph-scoped VM ölmediği için skor init'te bir kez çekildiği hâliyle kalıyordu.
+    LaunchedEffect(Unit) { viewModel.onAction(MatchSessionAction.OnStatsRefreshRequested) }
+
+    // Tab'lar saf UI durumu; navigasyon yok, hepsi bu container içinde yaşar.
+    var selectedTab by rememberSaveable { mutableStateOf(GameBottomTab.Play) }
+
+    // Etkinlik bitince Play kilitlenir, leaderboard açılır; maç aktivitesi başlarsa
+    // (davet sheet'i ya da faz Idle'dan çıktıysa) Play'e dön — davet/faz UI'ının
+    // tek sahibi Play içeriği.
+    LaunchedEffect(state.isGameEnded, state.phase, state.showMatchRequestSheet) {
+        selectedTab = when {
+            state.isGameEnded -> GameBottomTab.Leaderboard
+            state.phase != MatchPhase.Idle || state.showMatchRequestSheet -> GameBottomTab.Play
+            else -> selectedTab
+        }
+    }
+
     MatchContainerScreen(
         state = state,
+        selectedTab = selectedTab,
+        onTabSelected = { selectedTab = it },
         onAction = viewModel::onAction,
+        onQuestsClick = onNavigateToQuests,
     )
 }
 
@@ -76,11 +99,20 @@ fun MatchContainerRoot(
 @Composable
 fun MatchContainerScreen(
     state: MatchSessionState,
+    selectedTab: GameBottomTab,
+    onTabSelected: (GameBottomTab) -> Unit,
     onAction: (MatchSessionAction) -> Unit,
     modifier: Modifier = Modifier,
+    onQuestsClick: () -> Unit = {},
 ) {
+    val isIdle = state.phase == MatchPhase.Idle
+
     BackHandler(enabled = !state.showExitConfirmDialog) {
-        onAction(MatchSessionAction.OnBackClick)
+        if (isIdle && !state.isGameEnded && selectedTab != GameBottomTab.Play) {
+            onTabSelected(GameBottomTab.Play)
+        } else {
+            onAction(MatchSessionAction.OnBackClick)
+        }
     }
 
     if (state.showExitConfirmDialog) {
@@ -126,51 +158,76 @@ fun MatchContainerScreen(
 
     AppScaffold(
         topBar = {
-            if (state.phase == MatchPhase.Idle) {
-                GameHomeTopBar(
-                    userName = state.currentUserName.orEmpty(),
-                    photoUrl = state.currentUserPhotoUrl,
-                    score = state.currentUserScore,
-                    winCount = state.currentUserWinCount,
-                    matchesCount = state.currentUserMatchesCount,
-                    onCloseClick = { onAction(MatchSessionAction.OnBackClick) },
-                )
-            } else {
-                AppTopBar(
+            when {
+                !isIdle -> AppTopBar(
                     state = topBarStateFor(state.phase),
                     onBackClick = { onAction(MatchSessionAction.OnBackClick) },
+                )
+
+                selectedTab == GameBottomTab.Play -> AppTopBar(
+                    state = AppTopBarState.Game(showQuestsAction = true),
+                    onLeftClick = onQuestsClick,
+                    onRightClick = { onAction(MatchSessionAction.OnBackClick) },
+                )
+
+                else -> AppTopBar(
+                    state = AppTopBarState.Game(
+                        stringResource(
+                            if (selectedTab == GameBottomTab.Leaderboard) {
+                                Res.string.leaderboard_top_bar_title
+                            } else {
+                                Res.string.history_top_bar_title
+                            },
+                        ),
+                    ),
+                    onRightClick = { onAction(MatchSessionAction.OnBackClick) },
                 )
             }
         },
     ) { innerPadding ->
-        Column(
+        Box(
             modifier = modifier
                 .fillMaxSize()
                 .padding(innerPadding)
                 .consumeWindowInsets(innerPadding),
         ) {
-            ConnectionBanner(
-                connectionState = state.connectionState,
-                modifier = Modifier.fillMaxWidth(),
-            )
+            if (isIdle && selectedTab != GameBottomTab.Play) {
+                when (selectedTab) {
+                    GameBottomTab.Leaderboard -> LeaderboardTab(
+                        modifier = Modifier.fillMaxSize(),
+                    )
 
-            AnimatedContent(
-                targetState = state.phase,
-                contentKey = { it.key },
-                transitionSpec = {
-                    (slideInHorizontally { it / 4 } + fadeIn()) togetherWith
-                        (slideOutHorizontally { -it / 4 } + fadeOut()) using
-                        SizeTransform(clip = false)
-                },
-                contentAlignment = Alignment.Center,
-                label = "match_phase",
-                modifier = Modifier.weight(1f),
-            ) { phase ->
-                MatchPhaseContent(
-                    phase = phase,
-                    state = state,
-                    onAction = onAction,
+                    else -> HistoryTab(modifier = Modifier.fillMaxSize())
+                }
+            } else {
+                AnimatedContent(
+                    targetState = state.phase,
+                    contentKey = { it.key },
+                    transitionSpec = {
+                        (slideInHorizontally { it / 4 } + fadeIn()) togetherWith
+                            (slideOutHorizontally { -it / 4 } + fadeOut()) using
+                            SizeTransform(clip = false)
+                    },
+                    contentAlignment = Alignment.Center,
+                    label = "match_phase",
                     modifier = Modifier.fillMaxSize(),
+                ) { phase ->
+                    MatchPhaseContent(
+                        phase = phase,
+                        state = state,
+                        onAction = onAction,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
+            }
+
+            // Tek bottom bar; yalnız ana (Idle) ekranlarda, faz ekranlarında gösterilmez.
+            if (isIdle) {
+                GameBottomBar(
+                    activeTab = selectedTab,
+                    isGameEnded = state.isGameEnded,
+                    onTabClick = onTabSelected,
+                    modifier = Modifier.align(Alignment.BottomCenter),
                 )
             }
         }
@@ -178,7 +235,7 @@ fun MatchContainerScreen(
 }
 
 private fun topBarStateFor(phase: MatchPhase): AppTopBarState = when (phase) {
-    MatchPhase.Idle -> AppTopBarState.Game
+    MatchPhase.Idle -> AppTopBarState.Game()
     is MatchPhase.RpsReady -> AppTopBarState.RpsReady
     is MatchPhase.WhoWon -> AppTopBarState.RpsConfirmation
     is MatchPhase.WinnerPicks -> AppTopBarState.WinnerPicks
@@ -272,32 +329,9 @@ private fun MatchPhaseContent(
             isFinishing = phase.isFinishing,
             onFinish = { onAction(MatchSessionAction.OnFinishMatch) },
             modifier = modifier,
+            currentUserPhotoUrl = state.currentUserPhotoUrl,
+            opponentPhotoUrl = state.opponentProfilePictureUrl,
         )
     }
 }
 
-@Composable
-private fun ConnectionBanner(
-    connectionState: GameConnectionState,
-    modifier: Modifier = Modifier,
-) {
-    val text = when (connectionState) {
-        GameConnectionState.Connecting -> "Connecting…"
-        GameConnectionState.Reconnecting -> "Connection lost, reconnecting…"
-        is GameConnectionState.Disconnected ->
-            // Gerçek terminal hata snackbar'la gösterilir; banner gizli. Beklenen kopuşlar
-            // (arka plan/ağ/oturum) kendiliğinden toparlanır → "yeniden bağlanılıyor".
-            if (connectionState.isError) return else "Connection lost, reconnecting…"
-        GameConnectionState.Connected -> return
-    }
-
-    Text(
-        text = text,
-        modifier = modifier,
-        style = MaterialTheme.typography.labelMedium.copy(
-            color = AccessDefaults.TextSecondary,
-            textAlign = TextAlign.Center,
-            fontWeight = FontWeight.Medium,
-        ),
-    )
-}

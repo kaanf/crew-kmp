@@ -15,6 +15,10 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
+import kotlinx.datetime.yearsUntil
+import kotlin.time.Clock
 
 class RegisterViewModel(
     private val authRepository: AuthRepository,
@@ -59,6 +63,13 @@ class RegisterViewModel(
             is RegisterAction.OnGenderSelect -> {
                 _state.update { it.copy(gender = action.gender) }
             }
+
+            RegisterAction.OnUnderageGoBack -> {
+                _state.update { it.copy(showUnderageDialog = false) }
+                viewModelScope.launch {
+                    eventChannel.send(RegisterEvent.NavigateBack)
+                }
+            }
         }
     }
 
@@ -90,10 +101,15 @@ class RegisterViewModel(
 
             val currentState = _state.value
 
-            val gender = currentState.gender ?: return@launch
-
             val dateOfBirth = currentState.dateOfBirthTextState.text.toString().toLocalDate()
             if (dateOfBirth == null) {
+                return@launch
+            }
+
+            // Age is enforced on-device (backend no longer stores DOB); under-18 gets the gate sheet.
+            val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+            if (dateOfBirth.yearsUntil(today) < MIN_AGE) {
+                _state.update { it.copy(showUnderageDialog = true) }
                 return@launch
             }
 
@@ -109,8 +125,7 @@ class RegisterViewModel(
                                 email = currentState.emailTextState.text.toString().trim(),
                                 password = currentState.passwordTextState.text.toString(),
                                 fullName = currentState.fullNameTextState.text.toString(),
-                                dateOfBirth = dateOfBirth,
-                                gender = gender,
+                                gender = currentState.gender,
                                 profilePictureUrl = ""
                             ),
                         )
@@ -134,4 +149,8 @@ class RegisterViewModel(
                 }
             }
         }
+
+    private companion object {
+        const val MIN_AGE = 18
+    }
 }

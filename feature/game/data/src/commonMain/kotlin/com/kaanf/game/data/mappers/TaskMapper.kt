@@ -8,6 +8,7 @@ fun TaskDto.toDomain(): GameTask = GameTask(
     id = id,
     title = title,
     points = points,
+    rejectPoints = rejectPoints,
     categories = categories.map { it.toTaskCategory() },
 )
 

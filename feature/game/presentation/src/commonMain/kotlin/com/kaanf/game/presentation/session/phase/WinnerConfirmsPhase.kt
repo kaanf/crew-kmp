@@ -16,7 +16,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kaanf.core.designsystem.component.button.BaseButton
 import com.kaanf.core.designsystem.theme.AccessDefaults
+import com.kaanf.core.designsystem.theme.CrewTheme
 import com.kaanf.game.domain.model.GameTask
+import com.kaanf.game.domain.model.TaskCategory
 import com.kaanf.game.presentation.component.GameTaskCard
 import crew.feature.game.presentation.generated.resources.Res
 import crew.feature.game.presentation.generated.resources.match_phase_winner_confirms_completed_action
@@ -25,6 +27,7 @@ import crew.feature.game.presentation.generated.resources.match_phase_winner_con
 import crew.feature.game.presentation.generated.resources.match_phase_winner_confirms_not_done_action
 import crew.feature.game.presentation.generated.resources.match_phase_winner_confirms_title
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun WinnerConfirmsPhase(
@@ -93,5 +96,23 @@ fun WinnerConfirmsPhase(
                     .weight(0.5f),
             )
         }
+    }
+}
+
+@Composable
+@Preview
+private fun Preview() {
+    CrewTheme {
+        WinnerConfirmsPhase(
+            opponentName = "Mira",
+            task = GameTask(
+                id = "1",
+                title = "🌍 Get two strangers to teach you the same word in their language.",
+                points = 20,
+                categories = listOf(TaskCategory.Social),
+            ),
+            isConfirming = false,
+            onConfirm = {},
+        )
     }
 }

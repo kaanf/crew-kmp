@@ -5,6 +5,10 @@ sealed interface GameSocketMessage {
         val eventId: String,
         val gameStartsAt: String,
         val gameEndsAt: String,
+        /** Oyun içi phase sınırları; serverNow ile offset düzeltilerek lokal takip edilir. */
+        val boldStartsAt: String?,
+        val finalStartsAt: String?,
+        val serverNow: String?,
         val totalCount: Int,
         val members: List<LobbyMember>,
         /** Bağlanan kullanıcının kendi app bar istatistikleri; katılımcı değilse null. */
@@ -50,6 +54,9 @@ sealed interface GameSocketMessage {
         val eventId: String,
         val state: String,
         val cancelledByUserId: String,
+        val winnerUserId: String?,
+        val winnerTotalScore: Int?,
+        val winnerPointsAwarded: Int,
     ) : GameSocketMessage
 
     data class MatchReadyCompleted(
@@ -88,6 +95,7 @@ sealed interface GameSocketMessage {
         val taskId: String,
         val taskTitle: String,
         val taskPoints: Int,
+        val taskRejectPoints: Int,
         val taskCategories: List<TaskCategory>,
     ) : GameSocketMessage
 
@@ -103,6 +111,8 @@ sealed interface GameSocketMessage {
         val eventId: String,
         val state: String,
         val rejectedByUserId: String,
+        val rejectPoints: Int,
+        val rejectedByTotalScore: Int?,
     ) : GameSocketMessage
 
     data class TaskFinished(

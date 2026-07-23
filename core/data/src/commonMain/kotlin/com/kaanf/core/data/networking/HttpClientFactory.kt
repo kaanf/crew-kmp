@@ -28,7 +28,7 @@ class HttpClientFactory(
 ) {
     fun create(engine: HttpClientEngine): HttpClient {
         return HttpClient(engine) {
-            installWiretapHttp()
+//            installWiretapHttp()
             install(ContentNegotiation) {
                 json(
                     json =
@@ -62,7 +62,7 @@ class HttpClientFactory(
             // otomatik PONG döner (ponger pingInterval'dan bağımsız hep aktiftir).
             install(WebSockets)
             // WebSocket trafiğini Wiretap konsoluna yansıtır (WebSockets'ten sonra kurulmalı).
-            installWiretapWebSocket()
+//            installWiretapWebSocket()
             defaultRequest {
                 contentType(ContentType.Application.Json)
             }

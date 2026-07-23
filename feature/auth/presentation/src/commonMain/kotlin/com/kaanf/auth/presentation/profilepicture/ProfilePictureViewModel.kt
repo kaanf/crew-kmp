@@ -6,7 +6,14 @@ import com.kaanf.core.domain.repository.UserRepository
 import com.kaanf.core.domain.util.onFailure
 import com.kaanf.core.domain.util.onSuccess
 import com.kaanf.core.presentation.snackbar.SnackbarController
+import com.kaanf.core.presentation.snackbar.SnackbarIcon
+import com.kaanf.core.presentation.snackbar.SnackbarMessage
+import com.kaanf.core.presentation.snackbar.SnackbarVariant
 import com.kaanf.core.presentation.snackbar.toSnackbarMessage
+import com.kaanf.core.presentation.util.UIText
+import crew.feature.auth.presentation.generated.resources.Res
+import crew.feature.auth.presentation.generated.resources.profile_picture_uploaded_description
+import crew.feature.auth.presentation.generated.resources.profile_picture_uploaded_title
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -113,13 +120,21 @@ class ProfilePictureViewModel(
                     _state.update { it.copy(
                         isUploadingImage = false,
                     ) }
+                    snackbarController.show(
+                        SnackbarMessage(
+                            title = UIText.Resource(Res.string.profile_picture_uploaded_title),
+                            description = UIText.Resource(Res.string.profile_picture_uploaded_description),
+                            variant = SnackbarVariant.Success,
+                            icon = SnackbarIcon.Photo,
+                        ),
+                    )
                     eventChannel.send(ProfilePictureEvent.UploadSuccess)
                 }
                 .onFailure { error ->
                     _state.update { it.copy(
                         isUploadingImage = false
                     ) }
-                    snackbarController.show(error.toSnackbarMessage())
+                    snackbarController.show(error.toSnackbarMessage(icon = SnackbarIcon.Photo))
                     eventChannel.send(ProfilePictureEvent.UploadError)
                 }
         }

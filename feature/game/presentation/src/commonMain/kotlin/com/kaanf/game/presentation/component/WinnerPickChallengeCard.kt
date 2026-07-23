@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -31,9 +30,10 @@ import com.kaanf.core.presentation.model.ChallengeCardUiModel
 import com.kaanf.core.presentation.model.ChallengeCardVariant
 import crew.feature.game.presentation.generated.resources.Res
 import crew.feature.game.presentation.generated.resources.match_points_format
-import crew.feature.game.presentation.generated.resources.match_task_card_accept_label
+import crew.feature.game.presentation.generated.resources.match_points_signed_format
 import crew.feature.game.presentation.generated.resources.match_task_card_reject_label
 import crew.feature.game.presentation.generated.resources.match_task_card_variant_bold
+import crew.feature.game.presentation.generated.resources.match_task_card_variant_final
 import crew.feature.game.presentation.generated.resources.match_task_card_variant_flirty
 import crew.feature.game.presentation.generated.resources.match_task_card_variant_funny
 import crew.feature.game.presentation.generated.resources.match_task_card_variant_icebreaker
@@ -107,59 +107,31 @@ fun GameTaskCard(
 
             Spacer(modifier = Modifier.height(12.dp))
 
+            // Üst satırın (rozet solda / puan sağda) aynası: reject cezası tek satır.
             Row(
                 modifier = Modifier
                     .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                PointCard(
-                    text = stringResource(Res.string.match_task_card_accept_label),
-                    point = 35,
-                    color = AccessDefaults.Accent,
-                    isLeft = true
+                Text(
+                    text = stringResource(Res.string.match_task_card_reject_label),
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        color = AccessDefaults.TextMuted,
+                        fontSize = 10.sp,
+                    ),
                 )
 
-                PointCard(
-                    text = stringResource(Res.string.match_task_card_reject_label),
-                    point = -5,
+                Text(
+                    // Ceza işaretli gelir (örn. -35), o yüzden +'sız formatla basılır.
+                    text = stringResource(Res.string.match_points_signed_format, card.rejectPoints),
                     color = AccessDefaults.LeftArrowColor,
-                    isLeft = false
+                    fontSize = 12.sp,
+                    fontFamily = JetbrainsMono,
+                    fontWeight = FontWeight.ExtraBold,
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun PointCard(
-    text: String,
-    point: Int,
-    color: Color,
-    isLeft: Boolean
-) {
-    Column(
-        modifier = Modifier
-            .wrapContentHeight(),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        horizontalAlignment = if (isLeft) Alignment.Start else Alignment.End
-    ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.labelSmall.copy(
-                color = AccessDefaults.TextMuted,
-                fontSize = 10.sp,
-            ),
-        )
-
-        Text(
-            text = stringResource(Res.string.match_points_format, point),
-            color = color,
-            fontSize = 12.sp,
-            fontFamily = JetbrainsMono,
-            textAlign = TextAlign.End,
-            fontWeight = FontWeight.ExtraBold,
-        )
     }
 }
 
@@ -174,6 +146,7 @@ private fun CardBadge(
         ChallengeCardVariant.Flirty -> stringResource(Res.string.match_task_card_variant_flirty)
         ChallengeCardVariant.Team -> stringResource(Res.string.match_task_card_variant_team)
         ChallengeCardVariant.Funny -> stringResource(Res.string.match_task_card_variant_funny)
+        ChallengeCardVariant.FinalRound -> stringResource(Res.string.match_task_card_variant_final)
     }
 
     Box(
@@ -203,5 +176,6 @@ internal fun ChallengeCardVariant.taskAccentColor(): Color {
         ChallengeCardVariant.Flirty -> AccessDefaults.Rose
         ChallengeCardVariant.Team -> AccessDefaults.Teal
         ChallengeCardVariant.Funny -> AccessDefaults.Amber
+        ChallengeCardVariant.FinalRound -> AccessDefaults.Amber
     }
 }

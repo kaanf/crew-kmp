@@ -59,6 +59,7 @@ fun MatchScoreboardCard(
     isYou: Boolean,
     taskCompleted: Boolean,
     forfeit: Boolean = false,
+    photoUrl: String? = null,
 ) {
     Column(
         modifier = Modifier
@@ -86,7 +87,7 @@ fun MatchScoreboardCard(
         verticalArrangement = Arrangement.spacedBy(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        MatchScoreboardRow(entry = entry, isYou = isYou)
+        MatchScoreboardRow(entry = entry, isYou = isYou, photoUrl = photoUrl)
 
         Box(
             modifier = Modifier
@@ -199,6 +200,7 @@ private fun DetailRow(
 fun MatchScoreboardRow(
     entry: MatchScoreboardEntry,
     isYou: Boolean,
+    photoUrl: String? = null,
 ) {
     val displayName = if (isYou) stringResource(Res.string.match_scoreboard_you_label) else entry.fullName
     Row(
@@ -212,10 +214,14 @@ fun MatchScoreboardRow(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             AvatarCircle(
-                content = AvatarContent.Initials(
-                    label = displayName.firstOrNull()?.uppercase().orEmpty(),
-                    color = if (entry.isWinner) AccessDefaults.Accent else AccessDefaults.Sky,
-                ),
+                content = if (!photoUrl.isNullOrBlank()) {
+                    AvatarContent.Image(photoUrl)
+                } else {
+                    AvatarContent.Initials(
+                        label = displayName.firstOrNull()?.uppercase().orEmpty(),
+                        color = if (entry.isWinner) AccessDefaults.Accent else AccessDefaults.Sky,
+                    )
+                },
                 avatarSize = 56,
                 borderSize = 2,
             )

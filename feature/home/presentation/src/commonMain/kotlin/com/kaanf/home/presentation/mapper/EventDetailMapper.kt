@@ -18,7 +18,6 @@ fun EventDetail.toUiModel(): EventDetailUiModel {
         formattedPrice = price.format(),
         isFree = price.amount == 0L,
         // Backend EventPhase.name gönderir: NotOpened / EntryOpen / Gameplay / Finished.
-        isStarted = phase == "Gameplay",
         isEnded = phase == "Finished",
         // ponytail: backend görsel dönmezse eski sabit hero görseline düşülür; backend dolunca ölü kod olur
         imageUrls = imageUrls.ifEmpty { listOf(FALLBACK_HERO_IMAGE_URL) },

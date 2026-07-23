@@ -1,7 +1,5 @@
 package com.kaanf.home.presentation.profile
 
-import com.kaanf.core.domain.model.settings.AppLanguage
-
 sealed interface ProfileAction {
     data object OnChangePhotoClick : ProfileAction
     data object OnRemovePhotoClick : ProfileAction
@@ -11,7 +9,8 @@ sealed interface ProfileAction {
     data object OnEditNameClick : ProfileAction
     class OnNameEdited(val name: String) : ProfileAction
     data object OnSaveChanges : ProfileAction
-    data object OnLanguageClick : ProfileAction
-    class OnLanguageSelected(val language: AppLanguage) : ProfileAction
+    data object OnCancelEdit : ProfileAction
     data object OnSignOutClick : ProfileAction
+    data object OnDeleteAccountClick : ProfileAction
+    data object OnDeleteAccountConfirm : ProfileAction
 }

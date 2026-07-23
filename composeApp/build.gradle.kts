@@ -20,7 +20,7 @@ kotlin {
 
             implementation(libs.koin.android)
             // Wiretap yalnızca Android'de (Kotlin 2.3 ABI nedeniyle iOS'ta yok).
-            implementation(libs.wiretap.launcher)
+//            implementation(libs.wiretap.launcher)
         }
         commonMain.dependencies {
             implementation(projects.core.data)

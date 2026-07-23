@@ -30,6 +30,8 @@ data class MatchSessionState(
     val currentUserWinCount: Int = 0,
     val currentUserMatchesCount: Int = 0,
     val matchId: String? = null,
+    // Maç ortasında LOBBY_USER_LEFT'in rakibe ait olup olmadığını ayırt etmek için tutulur.
+    val opponentUserId: String? = null,
     val opponentFullName: String? = null,
     /**
      * Rakibin profil fotosu. Foto yalnızca davet anında gelir (gelen davette
@@ -49,6 +51,8 @@ data class MatchSessionState(
     /** Giden davette, MATCH_STARTED'a kadar tutulan rakip fotosu (sendInvite yanıtından). */
     val outgoingOpponentPhotoUrl: String? = null,
     val showExitConfirmDialog: Boolean = false,
+    /** Etkinlik süresi doldu: Play kilitli, yalnız leaderboard/history açık. */
+    val isGameEnded: Boolean = false,
     val errorMessage: String? = null,
 ) {
     val isConnected: Boolean get() = connectionState is GameConnectionState.Connected

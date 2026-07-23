@@ -49,6 +49,9 @@ fun SocketEnvelopeDto.toDomain(json: Json): GameSocketMessage = when (type) {
                 eventId = it.eventId,
                 gameStartsAt = it.gameStartsAt,
                 gameEndsAt = it.gameEndsAt,
+                boldStartsAt = it.boldStartsAt,
+                finalStartsAt = it.finalStartsAt,
+                serverNow = it.serverNow,
                 totalCount = it.totalCount,
                 members = it.members.map { member ->
                     member.toDomain()
@@ -101,6 +104,9 @@ fun SocketEnvelopeDto.toDomain(json: Json): GameSocketMessage = when (type) {
                 eventId = it.eventId,
                 state = it.state,
                 cancelledByUserId = it.cancelledByUserId,
+                winnerUserId = it.winnerUserId,
+                winnerTotalScore = it.winnerTotalScore,
+                winnerPointsAwarded = it.winnerPointsAwarded,
             )
         }
         ?: GameSocketMessage.Unknown(type)
@@ -159,6 +165,7 @@ fun SocketEnvelopeDto.toDomain(json: Json): GameSocketMessage = when (type) {
                 taskId = it.taskId,
                 taskTitle = it.taskTitle,
                 taskPoints = it.taskPoints,
+                taskRejectPoints = it.taskRejectPoints,
                 taskCategories = it.taskCategories.map { category -> category.toTaskCategory() },
             )
         }
@@ -203,6 +210,8 @@ fun SocketEnvelopeDto.toDomain(json: Json): GameSocketMessage = when (type) {
                 eventId = it.eventId,
                 state = it.state,
                 rejectedByUserId = it.rejectedByUserId,
+                rejectPoints = it.rejectPoints,
+                rejectedByTotalScore = it.rejectedByTotalScore,
             )
         }
         ?: GameSocketMessage.Unknown(type)

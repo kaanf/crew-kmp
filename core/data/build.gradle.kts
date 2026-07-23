@@ -25,7 +25,7 @@ kotlin {
                 implementation(libs.ktor.client.okhttp)
                 // Wiretap iOS klib'leri Kotlin 2.3 ABI'si ister; proje 2.2'de olduğu için
                 // wiretap yalnızca Android'de kullanılır (iosMain'de no-op).
-                implementation(libs.wiretap.ktor)
+//                implementation(libs.wiretap.ktor)
             }
         }
 

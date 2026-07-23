@@ -3,12 +3,15 @@ package com.kaanf.game.domain.repository
 import com.kaanf.core.domain.util.DataError
 import com.kaanf.core.domain.util.EmptyResult
 import com.kaanf.core.domain.util.Result
+import com.kaanf.game.domain.model.EventMemory
 import com.kaanf.game.domain.model.GameTask
 import com.kaanf.game.domain.model.LeaderboardEntry
+import com.kaanf.game.domain.model.MatchHistoryEntry
 import com.kaanf.game.domain.model.MatchInvite
 import com.kaanf.game.domain.model.MatchParticipant
 import com.kaanf.game.domain.model.MatchScoreboard
 import com.kaanf.game.domain.model.MatchSnapshot
+import com.kaanf.game.domain.model.Quest
 
 interface MatchRepository {
     suspend fun getMyMatchQrToken(eventId: String): Result<String, DataError.Remote>
@@ -62,9 +65,9 @@ interface MatchRepository {
 
     /**
      * Kazananın seçebileceği rastgele aktif görevleri döner (sunucu 3 tane verir).
-     * Maçtan bağımsız global katalogdan gelir.
+     * Sunucu, event'in o anki game phase'ine göre ağırlıklı çeker.
      */
-    suspend fun getTasks(): Result<List<GameTask>, DataError.Remote>
+    suspend fun getTasks(eventId: String): Result<List<GameTask>, DataError.Remote>
 
     /**
      * Kazananın seçtiği görevi rakibe (kaybedene) sunar. Sunucu kaybedene
@@ -115,6 +118,15 @@ interface MatchRepository {
     ): Result<List<LeaderboardEntry>, DataError.Remote>
 
     /**
+     * Çağıran kullanıcının bu etkinlikteki biten maçları (Completed/Cancelled),
+     * yeniden eskiye sıralı, sayfalı. `page` 0'dan başlar; dönen liste [size]'dan
+     * kısaysa son sayfadır. "Your night" tab'ında gösterilir.
+     */
+    suspend fun getMatchHistory(
+        eventId: String, page: Int, size: Int,
+    ): Result<List<MatchHistoryEntry>, DataError.Remote>
+
+    /**
      * Aktif (terminal olmayan) bir maçtan ayrılır = forfeit. Sunucu çağıranı kaybeden,
      * rakibi kazanan sayar ve rakibe MATCH_CANCELLED push'lar. Yalnızca devam eden maçlarda
      * çağrılmalı; biten/iptal/ret maçlarda sunucu hata döner.
@@ -130,4 +142,39 @@ interface MatchRepository {
     suspend fun finishMatch(
         eventId: String, matchId: String,
     ): EmptyResult<DataError.Remote>
+
+    /**
+     * Etkinliğin "memory" fotoğrafları, yeniden eskiye sayfalı (match history ile aynı
+     * sözleşme: `page` 0'dan başlar, dönen liste [size]'dan kısaysa son sayfadır).
+     * Oyun sürerken sunucu yalnız çağıranın kendi çektiklerini döner; etkinlik bitince
+     * tüm odanın rulosu açılır. URL'ler imzalı ve kısa ömürlü olduğundan görüntülemeden
+     * önce liste tazelenmeli.
+     */
+    suspend fun getMemories(
+        eventId: String, page: Int, size: Int,
+    ): Result<List<EventMemory>, DataError.Remote>
+
+    /**
+     * Kameradan çekilen fotoğrafı ruloya yükler (multipart). Sunucu yalnız Gameplay
+     * fazında ve check-in'li katılımcılara izin verir; kişi başı limit vardır.
+     */
+    suspend fun uploadMemory(
+        eventId: String, imageBytes: ByteArray, mimeType: String,
+    ): Result<EventMemory, DataError.Remote>
+
+    /** Kullanıcının kendi çektiği bir memory'yi siler; başkasınınki sunucuda 403'lenir. */
+    suspend fun deleteMemory(
+        eventId: String, memoryId: String,
+    ): EmptyResult<DataError.Remote>
+
+    /** Katalogdaki tüm questler + çağıranın ilerleme/claim durumu. */
+    suspend fun getQuests(eventId: String): Result<List<Quest>, DataError.Remote>
+
+    /**
+     * Hedefi dolmuş questin puanını alır; güncel (claimed=true) questi döner.
+     * Tamamlanmamış ya da zaten alınmış quest sunucuda business hatasıyla düşer.
+     */
+    suspend fun claimQuest(
+        eventId: String, questKey: String,
+    ): Result<Quest, DataError.Remote>
 }

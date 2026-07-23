@@ -44,12 +44,11 @@ fun TonightFlowCardPreview() {
 @Composable
 fun TonightFlowCard(
     modifier: Modifier = Modifier,
-    totalDuration: String = "2h 30m",
+    totalDuration: String = "1h 45m",
     steps: List<FlowStep> = listOf(
-        FlowStep("Icebreaker", "20:30 – 21:00", Color(0xFFC8FF3D)),
-        FlowStep("Social / Team", "21:00 – 22:00", Color(0xFF6FB7FF)),
-        FlowStep("Bold", "22:00 – 22:45", Color(0xFFFF7A5C)),
-        FlowStep("Final Round", "22:45 – 23:00", Color(0xFFFF5A7A)),
+        FlowStep("Icebreaker", "20:15 – 20:45", Color(0xFFC8FF3D)),
+        FlowStep("Bold", "20:45 – 21:30", Color(0xFFFF7A5C)),
+        FlowStep("Final Round", "21:30 – 22:00", Color(0xFFFF5A7A)),
     )
 ) {
     Column(

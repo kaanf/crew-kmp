@@ -8,7 +8,6 @@ data class ProfileState(
     val fullName: String = "",
     val email: String = "",
     val gender: String = "",
-    val dateOfBirth: String = "",
     // Locally-persisted app language.
     val language: AppLanguage = AppLanguage.DEFAULT,
     // Staged edits, applied to the backend only when "Save your changes" is pressed.
@@ -18,6 +17,9 @@ data class ProfileState(
     // Transient: bytes currently open in the cropper, before they become a staged photo.
     val pendingCropBytes: ByteArray? = null,
     val isSaving: Boolean = false,
+    val isDeletingAccount: Boolean = false,
+    // Set once the backend confirms deletion; the screen navigates to auth when it flips.
+    val accountDeleted: Boolean = false,
 ) {
     val displayedName: String
         get() = editedName ?: fullName
@@ -49,13 +51,14 @@ data class ProfileState(
         if (fullName != other.fullName) return false
         if (email != other.email) return false
         if (gender != other.gender) return false
-        if (dateOfBirth != other.dateOfBirth) return false
         if (language != other.language) return false
         if (editedName != other.editedName) return false
         if (!byteArrayEquals(pendingPhotoBytes, other.pendingPhotoBytes)) return false
         if (pendingPhotoRemoval != other.pendingPhotoRemoval) return false
         if (!byteArrayEquals(pendingCropBytes, other.pendingCropBytes)) return false
         if (isSaving != other.isSaving) return false
+        if (isDeletingAccount != other.isDeletingAccount) return false
+        if (accountDeleted != other.accountDeleted) return false
 
         return true
     }
@@ -65,13 +68,14 @@ data class ProfileState(
         result = 31 * result + fullName.hashCode()
         result = 31 * result + email.hashCode()
         result = 31 * result + gender.hashCode()
-        result = 31 * result + dateOfBirth.hashCode()
         result = 31 * result + language.hashCode()
         result = 31 * result + (editedName?.hashCode() ?: 0)
         result = 31 * result + (pendingPhotoBytes?.contentHashCode() ?: 0)
         result = 31 * result + pendingPhotoRemoval.hashCode()
         result = 31 * result + (pendingCropBytes?.contentHashCode() ?: 0)
         result = 31 * result + isSaving.hashCode()
+        result = 31 * result + isDeletingAccount.hashCode()
+        result = 31 * result + accountDeleted.hashCode()
         return result
     }
 }

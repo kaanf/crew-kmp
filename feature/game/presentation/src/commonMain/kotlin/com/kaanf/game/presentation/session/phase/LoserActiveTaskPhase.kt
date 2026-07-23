@@ -47,7 +47,10 @@ fun LoserActiveTaskPhase(
             modifier
                 .fillMaxSize()
                 .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(
+            space = 12.dp,
+            alignment = Alignment.CenterVertically,
+        ),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         task?.let {
