@@ -55,6 +55,7 @@ import crew.feature.auth.presentation.generated.resources.auth_password_label
 import crew.feature.auth.presentation.generated.resources.error_invalid_date_of_birth
 import crew.feature.auth.presentation.generated.resources.error_invalid_email
 import crew.feature.auth.presentation.generated.resources.error_password_mismatch
+import crew.feature.auth.presentation.generated.resources.register_age_confirmation
 import crew.feature.auth.presentation.generated.resources.register_confirm_password_label
 import crew.feature.auth.presentation.generated.resources.register_confirm_password_placeholder
 import crew.feature.auth.presentation.generated.resources.register_date_of_birth_label
@@ -193,7 +194,6 @@ fun RegisterScreen(
                         isError = showEmailError,
                         placeholder = stringResource(Res.string.auth_email_placeholder),
                         keyboardType = KeyboardType.Email,
-                        testTag = TestTags.REGISTER_EMAIL,
                     )
 
                     NativeAuthPasswordTextField(
@@ -202,7 +202,6 @@ fun RegisterScreen(
                         hint = stringResource(Res.string.register_password_requirements_hint),
                         isError = state.passwordTextState.text.isNotEmpty() && !state.isPasswordValid,
                         placeholder = stringResource(Res.string.register_password_placeholder),
-                        testTag = TestTags.REGISTER_PASSWORD,
                     )
 
                     val showPasswordMismatch =
@@ -213,7 +212,6 @@ fun RegisterScreen(
                         hint = if (showPasswordMismatch) stringResource(Res.string.error_password_mismatch) else null,
                         isError = showPasswordMismatch,
                         placeholder = stringResource(Res.string.register_confirm_password_placeholder),
-                        testTag = TestTags.REGISTER_RE_PASSWORD,
                     )
 
                     NativeAuthTextField(
@@ -224,6 +222,7 @@ fun RegisterScreen(
                         placeholder = stringResource(Res.string.register_full_name_placeholder),
                     )
 
+                    /*
                     val showDateOfBirthError =
                         state.dateOfBirthTextState.text.isNotEmpty() && !state.isDateOfBirthValid
                     NativeAuthTextField(
@@ -244,6 +243,14 @@ fun RegisterScreen(
                             focusManager.clearFocus()
                             showGenderSheet = true
                         },
+                    )
+                     */
+
+                    BaseCheckbox(
+                        checked = state.hasConfirmedAge,
+                        onCheckedChange = { onAction(RegisterAction.OnAgeConfirmationToggle) },
+                        label = stringResource(Res.string.register_age_confirmation),
+                        modifier = Modifier.padding(top = 8.dp),
                     )
 
                     BaseCheckbox(
@@ -267,9 +274,6 @@ fun RegisterScreen(
                             )
                             append(stringResource(Res.string.register_terms_suffix))
                         },
-                        modifier = Modifier
-                            .padding(top = 8.dp)
-                            .testTag(TestTags.REGISTER_TERMS),
                     )
 
                     BaseButton(
@@ -371,6 +375,7 @@ private fun RegisterScreenPreview() {
                     passwordTextState = TextFieldState("AccessKey9"),
                     rePasswordTextState = TextFieldState("AccessKey9"),
                     hasAcceptedTerms = true,
+                    hasConfirmedAge = true,
                 ),
             onAction = {},
         )

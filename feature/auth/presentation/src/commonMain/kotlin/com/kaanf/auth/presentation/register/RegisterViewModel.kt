@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kaanf.auth.domain.model.RegisterParams
 import com.kaanf.auth.domain.repository.AuthRepository
-import com.kaanf.auth.presentation.util.toLocalDate
 import com.kaanf.core.domain.util.Result
 import com.kaanf.core.presentation.snackbar.SnackbarController
 import com.kaanf.core.presentation.snackbar.toSnackbarMessage
@@ -15,10 +14,6 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.todayIn
-import kotlinx.datetime.yearsUntil
-import kotlin.time.Clock
 
 class RegisterViewModel(
     private val authRepository: AuthRepository,
@@ -56,6 +51,14 @@ class RegisterViewModel(
                 _state.update { current ->
                     current.copy(
                         hasAcceptedTerms = !current.hasAcceptedTerms,
+                    )
+                }
+            }
+
+            RegisterAction.OnAgeConfirmationToggle -> {
+                _state.update { current ->
+                    current.copy(
+                        hasConfirmedAge = !current.hasConfirmedAge,
                     )
                 }
             }
@@ -99,19 +102,11 @@ class RegisterViewModel(
                 return@launch
             }
 
+            if (!_state.value.hasConfirmedAge) {
+                return@launch
+            }
+
             val currentState = _state.value
-
-            val dateOfBirth = currentState.dateOfBirthTextState.text.toString().toLocalDate()
-            if (dateOfBirth == null) {
-                return@launch
-            }
-
-            // Age is enforced on-device (backend no longer stores DOB); under-18 gets the gate sheet.
-            val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
-            if (dateOfBirth.yearsUntil(today) < MIN_AGE) {
-                _state.update { it.copy(showUnderageDialog = true) }
-                return@launch
-            }
 
             _state.update {
                 it.copy(isRegistering = true)
@@ -149,8 +144,4 @@ class RegisterViewModel(
                 }
             }
         }
-
-    private companion object {
-        const val MIN_AGE = 18
-    }
 }

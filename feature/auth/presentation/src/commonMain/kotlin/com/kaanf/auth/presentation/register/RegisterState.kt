@@ -13,6 +13,7 @@ data class RegisterState(
     val dateOfBirthTextState: TextFieldState = TextFieldState(),
     val gender: Gender? = null,
     val hasAcceptedTerms: Boolean = false,
+    val hasConfirmedAge: Boolean = false,
     val isRegistering: Boolean = false,
     val isPasswordVisible: Boolean = false,
     val showUnderageDialog: Boolean = false,
@@ -40,8 +41,8 @@ data class RegisterState(
                 isPasswordValid &&
                 isPasswordMatch &&
                 hasAcceptedTerms &&
-                isFullNameValid &&
-                isDateOfBirthValid
+                hasConfirmedAge &&
+                isFullNameValid
 }
 
 private const val DATE_OF_BIRTH_DIGIT_COUNT = 8 // DDMMYYYY, separators are not stored

@@ -11,6 +11,8 @@ sealed interface RegisterAction {
 
     data object OnTermsToggle : RegisterAction
 
+    data object OnAgeConfirmationToggle : RegisterAction
+
     data class OnGenderSelect(val gender: Gender) : RegisterAction
 
     data object OnUnderageGoBack : RegisterAction
