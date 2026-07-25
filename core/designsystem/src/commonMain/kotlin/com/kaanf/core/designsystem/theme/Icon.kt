@@ -3,6 +3,7 @@ package com.kaanf.core.designsystem.theme
 import crew.core.designsystem.generated.resources.Res
 import crew.core.designsystem.generated.resources.crew_logo_qr
 import crew.core.designsystem.generated.resources.crew_pixel_art
+import crew.core.designsystem.generated.resources.ic_apple_logo
 import crew.core.designsystem.generated.resources.ic_bell
 import crew.core.designsystem.generated.resources.ic_camera
 import crew.core.designsystem.generated.resources.ic_case
@@ -11,11 +12,13 @@ import crew.core.designsystem.generated.resources.ic_chevron_left_24
 import crew.core.designsystem.generated.resources.ic_chevron_right_24
 import crew.core.designsystem.generated.resources.ic_close
 import crew.core.designsystem.generated.resources.ic_clock
+import crew.core.designsystem.generated.resources.ic_google_g
 import crew.core.designsystem.generated.resources.ic_image
 import crew.core.designsystem.generated.resources.ic_info
 import crew.core.designsystem.generated.resources.ic_key_lock
 import crew.core.designsystem.generated.resources.ic_key_open
 import crew.core.designsystem.generated.resources.ic_left_arrow
+import crew.core.designsystem.generated.resources.ic_mail
 import crew.core.designsystem.generated.resources.ic_more
 import crew.core.designsystem.generated.resources.ic_pin
 import crew.core.designsystem.generated.resources.ic_qr
@@ -52,4 +55,7 @@ object AccessIcons {
     val Case = Res.drawable.ic_case
     val Trash = Res.drawable.ic_trash
     val Target = Res.drawable.ic_target
+    val Mail = Res.drawable.ic_mail
+    val GoogleG = Res.drawable.ic_google_g
+    val AppleLogo = Res.drawable.ic_apple_logo
 }

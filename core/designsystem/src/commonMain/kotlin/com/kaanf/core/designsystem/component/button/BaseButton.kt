@@ -1,6 +1,7 @@
 package com.kaanf.core.designsystem.component.button
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -61,6 +62,8 @@ fun BaseButton(
     filled: Boolean = false,
     animatedBorder: Boolean = false,
     leadingIcon: DrawableResource? = null,
+    // Google "G" gibi çok renkli marka logoları boyanamaz; false ise ikon olduğu gibi çizilir.
+    tintLeadingIcon: Boolean = true,
     backgroundColor: Color? = null,
     borderColor: Color? = null,
     contentColor: Color? = null,
@@ -134,12 +137,20 @@ fun BaseButton(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     if (leadingIcon != null) {
-                        Icon(
-                            painter = painterResource(leadingIcon),
-                            contentDescription = null,
-                            tint = resolvedContentColor,
-                            modifier = Modifier.size(20.dp),
-                        )
+                        if (tintLeadingIcon) {
+                            Icon(
+                                painter = painterResource(leadingIcon),
+                                contentDescription = null,
+                                tint = resolvedContentColor,
+                                modifier = Modifier.size(20.dp),
+                            )
+                        } else {
+                            Image(
+                                painter = painterResource(leadingIcon),
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp),
+                            )
+                        }
                     }
                     Text(
                         text = text,
