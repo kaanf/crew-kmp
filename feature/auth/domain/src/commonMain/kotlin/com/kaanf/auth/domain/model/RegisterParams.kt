@@ -5,5 +5,7 @@ data class RegisterParams(
     val password: String,
     val fullName: String,
     val profilePictureUrl: String?,
-    val gender: Gender? = null
+    val gender: Gender? = null,
+    val ageConfirmed: Boolean = false,
+    val privacyAccepted: Boolean = false,
 )

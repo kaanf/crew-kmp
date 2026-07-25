@@ -23,11 +23,24 @@
         <activity
             android:exported="true"
             android:name=".androidapp.MainActivity"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <!-- Apple web (form_post) akışının backend'den dönüş deep link'i: crew://auth/apple -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:scheme="crew"
+                    android:host="auth" />
             </intent-filter>
         </activity>
 

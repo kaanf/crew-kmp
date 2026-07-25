@@ -121,7 +121,9 @@ class RegisterViewModel(
                                 password = currentState.passwordTextState.text.toString(),
                                 fullName = currentState.fullNameTextState.text.toString(),
                                 gender = currentState.gender,
-                                profilePictureUrl = ""
+                                profilePictureUrl = "",
+                                ageConfirmed = currentState.hasConfirmedAge,
+                                privacyAccepted = currentState.hasAcceptedTerms,
                             ),
                         )
                 ) {

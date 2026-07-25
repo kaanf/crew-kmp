@@ -58,6 +58,9 @@ detekt = "1.23.8"
 chaintech-qr-kit = "3.1.3"
 camerax = "1.4.2"
 mlkit-barcode = "17.3.0"
+androidx-credentials = "1.5.0"
+googleid = "1.1.1"
+androidx-browser = "1.8.0"
 #wiretap = "1.0.0-RC14"
 
 projectApplicationId = "com.kaanf.crew"
@@ -178,6 +181,12 @@ androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.r
 androidx-camera-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "camerax" }
 androidx-camera-view = { module = "androidx.camera:camera-view", version.ref = "camerax" }
 mlkit-barcode-scanning = { module = "com.google.mlkit:barcode-scanning", version.ref = "mlkit-barcode" }
+
+# Social login (Google Credential Manager + Apple web akışı Custom Tab'ı)
+androidx-credentials = { module = "androidx.credentials:credentials", version.ref = "androidx-credentials" }
+androidx-credentials-play-services = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "androidx-credentials" }
+googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleid" }
+androidx-browser = { module = "androidx.browser:browser", version.ref = "androidx-browser" }
 
 android-desugarJdkLibs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "androidDesugarJdkLibs" }
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }

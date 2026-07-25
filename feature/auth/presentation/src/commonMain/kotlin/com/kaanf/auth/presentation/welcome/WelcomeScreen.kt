@@ -27,10 +27,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kaanf.auth.presentation.social.SocialAuthSection
 import com.kaanf.auth.presentation.util.PolicyUrls
 import com.kaanf.auth.presentation.util.appendPolicyLink
 import com.kaanf.core.designsystem.component.button.BaseButton
 import com.kaanf.core.designsystem.theme.AccessDefaults
+import com.kaanf.core.designsystem.theme.AccessIcons
 import com.kaanf.core.designsystem.theme.CrewTheme
 import com.kaanf.core.presentation.util.TestTags
 import crew.feature.auth.presentation.generated.resources.Res
@@ -40,9 +42,9 @@ import crew.feature.auth.presentation.generated.resources.welcome_headline_show_
 import crew.feature.auth.presentation.generated.resources.welcome_headline_solo
 import crew.feature.auth.presentation.generated.resources.welcome_headline_story
 import crew.feature.auth.presentation.generated.resources.welcome_house_rules
-import crew.feature.auth.presentation.generated.resources.welcome_primary_action_create_account
+import crew.feature.auth.presentation.generated.resources.welcome_continue_with_email
 import crew.feature.auth.presentation.generated.resources.welcome_privacy_policy
-import crew.feature.auth.presentation.generated.resources.welcome_secondary_action_login
+import crew.feature.auth.presentation.generated.resources.social_divider
 import crew.feature.auth.presentation.generated.resources.welcome_terms
 import crew.feature.auth.presentation.generated.resources.welcome_terms_conjunction
 import crew.feature.auth.presentation.generated.resources.welcome_terms_middle
@@ -53,20 +55,26 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun WelcomeRoot(
-    onCreateAccountClick: () -> Unit,
-    onLoginClick: () -> Unit,
+    onContinueWithEmailClick: () -> Unit,
+    onLoginSuccess: () -> Unit,
+    onProfileIncomplete: () -> Unit,
 ) {
     WelcomeScreen(
-        onCreateAccountClick = onCreateAccountClick,
-        onLoginClick = onLoginClick,
+        onContinueWithEmailClick = onContinueWithEmailClick,
+        socialAuthSection = {
+            SocialAuthSection(
+                onLoginSuccess = onLoginSuccess,
+                onProfileIncomplete = onProfileIncomplete,
+            )
+        },
     )
 }
 
 @Composable
 fun WelcomeScreen(
-    onCreateAccountClick: () -> Unit,
-    onLoginClick: () -> Unit,
+    onContinueWithEmailClick: () -> Unit,
     modifier: Modifier = Modifier,
+    socialAuthSection: @Composable () -> Unit = {},
 ) {
     Box(
         modifier =
@@ -97,8 +105,8 @@ fun WelcomeScreen(
                 )
 
                 Footer(
-                    onCreateAccountClick = onCreateAccountClick,
-                    onLoginClick = onLoginClick,
+                    onContinueWithEmailClick = onContinueWithEmailClick,
+                    socialAuthSection = socialAuthSection,
                 )
             }
         }
@@ -152,25 +160,30 @@ private fun Content() {
 
 @Composable
 private fun Footer(
-    onCreateAccountClick: () -> Unit,
-    onLoginClick: () -> Unit,
+    onContinueWithEmailClick: () -> Unit,
+    socialAuthSection: @Composable () -> Unit = {},
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        BaseButton(
-            text = stringResource(Res.string.welcome_primary_action_create_account),
-            onClick = onCreateAccountClick,
-            modifier = Modifier.testTag(TestTags.WELCOME_CREATE_ACCOUNT),
-            filled = true,
+        socialAuthSection()
+
+        Text(
+            text = stringResource(Res.string.social_divider),
+            modifier = Modifier.padding(vertical = 2.dp),
+            style = MaterialTheme.typography.headlineSmall.copy(
+                color = AccessDefaults.TextMuted,
+            ),
         )
 
         BaseButton(
-            text = stringResource(Res.string.welcome_secondary_action_login),
-            onClick = onLoginClick,
+            text = stringResource(Res.string.welcome_continue_with_email),
+            onClick = onContinueWithEmailClick,
             modifier = Modifier.testTag(TestTags.WELCOME_LOGIN),
+            filled = true,
+            leadingIcon = AccessIcons.Mail,
         )
 
         Text(
@@ -211,8 +224,7 @@ private fun Footer(
 private fun WelcomeScreenPreview() {
     CrewTheme(isDarkTheme = true) {
         WelcomeScreen(
-            onCreateAccountClick = {},
-            onLoginClick = {},
+            onContinueWithEmailClick = {},
         )
     }
 }

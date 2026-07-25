@@ -12,6 +12,8 @@ fun RegisterParams.toDto(): RegisterRequest =
         fullName = fullName,
         profilePictureUrl = profilePictureUrl,
         gender = gender?.toDto(),
+        ageConfirmed = ageConfirmed,
+        privacyAccepted = privacyAccepted,
     )
 
 private fun Gender.toDto(): GenderDto =

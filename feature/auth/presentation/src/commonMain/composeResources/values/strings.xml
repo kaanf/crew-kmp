@@ -7,8 +7,7 @@
     <string name="welcome_headline_leave_with">Leave with</string>
     <string name="welcome_headline_story">a story.</string>
     <string name="welcome_body">Live bar games for strangers. Scan, play, rate.\nThe night ends in a leaderboard, not a swipe.</string>
-    <string name="welcome_primary_action_create_account">Create my account</string>
-    <string name="welcome_secondary_action_login">I already have one</string>
+    <string name="welcome_continue_with_email">Continue with email</string>
     <string name="welcome_terms_prefix">By continuing you agree to our </string>
     <string name="welcome_terms">Terms</string>
     <string name="welcome_terms_middle">, </string>
@@ -16,6 +15,15 @@
     <string name="welcome_terms_conjunction"> and </string>
     <string name="welcome_privacy_policy">Privacy Policy</string>
     <string name="welcome_terms_suffix">. 18+ only.</string>
+
+    <!-- Social login -->
+    <string name="social_continue_google">Continue with Google</string>
+    <string name="social_continue_apple">Continue with Apple</string>
+    <string name="social_divider">or</string>
+    <string name="consent_sheet_title">Before you continue</string>
+    <string name="consent_sheet_continue">Continue</string>
+    <string name="social_sign_in_failed_title">Sign-in failed</string>
+    <string name="social_sign_in_failed_description">We couldn\'t complete the sign-in. Please try again.</string>
     <string name="error_account_exists">An account with that email or username already exists.</string>
     <string name="error_email_exists">An account with that email already exists.</string>
     <string name="register_snackbar_email_taken_title">Email already in use</string>

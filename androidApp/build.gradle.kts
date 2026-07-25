@@ -16,6 +16,8 @@ android.buildTypes.getByName("release") {
 
 dependencies {
     implementation(projects.composeApp)
+    // MainActivity, Apple deep link dönüşünü AppleSignInBridge'e iletir.
+    implementation(projects.feature.auth.presentation)
 
     implementation(platform(libs.androidx.compose.bom))
     debugImplementation(libs.androidx.compose.ui.tooling)

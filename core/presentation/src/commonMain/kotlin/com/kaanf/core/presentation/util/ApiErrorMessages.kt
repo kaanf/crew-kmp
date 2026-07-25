@@ -2,8 +2,12 @@ package com.kaanf.core.presentation.util
 
 import com.kaanf.core.presentation.snackbar.SnackbarVariant
 import crew.core.presentation.generated.resources.Res
+import crew.core.presentation.generated.resources.err_account_exists_different_method_desc
+import crew.core.presentation.generated.resources.err_account_exists_different_method_title
 import crew.core.presentation.generated.resources.err_conflicting_result_desc
 import crew.core.presentation.generated.resources.err_conflicting_result_title
+import crew.core.presentation.generated.resources.err_consent_required_desc
+import crew.core.presentation.generated.resources.err_consent_required_title
 import crew.core.presentation.generated.resources.err_duplicate_match_invite_desc
 import crew.core.presentation.generated.resources.err_duplicate_match_invite_title
 import crew.core.presentation.generated.resources.err_email_not_verified_desc
@@ -88,6 +92,8 @@ data class ApiErrorUi(
  */
 fun apiErrorUi(code: String): ApiErrorUi? = when (code) {
     "USER_EXISTS" -> ApiErrorUi(Res.string.err_user_exists_title, Res.string.err_user_exists_desc, SnackbarVariant.Warn)
+    "ACCOUNT_EXISTS_WITH_DIFFERENT_METHOD" -> ApiErrorUi(Res.string.err_account_exists_different_method_title, Res.string.err_account_exists_different_method_desc, SnackbarVariant.Warn)
+    "CONSENT_REQUIRED" -> ApiErrorUi(Res.string.err_consent_required_title, Res.string.err_consent_required_desc, SnackbarVariant.Warn)
     "USER_NOT_FOUND" -> ApiErrorUi(Res.string.err_user_not_found_title, Res.string.err_user_not_found_desc, SnackbarVariant.Error)
     "EMAIL_NOT_VERIFIED" -> ApiErrorUi(Res.string.err_email_not_verified_title, Res.string.err_email_not_verified_desc, SnackbarVariant.Warn)
     "SAME_PASSWORD" -> ApiErrorUi(Res.string.err_same_password_title, Res.string.err_same_password_desc, SnackbarVariant.Warn)

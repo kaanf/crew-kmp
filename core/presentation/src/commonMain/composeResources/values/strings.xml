@@ -22,6 +22,10 @@
     <!-- Backend business error codes (see ApiErrorMessages.kt) -->
     <string name="err_user_exists_title">Account exists</string>
     <string name="err_user_exists_desc">An account with this email already exists. Try signing in instead.</string>
+    <string name="err_account_exists_different_method_title">Account already exists</string>
+    <string name="err_account_exists_different_method_desc">This email is already registered. Sign in with your password, then link Google or Apple from your profile.</string>
+    <string name="err_consent_required_title">Consent required</string>
+    <string name="err_consent_required_desc">Please confirm you are 18 or older and accept the Privacy Policy to continue.</string>
     <string name="err_user_not_found_title">Account not found</string>
     <string name="err_user_not_found_desc">We couldn't find an account for those details.</string>
     <string name="err_email_not_verified_title">Verify your email</string>

@@ -18,15 +18,20 @@ fun NavGraphBuilder.authGraph(
     ) {
         composable<AuthGraphRoutes.Welcome> {
             WelcomeRoot(
-                onCreateAccountClick = {
+                // E-posta yolu Register'a gider; mevcut kullanıcı oradaki
+                // aksiyonla Login'e geçer.
+                onContinueWithEmailClick = {
                     navController.navigate(AuthGraphRoutes.Register) {
                         restoreState = true
                         launchSingleTop = true
                     }
                 },
-                onLoginClick = {
-                    navController.navigate(AuthGraphRoutes.Login) {
-                        restoreState = true
+                onLoginSuccess = onLoginSuccess,
+                onProfileIncomplete = {
+                    navController.navigate(AuthGraphRoutes.ProfilePicture) {
+                        popUpTo(AuthGraphRoutes.Welcome) {
+                            inclusive = true
+                        }
                         launchSingleTop = true
                     }
                 },

@@ -3,8 +3,10 @@ package com.kaanf.auth.data.repository
 import com.kaanf.auth.data.dto.request.EmailRequest
 import com.kaanf.core.data.dto.AuthInfoSerializable
 import com.kaanf.auth.data.dto.request.LoginRequest
+import com.kaanf.auth.data.dto.request.SocialLoginRequest
 import com.kaanf.auth.data.mapper.toDto
 import com.kaanf.auth.domain.model.RegisterParams
+import com.kaanf.auth.domain.model.SocialLoginParams
 import com.kaanf.core.data.mappers.toDomain
 import com.kaanf.core.data.networking.get
 import com.kaanf.core.data.networking.post
@@ -45,6 +47,28 @@ class AuthRepositoryImpl(
                     password = password,
                 ),
         ).map { authInfoSerializable ->
+            authInfoSerializable.toDomain()
+        }
+    }
+
+    override suspend fun socialLogin(params: SocialLoginParams): Result<AuthInfo, DataError.Remote> {
+        return httpClient.post<SocialLoginRequest, AuthInfoSerializable>(
+            route = "/auth/social",
+            body =
+                SocialLoginRequest(
+                    provider = params.provider.name,
+                    idToken = params.idToken,
+                    nonce = params.nonce,
+                    ageConfirmed = params.ageConfirmed,
+                    privacyAccepted = params.privacyAccepted,
+                    fullName = params.fullName,
+                ),
+        ) {
+            headers.append(
+                "deviceId",
+                deviceIdProvider.getDeviceId(),
+            )
+        }.map { authInfoSerializable ->
             authInfoSerializable.toDomain()
         }
     }
