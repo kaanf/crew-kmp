@@ -8,7 +8,6 @@ data class UserSerializable(
     val email: String,
     val fullName: String,
     val profilePictureUrl: String? = null,
-    val gender: String = "",
     val role: String = "",
     val status: String = "",
     val hasVerifiedEmail: Boolean = false,

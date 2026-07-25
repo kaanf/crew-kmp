@@ -7,6 +7,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class UpdateUserRequest(
     val fullName: String? = null,
-    val gender: String? = null,
     val profilePictureUrl: String? = null,
 )

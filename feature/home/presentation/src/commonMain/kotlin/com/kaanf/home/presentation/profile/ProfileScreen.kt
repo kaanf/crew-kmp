@@ -174,7 +174,6 @@ fun ProfileScreen(
                 ProfileDetailsCard(
                     fullName = state.displayedName,
                     email = state.email,
-                    gender = state.gender,
                     language = stringResource(state.language.labelRes()),
                     onEditName = { onAction(ProfileAction.OnEditNameClick) },
                     onDeleteAccount = { onAction(ProfileAction.OnDeleteAccountClick) },

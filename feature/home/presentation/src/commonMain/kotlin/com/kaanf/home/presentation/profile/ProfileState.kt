@@ -7,7 +7,6 @@ data class ProfileState(
     val profilePictureUrl: String? = null,
     val fullName: String = "",
     val email: String = "",
-    val gender: String = "",
     // Locally-persisted app language.
     val language: AppLanguage = AppLanguage.DEFAULT,
     // Staged edits, applied to the backend only when "Save your changes" is pressed.
@@ -50,7 +49,6 @@ data class ProfileState(
         if (profilePictureUrl != other.profilePictureUrl) return false
         if (fullName != other.fullName) return false
         if (email != other.email) return false
-        if (gender != other.gender) return false
         if (language != other.language) return false
         if (editedName != other.editedName) return false
         if (!byteArrayEquals(pendingPhotoBytes, other.pendingPhotoBytes)) return false
@@ -67,7 +65,6 @@ data class ProfileState(
         var result = profilePictureUrl?.hashCode() ?: 0
         result = 31 * result + fullName.hashCode()
         result = 31 * result + email.hashCode()
-        result = 31 * result + gender.hashCode()
         result = 31 * result + language.hashCode()
         result = 31 * result + (editedName?.hashCode() ?: 0)
         result = 31 * result + (pendingPhotoBytes?.contentHashCode() ?: 0)

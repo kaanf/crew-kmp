@@ -1,7 +1,5 @@
 package com.kaanf.auth.presentation.register
 
-import com.kaanf.auth.domain.model.Gender
-
 sealed interface RegisterAction {
     data object OnLoginClick : RegisterAction
 
@@ -12,8 +10,6 @@ sealed interface RegisterAction {
     data object OnTermsToggle : RegisterAction
 
     data object OnAgeConfirmationToggle : RegisterAction
-
-    data class OnGenderSelect(val gender: Gender) : RegisterAction
 
     data object OnUnderageGoBack : RegisterAction
 }

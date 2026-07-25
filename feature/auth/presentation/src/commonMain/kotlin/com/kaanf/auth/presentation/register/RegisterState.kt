@@ -1,7 +1,6 @@
 package com.kaanf.auth.presentation.register
 
 import androidx.compose.foundation.text.input.TextFieldState
-import com.kaanf.auth.domain.model.Gender
 import com.kaanf.auth.domain.validation.EmailValidator
 import com.kaanf.auth.domain.validation.PasswordValidator
 
@@ -10,8 +9,6 @@ data class RegisterState(
     val rePasswordTextState: TextFieldState = TextFieldState(),
     val passwordTextState: TextFieldState = TextFieldState(),
     val fullNameTextState: TextFieldState = TextFieldState(),
-    val dateOfBirthTextState: TextFieldState = TextFieldState(),
-    val gender: Gender? = null,
     val hasAcceptedTerms: Boolean = false,
     val hasConfirmedAge: Boolean = false,
     val isRegistering: Boolean = false,
@@ -32,9 +29,6 @@ data class RegisterState(
     val isFullNameValid: Boolean
         get() = fullNameTextState.text.trim().length > 3
 
-    val isDateOfBirthValid: Boolean
-        get() = dateOfBirthTextState.text.length == DATE_OF_BIRTH_DIGIT_COUNT
-
     val canSubmit: Boolean
         get() =
             isEmailValid &&
@@ -44,5 +38,3 @@ data class RegisterState(
                 hasConfirmedAge &&
                 isFullNameValid
 }
-
-private const val DATE_OF_BIRTH_DIGIT_COUNT = 8 // DDMMYYYY, separators are not stored

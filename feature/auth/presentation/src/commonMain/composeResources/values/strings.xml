@@ -31,7 +31,6 @@
     <string name="error_invalid_password">Password must be at least 9 characters and include one digit and one uppercase letter</string>
     <string name="error_password_mismatch">Passwords do not match. Please re-enter your password.</string>
     <string name="error_invalid_email">This is not a valid email</string>
-    <string name="error_invalid_date_of_birth">Please enter a valid date of birth.</string>
     <string name="error_accept_terms">Please accept Terms and House Rules to continue.</string>
     <string name="error_invalid_username">The username must be between 3 and 20 characters</string>
     <string name="snackbar_access_denied_title">ACCESS DENIED</string>
@@ -66,17 +65,7 @@
     <string name="register_headline">Join the Crew.</string>
     <string name="register_description">Takes 30 seconds.</string>
     <string name="register_full_name_placeholder">Full Name</string>
-    <string name="register_date_of_birth_placeholder">DD-MM-YYYY</string>
-    <string name="register_gender_placeholder">Select</string>
-    <string name="register_gender_sheet_title">Select gender</string>
-    <string name="register_gender_female">Female</string>
-    <string name="register_gender_male">Male</string>
-    <string name="register_gender_non_binary">Non-binary</string>
-    <string name="register_gender_other">Other</string>
-    <string name="register_gender_prefer_not_to_say">Prefer not to say</string>
     <string name="register_full_name_label">FULL NAME</string>
-    <string name="register_date_of_birth_label">DATE OF BIRTH</string>
-    <string name="register_gender_label">GENDER</string>
     <string name="register_confirm_password_label">CONFIRM PASSWORD</string>
     <string name="register_password_placeholder">At least 9 characters</string>
     <string name="register_confirm_password_placeholder">Repeat your password</string>

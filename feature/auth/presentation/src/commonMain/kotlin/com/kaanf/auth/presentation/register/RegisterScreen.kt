@@ -16,8 +16,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,10 +27,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.kaanf.auth.domain.model.Gender
 import com.kaanf.auth.presentation.component.textfield.NativeAuthPasswordTextField
 import com.kaanf.auth.presentation.component.textfield.NativeAuthTextField
-import com.kaanf.auth.presentation.component.textfield.NativeAuthTextFieldFormat
 import com.kaanf.auth.presentation.util.PolicyUrls
 import com.kaanf.auth.presentation.util.appendPolicyLink
 import com.kaanf.core.designsystem.component.button.BaseButton
@@ -40,8 +36,6 @@ import com.kaanf.core.designsystem.component.checkbox.BaseCheckbox
 import com.kaanf.core.designsystem.component.layout.AppScaffold
 import com.kaanf.core.designsystem.component.layout.AppTopBar
 import com.kaanf.core.designsystem.component.dialog.BaseDialog
-import com.kaanf.core.designsystem.component.sheet.SelectionBottomSheet
-import com.kaanf.core.designsystem.component.textfield.BaseSelectField
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.CrewTheme
 import com.kaanf.core.presentation.model.AppTopBarState
@@ -52,26 +46,15 @@ import crew.feature.auth.presentation.generated.resources.Res
 import crew.feature.auth.presentation.generated.resources.auth_email_label
 import crew.feature.auth.presentation.generated.resources.auth_email_placeholder
 import crew.feature.auth.presentation.generated.resources.auth_password_label
-import crew.feature.auth.presentation.generated.resources.error_invalid_date_of_birth
 import crew.feature.auth.presentation.generated.resources.error_invalid_email
 import crew.feature.auth.presentation.generated.resources.error_password_mismatch
 import crew.feature.auth.presentation.generated.resources.register_age_confirmation
 import crew.feature.auth.presentation.generated.resources.register_confirm_password_label
 import crew.feature.auth.presentation.generated.resources.register_confirm_password_placeholder
-import crew.feature.auth.presentation.generated.resources.register_date_of_birth_label
-import crew.feature.auth.presentation.generated.resources.register_date_of_birth_placeholder
 import crew.feature.auth.presentation.generated.resources.register_description
 import crew.feature.auth.presentation.generated.resources.register_full_name_label
 import crew.feature.auth.presentation.generated.resources.register_full_name_hint
 import crew.feature.auth.presentation.generated.resources.register_full_name_placeholder
-import crew.feature.auth.presentation.generated.resources.register_gender_female
-import crew.feature.auth.presentation.generated.resources.register_gender_label
-import crew.feature.auth.presentation.generated.resources.register_gender_male
-import crew.feature.auth.presentation.generated.resources.register_gender_non_binary
-import crew.feature.auth.presentation.generated.resources.register_gender_other
-import crew.feature.auth.presentation.generated.resources.register_gender_placeholder
-import crew.feature.auth.presentation.generated.resources.register_gender_prefer_not_to_say
-import crew.feature.auth.presentation.generated.resources.register_gender_sheet_title
 import crew.feature.auth.presentation.generated.resources.register_headline
 import crew.feature.auth.presentation.generated.resources.register_password_placeholder
 import crew.feature.auth.presentation.generated.resources.register_password_requirements_hint
@@ -86,7 +69,6 @@ import crew.feature.auth.presentation.generated.resources.register_terms_suffix
 import crew.feature.auth.presentation.generated.resources.register_underage_description
 import crew.feature.auth.presentation.generated.resources.register_underage_go_back
 import crew.feature.auth.presentation.generated.resources.register_underage_title
-import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
@@ -144,7 +126,6 @@ fun RegisterScreen(
 ) {
     val focusManager = LocalFocusManager.current
     val scrollState = rememberScrollState()
-    var showGenderSheet by remember { mutableStateOf(false) }
 
     Box(
         modifier = modifier
@@ -222,30 +203,6 @@ fun RegisterScreen(
                         placeholder = stringResource(Res.string.register_full_name_placeholder),
                     )
 
-                    /*
-                    val showDateOfBirthError =
-                        state.dateOfBirthTextState.text.isNotEmpty() && !state.isDateOfBirthValid
-                    NativeAuthTextField(
-                        state = state.dateOfBirthTextState,
-                        label = stringResource(Res.string.register_date_of_birth_label),
-                        hint = if (showDateOfBirthError) stringResource(Res.string.error_invalid_date_of_birth) else null,
-                        isError = showDateOfBirthError,
-                        placeholder = stringResource(Res.string.register_date_of_birth_placeholder),
-                        keyboardType = KeyboardType.Number,
-                        format = NativeAuthTextFieldFormat.Date,
-                    )
-
-                    BaseSelectField(
-                        value = state.gender?.let { stringResource(it.labelRes()) },
-                        label = stringResource(Res.string.register_gender_label),
-                        placeholder = stringResource(Res.string.register_gender_placeholder),
-                        onClick = {
-                            focusManager.clearFocus()
-                            showGenderSheet = true
-                        },
-                    )
-                     */
-
                     BaseCheckbox(
                         checked = state.hasConfirmedAge,
                         onCheckedChange = { onAction(RegisterAction.OnAgeConfirmationToggle) },
@@ -295,20 +252,6 @@ fun RegisterScreen(
             }
         }
 
-        if (showGenderSheet) {
-            SelectionBottomSheet(
-                title = stringResource(Res.string.register_gender_sheet_title),
-                options = Gender.entries,
-                selected = state.gender,
-                labelOf = { stringResource(it.labelRes()) },
-                onSelect = { gender ->
-                    onAction(RegisterAction.OnGenderSelect(gender))
-                    showGenderSheet = false
-                },
-                onDismiss = { showGenderSheet = false },
-            )
-        }
-
         if (state.showUnderageDialog) {
             UnderageDialog(
                 onGoBack = { onAction(RegisterAction.OnUnderageGoBack) },
@@ -354,15 +297,6 @@ private fun UnderageDialog(onGoBack: () -> Unit) {
         )
     }
 }
-
-private fun Gender.labelRes(): StringResource =
-    when (this) {
-        Gender.Female -> Res.string.register_gender_female
-        Gender.Male -> Res.string.register_gender_male
-        Gender.NonBinary -> Res.string.register_gender_non_binary
-        Gender.Other -> Res.string.register_gender_other
-        Gender.PreferNotToSay -> Res.string.register_gender_prefer_not_to_say
-    }
 
 @Preview
 @Composable

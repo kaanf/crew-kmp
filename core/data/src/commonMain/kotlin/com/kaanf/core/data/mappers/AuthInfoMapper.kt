@@ -21,7 +21,6 @@ fun UserSerializable.toDomain(): User {
         email = email,
         fullName = fullName,
         profilePictureUrl = profilePictureUrl,
-        gender = gender,
         role = role,
         status = status,
         hasVerifiedEmail = hasVerifiedEmail,
@@ -35,7 +34,6 @@ fun User.toSerializable(): UserSerializable {
         email = email,
         fullName = fullName,
         profilePictureUrl = profilePictureUrl,
-        gender = gender,
         role = role,
         status = status,
         hasVerifiedEmail = hasVerifiedEmail,
@@ -45,7 +43,6 @@ fun User.toSerializable(): UserSerializable {
 fun User.toUpdateUserRequest(): UpdateUserRequest {
     return UpdateUserRequest(
         fullName = fullName,
-        gender = gender,
         profilePictureUrl = profilePictureUrl,
     )
 }

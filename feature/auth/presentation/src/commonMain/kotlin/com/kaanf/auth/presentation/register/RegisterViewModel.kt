@@ -63,10 +63,6 @@ class RegisterViewModel(
                 }
             }
 
-            is RegisterAction.OnGenderSelect -> {
-                _state.update { it.copy(gender = action.gender) }
-            }
-
             RegisterAction.OnUnderageGoBack -> {
                 _state.update { it.copy(showUnderageDialog = false) }
                 viewModelScope.launch {
@@ -120,7 +116,6 @@ class RegisterViewModel(
                                 email = currentState.emailTextState.text.toString().trim(),
                                 password = currentState.passwordTextState.text.toString(),
                                 fullName = currentState.fullNameTextState.text.toString(),
-                                gender = currentState.gender,
                                 profilePictureUrl = "",
                                 ageConfirmed = currentState.hasConfirmedAge,
                                 privacyAccepted = currentState.hasAcceptedTerms,

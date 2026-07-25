@@ -122,7 +122,6 @@ class ProfileViewModel(
                         profilePictureUrl = user?.profilePictureUrl,
                         fullName = user?.fullName.orEmpty(),
                         email = user?.email.orEmpty(),
-                        gender = formatGender(user?.gender),
                     )
                 }
             }
@@ -238,14 +237,4 @@ class ProfileViewModel(
 
         return true
     }
-}
-
-// "MALE" -> "Male", "prefer_not_to_say" -> "Prefer not to say".
-private fun formatGender(raw: String?): String {
-    val value = raw?.trim().orEmpty()
-    if (value.isBlank()) return ""
-    return value
-        .replace('_', ' ')
-        .lowercase()
-        .replaceFirstChar { it.uppercase() }
 }

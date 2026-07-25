@@ -36,7 +36,6 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 fun ProfileDetailsCard(
     fullName: String,
     email: String,
-    gender: String,
     language: String,
     onEditName: () -> Unit,
     onDeleteAccount: () -> Unit,
@@ -60,10 +59,6 @@ fun ProfileDetailsCard(
         RowDivider()
 
         ProfileDetailRow(label = "Email", value = email, locked = true)
-
-        RowDivider()
-
-        ProfileDetailRow(label = "Gender", value = gender, locked = true)
 
         RowDivider()
 
@@ -184,7 +179,6 @@ private fun ProfileDetailsCardPreview() {
             ProfileDetailsCard(
                 fullName = "Kaan Fırat",
                 email = "frtpkaan@gmail.com",
-                gender = "Male",
                 language = "English",
                 onEditName = {},
                 onDeleteAccount = {},
