@@ -27,13 +27,15 @@ private fun EventTicketContextDto.toDomain(): EventTicketContext {
     )
 }
 
-private fun VenueDto.toDomain(): Venue {
+fun VenueDto.toDomain(): Venue {
     return Venue(
         id = id,
         name = name,
         district = district,
         address = address,
-        city = city
+        city = city,
+        latitude = latitude,
+        longitude = longitude,
     )
 }
 

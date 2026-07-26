@@ -58,4 +58,5 @@ object AccessIcons {
     val Mail = Res.drawable.ic_mail
     val GoogleG = Res.drawable.ic_google_g
     val AppleLogo = Res.drawable.ic_apple_logo
+    val PixelArt = Res.drawable.crew_pixel_art
 }

@@ -39,12 +39,13 @@ import com.kaanf.core.presentation.model.AppTopBarState
 import com.kaanf.core.presentation.util.ObserveAsEvents
 import com.kaanf.core.designsystem.component.card.GradientChallengeCard
 import com.kaanf.core.designsystem.component.card.MoreDeckCard
+import com.kaanf.home.presentation.dashboard.component.carousel.DashboardEventCarousel
 import com.kaanf.home.presentation.dashboard.component.emptystate.DashboardEmptyState
 import com.kaanf.home.presentation.dashboard.component.eventcard.DashboardEventCard
 import com.kaanf.home.presentation.dashboard.component.eventinfo.DashboardEventInfoRow
-import com.kaanf.home.presentation.dashboard.component.featuredevent.DashboardFeaturedEventCard
 import com.kaanf.home.presentation.model.EventDashboardUiModel
 import crew.feature.home.presentation.generated.resources.Res
+import crew.feature.home.presentation.generated.resources.dashboard_featured_event_section_description
 import crew.feature.home.presentation.generated.resources.dashboard_featured_event_section_title
 import crew.feature.home.presentation.generated.resources.dashboard_game_preview_cta
 import crew.feature.home.presentation.generated.resources.dashboard_game_preview_section_description
@@ -190,20 +191,16 @@ private fun DashboardContent(
             Spacer(modifier = Modifier.height(24.dp))
         }
 
-        /*
-        state.featuredEvent?.let { featuredEvent ->
-            item(contentType = "featured-card-section") {
+        if (state.upcomingEvents.isNotEmpty()) {
+            item(contentType = "featured-carousel-section") {
                 DashboardSection(
                     title = stringResource(Res.string.dashboard_featured_event_section_title),
-                    description = null,
+                    description = stringResource(Res.string.dashboard_featured_event_section_description),
                     ctaText = "",
                     content = {
-                        DashboardFeaturedEventCard(
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            event = featuredEvent,
-                            onClicked = {
-                                onAction(DashboardAction.OnEventClicked(featuredEvent.id))
-                            },
+                        DashboardEventCarousel(
+                            events = state.upcomingEvents,
+                            onEventClicked = { onAction(DashboardAction.OnEventClicked(it)) },
                         )
                     },
                 )
@@ -213,7 +210,6 @@ private fun DashboardContent(
                 Spacer(modifier = Modifier.height(24.dp))
             }
         }
-         */
 
         item(contentType = "deck-card-section") {
             DashboardSection(

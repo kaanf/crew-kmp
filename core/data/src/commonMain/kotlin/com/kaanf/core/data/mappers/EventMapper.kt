@@ -22,6 +22,7 @@ fun EventDashboardDto.toDomain(): EventDashboard {
         endsAt = Instant.parse(endsAt),
         status = EventStatus.valueOf(status),
         hasMyTicket = hasMyTicket,
+        featuredImageUrl = featuredImageUrl,
     )
 }
 
@@ -31,6 +32,7 @@ fun EventDetailDto.toDomain(): EventDetail {
         title = title,
         description = description,
         venueId = venueId,
+        venue = venue?.toDomain(),
         price = price.toDomain(),
         capacity = capacity,
         soldCount = soldCount,

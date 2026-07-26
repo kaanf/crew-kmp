@@ -9,4 +9,6 @@ data class VenueDto(
     val district: String,
     val address: String,
     val city: String,
+    val latitude: Double? = null,
+    val longitude: Double? = null,
 )

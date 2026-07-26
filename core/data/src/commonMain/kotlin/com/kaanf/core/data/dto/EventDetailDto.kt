@@ -8,6 +8,7 @@ data class EventDetailDto(
     val title: String,
     val description: String?,
     val venueId: String,
+    val venue: VenueDto? = null,
     val price: PriceSerializable,
     val capacity: Int,
     val soldCount: Int,

@@ -49,6 +49,7 @@ import com.kaanf.core.presentation.util.ObserveAsEvents
 import com.kaanf.home.presentation.eventdetail.component.EventDetailInformationCard
 import com.kaanf.home.presentation.eventdetail.component.EventImageViewer
 import com.kaanf.home.presentation.eventdetail.component.EventOnboardingCard
+import com.kaanf.home.presentation.component.EventVenueDirectionsCard
 import com.kaanf.home.presentation.eventdetail.component.PagerDots
 import com.kaanf.home.presentation.eventdetail.component.SafetyBadge
 import com.kaanf.home.presentation.model.EventDetailUiModel
@@ -212,6 +213,12 @@ private fun EventDetailContent(
 
             item(contentType = "safety-card") {
                 SafetyBadge()
+            }
+
+            event.location?.let { location ->
+                item(contentType = "venue-directions") {
+                    EventVenueDirectionsCard(location = location)
+                }
             }
 
             item(contentType = "space-after-last-card") {

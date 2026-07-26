@@ -10,4 +10,5 @@ data class EventDashboardUiModel(
     val formattedPrice: String,
     val isFeatured: Boolean,
     val hasMyTicket: Boolean,
+    val imageUrl: String? = null,
 )

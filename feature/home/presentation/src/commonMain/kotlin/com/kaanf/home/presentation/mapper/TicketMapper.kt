@@ -20,6 +20,7 @@ fun EventTicketResponse.toUiModel(): TicketQrUiModel {
         serverClockOffsetMillis = serverNow.toEpochMilliseconds() - deviceNowMillis,
         formattedVenueAddress = eventDetail.venue.toFormattedAddress(),
         formattedDoorTime = eventDetail.doorsOpenAt.toQrDate(),
-        formattedDoorClock = eventDetail.doorsOpenAt.toClockText()
+        formattedDoorClock = eventDetail.doorsOpenAt.toClockText(),
+        location = eventDetail.venue?.toLocationUiModel(),
     )
 }

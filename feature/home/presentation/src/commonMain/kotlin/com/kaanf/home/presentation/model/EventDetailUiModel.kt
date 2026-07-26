@@ -18,4 +18,6 @@ data class EventDetailUiModel(
     val isEnded: Boolean,
     /** Sıralı hero görselleri; backend boş dönerse mapper tek elemanlı fallback listesi verir. */
     val imageUrls: List<String>,
+    /** Mekânın koordinatı yoksa null; harita bölümü tamamen gizlenir. */
+    val location: EventLocationUiModel?,
 )

@@ -14,4 +14,6 @@ data class TicketQrUiModel(
     val formattedVenueAddress: String,
     val formattedDoorTime: String,
     val formattedDoorClock: String,
+    /** Yalnız mekânın koordinatı varsa dolu; harita şeridi bu null değilse çizilir. */
+    val location: EventLocationUiModel?,
 )

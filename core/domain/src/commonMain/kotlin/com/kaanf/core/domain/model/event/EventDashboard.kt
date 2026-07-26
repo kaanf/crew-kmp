@@ -15,4 +15,5 @@ data class EventDashboard(
     val endsAt: Instant,
     val status: EventStatus,
     val hasMyTicket: Boolean,
+    val featuredImageUrl: String?,
 )

@@ -13,5 +13,6 @@ fun EventDashboard.toUiModel(): EventDashboardUiModel {
         percentage = percentage,
         formattedPrice = price.format(),
         hasMyTicket = hasMyTicket,
+        imageUrl = featuredImageUrl,
     )
 }

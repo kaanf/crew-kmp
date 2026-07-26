@@ -3,6 +3,7 @@
     <string name="dashboard_header_title">This week in\nthe city</string>
     <string name="dashboard_header_description">Live bar games. You show up solo, leave with a story.</string>
     <string name="dashboard_featured_event_section_title">FEATURED EVENT</string>
+    <string name="dashboard_featured_event_section_description">The nights we&apos;d go to ourselves &#183; swipe &#8594;</string>
     <string name="dashboard_featured_event_title">Crew - Vol 14.</string>
     <string name="dashboard_featured_event_date">FRI, 12 MAR - DOORS 20:00</string>
     <string name="dashboard_featured_event_price">220 CZK</string>
@@ -50,6 +51,7 @@
     <string name="ticket_qr_countdown_hours_label">HRS</string>
     <string name="ticket_qr_countdown_minutes_label">MIN</string>
     <string name="ticket_qr_countdown_seconds_label">SEC</string>
+    <string name="ticket_qr_getting_there">GETTING THERE</string>
 
     <string name="ticket_qr_doors_locked_icon">&#x23F3;</string>
     <string name="ticket_qr_doors_locked_title">Doors haven&apos;t opened yet</string>
@@ -72,6 +74,7 @@
     <string name="ticket_qr_load_error_title">Couldn&apos;t load your ticket</string>
     <string name="ticket_qr_load_error_description">Check your connection and try again.</string>
     <string name="ticket_qr_retry_action">TRY AGAIN</string>
+    <string name="event_detail_directions_action">GET DIRECTIONS</string>
     <string name="event_detail_load_error_title">Couldn&apos;t load this event</string>
     <string name="event_detail_load_error_description">Check your connection and try again.</string>
 
