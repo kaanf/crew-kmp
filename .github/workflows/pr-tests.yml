@@ -49,8 +49,47 @@ jobs:
       - name: Ensure Gradle wrapper is executable
         run: chmod +x ./gradlew
 
-      # androidApp:assembleDebug google-services.json (gitignore'da) ister; derleme
-      # kontrolü için compileDebugKotlin yeterli.
+      # google-services eklentisi (FCM) derlemeden önce processDebugGoogleServices
+      # ile config dosyasını ister, compileDebugKotlin bile ona bağımlı. Gerçek
+      # google-services.json gitignore'da olduğu için CI'da şema-geçerli bir
+      # placeholder yazıyoruz: burada paketleme yapılmadığından (yalnız test +
+      # compile) bu sahte config hiçbir artefakta giremez. CI bir gün gerçek
+      # Firebase projesine ihtiyaç duyarsa (ör. App Distribution lane'i) bunun
+      # yerine dosyayı secret'tan yazmak gerekir.
+      - name: Write placeholder google-services.json
+        run: |
+          cat > androidApp/google-services.json <<'JSON'
+          {
+            "project_info": {
+              "project_number": "000000000000",
+              "project_id": "ci-placeholder",
+              "storage_bucket": "ci-placeholder.appspot.com"
+            },
+            "client": [
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "1:000000000000:android:0000000000000000",
+                  "android_client_info": {
+                    "package_name": "com.kaanf.crew"
+                  }
+                },
+                "oauth_client": [],
+                "api_key": [
+                  {
+                    "current_key": "AIzaSyCIplaceholderCIplaceholderCIplace00"
+                  }
+                ],
+                "services": {
+                  "appinvite_service": {
+                    "other_platform_oauth_client": []
+                  }
+                }
+              }
+            ],
+            "configuration_version": "1"
+          }
+          JSON
+
       - name: Run unit tests and compile Android
         run: ./gradlew --no-daemon allTests :androidApp:compileDebugKotlin
 
