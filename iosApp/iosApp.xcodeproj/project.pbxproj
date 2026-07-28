@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		8CB679FD3018503C00616CF2 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 8CB679FC3018503C00616CF2 /* FirebaseMessaging */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		7BA2525428252095D17763E3 /* Crew.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Crew.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -41,6 +45,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8CB679FD3018503C00616CF2 /* FirebaseMessaging in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -85,6 +90,7 @@
 			);
 			name = iosApp;
 			packageProductDependencies = (
+				8CB679FC3018503C00616CF2 /* FirebaseMessaging */,
 			);
 			productName = iosApp;
 			productReference = 7BA2525428252095D17763E3 /* Crew.app */;
@@ -114,6 +120,9 @@
 			);
 			mainGroup = 415BF81389250C72AFBA57F1;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				8CB679FB3018503C00616CF2 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 16863B0985BF66200CB7C7C6 /* Products */;
 			projectDirPath = "";
@@ -250,7 +259,7 @@
 				INFOPLIST_KEY_CFBundleDisplayName = Crew;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
-				INFOPLIST_KEY_NSCameraUsageDescription = "Crew uses the camera to scan event ticket QR codes for check-in.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Crew uses your camera so you can take a profile photo.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -347,7 +356,7 @@
 				INFOPLIST_KEY_CFBundleDisplayName = Crew;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
-				INFOPLIST_KEY_NSCameraUsageDescription = "Crew uses the camera to scan event ticket QR codes for check-in.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Crew uses your camera so you can take a profile photo.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -390,6 +399,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		8CB679FB3018503C00616CF2 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.16.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		8CB679FC3018503C00616CF2 /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8CB679FB3018503C00616CF2 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMessaging;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = BB21710A4977397441112EC8 /* Project object */;
 }

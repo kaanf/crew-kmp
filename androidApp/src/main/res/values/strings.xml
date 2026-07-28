@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Crew</string>
+    <string name="notification_channel_default">Genel</string>
 </resources>

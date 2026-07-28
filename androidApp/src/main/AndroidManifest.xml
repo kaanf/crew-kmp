@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature android:name="android.hardware.camera" />
@@ -43,6 +44,19 @@
                     android:host="auth" />
             </intent-filter>
         </activity>
+
+        <service
+            android:name=".androidapp.MyFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <!-- Background'da gelen notification mesajları bu kanala düşer (kanal CrewApplication'da yaratılır). -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="default" />
 
         <!-- Exposes the cached camera capture file to the camera app via a content:// URI.
              Authority matches ComposeFileProvider's "${packageName}.fileprovider". -->

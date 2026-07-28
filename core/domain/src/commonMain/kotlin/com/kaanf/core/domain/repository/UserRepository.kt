@@ -19,4 +19,6 @@ interface UserRepository {
     ): EmptyResult<DataError.Remote>
 
     suspend fun deleteProfilePicture(): EmptyResult<DataError.Remote>
+
+    suspend fun registerDeviceToken(token: String, platform: String): EmptyResult<DataError.Remote>
 }

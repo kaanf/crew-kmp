@@ -1,13 +1,54 @@
 import SwiftUI
 import ComposeApp
 import Foundation
+import FirebaseCore
+import FirebaseMessaging
+import UserNotifications
+
+class AppDelegate: NSObject, UIApplicationDelegate, MessagingDelegate, UNUserNotificationCenterDelegate {
+    func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
+    ) -> Bool {
+        FirebaseApp.configure()
+        Messaging.messaging().delegate = self
+        UNUserNotificationCenter.current().delegate = self
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { _, _ in }
+        application.registerForRemoteNotifications()
+        return true
+    }
+
+    // Apple'ın verdiği cihaz adresini Firebase'e tanıt; FCM token'ı bunun üzerine üretilir.
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        Messaging.messaging().apnsToken = deviceToken
+    }
+
+    // FCM token'ı hazır olduğunda (ve her yenilendiğinde) paylaşılan koda ilet.
+    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+        if let fcmToken {
+            PushTokenBridge.shared.onNewToken(newToken: fcmToken)
+        }
+    }
+
+    // Uygulama önplandayken de bildirimi banner olarak göster.
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        willPresent notification: UNNotification,
+        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+    ) {
+        completionHandler([.banner, .sound])
+    }
+}
 
 @main
 struct iOSApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+
     init() {
         KoinHelperKt.doInitKoin()
+        PushTokenBridge.shared.start()
     }
-    
+
     var body: some Scene {
         WindowGroup {
             ContentView()

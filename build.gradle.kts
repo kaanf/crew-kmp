@@ -11,4 +11,5 @@ plugins {
     alias(libs.plugins.room) apply false
     alias(libs.plugins.kotlin.android) apply false
     alias(libs.plugins.firebase.appdistribution) apply false
+    alias(libs.plugins.google.services) apply false
 }

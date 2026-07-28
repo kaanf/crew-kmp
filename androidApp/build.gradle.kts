@@ -2,9 +2,10 @@ plugins {
     alias(libs.plugins.convention.android.application)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.firebase.appdistribution)
+    alias(libs.plugins.google.services)
 }
 
-// ponytail: appId ile çalışıyor, google-services.json gerekmiyor.
+// App Distribution appId ile çalışır; google-services eklentisi (FCM) ise androidApp/google-services.json ister.
 // Kimlik: GOOGLE_APPLICATION_CREDENTIALS env'i service account json'ına baksın.
 android.buildTypes.getByName("release") {
     firebaseAppDistribution {
@@ -16,6 +17,8 @@ android.buildTypes.getByName("release") {
 
 dependencies {
     implementation(projects.composeApp)
+    // PushTokenSync, UserRepository/SessionStorage arayüzlerini kullanır.
+    implementation(projects.core.domain)
     // MainActivity, Apple deep link dönüşünü AppleSignInBridge'e iletir.
     implementation(projects.feature.auth.presentation)
 
@@ -29,6 +32,9 @@ dependencies {
     implementation(libs.androidx.compose.material3)
 
     implementation(libs.koin.android)
+
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.messaging)
 
 //    debugImplementation(libs.wiretap.launcher)
 

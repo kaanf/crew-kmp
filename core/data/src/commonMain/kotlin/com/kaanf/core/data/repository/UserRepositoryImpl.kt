@@ -2,6 +2,7 @@ package com.kaanf.core.data.repository
 
 import com.kaanf.core.data.dto.ConfirmProfilePictureRequest
 import com.kaanf.core.data.dto.ProfilePictureUploadUrlsResponse
+import com.kaanf.core.data.dto.RegisterDeviceTokenRequest
 import com.kaanf.core.data.dto.UpdateUserRequest
 import com.kaanf.core.data.dto.UserSerializable
 import com.kaanf.core.data.mappers.toDomain
@@ -10,6 +11,7 @@ import com.kaanf.core.data.networking.delete
 import com.kaanf.core.data.networking.get
 import com.kaanf.core.data.networking.patch
 import com.kaanf.core.data.networking.post
+import com.kaanf.core.data.networking.put
 import com.kaanf.core.data.networking.safeCall
 import com.kaanf.core.domain.model.ProfilePictureUploadUrls
 import com.kaanf.core.domain.model.user.User
@@ -91,6 +93,13 @@ class UserRepositoryImpl(
                     currentUser.copy(profilePictureUrl = uploadUrls.publicUrl)
                 )
             }
+    }
+
+    override suspend fun registerDeviceToken(token: String, platform: String): EmptyResult<DataError.Remote> {
+        return httpClient.put<RegisterDeviceTokenRequest, Unit>(
+            route = "/profile/device-token",
+            body = RegisterDeviceTokenRequest(token = token, platform = platform)
+        )
     }
 
     private suspend fun getProfilePictureUploadUrl(mimeType: String): Result<ProfilePictureUploadUrls, DataError.Remote> {
