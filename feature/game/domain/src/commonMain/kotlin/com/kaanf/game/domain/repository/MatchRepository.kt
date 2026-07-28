@@ -3,6 +3,7 @@ package com.kaanf.game.domain.repository
 import com.kaanf.core.domain.util.DataError
 import com.kaanf.core.domain.util.EmptyResult
 import com.kaanf.core.domain.util.Result
+import com.kaanf.game.domain.model.AddressBook
 import com.kaanf.game.domain.model.EventMemory
 import com.kaanf.game.domain.model.GameTask
 import com.kaanf.game.domain.model.LeaderboardEntry
@@ -166,6 +167,12 @@ interface MatchRepository {
     suspend fun deleteMemory(
         eventId: String, memoryId: String,
     ): EmptyResult<DataError.Remote>
+
+    /**
+     * Adres defteri: tanışılan kişiler + odadaki toplam kişi sayısı.
+     * Damga pasaportu ekranı açılınca çağrılır.
+     */
+    suspend fun getAddressBook(eventId: String): Result<AddressBook, DataError.Remote>
 
     /** Katalogdaki tüm questler + çağıranın ilerleme/claim durumu. */
     suspend fun getQuests(eventId: String): Result<List<Quest>, DataError.Remote>

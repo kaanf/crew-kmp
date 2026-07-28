@@ -55,6 +55,7 @@ fun MatchContainerRoot(
     onNavigateToScanOpponent: () -> Unit,
     onNavigateToDashboard: () -> Unit,
     onNavigateToQuests: () -> Unit,
+    onNavigateToPassport: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -92,6 +93,7 @@ fun MatchContainerRoot(
         onTabSelected = { selectedTab = it },
         onAction = viewModel::onAction,
         onQuestsClick = onNavigateToQuests,
+        onPassportClick = onNavigateToPassport,
     )
 }
 
@@ -104,6 +106,7 @@ fun MatchContainerScreen(
     onAction: (MatchSessionAction) -> Unit,
     modifier: Modifier = Modifier,
     onQuestsClick: () -> Unit = {},
+    onPassportClick: () -> Unit = {},
 ) {
     val isIdle = state.phase == MatchPhase.Idle
 
@@ -165,8 +168,12 @@ fun MatchContainerScreen(
                 )
 
                 selectedTab == GameBottomTab.Play -> AppTopBar(
-                    state = AppTopBarState.Game(showQuestsAction = true),
+                    state = AppTopBarState.Game(
+                        showQuestsAction = true,
+                        showPassportAction = true,
+                    ),
                     onLeftClick = onQuestsClick,
+                    onPassportClick = onPassportClick,
                     onRightClick = { onAction(MatchSessionAction.OnBackClick) },
                 )
 

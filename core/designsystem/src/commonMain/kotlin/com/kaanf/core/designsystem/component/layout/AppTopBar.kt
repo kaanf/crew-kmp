@@ -4,8 +4,10 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -79,6 +81,7 @@ fun AppTopBar(
     onBackClick: (() -> Unit) = {},
     onRightClick: (() -> Unit) = {},
     onLeftClick: (() -> Unit) = {},
+    onPassportClick: (() -> Unit) = {},
 ) {
     val overlayAlpha by animateFloatAsState(
         targetValue = if (elevated()) 1f else 0f,
@@ -227,27 +230,18 @@ fun AppTopBar(
                 else -> false
             }
 
-            // QR home: solda (varsa) quest ikonu.
-            if (state is AppTopBarState.Game && state.showQuestsAction) {
-                IconButton(
-                    onClick = onLeftClick,
-                    modifier = Modifier
-                        .align(Alignment.CenterStart)
-                        .clip(CircleShape)
-                        .background(AccessDefaults.SurfaceElevated)
-                        .border(
-                            width = 1.dp,
-                            color = AccessDefaults.BorderSoft,
-                            shape = CircleShape,
-                        )
-                        .size(32.dp),
+            // QR home: solda (varsa) quest + pasaport ikonları.
+            if (state is AppTopBarState.Game && (state.showQuestsAction || state.showPassportAction)) {
+                Row(
+                    modifier = Modifier.align(Alignment.CenterStart),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    Icon(
-                        painter = painterResource(AccessIcons.Target),
-                        contentDescription = null,
-                        tint = AccessDefaults.TextPrimary,
-                        modifier = Modifier.size(20.dp),
-                    )
+                    if (state.showQuestsAction) {
+                        GameActionButton(icon = AccessIcons.Target, onClick = onLeftClick)
+                    }
+                    if (state.showPassportAction) {
+                        GameActionButton(icon = AccessIcons.User, onClick = onPassportClick)
+                    }
                 }
             }
 
@@ -343,6 +337,33 @@ fun AppTopBar(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun GameActionButton(
+    icon: DrawableResource,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    IconButton(
+        onClick = onClick,
+        modifier = modifier
+            .clip(CircleShape)
+            .background(AccessDefaults.SurfaceElevated)
+            .border(
+                width = 1.dp,
+                color = AccessDefaults.BorderSoft,
+                shape = CircleShape,
+            )
+            .size(32.dp),
+    ) {
+        Icon(
+            painter = painterResource(icon),
+            contentDescription = null,
+            tint = AccessDefaults.TextPrimary,
+            modifier = Modifier.size(20.dp),
+        )
     }
 }
 

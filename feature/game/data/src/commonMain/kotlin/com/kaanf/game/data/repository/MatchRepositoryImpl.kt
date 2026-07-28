@@ -10,6 +10,7 @@ import com.kaanf.core.domain.util.EmptyResult
 import com.kaanf.core.domain.util.Result
 import com.kaanf.core.domain.util.asEmptyResult
 import com.kaanf.core.domain.util.map
+import com.kaanf.game.data.dto.AddressBookDto
 import com.kaanf.game.data.dto.ConfirmTaskRequest
 import com.kaanf.game.data.dto.CreateMatchInviteRequest
 import com.kaanf.game.data.dto.EventMemoryDto
@@ -31,6 +32,7 @@ import com.kaanf.game.data.dto.QuestDto
 import com.kaanf.game.data.dto.ReportResultRequest
 import com.kaanf.game.data.dto.TaskDto
 import com.kaanf.game.data.mappers.toDomain
+import com.kaanf.game.domain.model.AddressBook
 import com.kaanf.game.domain.model.EventMemory
 import com.kaanf.game.domain.model.GameTask
 import com.kaanf.game.domain.model.LeaderboardEntry
@@ -169,6 +171,12 @@ class MatchRepositoryImpl(
         return httpClient.getOrNull<MatchSnapshotDto>(
             route = "/events/$eventId/matches/current",
         ).map { it?.toDomain() }
+    }
+
+    override suspend fun getAddressBook(eventId: String): Result<AddressBook, DataError.Remote> {
+        return httpClient.get<AddressBookDto>(
+            route = "/events/$eventId/address-book",
+        ).map { it.toDomain() }
     }
 
     override suspend fun getLeaderboard(

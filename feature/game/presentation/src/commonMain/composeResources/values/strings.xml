@@ -188,4 +188,27 @@
     <string name="history_kind_lost">Match lost</string>
     <string name="history_kind_opponent_left">Opponent left</string>
     <string name="history_kind_you_left">You left the match</string>
+
+    <string name="passport_top_bar_title">Stamp Passport</string>
+    <string name="passport_eyebrow">TRACE OF THE NIGHT</string>
+    <string name="passport_title_format">%1$d stamps = %2$d strangers</string>
+    <string name="passport_subtitle">Every new person leaves their own stamp. Not points — the trace of who you played with tonight.</string>
+    <string name="passport_page_head">CREW · TONIGHT</string>
+    <string name="passport_page_number">PAGE 01</string>
+    <string name="passport_filled_format">%1$d / %2$d filled</string>
+    <string name="passport_rare_count_format">%1$d rare</string>
+    <string name="passport_hint_prefix">There are </string>
+    <string name="passport_hint_highlight_format">%1$d people</string>
+    <string name="passport_hint_suffix"> in the room whose stamp you don&apos;t have. Empty slots don&apos;t fill themselves.</string>
+    <string name="passport_rare_section_title">RARE STAMPS</string>
+    <string name="passport_rare_status_collected">YOURS</string>
+    <string name="passport_rare_status_missing">MISSING</string>
+    <string name="passport_rare_host_emoji">&#x1F451;</string>
+    <string name="passport_rare_host_name">King of the Night</string>
+    <string name="passport_rare_host_hint">Find the host and play them</string>
+    <string name="passport_source_rps_won">Rock paper scissors · you won</string>
+    <string name="passport_source_rps_lost">Rock paper scissors · they won</string>
+    <string name="passport_source_task_format">Task · &#8220;%1$s&#8221;</string>
+    <string name="passport_collect_action">Collect a new stamp</string>
+    <string name="passport_share_action">Share page</string>
 </resources>

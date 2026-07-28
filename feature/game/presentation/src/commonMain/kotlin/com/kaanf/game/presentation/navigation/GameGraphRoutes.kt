@@ -21,4 +21,7 @@ sealed interface GameGraphRoutes {
 
     @Serializable
     data class Quests(val eventId: String) : GameGraphRoutes
+
+    @Serializable
+    data class Passport(val eventId: String) : GameGraphRoutes
 }

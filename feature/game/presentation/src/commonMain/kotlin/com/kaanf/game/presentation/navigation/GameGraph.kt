@@ -7,6 +7,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.toRoute
 import com.kaanf.game.presentation.gamelobby.GameLobbyRoot
+import com.kaanf.game.presentation.passport.PassportRoot
 import com.kaanf.game.presentation.quests.QuestsRoot
 import com.kaanf.game.presentation.scanopponent.ScanOpponentRoot
 import com.kaanf.game.presentation.session.MatchContainerRoot
@@ -54,11 +55,24 @@ fun NavGraphBuilder.gameGraph(
                 onNavigateToQuests = {
                     navController.navigate(GameGraphRoutes.Quests(eventId = eventId))
                 },
+                onNavigateToPassport = {
+                    navController.navigate(GameGraphRoutes.Passport(eventId = eventId))
+                },
             )
         }
 
         composable<GameGraphRoutes.Quests> {
             QuestsRoot(onBack = { navController.popBackStack() })
+        }
+
+        composable<GameGraphRoutes.Passport> {
+            PassportRoot(
+                onBack = { navController.popBackStack() },
+                // "Yeni damga topla" = QR home'a dön; QR ekranı zaten bir altta.
+                onCollectStamp = { navController.popBackStack() },
+                // ponytail: paylaşım davranışı belirlenmedi, şimdilik no-op.
+                onSharePage = {},
+            )
         }
 
         composable<GameGraphRoutes.ScanOpponent> { entry ->

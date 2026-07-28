@@ -18,6 +18,8 @@ sealed interface AppTopBarState {
         val title: String? = null,
         /** Solda quest ikonunu gösterir (yalnız oyun ana ekranında). */
         val showQuestsAction: Boolean = false,
+        /** Quest ikonunun yanında damga pasaportu (adres defteri) ikonunu gösterir. */
+        val showPassportAction: Boolean = false,
     ) : AppTopBarState
     data object ScanOpponent : AppTopBarState
     data object RpsReady : AppTopBarState

@@ -3,6 +3,7 @@ package com.kaanf.game.presentation.di
 import com.kaanf.game.presentation.history.HistoryViewModel
 import com.kaanf.game.presentation.leaderboard.LeaderboardViewModel
 import com.kaanf.game.presentation.memories.MemoriesViewModel
+import com.kaanf.game.presentation.passport.PassportViewModel
 import com.kaanf.game.presentation.quests.QuestsViewModel
 import com.kaanf.game.presentation.scanopponent.ScanOpponentViewModel
 import com.kaanf.game.presentation.session.MatchSessionViewModel
@@ -18,4 +19,5 @@ val gamePresentationModule =
         viewModelOf(::HistoryViewModel)
         viewModelOf(::MemoriesViewModel)
         viewModelOf(::QuestsViewModel)
+        viewModelOf(::PassportViewModel)
     }

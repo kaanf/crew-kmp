@@ -43,12 +43,10 @@ import crew.feature.game.presentation.generated.resources.history_kind_opponent_
 import crew.feature.game.presentation.generated.resources.history_kind_won
 import crew.feature.game.presentation.generated.resources.history_kind_you_left
 import crew.feature.game.presentation.generated.resources.history_match_log_label
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
+import com.kaanf.game.presentation.util.toClockText
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
-import kotlin.time.Instant
 
 /**
  * MatchContainerScreen içindeki "Your night" tab'ı: biten maçların akışı (match log).
@@ -189,11 +187,6 @@ private fun MatchHistoryEntry.kindLabelRes() = when {
     cancelled -> Res.string.history_kind_you_left
     won -> Res.string.history_kind_won
     else -> Res.string.history_kind_lost
-}
-
-private fun Instant.toClockText(): String {
-    val time = toLocalDateTime(TimeZone.currentSystemDefault()).time
-    return "${time.hour.toString().padStart(2, '0')}:${time.minute.toString().padStart(2, '0')}"
 }
 
 @Composable
