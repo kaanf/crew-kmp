@@ -191,7 +191,7 @@ private fun DashboardContent(
             Spacer(modifier = Modifier.height(24.dp))
         }
 
-        if (state.upcomingEvents.isNotEmpty()) {
+        if (state.featuredEvents.isNotEmpty()) {
             item(contentType = "featured-carousel-section") {
                 DashboardSection(
                     title = stringResource(Res.string.dashboard_featured_event_section_title),
@@ -199,7 +199,7 @@ private fun DashboardContent(
                     ctaText = "",
                     content = {
                         DashboardEventCarousel(
-                            events = state.upcomingEvents,
+                            events = state.featuredEvents,
                             onEventClicked = { onAction(DashboardAction.OnEventClicked(it)) },
                         )
                     },

@@ -6,40 +6,29 @@ import kotlinx.datetime.number
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Instant
 
+/** "Wednesday, 9 July" */
 internal fun Instant.toEventDateText(
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
 ): String {
     val date = toLocalDateTime(timeZone).date
+    val dayName = date.dayOfWeek.name.lowercase().replaceFirstChar { it.uppercase() }
+    val monthName = date.month.name.lowercase().replaceFirstChar { it.uppercase() }
 
-    val dayText = when (date.dayOfWeek.name) {
-        "MONDAY" -> "MON"
-        "TUESDAY" -> "TUE"
-        "WEDNESDAY" -> "WED"
-        "THURSDAY" -> "THU"
-        "FRIDAY" -> "FRI"
-        "SATURDAY" -> "SAT"
-        "SUNDAY" -> "SUN"
-        else -> ""
-    }
-
-    val monthText = when (date.month.number) {
-        1 -> "JAN"
-        2 -> "FEB"
-        3 -> "MAR"
-        4 -> "APR"
-        5 -> "MAY"
-        6 -> "JUN"
-        7 -> "JUL"
-        8 -> "AUG"
-        9 -> "SEP"
-        10 -> "OCT"
-        11 -> "NOV"
-        12 -> "DEC"
-        else -> ""
-    }
-
-    return "$dayText · $monthText ${date.day}"
+    return "$dayName, ${date.day} $monthName"
 }
+
+private val MonthShortNames = listOf(
+    "JAN", "FEB", "MAR", "APR", "MAY", "JUN",
+    "JUL", "AUG", "SEP", "OCT", "NOV", "DEC",
+)
+
+internal fun Instant.toMonthShortText(
+    timeZone: TimeZone = TimeZone.currentSystemDefault(),
+): String = MonthShortNames[toLocalDateTime(timeZone).date.month.number - 1]
+
+internal fun Instant.toDayOfMonthText(
+    timeZone: TimeZone = TimeZone.currentSystemDefault(),
+): String = toLocalDateTime(timeZone).date.day.toString()
 
 internal fun Instant.toEventDetailDateText(
     timeZone: TimeZone = TimeZone.currentSystemDefault(),

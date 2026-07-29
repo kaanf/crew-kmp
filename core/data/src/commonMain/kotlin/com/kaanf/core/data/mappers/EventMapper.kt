@@ -22,7 +22,7 @@ fun EventDashboardDto.toDomain(): EventDashboard {
         endsAt = Instant.parse(endsAt),
         status = EventStatus.valueOf(status),
         hasMyTicket = hasMyTicket,
-        featuredImageUrl = featuredImageUrl,
+        featuredImageUrl = imageUrl,
     )
 }
 

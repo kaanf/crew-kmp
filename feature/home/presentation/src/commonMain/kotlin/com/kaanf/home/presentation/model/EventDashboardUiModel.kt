@@ -11,4 +11,14 @@ data class EventDashboardUiModel(
     val isFeatured: Boolean,
     val hasMyTicket: Boolean,
     val imageUrl: String? = null,
+    val dayOfMonth: String = "",
+    val monthShort: String = "",
+    val doorsTime: String = "",
+    val timing: EventTiming = EventTiming.BeforeDoors,
 )
+
+enum class EventTiming {
+    BeforeDoors,
+    DoorsOpen,
+    InGame,
+}

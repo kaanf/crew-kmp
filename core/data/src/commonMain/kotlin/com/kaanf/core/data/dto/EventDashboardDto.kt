@@ -15,5 +15,5 @@ data class EventDashboardDto(
     val endsAt: String,
     val status: String,
     val hasMyTicket: Boolean,
-    val featuredImageUrl: String? = null,
+    val imageUrl: String? = null,
 )

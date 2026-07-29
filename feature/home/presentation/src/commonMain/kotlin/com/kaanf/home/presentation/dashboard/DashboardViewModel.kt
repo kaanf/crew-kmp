@@ -87,9 +87,12 @@ class DashboardViewModel(
 
                 _state.update {
                     it.copy(
-                        myEvents = myEvents.map { event -> event.toUiModel() },
-                        doorsOpenEvents = doorsOpen.map { event -> event.toUiModel() },
-                        upcomingEvents = upcoming.map { event -> event.toUiModel() },
+                        featuredEvents = result.data
+                            .filter { event -> event.isFeatured }
+                            .map { event -> event.toUiModel(now) },
+                        myEvents = myEvents.map { event -> event.toUiModel(now) },
+                        doorsOpenEvents = doorsOpen.map { event -> event.toUiModel(now) },
+                        upcomingEvents = upcoming.map { event -> event.toUiModel(now) },
                         isLoading = false,
                         isRefreshing = false,
                     )
