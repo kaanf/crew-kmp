@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,12 +26,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kaanf.core.designsystem.component.image.BaseImage
 import com.kaanf.core.designsystem.theme.AccessDefaults
-import com.kaanf.core.designsystem.theme.AccessIcons
 import com.kaanf.core.designsystem.theme.AccessShapes
 import com.kaanf.core.designsystem.theme.CrewTheme
 import com.kaanf.home.presentation.model.EventDashboardUiModel
 import com.kaanf.home.presentation.model.EventTiming
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 private val ThumbnailSize = 64.dp
@@ -55,7 +52,7 @@ fun DashboardEventCard(
                 indication = null,
                 onClick = { onClicked.invoke(event.id) },
             )
-            .padding(11.dp),
+            .padding(12.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -63,11 +60,11 @@ fun DashboardEventCard(
 
         Column(
             modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
+            verticalArrangement = Arrangement.spacedBy(3.dp),
         ) {
             Text(
                 text = event.title,
-                style = MaterialTheme.typography.titleLarge.copy(
+                style = MaterialTheme.typography.headlineSmall.copy(
                     color = AccessDefaults.TextPrimary,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
@@ -89,6 +86,7 @@ fun DashboardEventCard(
             )
 
             Text(
+                modifier = Modifier.padding(top = 3.dp),
                 text = event.timingText(),
                 style = MaterialTheme.typography.labelMedium.copy(
                     color = if (event.timing == EventTiming.InGame) {
@@ -107,7 +105,7 @@ fun DashboardEventCard(
 
         ActionChip(
             text = if (event.hasMyTicket) "Ticket" else event.formattedPrice,
-            highlighted = event.hasMyTicket,
+            filled = event.hasMyTicket,
         )
     }
 }
@@ -133,36 +131,31 @@ private fun EventThumbnail(event: EventDashboardUiModel) {
 @Composable
 private fun ActionChip(
     text: String,
-    highlighted: Boolean,
+    filled: Boolean,
 ) {
-    Row(
-        modifier = Modifier
-            .border(
-                width = 1.dp,
-                color = if (highlighted) AccessDefaults.Accent.copy(alpha = 0.45f) else AccessDefaults.Border,
-                shape = AccessShapes.Medium,
-            )
-            .padding(horizontal = 11.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.titleMedium.copy(
-                color = if (highlighted) AccessDefaults.Accent else AccessDefaults.TextPrimary,
-                fontWeight = FontWeight.ExtraBold,
-                fontSize = 13.sp,
-                lineHeight = 13.sp,
-            ),
+    val chipModifier = if (filled) {
+        Modifier.background(
+            color = AccessDefaults.Accent,
+            shape = AccessShapes.Medium,
         )
-
-        Icon(
-            painter = painterResource(AccessIcons.RightChevron),
-            contentDescription = null,
-            tint = if (highlighted) AccessDefaults.Accent else AccessDefaults.TextPrimary,
-            modifier = Modifier.size(14.dp),
+    } else {
+        Modifier.border(
+            width = 1.dp,
+            color = AccessDefaults.Border,
+            shape = AccessShapes.Medium,
         )
     }
+
+    Text(
+        modifier = chipModifier.padding(horizontal = 11.dp, vertical = 8.dp),
+        text = text,
+        style = MaterialTheme.typography.titleMedium.copy(
+            color = if (filled) AccessDefaults.OnAccent else AccessDefaults.TextPrimary,
+            fontWeight = FontWeight.ExtraBold,
+            fontSize = 12.sp,
+            lineHeight = 12.sp,
+        ),
+    )
 }
 
 private fun EventDashboardUiModel.timingText(): String = when (timing) {
