@@ -47,10 +47,15 @@ import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
 import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import com.kaanf.core.designsystem.theme.AccessShapes
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import kotlin.math.hypot
+
+private const val GLOW_RASTER_PX = 256
 @Composable
 fun BaseButton(
     text: String,
@@ -187,14 +192,15 @@ private fun AnimatedBorderPaint(
             val sideInt = side.toInt().coerceAtLeast(1)
             val topLeft = Offset((size.width - side) / 2f, (size.height - side) / 2f)
 
-            // Sweep gradient'i her karede shader olarak değerlendirmek yerine bir
-            // kez bitmap'e rasterize edip dönüşte sadece basıyoruz.
-            val gradientImage = ImageBitmap(sideInt, sideInt)
+            // Sweep gradient'i her karede shader olarak değerlendirmek yerine bir kez
+            // bitmap'e rasterize edip dönüşte sadece basıyoruz. Yumuşak bir parlama
+            // olduğu için küçük rasterize edip büyütmek gözle ayırt edilmiyor.
+            val gradientImage = ImageBitmap(GLOW_RASTER_PX, GLOW_RASTER_PX)
             CanvasDrawScope().draw(
                 density = this,
                 layoutDirection = layoutDirection,
                 canvas = Canvas(gradientImage),
-                size = Size(side, side),
+                size = Size(GLOW_RASTER_PX.toFloat(), GLOW_RASTER_PX.toFloat()),
             ) {
                 drawRect(
                     brush = Brush.sweepGradient(
@@ -210,13 +216,21 @@ private fun AnimatedBorderPaint(
                 )
             }
 
+            val glowSource = IntSize(GLOW_RASTER_PX, GLOW_RASTER_PX)
+            val glowDestination = IntSize(sideInt, sideInt)
+            val glowOffset = IntOffset(topLeft.x.toInt(), topLeft.y.toInt())
+
             onDrawBehind {
                 drawRect(color = color.copy(alpha = 0.15f))
 
                 rotate(degrees = angle) {
                     drawImage(
                         image = gradientImage,
-                        topLeft = topLeft,
+                        srcOffset = IntOffset.Zero,
+                        srcSize = glowSource,
+                        dstOffset = glowOffset,
+                        dstSize = glowDestination,
+                        filterQuality = FilterQuality.Low,
                     )
                 }
             }

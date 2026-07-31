@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.lerp
 import androidx.compose.ui.zIndex
 import com.kaanf.core.designsystem.component.badge.RoundedBadge
+import com.kaanf.home.presentation.component.verticalGradientScrim
 import com.kaanf.core.designsystem.component.image.BaseImage
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessIcons
@@ -54,6 +55,11 @@ private const val MaxTiltDegrees = 11f
 private const val NeighbourScale = 0.78f
 private const val NeighbourAlpha = 0.55f
 private val CardHeight = 290.dp
+
+private val CardScrim = Brush.verticalGradient(
+    0.35f to Color.Transparent,
+    1f to Color.Black.copy(alpha = 0.85f),
+)
 private val NeighbourPull = 44.dp
 private val CenterElevation = 16.dp
 private val JitterX = 12.dp
@@ -171,16 +177,7 @@ private fun CarouselEventCard(
             )
         }
 
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .background(
-                    Brush.verticalGradient(
-                        0.35f to Color.Transparent,
-                        1f to Color.Black.copy(alpha = 0.85f),
-                    ),
-                ),
-        )
+        Box(modifier = Modifier.matchParentSize().verticalGradientScrim(CardScrim))
 
         Column(
             modifier = Modifier

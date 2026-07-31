@@ -28,12 +28,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -47,6 +43,7 @@ import com.kaanf.core.designsystem.component.layout.AppTopBar
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.presentation.model.AppTopBarState
 import com.kaanf.core.presentation.util.ObserveAsEvents
+import com.kaanf.home.presentation.component.verticalGradientScrim
 import com.kaanf.home.presentation.eventdetail.component.EventDetailInfoSection
 import com.kaanf.home.presentation.eventdetail.component.EventImageViewer
 import com.kaanf.home.presentation.eventdetail.component.EventOnboardingCard
@@ -322,7 +319,7 @@ private fun EventDetailHero(
             }
         }
 
-        Box(modifier = Modifier.matchParentSize().heroScrim())
+        Box(modifier = Modifier.matchParentSize().verticalGradientScrim(HeroScrim))
 
         if (imageUrls.size > 1) {
             PagerDots(
@@ -368,27 +365,6 @@ private val HeroScrim = Brush.verticalGradient(
     0.99f to AccessDefaults.Background,
 )
 
-/**
- * Scrim'i her karede shader ile boyamak yerine bir kez bitmap'e rasterize eder; scroll
- * sırasında sadece hazır bitmap basılır. iOS'ta hareket eden gradient'ler kare düşürüyor
- * (bkz. [com.kaanf.home.presentation.component.eventHeroBackground]).
- */
-private fun Modifier.heroScrim(): Modifier = drawWithCache {
-    val scrim = ImageBitmap(
-        width = size.width.toInt().coerceAtLeast(1),
-        height = size.height.toInt().coerceAtLeast(1),
-    )
-    CanvasDrawScope().draw(
-        density = this,
-        layoutDirection = layoutDirection,
-        canvas = Canvas(scrim),
-        size = size,
-    ) {
-        drawRect(HeroScrim)
-    }
-
-    onDrawBehind { drawImage(scrim) }
-}
 
 @Composable
 @Preview
