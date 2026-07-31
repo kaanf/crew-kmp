@@ -55,7 +55,6 @@ fun App(
     val snackbarHostState = remember { SnackbarHostState() }
     val snackbarScope = rememberCoroutineScope()
 
-    // Game grafiğindeyken global "internet yok" snackbar'ı susar; oradaki soket kendi uyarısını verir.
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination
     val isInGameGraph = currentDestination?.hierarchy?.any { destination ->
         destination.hasRoute(GameGraphRoutes.Graph::class)
