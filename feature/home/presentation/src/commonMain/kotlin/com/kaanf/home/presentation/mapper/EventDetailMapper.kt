@@ -4,7 +4,6 @@ import com.kaanf.core.domain.model.event.EventDetail
 import com.kaanf.core.domain.model.venue.Venue
 import com.kaanf.home.presentation.model.EventDetailUiModel
 import com.kaanf.home.presentation.model.EventLocationUiModel
-import com.kaanf.home.presentation.util.toClockText
 import com.kaanf.home.presentation.util.toEventDetailDateText
 
 fun EventDetail.toUiModel(): EventDetailUiModel {
@@ -15,8 +14,8 @@ fun EventDetail.toUiModel(): EventDetailUiModel {
         heroDate = startsAt.toEventDetailDateText(),
         doorsOpenAt = doorsOpenAt,
         hasMyTicket = hasMyTicket,
-        gameTime = "${startsAt.toClockText()} - ${endsAt.toClockText()}",
-        crew = "$soldCount / $capacity in",
+        goingCount = soldCount,
+        spotsLeft = (capacity - soldCount).coerceAtLeast(0),
         formattedPrice = price.format(),
         isFree = price.amount == 0L,
         // Backend EventPhase.name gönderir: NotOpened / EntryOpen / Gameplay / Finished.
@@ -34,6 +33,7 @@ internal fun Venue.toLocationUiModel(): EventLocationUiModel? {
     return EventLocationUiModel(
         name = name,
         address = "$address, $district / $city",
+        district = district,
         latitude = latitude,
         longitude = longitude,
     )
