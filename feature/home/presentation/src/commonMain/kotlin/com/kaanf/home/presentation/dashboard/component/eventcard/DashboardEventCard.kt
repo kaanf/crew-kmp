@@ -8,10 +8,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
@@ -22,7 +20,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -39,7 +36,6 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 private val ThumbnailSize = 64.dp
-private val ScrimColor = Color(0xB30E0B08)
 
 @Composable
 fun DashboardEventCard(
@@ -73,9 +69,10 @@ fun DashboardEventCard(
                 text = event.title,
                 style = MaterialTheme.typography.titleLarge.copy(
                     color = AccessDefaults.TextPrimary,
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 18.sp,
-                    lineHeight = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    lineHeight = 18.sp,
+                    letterSpacing = (-0.4).sp,
                 ),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -85,36 +82,27 @@ fun DashboardEventCard(
                 text = event.date,
                 style = MaterialTheme.typography.bodySmall.copy(
                     color = AccessDefaults.TextMuted,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 12.sp,
+                    fontSize = 11.5.sp,
                 ),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
 
-            Spacer(modifier = Modifier.height(3.dp))
-
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(
-                    modifier = Modifier.weight(1f, fill = false),
-                    text = event.timingText(),
-                    style = MetaLabelStyle().copy(
-                        color = if (event.timing == EventTiming.InGame) {
-                            AccessDefaults.Accent
-                        } else {
-                            AccessDefaults.TextSecondary
-                        },
-                    ),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-
-                Text(
-                    text = "· %${event.percentage} Full",
-                    style = MetaLabelStyle(),
-                    maxLines = 1,
-                )
-            }
+            Text(
+                text = event.timingText(),
+                style = MaterialTheme.typography.labelMedium.copy(
+                    color = if (event.timing == EventTiming.InGame) {
+                        AccessDefaults.Accent
+                    } else {
+                        AccessDefaults.TextSecondary
+                    },
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 12.sp,
+                    lineHeight = 14.sp,
+                ),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
         }
 
         ActionChip(
@@ -137,35 +125,6 @@ private fun EventThumbnail(event: EventDashboardUiModel) {
                 modifier = Modifier.fillMaxSize(),
                 imageUrl = url,
                 contentScale = ContentScale.Crop,
-            )
-        }
-
-        // ponytail: düz scrim şeridi — gradient her karede boyanınca scroll takılıyor
-        Row(
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .fillMaxWidth()
-                .background(ScrimColor)
-                .padding(horizontal = 6.dp, vertical = 4.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-            verticalAlignment = Alignment.Bottom,
-        ) {
-            Text(
-                text = event.dayOfMonth,
-                style = MaterialTheme.typography.titleMedium.copy(
-                    color = AccessDefaults.TextPrimary,
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 13.sp,
-                    lineHeight = 13.sp,
-                ),
-            )
-
-            Text(
-                text = event.monthShort,
-                style = MetaLabelStyle().copy(
-                    fontSize = 8.sp,
-                    lineHeight = 12.sp,
-                ),
             )
         }
     }
@@ -206,17 +165,10 @@ private fun ActionChip(
     }
 }
 
-@Composable
-private fun MetaLabelStyle() = MaterialTheme.typography.labelMedium.copy(
-    color = AccessDefaults.TextSecondary,
-    fontWeight = FontWeight.Bold,
-    fontSize = 12.sp,
-)
-
 private fun EventDashboardUiModel.timingText(): String = when (timing) {
-    EventTiming.InGame -> "In Game"
+    EventTiming.InGame -> "In game"
     EventTiming.DoorsOpen -> "Doors are open"
-    EventTiming.BeforeDoors -> "Doors open at $doorsTime"
+    EventTiming.BeforeDoors -> "Doors $doorsTime"
 }
 
 @Preview
