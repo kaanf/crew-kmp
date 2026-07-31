@@ -1,4 +1,4 @@
-package com.kaanf.game.data.network
+package com.kaanf.core.data.networking
 
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -45,6 +45,6 @@ actual class ConnectivityObserver {
     }
 
     companion object {
-        private const val NW_PATH_MONITOR_LABEL = "com.kaanf.game.data.network.ConnectivityObserver"
+        private const val NW_PATH_MONITOR_LABEL = "com.kaanf.core.data.networking.ConnectivityObserver"
     }
 }

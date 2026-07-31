@@ -1,18 +1,18 @@
-package com.kaanf.game.data.network
+package com.kaanf.core.data.networking
 
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
-import androidx.core.content.getSystemService
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 
 actual class ConnectivityObserver(
-    private val context: Context
+    context: Context
 ) {
-    private val connectivityManager = context.getSystemService<ConnectivityManager>()!!
+    private val connectivityManager =
+        context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
     actual val isConnected: Flow<Boolean> = callbackFlow {
         val initiallyConnected = connectivityManager.activeNetwork?.let { network ->

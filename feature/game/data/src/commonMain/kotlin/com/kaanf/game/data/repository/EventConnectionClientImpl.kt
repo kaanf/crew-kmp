@@ -2,6 +2,7 @@
 
 package com.kaanf.game.data.repository
 
+import com.kaanf.core.data.networking.ConnectivityObserver
 import com.kaanf.core.data.networking.JwtTokenInspector
 import com.kaanf.core.data.networking.SessionRefresher
 import com.kaanf.core.data.networking.UrlConstants
@@ -11,7 +12,6 @@ import com.kaanf.game.data.dto.SocketEnvelopeDto
 import com.kaanf.game.data.lifecycle.AppLifecycleObserver
 import com.kaanf.game.data.mappers.toDomain
 import com.kaanf.game.data.network.ConnectionErrorHandler
-import com.kaanf.game.data.network.ConnectivityObserver
 import com.kaanf.game.domain.event.EventConnectionClient
 import com.kaanf.game.domain.model.GameConnectionState
 import com.kaanf.game.domain.model.GameSocketMessage

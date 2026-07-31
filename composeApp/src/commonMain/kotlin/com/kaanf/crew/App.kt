@@ -19,6 +19,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.kaanf.auth.presentation.navigation.AuthGraphRoutes
 import com.kaanf.core.designsystem.component.layout.CrewSnackbarHost
@@ -29,6 +32,7 @@ import com.kaanf.core.designsystem.theme.CrewTheme
 import com.kaanf.core.presentation.util.ObserveAsEvents
 import com.kaanf.crew.navigation.DeepLinkListener
 import com.kaanf.crew.navigation.NavigationRoot
+import com.kaanf.game.presentation.navigation.GameGraphRoutes
 import com.kaanf.home.presentation.navigation.HomeGraphRoutes
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -50,6 +54,16 @@ fun App(
     val snackbarController: SnackbarController = koinInject()
     val snackbarHostState = remember { SnackbarHostState() }
     val snackbarScope = rememberCoroutineScope()
+
+    // Game grafiğindeyken global "internet yok" snackbar'ı susar; oradaki soket kendi uyarısını verir.
+    val currentDestination = navController.currentBackStackEntryAsState().value?.destination
+    val isInGameGraph = currentDestination?.hierarchy?.any { destination ->
+        destination.hasRoute(GameGraphRoutes.Graph::class)
+    } == true
+
+    LaunchedEffect(isInGameGraph) {
+        viewModel.onGameGraphVisibilityChanged(isInGameGraph)
+    }
 
     LaunchedEffect(state.isCheckingAuth) {
         if (!state.isCheckingAuth) {
