@@ -4,6 +4,7 @@ package com.kaanf.home.presentation.model
 data class EventLocationUiModel(
     val name: String,
     val address: String,
+    val district: String,
     val latitude: Double,
     val longitude: Double,
 )

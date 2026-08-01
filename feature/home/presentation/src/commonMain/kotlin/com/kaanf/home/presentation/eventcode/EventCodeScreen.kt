@@ -29,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kaanf.core.designsystem.component.info.GlowInfoCard
 import com.kaanf.core.designsystem.component.info.InfoCard
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessIcons
@@ -36,7 +37,6 @@ import com.kaanf.core.designsystem.theme.AccessShapes
 import com.kaanf.core.designsystem.theme.CrewTheme
 import com.kaanf.home.presentation.eventcode.component.CodeFieldStatus
 import com.kaanf.home.presentation.eventcode.component.CodeInputField
-import com.kaanf.home.presentation.ticketqr.component.doorslocked.DoorsLockedInfoCard
 import crew.feature.home.presentation.generated.resources.Res
 import crew.feature.home.presentation.generated.resources.event_code_headline
 import crew.feature.home.presentation.generated.resources.ticket_qr_clear_code_action
@@ -45,6 +45,9 @@ import crew.feature.home.presentation.generated.resources.event_code_info_descri
 import crew.feature.home.presentation.generated.resources.event_code_info_title
 import crew.feature.home.presentation.generated.resources.event_code_input_hint
 import crew.feature.home.presentation.generated.resources.event_code_show_qr_action
+import crew.feature.home.presentation.generated.resources.ticket_qr_doors_locked_description
+import crew.feature.home.presentation.generated.resources.ticket_qr_doors_locked_icon
+import crew.feature.home.presentation.generated.resources.ticket_qr_doors_locked_title
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -90,7 +93,14 @@ fun EventCodeContent(
                 )
 
                 if (doorsLocked) {
-                    DoorsLockedInfoCard(doorTime = doorTime)
+                    GlowInfoCard(
+                        emoji = stringResource(Res.string.ticket_qr_doors_locked_icon),
+                        title = stringResource(Res.string.ticket_qr_doors_locked_title),
+                        description = stringResource(
+                            Res.string.ticket_qr_doors_locked_description,
+                            doorTime,
+                        ),
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(6.dp))

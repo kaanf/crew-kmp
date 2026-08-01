@@ -32,8 +32,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kaanf.core.designsystem.component.avatar.AvatarCircle
 import com.kaanf.core.designsystem.component.avatar.AvatarContent
+import com.kaanf.core.designsystem.component.avatar.VersusAvatarRow
 import com.kaanf.core.designsystem.component.avatar.avatarContentFor
 import com.kaanf.core.designsystem.component.button.BaseButton
 import com.kaanf.core.designsystem.theme.AccessDefaults
@@ -68,53 +68,19 @@ fun GameResponseSheet(
             ),
         )
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(
-                space = 24.dp,
-                alignment = Alignment.CenterHorizontally
+        VersusAvatarRow(
+            left = avatarContentFor(
+                imageUrl = message.fromProfilePictureUrl,
+                initialsLabel = message.fromFullName.take(1).uppercase(),
+                seed = message.fromFullName,
             ),
-            verticalAlignment = Alignment.CenterVertically,
+            right = selfPhotoUrl?.let { AvatarContent.Image(it) }
+                ?: AvatarContent.Initials(label = "MK", color = AccessDefaults.Teal),
+            rightBorderColor = AccessDefaults.Accent,
         ) {
-            AvatarCircle(
-                content = avatarContentFor(
-                    imageUrl = message.fromProfilePictureUrl,
-                    initialsLabel = message.fromFullName.take(1).uppercase(),
-                    seed = message.fromFullName,
-                ),
-                avatarSize = 78,
-                textSize = 30.0,
-                borderColor = AccessDefaults.BorderSoft,
-                borderSize = 2,
-            )
-
-            Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                PairedStatusLine(
-                    modifier = Modifier.width(80.dp).height(32.dp)
-                )
-
-                Text(
-                    text = "PAIRED",
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        color = AccessDefaults.TextMuted,
-                        letterSpacing = 3.sp,
-                        fontSize = 9.sp
-                    )
-                )
+            MatchStatusColumn(label = "PAIRED") {
+                PairedStatusLine(modifier = Modifier.width(80.dp).height(32.dp))
             }
-
-            AvatarCircle(
-                content = selfPhotoUrl?.let { AvatarContent.Image(it) }
-                    ?: AvatarContent.Initials(label = "MK", color = AccessDefaults.Teal),
-                avatarSize = 78,
-                textSize = 30.0,
-                borderColor = AccessDefaults.Accent,
-                borderSize = 2,
-            )
         }
 
         Text(

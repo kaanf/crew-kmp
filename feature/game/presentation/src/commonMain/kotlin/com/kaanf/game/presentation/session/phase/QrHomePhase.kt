@@ -40,7 +40,6 @@ import com.kaanf.game.presentation.component.dialog.CameraPermissionDialog
 import com.kaanf.game.presentation.memories.TonightsRollSection
 import com.kaanf.game.presentation.session.MatchSessionAction
 import com.kaanf.game.presentation.session.MatchSessionState
-import com.kaanf.game.presentation.session.component.LostThrowInfoCard
 import crew.feature.game.presentation.generated.resources.Res
 import crew.feature.game.presentation.generated.resources.leaderboard_points_format
 import crew.feature.game.presentation.generated.resources.match_phase_qr_home_description
@@ -152,7 +151,8 @@ fun QrHomePhase(
 
         TonightsRollSection(modifier = Modifier.fillMaxWidth())
 
-        //LostThrowInfoCard()
+        // "Atışı kaybettin" kartı geri gelirse: GlowInfoCard(accentColor = AccessDefaults.Coral)
+        // + match_phase_lost_throw_* stringleri.
     }
 }
 

@@ -1,7 +1,6 @@
 package com.kaanf.game.presentation.memories
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -43,8 +42,10 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kaanf.core.designsystem.component.image.BaseImage
 import com.kaanf.core.designsystem.component.sheet.ContainerBottomSheet
+import com.kaanf.core.designsystem.modifier.surfaceCard
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessIcons
+import com.kaanf.core.designsystem.theme.AccessShapes
 import com.kaanf.game.domain.model.EventMemory
 import crew.feature.game.presentation.generated.resources.Res
 import crew.feature.game.presentation.generated.resources.memories_reveal_card_subtitle_format
@@ -107,48 +108,12 @@ private fun MemoriesRevealCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val cardShape = RoundedCornerShape(18.dp)
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(top = 8.dp)
-            .clip(cardShape)
-            .background(AccessDefaults.Surface)
-            .border(
-                width = 1.dp,
-                color = AccessDefaults.Coral.copy(alpha = 0.34f),
-                shape = cardShape,
-            )
-            .clickable(onClick = onClick)
-            .padding(15.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(13.dp),
-    ) {
-        Box(
-            modifier = Modifier
-                .size(42.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(AccessDefaults.Coral.copy(alpha = 0.16f)),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                painter = painterResource(AccessIcons.LockOpen),
-                contentDescription = null,
-                tint = AccessDefaults.Coral,
-                modifier = Modifier.size(20.dp),
-            )
-        }
-        Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(3.dp),
-        ) {
-            Text(
-                text = stringResource(Res.string.memories_reveal_card_title),
-                style = MaterialTheme.typography.titleSmall.copy(
-                    color = AccessDefaults.TextPrimary,
-                    fontWeight = FontWeight.Bold,
-                ),
-            )
+    MemoriesEntryCard(
+        icon = AccessIcons.LockOpen,
+        title = stringResource(Res.string.memories_reveal_card_title),
+        onClick = onClick,
+        modifier = modifier.padding(top = 8.dp),
+        subtitle = {
             Text(
                 text = stringResource(Res.string.memories_reveal_card_subtitle_format, count),
                 style = MaterialTheme.typography.bodySmall.copy(
@@ -156,14 +121,16 @@ private fun MemoriesRevealCard(
                     fontSize = 11.sp,
                 ),
             )
-        }
-        Icon(
-            painter = painterResource(AccessIcons.RightChevron),
-            contentDescription = null,
-            tint = AccessDefaults.Coral,
-            modifier = Modifier.size(18.dp),
-        )
-    }
+        },
+        trailing = {
+            Icon(
+                painter = painterResource(AccessIcons.RightChevron),
+                contentDescription = null,
+                tint = AccessDefaults.Coral,
+                modifier = Modifier.size(18.dp),
+            )
+        },
+    )
 }
 
 @Composable
@@ -263,8 +230,7 @@ private fun RevealCell(
         modifier = modifier
             .aspectRatio(1f / 1.15f)
             .clip(cellShape)
-            .background(AccessDefaults.SurfaceElevated)
-            .border(width = 1.dp, color = AccessDefaults.BorderSoft, shape = cellShape)
+            .surfaceCard(shape = cellShape, backgroundColor = AccessDefaults.SurfaceElevated)
             .clickable(onClick = onClick),
     ) {
         BaseImage(
@@ -300,7 +266,7 @@ private fun RevealCell(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(8.dp)
-                    .background(AccessDefaults.Accent, RoundedCornerShape(999.dp))
+                    .background(AccessDefaults.Accent, AccessShapes.Pill)
                     .padding(horizontal = 7.dp, vertical = 3.dp),
             )
         }

@@ -23,9 +23,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kaanf.core.designsystem.component.button.BaseButton
+import com.kaanf.core.designsystem.modifier.surfaceCard
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessIcons
-import com.kaanf.core.designsystem.theme.AccessShapes
 import com.kaanf.core.designsystem.theme.CrewTheme
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -88,15 +88,7 @@ fun LeaveMatchSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(
-                    color = AccessDefaults.SurfaceElevated,
-                    shape = AccessShapes.Medium
-                )
-                .border(
-                    width = 1.dp,
-                    color = AccessDefaults.BorderSoft,
-                    shape = AccessShapes.Medium
-                )
+                .surfaceCard(backgroundColor = AccessDefaults.SurfaceElevated)
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally

@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.FlowRow
 import com.kaanf.core.designsystem.component.avatar.AvatarCircle
 import com.kaanf.core.designsystem.component.avatar.AvatarStack
 import com.kaanf.core.designsystem.component.avatar.ExtraAvatarCircle
+import com.kaanf.core.designsystem.theme.AccessShapes
 import com.kaanf.core.presentation.model.UserAvatar
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -178,7 +179,7 @@ private fun StatPill(
 ) {
     Row(
         modifier = modifier
-            .clip(RoundedCornerShape(999.dp))
+            .clip(AccessShapes.Pill)
             .background(Color(0xFF211B14))
             .padding(horizontal = 18.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
