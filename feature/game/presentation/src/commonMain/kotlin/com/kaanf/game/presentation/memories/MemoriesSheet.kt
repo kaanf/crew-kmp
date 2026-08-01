@@ -38,6 +38,7 @@ import com.kaanf.core.designsystem.component.image.BaseImage
 import com.kaanf.core.designsystem.modifier.surfaceCard
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessIcons
+import com.kaanf.core.designsystem.theme.AccessShapes
 import com.kaanf.game.domain.model.EventMemory
 import crew.feature.game.presentation.generated.resources.Res
 import crew.feature.game.presentation.generated.resources.memories_delete_action
@@ -137,7 +138,7 @@ fun MemoriesSheet(
                     modifier = Modifier
                         .background(
                             color = AccessDefaults.Coral.copy(alpha = 0.13f),
-                            shape = RoundedCornerShape(999.dp),
+                            shape = AccessShapes.Pill,
                         )
                         .padding(horizontal = 8.dp, vertical = 1.dp),
                 )

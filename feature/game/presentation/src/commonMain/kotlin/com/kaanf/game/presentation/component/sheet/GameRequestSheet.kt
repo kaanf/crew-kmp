@@ -12,8 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kaanf.core.designsystem.component.avatar.AvatarCircle
 import com.kaanf.core.designsystem.component.avatar.AvatarContent
+import com.kaanf.core.designsystem.component.avatar.VersusAvatarRow
 import com.kaanf.core.designsystem.component.avatar.avatarContentFor
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.CrewTheme
@@ -65,53 +65,19 @@ fun GameRequestSheet(
             ),
         )
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(
-                space = 24.dp,
-                alignment = Alignment.CenterHorizontally
+        VersusAvatarRow(
+            left = selfPhotoUrl?.let { AvatarContent.Image(it) }
+                ?: AvatarContent.Initials(label = "Y", color = AccessDefaults.Rose),
+            right = avatarContentFor(
+                imageUrl = opponentPhotoUrl,
+                initialsLabel = opponentName.take(1).uppercase().ifBlank { "?" },
+                seed = opponentName,
             ),
-            verticalAlignment = Alignment.CenterVertically,
+            rightBorderColor = AccessDefaults.Accent,
         ) {
-            AvatarCircle(
-                content = selfPhotoUrl?.let { AvatarContent.Image(it) }
-                    ?: AvatarContent.Initials(label = "Y", color = AccessDefaults.Rose),
-                avatarSize = 78,
-                textSize = 30.0,
-                borderColor = AccessDefaults.BorderSoft,
-                borderSize = 2,
-            )
-
-            Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                SentStatusLine(
-                    modifier = Modifier.width(80.dp).height(32.dp)
-                )
-
-                Text(
-                    text = "SENT",
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        color = AccessDefaults.TextMuted,
-                        letterSpacing = 3.sp,
-                        fontSize = 9.sp
-                    )
-                )
+            MatchStatusColumn(label = "SENT") {
+                SentStatusLine(modifier = Modifier.width(80.dp).height(32.dp))
             }
-
-            AvatarCircle(
-                content = avatarContentFor(
-                    imageUrl = opponentPhotoUrl,
-                    initialsLabel = opponentName.take(1).uppercase().ifBlank { "?" },
-                    seed = opponentName,
-                ),
-                avatarSize = 78,
-                textSize = 30.0,
-                borderColor = AccessDefaults.Accent,
-                borderSize = 2,
-            )
         }
 
         Text(
@@ -149,6 +115,29 @@ fun GameRequestSheet(
             ),
         )
         */
+    }
+}
+
+/** İki avatarın arasındaki durum sütunu: animasyonlu çizgi + altında büyük harf etiket. */
+@Composable
+internal fun MatchStatusColumn(
+    label: String,
+    line: @Composable () -> Unit,
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        line()
+
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall.copy(
+                color = AccessDefaults.TextMuted,
+                letterSpacing = 3.sp,
+                fontSize = 9.sp,
+            ),
+        )
     }
 }
 

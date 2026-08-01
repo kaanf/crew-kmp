@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -17,8 +16,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kaanf.core.designsystem.component.avatar.AvatarCircle
 import com.kaanf.core.designsystem.component.avatar.AvatarContent
+import com.kaanf.core.designsystem.component.avatar.VersusAvatarRow
 import com.kaanf.core.designsystem.component.avatar.avatarContentFor
 import com.kaanf.core.designsystem.component.button.BaseButton
 import com.kaanf.core.designsystem.theme.AccessDefaults
@@ -57,26 +56,18 @@ fun RpsReadyPhase(
         ),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(
-                space = 24.dp,
-                alignment = Alignment.CenterHorizontally,
+        VersusAvatarRow(
+            left = myImageUrl?.let { AvatarContent.Image(it) }
+                ?: AvatarContent.Initials(
+                    label = stringResource(Res.string.match_you_avatar_label),
+                    color = AccessDefaults.Rose,
+                ),
+            right = avatarContentFor(
+                imageUrl = opponentImageUrl,
+                initialsLabel = opponentInitial,
+                seed = opponentFullName,
             ),
-            verticalAlignment = Alignment.CenterVertically,
         ) {
-            AvatarCircle(
-                content = myImageUrl?.let { AvatarContent.Image(it) }
-                    ?: AvatarContent.Initials(
-                        label = stringResource(Res.string.match_you_avatar_label),
-                        color = AccessDefaults.Rose,
-                    ),
-                avatarSize = 78,
-                textSize = 30.0,
-                borderColor = AccessDefaults.BorderSoft,
-                borderSize = 2,
-            )
-
             Text(
                 text = stringResource(Res.string.match_phase_rps_ready_vs_label),
                 style = MaterialTheme.typography.labelSmall.copy(
@@ -84,18 +75,6 @@ fun RpsReadyPhase(
                     letterSpacing = 3.sp,
                     fontSize = 12.sp,
                 ),
-            )
-
-            AvatarCircle(
-                content = avatarContentFor(
-                    imageUrl = opponentImageUrl,
-                    initialsLabel = opponentInitial,
-                    seed = opponentFullName,
-                ),
-                avatarSize = 78,
-                textSize = 30.0,
-                borderColor = AccessDefaults.BorderSoft,
-                borderSize = 2,
             )
         }
 

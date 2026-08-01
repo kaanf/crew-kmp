@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -39,9 +37,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kaanf.core.designsystem.component.header.SectionHeader
 import com.kaanf.core.designsystem.component.layout.AppScaffold
 import com.kaanf.core.designsystem.component.layout.AppTopBar
+import com.kaanf.core.designsystem.component.layout.FullScreenLoader
+import com.kaanf.core.designsystem.component.progressbar.BaseProgressBar
 import com.kaanf.core.designsystem.modifier.surfaceCard
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessIcons
+import com.kaanf.core.designsystem.theme.AccessShapes
 import com.kaanf.core.presentation.model.AppTopBarState
 import com.kaanf.game.domain.model.Quest
 import crew.feature.game.presentation.generated.resources.Res
@@ -91,15 +92,11 @@ fun QuestsScreen(
         },
     ) { innerPadding ->
         if (state.isLoading) {
-            Box(
+            FullScreenLoader(
                 modifier = Modifier
-                    .fillMaxSize()
                     .padding(innerPadding)
                     .consumeWindowInsets(innerPadding),
-                contentAlignment = Alignment.Center,
-            ) {
-                CircularProgressIndicator()
-            }
+            )
         } else {
             LazyColumn(
                 modifier = Modifier
@@ -217,7 +214,7 @@ private fun QuestCard(
                         fontWeight = FontWeight.SemiBold,
                     ),
                     modifier = Modifier
-                        .clip(RoundedCornerShape(999.dp))
+                        .clip(AccessShapes.Pill)
                         .background(AccessDefaults.Accent)
                         .clickable(onClick = onClaim)
                         .padding(horizontal = 15.dp, vertical = 9.dp),
@@ -247,7 +244,7 @@ private fun QuestCard(
                     modifier = Modifier
                         .background(
                             color = AccessDefaults.Accent.copy(alpha = 0.12f),
-                            shape = RoundedCornerShape(999.dp),
+                            shape = AccessShapes.Pill,
                         )
                         .padding(horizontal = 9.dp, vertical = 3.dp),
                 )
@@ -257,22 +254,12 @@ private fun QuestCard(
                 style = MaterialTheme.typography.bodySmall.copy(color = AccessDefaults.TextMuted),
                 modifier = Modifier.padding(top = 6.dp),
             )
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 12.dp, bottom = 9.dp)
-                    .height(7.dp)
-                    .clip(RoundedCornerShape(999.dp))
-                    .background(AccessDefaults.SurfaceElevated),
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(fraction = quest.progress / quest.target.toFloat())
-                        .fillMaxHeight()
-                        .clip(RoundedCornerShape(999.dp))
-                        .background(AccessDefaults.Accent),
-                )
-            }
+            BaseProgressBar(
+                progress = quest.progress / quest.target.toFloat(),
+                height = 7.dp,
+                trackColor = AccessDefaults.SurfaceElevated,
+                modifier = Modifier.padding(top = 12.dp, bottom = 9.dp),
+            )
             Text(
                 text = stringResource(
                     Res.string.quests_progress_format,

@@ -37,6 +37,7 @@ import com.kaanf.core.designsystem.component.avatar.avatarContentFor
 import com.kaanf.core.designsystem.component.image.BaseImage
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessIcons
+import com.kaanf.core.designsystem.theme.AccessShapes
 import com.kaanf.game.domain.model.EventMemory
 import crew.feature.game.presentation.generated.resources.Res
 import crew.feature.game.presentation.generated.resources.memories_shared_by_format
@@ -140,7 +141,7 @@ fun MemoryLightbox(
                                 fontSize = 10.sp,
                             ),
                             modifier = Modifier
-                                .background(AccessDefaults.Accent, RoundedCornerShape(999.dp))
+                                .background(AccessDefaults.Accent, AccessShapes.Pill)
                                 .padding(horizontal = 9.dp, vertical = 4.dp),
                         )
                     }

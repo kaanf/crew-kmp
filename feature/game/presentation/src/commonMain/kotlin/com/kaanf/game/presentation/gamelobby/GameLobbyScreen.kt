@@ -4,7 +4,6 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -13,9 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -35,6 +31,7 @@ import com.kaanf.core.designsystem.component.dialog.BaseDialog
 import com.kaanf.core.designsystem.component.info.InfoCard
 import com.kaanf.core.designsystem.component.layout.AppScaffold
 import com.kaanf.core.designsystem.component.layout.AppTopBar
+import com.kaanf.core.designsystem.component.layout.FullScreenLoader
 import com.kaanf.core.designsystem.component.sheet.ContainerBottomSheet
 import com.kaanf.core.designsystem.component.sheet.TwoOptionBottomSheet
 import com.kaanf.core.designsystem.theme.AccessDefaults
@@ -172,12 +169,7 @@ fun GameLobbyScreen(
         animationSpec = tween(durationMillis = 250),
     ) { isLoading ->
         if (isLoading) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center,
-            ) {
-                CircularProgressIndicator(color = AccessDefaults.Accent)
-            }
+            FullScreenLoader()
         } else {
             GameLobbyContent(
                 scrollState = scrollState,

@@ -17,7 +17,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,6 +39,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kaanf.core.designsystem.component.avatar.AvatarCircle
 import com.kaanf.core.designsystem.component.avatar.avatarContentFor
 import com.kaanf.core.designsystem.component.header.SectionHeader
+import com.kaanf.core.designsystem.component.layout.FullScreenLoader
 import com.kaanf.core.designsystem.modifier.surfaceCard
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.game.domain.model.LeaderboardEntry
@@ -97,12 +97,7 @@ fun LeaderboardContent(
     }
 
     if (state.isLoading) {
-        Box(
-            modifier = modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center,
-        ) {
-            CircularProgressIndicator()
-        }
+        FullScreenLoader(modifier = modifier)
     } else {
         LazyColumn(
             state = listState,

@@ -2,12 +2,9 @@ package com.kaanf.game.presentation.memories
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -33,6 +30,7 @@ import com.kaanf.core.designsystem.component.image.BaseImage
 import com.kaanf.core.designsystem.component.sheet.ContainerBottomSheet
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessIcons
+import com.kaanf.core.designsystem.theme.AccessShapes
 import com.kaanf.core.presentation.util.mediapicker.rememberCameraLauncher
 import com.kaanf.game.domain.model.EventMemory
 import crew.feature.game.presentation.generated.resources.Res
@@ -86,53 +84,12 @@ private fun TonightsRollCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val cardShape = RoundedCornerShape(16.dp)
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(cardShape)
-            .background(AccessDefaults.Surface)
-            .border(
-                width = 1.dp,
-                color = AccessDefaults.Coral.copy(alpha = 0.3f),
-                shape = cardShape,
-            )
-            .clickable(onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(13.dp),
-    ) {
-        Box(
-            modifier = Modifier
-                .size(42.dp)
-                .clip(RoundedCornerShape(13.dp))
-                .background(AccessDefaults.Coral.copy(alpha = 0.14f))
-                .border(
-                    width = 1.dp,
-                    color = AccessDefaults.Coral.copy(alpha = 0.3f),
-                    shape = RoundedCornerShape(13.dp),
-                ),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                painter = painterResource(AccessIcons.Camera),
-                contentDescription = null,
-                tint = AccessDefaults.Coral,
-                modifier = Modifier.size(18.dp),
-            )
-        }
-
-        Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(3.dp),
-        ) {
-            Text(
-                text = stringResource(Res.string.memories_roll_title),
-                style = MaterialTheme.typography.titleSmall.copy(
-                    color = AccessDefaults.TextPrimary,
-                    fontWeight = FontWeight.Bold,
-                ),
-            )
+    MemoriesEntryCard(
+        icon = AccessIcons.Camera,
+        title = stringResource(Res.string.memories_roll_title),
+        onClick = onClick,
+        modifier = modifier,
+        subtitle = {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(5.dp),
@@ -151,55 +108,56 @@ private fun TonightsRollCard(
                     ),
                 )
             }
-        }
-
-        if (thumbnailUrls.isNotEmpty()) {
-            // Üst üste binen stack: negatif spacing, offset gibi ölü genişlik bırakmaz.
-            Row(horizontalArrangement = Arrangement.spacedBy((-11).dp)) {
-                thumbnailUrls.forEach { url ->
-                    BaseImage(
-                        imageUrl = url,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .size(27.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                            .border(
-                                width = 2.dp,
-                                color = AccessDefaults.Surface,
-                                shape = RoundedCornerShape(8.dp),
-                            ),
-                    )
+        },
+        trailing = {
+            if (thumbnailUrls.isNotEmpty()) {
+                // Üst üste binen stack: negatif spacing, offset gibi ölü genişlik bırakmaz.
+                Row(horizontalArrangement = Arrangement.spacedBy((-11).dp)) {
+                    thumbnailUrls.forEach { url ->
+                        BaseImage(
+                            imageUrl = url,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .size(27.dp)
+                                .clip(AccessShapes.Small)
+                                .border(
+                                    width = 2.dp,
+                                    color = AccessDefaults.Surface,
+                                    shape = AccessShapes.Small,
+                                ),
+                        )
+                    }
                 }
             }
-        }
 
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .clip(RoundedCornerShape(11.dp))
-                .background(AccessDefaults.Coral.copy(alpha = 0.1f))
-                .border(
-                    width = 1.dp,
-                    color = AccessDefaults.Coral.copy(alpha = 0.2f),
-                    shape = RoundedCornerShape(11.dp),
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(11.dp))
+                    .background(AccessDefaults.Coral.copy(alpha = 0.1f))
+                    .border(
+                        width = 1.dp,
+                        color = AccessDefaults.Coral.copy(alpha = 0.2f),
+                        shape = RoundedCornerShape(11.dp),
+                    )
+                    .padding(horizontal = 9.dp, vertical = 4.dp),
+            ) {
+                Text(
+                    text = "$shotCount",
+                    style = MaterialTheme.typography.titleSmall.copy(
+                        color = AccessDefaults.Coral,
+                        fontWeight = FontWeight.Bold,
+                    ),
                 )
-                .padding(horizontal = 9.dp, vertical = 4.dp),
-        ) {
-            Text(
-                text = "$shotCount",
-                style = MaterialTheme.typography.titleSmall.copy(
-                    color = AccessDefaults.Coral,
-                    fontWeight = FontWeight.Bold,
-                ),
-            )
-            Text(
-                text = stringResource(Res.string.memories_roll_shots_label).uppercase(),
-                style = MaterialTheme.typography.labelSmall.copy(
-                    color = AccessDefaults.Coral.copy(alpha = 0.7f),
-                    fontSize = 8.sp,
-                    letterSpacing = 1.sp,
-                ),
-            )
-        }
-    }
+                Text(
+                    text = stringResource(Res.string.memories_roll_shots_label).uppercase(),
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        color = AccessDefaults.Coral.copy(alpha = 0.7f),
+                        fontSize = 8.sp,
+                        letterSpacing = 1.sp,
+                    ),
+                )
+            }
+        },
+    )
 }

@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kaanf.core.designsystem.component.avatar.AvatarCircle
 import com.kaanf.core.designsystem.component.avatar.avatarContentFor
+import com.kaanf.core.designsystem.component.layout.FullScreenLoader
 import com.kaanf.core.designsystem.modifier.surfaceCard
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessIcons
@@ -56,12 +57,7 @@ fun HistoryTab(modifier: Modifier = Modifier) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     when {
-        state.isLoading -> Box(
-            modifier = modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center,
-        ) {
-            CircularProgressIndicator()
-        }
+        state.isLoading -> FullScreenLoader(modifier = modifier)
 
         state.entries.isEmpty() -> HistoryEmptyState(modifier = modifier)
 
