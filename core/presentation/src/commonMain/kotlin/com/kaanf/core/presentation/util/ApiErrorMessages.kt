@@ -14,6 +14,8 @@ import crew.core.presentation.generated.resources.err_email_not_verified_desc
 import crew.core.presentation.generated.resources.err_email_not_verified_title
 import crew.core.presentation.generated.resources.err_event_full_desc
 import crew.core.presentation.generated.resources.err_event_full_title
+import crew.core.presentation.generated.resources.err_event_memory_not_found_desc
+import crew.core.presentation.generated.resources.err_event_memory_not_found_title
 import crew.core.presentation.generated.resources.err_event_not_found_desc
 import crew.core.presentation.generated.resources.err_event_not_found_title
 import crew.core.presentation.generated.resources.err_event_not_in_gameplay_desc
@@ -22,6 +24,8 @@ import crew.core.presentation.generated.resources.err_event_not_open_entry_desc
 import crew.core.presentation.generated.resources.err_event_not_open_entry_title
 import crew.core.presentation.generated.resources.err_event_not_open_tickets_desc
 import crew.core.presentation.generated.resources.err_event_not_open_tickets_title
+import crew.core.presentation.generated.resources.err_identity_already_linked_desc
+import crew.core.presentation.generated.resources.err_identity_already_linked_title
 import crew.core.presentation.generated.resources.err_invalid_entry_code_desc
 import crew.core.presentation.generated.resources.err_invalid_entry_code_title
 import crew.core.presentation.generated.resources.err_invalid_match_qr_desc
@@ -48,10 +52,18 @@ import crew.core.presentation.generated.resources.err_match_not_task_offer_desc
 import crew.core.presentation.generated.resources.err_match_not_task_offer_title
 import crew.core.presentation.generated.resources.err_match_not_task_pick_desc
 import crew.core.presentation.generated.resources.err_match_not_task_pick_title
+import crew.core.presentation.generated.resources.err_memory_limit_reached_desc
+import crew.core.presentation.generated.resources.err_memory_limit_reached_title
 import crew.core.presentation.generated.resources.err_participant_not_available_desc
 import crew.core.presentation.generated.resources.err_participant_not_available_title
 import crew.core.presentation.generated.resources.err_participant_not_found_desc
 import crew.core.presentation.generated.resources.err_participant_not_found_title
+import crew.core.presentation.generated.resources.err_quest_already_claimed_desc
+import crew.core.presentation.generated.resources.err_quest_already_claimed_title
+import crew.core.presentation.generated.resources.err_quest_not_completed_desc
+import crew.core.presentation.generated.resources.err_quest_not_completed_title
+import crew.core.presentation.generated.resources.err_quest_not_found_desc
+import crew.core.presentation.generated.resources.err_quest_not_found_title
 import crew.core.presentation.generated.resources.err_rate_limit_desc
 import crew.core.presentation.generated.resources.err_rate_limit_title
 import crew.core.presentation.generated.resources.err_same_password_desc
@@ -99,6 +111,7 @@ fun apiErrorUi(code: String): ApiErrorUi? = when (code) {
     "SAME_PASSWORD" -> ApiErrorUi(Res.string.err_same_password_title, Res.string.err_same_password_desc, SnackbarVariant.Warn)
     "INVALID_PROFILE_PICTURE" -> ApiErrorUi(Res.string.err_invalid_profile_picture_title, Res.string.err_invalid_profile_picture_desc, SnackbarVariant.Error)
     "RATE_LIMIT_EXCEEDED" -> ApiErrorUi(Res.string.err_rate_limit_title, Res.string.err_rate_limit_desc, SnackbarVariant.Warn)
+    "IDENTITY_ALREADY_LINKED" -> ApiErrorUi(Res.string.err_identity_already_linked_title, Res.string.err_identity_already_linked_desc, SnackbarVariant.Warn)
 
     "EVENT_NOT_FOUND" -> ApiErrorUi(Res.string.err_event_not_found_title, Res.string.err_event_not_found_desc, SnackbarVariant.Error)
     "TICKET_NOT_FOUND" -> ApiErrorUi(Res.string.err_ticket_not_found_title, Res.string.err_ticket_not_found_desc, SnackbarVariant.Error)
@@ -130,6 +143,12 @@ fun apiErrorUi(code: String): ApiErrorUi? = when (code) {
     "MATCH_NOT_COMPLETED" -> ApiErrorUi(Res.string.err_match_not_completed_title, Res.string.err_match_not_completed_desc, SnackbarVariant.Warn)
     "TASK_NOT_FOUND" -> ApiErrorUi(Res.string.err_task_not_found_title, Res.string.err_task_not_found_desc, SnackbarVariant.Error)
     "TASK_NOT_ALLOWED_IN_PHASE" -> ApiErrorUi(Res.string.err_task_not_allowed_phase_title, Res.string.err_task_not_allowed_phase_desc, SnackbarVariant.Warn)
+
+    "QUEST_NOT_FOUND" -> ApiErrorUi(Res.string.err_quest_not_found_title, Res.string.err_quest_not_found_desc, SnackbarVariant.Error)
+    "QUEST_ALREADY_CLAIMED" -> ApiErrorUi(Res.string.err_quest_already_claimed_title, Res.string.err_quest_already_claimed_desc, SnackbarVariant.Warn)
+    "QUEST_NOT_COMPLETED" -> ApiErrorUi(Res.string.err_quest_not_completed_title, Res.string.err_quest_not_completed_desc, SnackbarVariant.Warn)
+    "MEMORY_LIMIT_REACHED" -> ApiErrorUi(Res.string.err_memory_limit_reached_title, Res.string.err_memory_limit_reached_desc, SnackbarVariant.Warn)
+    "EVENT_MEMORY_NOT_FOUND" -> ApiErrorUi(Res.string.err_event_memory_not_found_title, Res.string.err_event_memory_not_found_desc, SnackbarVariant.Error)
 
     else -> null
 }
