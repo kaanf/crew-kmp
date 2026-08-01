@@ -1,7 +1,6 @@
-package com.kaanf.home.presentation.ticketqr.component.doorslocked
+package com.kaanf.core.designsystem.component.info
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,21 +27,23 @@ import androidx.compose.ui.unit.sp
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessShapes
 import com.kaanf.core.designsystem.theme.CrewTheme
-import crew.feature.home.presentation.generated.resources.Res
-import crew.feature.home.presentation.generated.resources.ticket_qr_doors_locked_description
-import crew.feature.home.presentation.generated.resources.ticket_qr_doors_locked_icon
-import crew.feature.home.presentation.generated.resources.ticket_qr_doors_locked_title
-import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
+/**
+ * Sol üst köşeden yayılan renkli parıltı + aynı gradyanla çizilen kenarlık taşıyan uyarı kartı.
+ * [accentColor] kartın tonunu belirler: Amber "kapılar kapandı", Coral "atışı kaybettin" gibi.
+ * Parıltı çizimi [drawWithCache] içinde kalır; boyut değişmedikçe brush yeniden kurulmaz.
+ */
 @Composable
-fun DoorsLockedInfoCard(
-    doorTime: String,
+fun GlowInfoCard(
+    emoji: String,
+    title: String,
+    description: String,
     modifier: Modifier = Modifier,
+    accentColor: Color = AccessDefaults.Amber,
+    glowAlpha: Float = 0.1f,
+    borderAlpha: Float = 0.25f,
 ) {
-    val title = stringResource(Res.string.ticket_qr_doors_locked_title)
-    val description = stringResource(Res.string.ticket_qr_doors_locked_description, doorTime)
-
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -52,57 +53,47 @@ fun DoorsLockedInfoCard(
                 val outline = shape.createOutline(
                     size = size,
                     layoutDirection = layoutDirection,
-                    density = this
+                    density = this,
                 )
 
                 val glowBrush = Brush.radialGradient(
                     colors = listOf(
-                        AccessDefaults.Amber.copy(alpha = 0.1f),
-                        Color.Transparent
+                        accentColor.copy(alpha = glowAlpha),
+                        Color.Transparent,
                     ),
                     center = Offset(0f, 0f),
-                    radius = size.maxDimension * 0.9f
+                    radius = size.maxDimension * 0.9f,
                 )
 
                 val borderBrush = Brush.radialGradient(
                     colors = listOf(
-                        AccessDefaults.Amber.copy(alpha = 0.25f),
-                        AccessDefaults.Surface.copy(alpha = 0.8f)
+                        accentColor.copy(alpha = borderAlpha),
+                        AccessDefaults.Surface.copy(alpha = 0.8f),
                     ),
                     center = Offset(0f, 0f),
-                    radius = size.maxDimension * 0.9f
+                    radius = size.maxDimension * 0.9f,
                 )
 
                 onDrawBehind {
-                    drawOutline(
-                        outline = outline,
-                        color = AccessDefaults.Surface
-                    )
-
-                    drawOutline(
-                        outline = outline,
-                        brush = glowBrush
-                    )
-
+                    drawOutline(outline = outline, color = AccessDefaults.Surface)
+                    drawOutline(outline = outline, brush = glowBrush)
                     drawOutline(
                         outline = outline,
                         brush = borderBrush,
-                        style = Stroke(width = 1.dp.toPx())
+                        style = Stroke(width = 1.dp.toPx()),
                     )
                 }
             }
-            .padding(
-                all = 16.dp
-            ),
+            .padding(all = 16.dp),
         horizontalAlignment = Alignment.Start,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = stringResource(Res.string.ticket_qr_doors_locked_icon),
+                text = emoji,
                 fontSize = 24.sp,
             )
 
@@ -114,9 +105,7 @@ fun DoorsLockedInfoCard(
                             fontWeight = FontWeight.Bold,
                         ),
                     ) {
-                        append(
-                            title,
-                        )
+                        append(title)
                     }
 
                     append("\n")
@@ -127,32 +116,41 @@ fun DoorsLockedInfoCard(
                             fontWeight = FontWeight.Normal,
                         ),
                     ) {
-                        append(
-                            description,
-                        )
+                        append(description)
                     }
                 },
                 style = MaterialTheme.typography.bodyMedium.copy(
                     color = AccessDefaults.TextMuted,
                     fontSize = 13.sp,
-                    lineHeight = 20.sp
+                    lineHeight = 20.sp,
                 ),
-                textAlign = TextAlign.Start
+                textAlign = TextAlign.Start,
             )
         }
     }
 }
 
-
-@Composable
 @Preview
-fun DoorsLockedInfoCardPreview() {
+@Composable
+private fun GlowInfoCardPreview() {
     CrewTheme {
-        Box(
+        Column(
             modifier = Modifier.padding(16.dp),
-            contentAlignment = Alignment.Center
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            DoorsLockedInfoCard(doorTime = "20:00")
+            GlowInfoCard(
+                emoji = "🔒",
+                title = "Doors are locked",
+                description = "Your QR wakes up at 20:00. Grab a drink until then.",
+            )
+            GlowInfoCard(
+                emoji = "✊",
+                title = "You lost the throw",
+                description = "The winner picks a task for you. Accepting is the fast way out.",
+                accentColor = AccessDefaults.Coral,
+                glowAlpha = 0.15f,
+                borderAlpha = 0.45f,
+            )
         }
     }
 }

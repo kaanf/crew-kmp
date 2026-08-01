@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kaanf.core.designsystem.component.avatar.AvatarCircle
 import com.kaanf.core.designsystem.component.avatar.AvatarContent
+import com.kaanf.core.designsystem.modifier.surfaceCard
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessShapes
 import com.kaanf.core.designsystem.theme.CrewTheme
@@ -56,15 +57,7 @@ fun WhoWonRow(
         modifier = modifier
             .fillMaxWidth()
             .alpha(if (enabled) 1f else 0.5f)
-            .background(
-                color = AccessDefaults.Surface,
-                shape = AccessShapes.Card,
-            )
-            .border(
-                width = 1.dp,
-                color = AccessDefaults.Border,
-                shape = AccessShapes.Card,
-            )
+            .surfaceCard(shape = AccessShapes.Card, borderColor = AccessDefaults.Border)
             .clickable(enabled = enabled, onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,

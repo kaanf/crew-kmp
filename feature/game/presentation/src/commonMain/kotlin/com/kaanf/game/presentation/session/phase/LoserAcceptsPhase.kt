@@ -21,6 +21,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kaanf.core.designsystem.component.button.BaseButton
+import com.kaanf.core.designsystem.component.header.SectionHeader
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.component.dialog.BaseDialog
 import com.kaanf.core.designsystem.theme.CrewTheme
@@ -28,7 +29,6 @@ import com.kaanf.game.domain.model.GameTask
 import com.kaanf.game.domain.model.TaskCategory
 import com.kaanf.game.presentation.component.GameTaskCard
 import com.kaanf.game.presentation.gamelobby.component.dialog.LeaveEventDialog
-import com.kaanf.game.presentation.session.component.PhaseHeaderCard
 import crew.feature.game.presentation.generated.resources.Res
 import crew.feature.game.presentation.generated.resources.match_phase_loser_accepts_accept_action
 import crew.feature.game.presentation.generated.resources.match_phase_loser_accepts_eyebrow
@@ -79,9 +79,9 @@ fun LoserAcceptsPhase(
         verticalArrangement = Arrangement.spacedBy(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        PhaseHeaderCard(
-            header = stringResource(Res.string.match_phase_loser_accepts_eyebrow, opponentUppercase),
-            title = stringResource(Res.string.match_phase_loser_accepts_title)
+        SectionHeader(
+            eyebrow = stringResource(Res.string.match_phase_loser_accepts_eyebrow, opponentUppercase),
+            title = stringResource(Res.string.match_phase_loser_accepts_title),
         )
 
         GameTaskCard(

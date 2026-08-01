@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kaanf.core.designsystem.component.image.BaseImage
 import com.kaanf.core.designsystem.component.sheet.ContainerBottomSheet
+import com.kaanf.core.designsystem.modifier.surfaceCard
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessIcons
 import com.kaanf.game.domain.model.EventMemory
@@ -263,8 +264,7 @@ private fun RevealCell(
         modifier = modifier
             .aspectRatio(1f / 1.15f)
             .clip(cellShape)
-            .background(AccessDefaults.SurfaceElevated)
-            .border(width = 1.dp, color = AccessDefaults.BorderSoft, shape = cellShape)
+            .surfaceCard(shape = cellShape, backgroundColor = AccessDefaults.SurfaceElevated)
             .clickable(onClick = onClick),
     ) {
         BaseImage(

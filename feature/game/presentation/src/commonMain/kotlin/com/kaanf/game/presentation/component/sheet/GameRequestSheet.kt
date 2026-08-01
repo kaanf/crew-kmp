@@ -36,7 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
-import com.kaanf.core.designsystem.component.progressbar.ThreeDotsAnimatedCard
+import com.kaanf.core.designsystem.component.progressbar.WaitingIndicatorRow
 
 @Composable
 fun GameRequestSheet(
@@ -133,27 +133,7 @@ fun GameRequestSheet(
 
         Spacer(modifier = Modifier.height(1.dp))
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(
-                space = 6.dp,
-                alignment = Alignment.CenterHorizontally
-            ),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            ThreeDotsAnimatedCard(
-                dotRadius = 2.dp,
-                spacing = 4.dp
-            )
-            Text(
-                text = "Waiting for response",
-                style = MaterialTheme.typography.titleSmall.copy(
-                    color = AccessDefaults.TextSecondary,
-                    fontSize = 11.sp,
-                ),
-            )
-        }
+        WaitingIndicatorRow(text = "Waiting for response")
 
         /* Daha sonra koyacağız
         Text(

@@ -4,18 +4,16 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.kaanf.core.designsystem.component.button.BaseButton
+import com.kaanf.core.designsystem.component.header.SectionHeader
 import com.kaanf.core.designsystem.component.progressbar.ThreeDotsAnimatedCard
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.CrewTheme
@@ -63,8 +61,8 @@ fun MatchScoreboardPhase(
         ),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(
-            text = buildAnnotatedString {
+        SectionHeader(
+            title = buildAnnotatedString {
                 withStyle(style = SpanStyle(color = AccessDefaults.TextPrimary)) {
                     append(titlePrefix)
                 }
@@ -77,17 +75,12 @@ fun MatchScoreboardPhase(
                     append(titleHighlight)
                 }
             },
-            style = MaterialTheme.typography.headlineLarge,
-            textAlign = TextAlign.Center,
-        )
-
-        Text(
-            text = scoreboardSubtitle(myEntry = myEntry, completed = completed, forfeit = forfeit),
-            style = MaterialTheme.typography.titleSmall.copy(
-                color = AccessDefaults.TextSecondary,
-                fontWeight = FontWeight.Medium,
-                textAlign = TextAlign.Center,
+            description = scoreboardSubtitle(
+                myEntry = myEntry,
+                completed = completed,
+                forfeit = forfeit,
             ),
+            verticalSpacing = 12.dp,
         )
 
         if (isLoading) {

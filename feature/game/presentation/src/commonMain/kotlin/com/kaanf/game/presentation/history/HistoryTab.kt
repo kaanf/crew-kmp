@@ -1,7 +1,5 @@
 package com.kaanf.game.presentation.history
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,9 +29,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kaanf.core.designsystem.component.avatar.AvatarCircle
 import com.kaanf.core.designsystem.component.avatar.avatarContentFor
+import com.kaanf.core.designsystem.modifier.surfaceCard
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessIcons
-import com.kaanf.core.designsystem.theme.AccessShapes
 import com.kaanf.game.domain.model.MatchHistoryEntry
 import crew.feature.game.presentation.generated.resources.Res
 import crew.feature.game.presentation.generated.resources.history_empty_description
@@ -111,8 +109,7 @@ private fun MatchLogCard(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(color = AccessDefaults.Surface, shape = AccessShapes.Medium)
-            .border(width = 1.dp, color = AccessDefaults.BorderSoft, shape = AccessShapes.Medium)
+            .surfaceCard()
             .padding(12.dp),
     ) {
         Row(

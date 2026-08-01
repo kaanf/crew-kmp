@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -23,14 +21,11 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.kaanf.core.designsystem.component.button.BaseButton
+import com.kaanf.core.designsystem.component.header.SectionHeader
 import com.kaanf.core.designsystem.component.progressbar.ThreeDotsAnimatedCard
-import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessShapes
 import com.kaanf.core.designsystem.theme.CrewTheme
 import com.kaanf.game.domain.model.GameTask
@@ -74,26 +69,12 @@ fun WinnerPicksPhase(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Text(
-            text = stringResource(Res.string.match_phase_winner_picks_eyebrow, opponentUppercase),
-            style = MaterialTheme.typography.labelSmall.copy(
-                color = AccessDefaults.TextMuted,
-                fontSize = 12.sp,
-            ),
-        )
-
-        Text(
-            text = stringResource(Res.string.match_phase_winner_picks_title, tasks.size),
-            style = MaterialTheme.typography.headlineLarge,
-            textAlign = TextAlign.Center,
-        )
-
-        Text(
-            text = stringResource(Res.string.match_phase_winner_picks_description, opponentName),
-            style = MaterialTheme.typography.titleSmall.copy(
-                color = AccessDefaults.TextSecondary,
-                fontWeight = FontWeight.Medium,
-                textAlign = TextAlign.Center,
+        SectionHeader(
+            eyebrow = stringResource(Res.string.match_phase_winner_picks_eyebrow, opponentUppercase),
+            title = stringResource(Res.string.match_phase_winner_picks_title, tasks.size),
+            description = stringResource(
+                Res.string.match_phase_winner_picks_description,
+                opponentName,
             ),
         )
 

@@ -39,8 +39,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kaanf.core.designsystem.component.avatar.AvatarCircle
 import com.kaanf.core.designsystem.component.avatar.avatarContentFor
+import com.kaanf.core.designsystem.component.header.SectionHeader
+import com.kaanf.core.designsystem.modifier.surfaceCard
 import com.kaanf.core.designsystem.theme.AccessDefaults
-import com.kaanf.core.designsystem.theme.AccessShapes
 import com.kaanf.game.domain.model.LeaderboardEntry
 import com.kaanf.game.presentation.memories.MemoriesRevealEntry
 import crew.feature.game.presentation.generated.resources.Res
@@ -134,34 +135,26 @@ fun LeaderboardContent(
 
 @Composable
 private fun WrapHeader(modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier.fillMaxWidth().padding(top = 12.dp, bottom = 8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(6.dp),
-    ) {
-        Text(
-            text = stringResource(Res.string.leaderboard_eyebrow),
-            style = MaterialTheme.typography.labelSmall.copy(
-                color = AccessDefaults.Accent,
-                fontSize = 12.sp,
-            ),
-        )
-        Text(
-            text = buildAnnotatedString {
-                append(stringResource(Res.string.leaderboard_title_prefix))
-                withStyle(
-                    style = SpanStyle(
-                        color = AccessDefaults.Accent,
-                        shadow = Shadow(color = AccessDefaults.AccentGlow, blurRadius = 24f),
-                    ),
-                ) {
-                    append(stringResource(Res.string.leaderboard_title_highlight))
-                }
-            },
-            style = MaterialTheme.typography.displayMedium.copy(color = AccessDefaults.TextPrimary),
-            textAlign = TextAlign.Center,
-        )
-    }
+    SectionHeader(
+        modifier = modifier.padding(top = 12.dp, bottom = 8.dp),
+        eyebrow = stringResource(Res.string.leaderboard_eyebrow),
+        eyebrowColor = AccessDefaults.Accent,
+        title = buildAnnotatedString {
+            append(stringResource(Res.string.leaderboard_title_prefix))
+            withStyle(
+                style = SpanStyle(
+                    color = AccessDefaults.Accent,
+                    shadow = Shadow(color = AccessDefaults.AccentGlow, blurRadius = 24f),
+                ),
+            ) {
+                append(stringResource(Res.string.leaderboard_title_highlight))
+            }
+        },
+        titleStyle = MaterialTheme.typography.displayMedium.copy(
+            color = AccessDefaults.TextPrimary,
+        ),
+        verticalSpacing = 6.dp,
+    )
 }
 
 @Composable
@@ -320,14 +313,17 @@ private fun LeaderboardRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .background(
-                color = if (isCurrentUser) AccessDefaults.SurfaceElevated else AccessDefaults.Surface,
-                shape = AccessShapes.Medium,
-            )
-            .border(
-                width = 1.dp,
-                color = if (isCurrentUser) AccessDefaults.AccentFocusRing else AccessDefaults.BorderSoft,
-                shape = AccessShapes.Medium,
+            .surfaceCard(
+                backgroundColor = if (isCurrentUser) {
+                    AccessDefaults.SurfaceElevated
+                } else {
+                    AccessDefaults.Surface
+                },
+                borderColor = if (isCurrentUser) {
+                    AccessDefaults.AccentFocusRing
+                } else {
+                    AccessDefaults.BorderSoft
+                },
             )
             .padding(horizontal = 12.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,

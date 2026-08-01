@@ -1,7 +1,6 @@
 package com.kaanf.game.presentation.memories
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kaanf.core.designsystem.component.button.BaseButton
 import com.kaanf.core.designsystem.component.image.BaseImage
+import com.kaanf.core.designsystem.modifier.surfaceCard
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessIcons
 import com.kaanf.game.domain.model.EventMemory
@@ -182,8 +182,7 @@ private fun MyShotCell(
         modifier = modifier
             .aspectRatio(1f / 1.1f)
             .clip(cellShape)
-            .background(AccessDefaults.SurfaceElevated)
-            .border(width = 1.dp, color = AccessDefaults.BorderSoft, shape = cellShape)
+            .surfaceCard(shape = cellShape, backgroundColor = AccessDefaults.SurfaceElevated)
             .clickable(enabled = !showDeleteConfirm, onClick = onClick),
     ) {
         BaseImage(

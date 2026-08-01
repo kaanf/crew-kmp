@@ -6,15 +6,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.kaanf.core.designsystem.component.button.BaseButton
+import com.kaanf.core.designsystem.component.header.SectionHeader
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.CrewTheme
 import com.kaanf.game.domain.model.GameTask
@@ -48,18 +45,10 @@ fun WinnerConfirmsPhase(
         ),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(
-            text = stringResource(Res.string.match_phase_winner_confirms_eyebrow),
-            style = MaterialTheme.typography.labelSmall.copy(
-                color = AccessDefaults.TextMuted,
-                fontSize = 12.sp,
-            ),
-        )
-
-        Text(
-            text = stringResource(Res.string.match_phase_winner_confirms_title, opponentName),
-            style = MaterialTheme.typography.headlineLarge,
-            textAlign = TextAlign.Center,
+        SectionHeader(
+            eyebrow = stringResource(Res.string.match_phase_winner_confirms_eyebrow),
+            title = stringResource(Res.string.match_phase_winner_confirms_title, opponentName),
+            verticalSpacing = 12.dp,
         )
 
         task?.let {

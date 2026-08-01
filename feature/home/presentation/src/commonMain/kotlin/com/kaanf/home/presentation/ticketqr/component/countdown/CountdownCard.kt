@@ -1,7 +1,5 @@
 package com.kaanf.home.presentation.ticketqr.component.countdown
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,6 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kaanf.core.designsystem.modifier.surfaceCard
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessShapes
 import crew.feature.home.presentation.generated.resources.Res
@@ -60,15 +59,7 @@ fun CountdownCard(
 
     Row(
         modifier = modifier
-            .background(
-                color = AccessDefaults.Surface,
-                shape = AccessShapes.XXLarge
-            )
-            .border(
-                width = 1.dp,
-                color = AccessDefaults.BorderSoft,
-                shape = AccessShapes.XXLarge
-            )
+            .surfaceCard(shape = AccessShapes.XXLarge)
             .padding(horizontal = 18.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp)
