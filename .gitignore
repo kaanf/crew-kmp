@@ -98,3 +98,6 @@ pnpm-debug.log*
 # Local assistant files
 CLAUDE.md
 .claude/
+
+*.ipa
+*.dSYM.zip
