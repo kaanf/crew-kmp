@@ -36,6 +36,8 @@
     <string name="err_invalid_profile_picture_desc">That image couldn't be used. Please pick another one.</string>
     <string name="err_rate_limit_title">Slow down a moment</string>
     <string name="err_rate_limit_desc">Too many attempts. Please try again shortly.</string>
+    <string name="err_identity_already_linked_title">Already connected</string>
+    <string name="err_identity_already_linked_desc">This sign-in method is already linked to another account.</string>
 
     <string name="err_event_not_found_title">Event unavailable</string>
     <string name="err_event_not_found_desc">This event is no longer available.</string>
@@ -96,4 +98,15 @@
     <string name="err_task_not_found_desc">We couldn't find that task.</string>
     <string name="err_task_not_allowed_phase_title">Task unavailable</string>
     <string name="err_task_not_allowed_phase_desc">That task isn't available in the current round — pick another one.</string>
+
+    <string name="err_quest_not_found_title">Quest not found</string>
+    <string name="err_quest_not_found_desc">We couldn't find that quest.</string>
+    <string name="err_quest_already_claimed_title">Already claimed</string>
+    <string name="err_quest_already_claimed_desc">You've already claimed the reward for this quest.</string>
+    <string name="err_quest_not_completed_title">Not there yet</string>
+    <string name="err_quest_not_completed_desc">Finish this quest before claiming its reward.</string>
+    <string name="err_memory_limit_reached_title">Memory limit reached</string>
+    <string name="err_memory_limit_reached_desc">You've captured all the memories you can for this event.</string>
+    <string name="err_event_memory_not_found_title">Memory gone</string>
+    <string name="err_event_memory_not_found_desc">That memory no longer exists.</string>
 </resources>
