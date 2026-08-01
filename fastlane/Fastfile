@@ -1,8 +1,47 @@
-platform :ios do
-  lane :ios_build do
-    build_app(
-      project: "iosApp/iosApp.xcodeproj",
-      scheme: "iosApp"
-    )
-  end
+# Tek versiyon kaynağı: gradle/libs.versions.toml
+# bump lane'i toml'u artırır ve iOS xcconfig'ine aynen yazar; iki platform aynı build number'ı kullanır.
+
+TOML = File.expand_path("../gradle/libs.versions.toml", __dir__)
+XCCONFIG = File.expand_path("../iosApp/Configuration/Config.xcconfig", __dir__)
+XCODEPROJ = "iosApp/iosApp.xcodeproj"
+
+def replace!(path, pattern, replacement)
+  text = File.read(path)
+  UI.user_error!("#{pattern.source} bulunamadı: #{path}") unless text.sub!(pattern, replacement)
+  File.write(path, text)
+end
+
+desc "Build number'ı artırır. Marketing version için: fastlane bump version:1.1"
+lane :bump do |options|
+  toml = File.read(TOML)
+  code = toml[/projectVersionCode = "(\d+)"/, 1].to_i + 1
+  name = options[:version] || toml[/projectVersionName = "([^"]+)"/, 1]
+
+  replace!(TOML, /projectVersionCode = "\d+"/, %(projectVersionCode = "#{code}"))
+  replace!(TOML, /projectVersionName = "[^"]+"/, %(projectVersionName = "#{name}"))
+  replace!(XCCONFIG, /CURRENT_PROJECT_VERSION=.*/, "CURRENT_PROJECT_VERSION=#{code}")
+  replace!(XCCONFIG, /MARKETING_VERSION=.*/, "MARKETING_VERSION=#{name}")
+
+  UI.success("Version #{name} (#{code})")
+end
+
+desc "Archive alır ve App Store Connect'e yükler (bump yapmaz)"
+lane :ios_upload do
+  build_app(project: XCODEPROJ, scheme: "iosApp", export_method: "app-store")
+  upload_to_testflight(skip_waiting_for_build_processing: true)
+end
+
+desc "İmzalı release APK üretir"
+lane :android_apk do
+  gradle(project_dir: "..", task: "androidApp:assembleRelease")
+  apk = lane_context[SharedValues::GRADLE_APK_OUTPUT_PATH]
+  UI.user_error!("APK imzasız — CREW_STORE_FILE/CREW_STORE_PASSWORD/CREW_KEY_ALIAS/CREW_KEY_PASSWORD tanımlı değil") if apk.to_s.include?("unsigned")
+  UI.success(apk)
+end
+
+desc "Bump + iOS yükleme + Android APK"
+lane :release do
+  bump
+  ios_upload
+  android_apk
 end
