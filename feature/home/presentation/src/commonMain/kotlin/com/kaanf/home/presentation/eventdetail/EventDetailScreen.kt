@@ -17,7 +17,6 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,6 +39,7 @@ import com.kaanf.core.designsystem.component.button.BaseButton
 import com.kaanf.core.designsystem.component.image.BaseImage
 import com.kaanf.core.designsystem.component.layout.AppScaffold
 import com.kaanf.core.designsystem.component.layout.AppTopBar
+import com.kaanf.core.designsystem.component.layout.FullScreenLoader
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.presentation.model.AppTopBarState
 import com.kaanf.core.presentation.util.ObserveAsEvents
@@ -123,7 +123,7 @@ fun EventDetailScreen(
                         onRetry = { onAction(EventDetailAction.OnRetryLoad) },
                     )
                 } else {
-                    CircularProgressIndicator(color = AccessDefaults.Accent)
+                    FullScreenLoader()
                 }
             }
         } else {

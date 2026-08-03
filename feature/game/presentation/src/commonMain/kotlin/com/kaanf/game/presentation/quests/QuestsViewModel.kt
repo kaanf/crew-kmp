@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kaanf.core.domain.repository.UserRepository
+import com.kaanf.core.domain.util.Result
 import com.kaanf.core.domain.util.onFailure
 import com.kaanf.core.domain.util.onSuccess
 import com.kaanf.core.presentation.snackbar.SnackbarController
@@ -16,6 +17,7 @@ import com.kaanf.game.domain.model.EventParticipant
 import com.kaanf.game.domain.model.Quest
 import com.kaanf.game.domain.model.QuestPhotoTag
 import com.kaanf.game.domain.repository.MatchRepository
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.launchIn
@@ -56,39 +58,44 @@ class QuestsViewModel(
 
     init {
         loadQuests()
-        loadPhotos()
         userRepository.observeCurrentUser()
             .onEach { currentUserId = it?.id }
             .launchIn(viewModelScope)
     }
 
+    /**
+     * Quest listesi ve foto kareleri paralel çekilir ama ekran ikisi birden gelince açılır.
+     * Ayrı ayrı yazıldığında tamamlanmış kartlar önce tik ikonuyla çizilip fotoğraf gelince
+     * karesine dönüşüyor, alt yazı da değişiyordu; ekran yerleştikten sonra oynuyordu.
+     *
+     * Kare listesi: benim yüklediklerim + etiketlendiklerim. Tek sayfa yeter, her queste
+     * kendi fotoğrafım varsa o gösterilir (aynı queste birden çok kişi beni etiketlemişse
+     * ilk gelen kare gösterilir; hata değil, sadece bir kare gösteriliyor).
+     */
     private fun loadQuests() {
         viewModelScope.launch {
-            matchRepository.getQuests(eventId)
+            // Kareler sessiz düşer: quest listesi fotoğrafsız da çalışır, ikinci bir
+            // snackbar gürültü olur.
+            val photos = async { matchRepository.getMemories(eventId, page = 0, size = PHOTO_PAGE_SIZE) }
+
+            val questsResult = matchRepository.getQuests(eventId)
+            val byQuestKey = (photos.await() as? Result.Success)?.data?.byQuestKey().orEmpty()
+
+            questsResult
                 .onSuccess { quests ->
                     _state.update {
                         // Foto questleri katalogun sonunda; listede öne alınır ki yeni akış görünsün.
-                        it.copy(isLoading = false, quests = quests.sortedByDescending(Quest::isPhoto))
+                        it.copy(
+                            isLoading = false,
+                            quests = quests.sortedByDescending(Quest::isPhoto),
+                            photos = byQuestKey,
+                        )
                     }
                 }
                 .onFailure { error ->
                     _state.update { it.copy(isLoading = false) }
                     snackbarController.show(error.toSnackbarMessage())
                 }
-        }
-    }
-
-    /**
-     * Foto questlerinin karesi: benim yüklediklerim + etiketlendiklerim. Tek sayfa yeter,
-     * her queste kendi fotoğrafım varsa o gösterilir (aynı queste birden çok kişi beni
-     * etiketlemişse ilk gelen kare gösterilir; hata değil, sadece bir kare gösteriliyor).
-     */
-    private fun loadPhotos() {
-        viewModelScope.launch {
-            matchRepository.getMemories(eventId, page = 0, size = PHOTO_PAGE_SIZE)
-                .onSuccess { memories -> _state.update { it.copy(photos = memories.byQuestKey()) } }
-                // Sessiz düşer: quest listesi fotoğrafsız da çalışır, ikinci bir snackbar gürültü olur.
-                .onFailure { }
         }
     }
 
