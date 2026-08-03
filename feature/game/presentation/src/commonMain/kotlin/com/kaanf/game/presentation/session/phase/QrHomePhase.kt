@@ -37,7 +37,6 @@ import com.kaanf.core.presentation.permission.PermissionState
 import com.kaanf.core.presentation.permission.rememberPermissionController
 import com.kaanf.game.presentation.component.OnboardingInfoCard
 import com.kaanf.game.presentation.component.dialog.CameraPermissionDialog
-import com.kaanf.game.presentation.memories.TonightsRollSection
 import com.kaanf.game.presentation.session.MatchSessionAction
 import com.kaanf.game.presentation.session.MatchSessionState
 import crew.feature.game.presentation.generated.resources.Res
@@ -147,9 +146,8 @@ fun QrHomePhase(
             leadingIcon = AccessIcons.QR,
         )
 
-        Spacer(modifier = Modifier.height(2.dp))
-
-        TonightsRollSection(modifier = Modifier.fillMaxWidth())
+        // Fotoğraf akışı artık burada değil: serbest çekim kalktı, kamera yalnız
+        // Quests ekranındaki foto questlerinin içinden açılıyor.
 
         // "Atışı kaybettin" kartı geri gelirse: GlowInfoCard(accentColor = AccessDefaults.Coral)
         // + match_phase_lost_throw_* stringleri.

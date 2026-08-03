@@ -148,19 +148,6 @@
     <string name="game_tab_play">Play</string>
     <string name="game_tab_history">History</string>
 
-    <string name="memories_roll_title">Tonight's roll</string>
-    <string name="memories_roll_subtitle">Opens at the end</string>
-    <string name="memories_roll_shots_label">shots</string>
-    <string name="memories_sheet_seal_label">Sealed roll</string>
-    <string name="memories_sheet_title">Snap the night</string>
-    <string name="memories_sheet_description">Straight from the camera, no gallery. Everyone shares one roll; it develops when the night ends.</string>
-    <string name="memories_snap_action">Snap a memory</string>
-    <string name="memories_limit_reached">You've reached the limit</string>
-    <string name="memories_snap_uploading">Adding to the roll…</string>
-    <string name="memories_your_shots_label">YOUR SHOTS</string>
-    <string name="memories_delete_confirm_title">Delete?</string>
-    <string name="memories_delete_keep">Keep</string>
-    <string name="memories_delete_action">Delete</string>
     <string name="memories_reveal_card_title">The roll developed</string>
     <string name="memories_reveal_card_subtitle_format">%1$d sealed memories from tonight. Now unlocked!</string>
     <string name="memories_reveal_eyebrow">The roll developed</string>
@@ -176,9 +163,21 @@
     <string name="quests_title_highlight">bonus points</string>
     <string name="quests_reward_format">+%1$d</string>
     <string name="quests_progress_format">%1$d of %2$d done</string>
-    <string name="quests_completed_format">Completed · +%1$d Points</string>
     <string name="quests_claim_format">Claim +%1$d</string>
     <string name="quests_claimed_label">Claimed</string>
+    <string name="quests_photo_tags_format">Tag %1$d people</string>
+    <string name="quests_photo_take_action">Take photo</string>
+    <string name="quests_photo_shot_by_you">Shot by you</string>
+    <string name="quests_photo_shot_by_format">Shot by %1$s</string>
+    <string name="quests_photo_with_format">With %1$s</string>
+    <string name="quests_photo_sheet_subtitle_format">Tag exactly %1$d people. Everyone tagged earns the points too.</string>
+    <string name="quests_photo_hint_tap_photo">Tap a face on the photo to tag someone</string>
+    <string name="quests_photo_picker_title">Who is this?</string>
+    <string name="quests_photo_picker_subtitle">Only people checked in tonight can be tagged.</string>
+    <string name="quests_photo_selected_format">%1$d / %2$d</string>
+    <string name="quests_photo_send_action">Send to the room</string>
+    <string name="quests_photo_sending">Sending…</string>
+    <string name="quests_photo_no_participants">Nobody else is checked in yet.</string>
 
     <string name="history_top_bar_title">Your night</string>
     <string name="history_empty_title">Nothing logged yet</string>

@@ -1,6 +1,5 @@
 package com.kaanf.game.data.repository
 
-import com.kaanf.core.data.networking.delete
 import com.kaanf.core.data.networking.get
 import com.kaanf.core.data.networking.getOrNull
 import com.kaanf.core.data.networking.mapCatching
@@ -14,6 +13,7 @@ import com.kaanf.game.data.dto.AddressBookDto
 import com.kaanf.game.data.dto.ConfirmTaskRequest
 import com.kaanf.game.data.dto.CreateMatchInviteRequest
 import com.kaanf.game.data.dto.EventMemoryDto
+import com.kaanf.game.data.dto.EventParticipantDto
 import com.kaanf.game.data.dto.LeaderboardEntryDto
 import com.kaanf.game.data.dto.MatchCancelDto
 import com.kaanf.game.data.dto.MatchDto
@@ -29,11 +29,13 @@ import com.kaanf.game.data.dto.MatchTaskStateDto
 import com.kaanf.game.data.dto.MyParticipantDto
 import com.kaanf.game.data.dto.OfferTaskRequest
 import com.kaanf.game.data.dto.QuestDto
+import com.kaanf.game.data.dto.QuestPhotoTagRequest
 import com.kaanf.game.data.dto.ReportResultRequest
 import com.kaanf.game.data.dto.TaskDto
 import com.kaanf.game.data.mappers.toDomain
 import com.kaanf.game.domain.model.AddressBook
 import com.kaanf.game.domain.model.EventMemory
+import com.kaanf.game.domain.model.EventParticipant
 import com.kaanf.game.domain.model.GameTask
 import com.kaanf.game.domain.model.LeaderboardEntry
 import com.kaanf.game.domain.model.MatchHistoryEntry
@@ -42,12 +44,14 @@ import com.kaanf.game.domain.model.MatchParticipant
 import com.kaanf.game.domain.model.MatchScoreboard
 import com.kaanf.game.domain.model.MatchSnapshot
 import com.kaanf.game.domain.model.Quest
+import com.kaanf.game.domain.model.QuestPhotoTag
 import com.kaanf.game.domain.repository.MatchRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
+import kotlinx.serialization.json.Json
 
 class MatchRepositoryImpl(
     private val httpClient: HttpClient,
@@ -223,13 +227,21 @@ class MatchRepositoryImpl(
         ).mapCatching { memories -> memories.map { it.toDomain() } }
     }
 
-    override suspend fun uploadMemory(
-        eventId: String, imageBytes: ByteArray, mimeType: String,
+    override suspend fun uploadQuestPhoto(
+        eventId: String,
+        questKey: String,
+        tags: List<QuestPhotoTag>,
+        imageBytes: ByteArray,
+        mimeType: String,
     ): Result<EventMemory, DataError.Remote> {
-        // Ham kamera baytları olduğu gibi gönderilir; boyut optimizasyonunu sunucu yapar
-        // (1600px'e küçültüp JPEG'e çevirir). setBody, OutgoingContent'i serialize etmeden geçirir.
+        // Etiketler dosyayla aynı multipart gövdesinde, düz metin bir "tags" alanında JSON
+        // dizisi olarak gider (sunucu böyle bekliyor: part'a ayrı Content-Type gerekmesin).
+        // setBody, OutgoingContent'i serialize etmeden geçirir.
+        val tagsJson = Json.encodeToString(
+            tags.map { QuestPhotoTagRequest(it.participantId, it.pinX, it.pinY) },
+        )
         return httpClient.post<MultiPartFormDataContent, EventMemoryDto>(
-            route = "/events/$eventId/memories",
+            route = "/events/$eventId/quests/$questKey/photo",
             body = MultiPartFormDataContent(
                 formData {
                     append(
@@ -237,21 +249,21 @@ class MatchRepositoryImpl(
                         value = imageBytes,
                         headers = Headers.build {
                             append(HttpHeaders.ContentType, mimeType)
-                            append(HttpHeaders.ContentDisposition, "filename=\"memory.jpg\"")
+                            append(HttpHeaders.ContentDisposition, "filename=\"quest-photo.jpg\"")
                         },
                     )
+                    append("tags", tagsJson)
                 },
             ),
         ).mapCatching { it.toDomain() }
     }
 
-    override suspend fun deleteMemory(
-        eventId: String, memoryId: String,
-    ): EmptyResult<DataError.Remote> {
-        // Sunucu 204 (gövdesiz) döner.
-        return httpClient.delete<Unit>(
-            route = "/events/$eventId/memories/$memoryId",
-        )
+    override suspend fun getEventParticipants(
+        eventId: String,
+    ): Result<List<EventParticipant>, DataError.Remote> {
+        return httpClient.get<List<EventParticipantDto>>(
+            route = "/events/$eventId/participants",
+        ).map { participants -> participants.map { it.toDomain() } }
     }
 
     override suspend fun getQuests(

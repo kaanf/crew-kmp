@@ -105,8 +105,10 @@
     <string name="err_quest_already_claimed_desc">You've already claimed the reward for this quest.</string>
     <string name="err_quest_not_completed_title">Not there yet</string>
     <string name="err_quest_not_completed_desc">Finish this quest before claiming its reward.</string>
-    <string name="err_memory_limit_reached_title">Memory limit reached</string>
-    <string name="err_memory_limit_reached_desc">You've captured all the memories you can for this event.</string>
+    <string name="err_invalid_quest_photo_tags_title">Tags don't match</string>
+    <string name="err_invalid_quest_photo_tags_desc">Tag exactly the number of people this quest asks for, and only people checked in tonight.</string>
+    <string name="err_quest_photo_already_submitted_title">Photo already sent</string>
+    <string name="err_quest_photo_already_submitted_desc">You've already sent a photo for this quest.</string>
     <string name="err_event_memory_not_found_title">Memory gone</string>
     <string name="err_event_memory_not_found_desc">That memory no longer exists.</string>
 </resources>
