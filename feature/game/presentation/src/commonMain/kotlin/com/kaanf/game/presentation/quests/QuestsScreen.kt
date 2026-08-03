@@ -49,8 +49,6 @@ import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessIcons
 import com.kaanf.core.designsystem.theme.AccessShapes
 import com.kaanf.core.presentation.model.AppTopBarState
-import com.kaanf.core.presentation.util.mediapicker.PickedImageData
-import com.kaanf.core.presentation.util.mediapicker.rememberCameraLauncher
 import com.kaanf.game.domain.model.EventMemory
 import com.kaanf.game.domain.model.Quest
 import com.kaanf.game.domain.model.QuestPhotoTag
@@ -102,30 +100,22 @@ fun QuestsScreen(
     ) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // Foto akışı: satırdan kamera → çekilen kare etiketleme ekranını açar → gönderince liste.
+    // Foto akışı tek ekranda: satır → etiketleme ekranı (kutu önce kamera, çekimden
+    // sonra etiketlenen kare) → gönderince liste.
     var pendingQuest by remember { mutableStateOf<Quest?>(null) }
-    var pendingPhoto by remember { mutableStateOf<PickedImageData?>(null) }
     var lightboxMemory by remember { mutableStateOf<EventMemory?>(null) }
 
-    val cameraLauncher = rememberCameraLauncher { picked -> pendingPhoto = picked }
-    val closePhotoFlow = {
-        pendingPhoto = null
-        pendingQuest = null
-    }
-
     val photoQuest = pendingQuest
-    val photo = pendingPhoto
-    if (photoQuest != null && photo != null) {
+    if (photoQuest != null) {
         QuestPhotoTagScreen(
             modifier = modifier,
             quest = photoQuest,
-            imageBytes = photo.bytes,
             participants = state.taggableParticipants,
             isUploading = state.isUploading,
             onLoadParticipants = onLoadParticipants,
-            onBack = closePhotoFlow,
+            onBack = { pendingQuest = null },
             onSend = { tags, image ->
-                onSendPhoto(photoQuest.key, tags, image) { closePhotoFlow() }
+                onSendPhoto(photoQuest.key, tags, image) { pendingQuest = null }
             },
         )
         return
@@ -165,10 +155,7 @@ fun QuestsScreen(
                         photo = state.photos[quest.key],
                         isClaiming = state.claimingKey == quest.key,
                         onClaim = { onClaim(quest.key) },
-                        onTakePhoto = {
-                            pendingQuest = quest
-                            cameraLauncher.launch()
-                        },
+                        onTakePhoto = { pendingQuest = quest },
                         onPhotoClick = { memory -> lightboxMemory = memory },
                     )
                 }

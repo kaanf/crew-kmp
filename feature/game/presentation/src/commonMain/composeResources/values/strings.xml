@@ -167,6 +167,8 @@
     <string name="quests_claimed_label">Claimed</string>
     <string name="quests_photo_tags_format">Tag %1$d people</string>
     <string name="quests_photo_take_action">Take photo</string>
+    <string name="quests_photo_open_camera_action">Open the camera</string>
+    <string name="quests_photo_retake_action">Retake</string>
     <string name="quests_photo_shot_by_you">Shot by you</string>
     <string name="quests_photo_shot_by_format">Shot by %1$s</string>
     <string name="quests_photo_with_format">With %1$s</string>
