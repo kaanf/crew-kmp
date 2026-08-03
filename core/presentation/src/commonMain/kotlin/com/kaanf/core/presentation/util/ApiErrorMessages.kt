@@ -52,8 +52,8 @@ import crew.core.presentation.generated.resources.err_match_not_task_offer_desc
 import crew.core.presentation.generated.resources.err_match_not_task_offer_title
 import crew.core.presentation.generated.resources.err_match_not_task_pick_desc
 import crew.core.presentation.generated.resources.err_match_not_task_pick_title
-import crew.core.presentation.generated.resources.err_memory_limit_reached_desc
-import crew.core.presentation.generated.resources.err_memory_limit_reached_title
+import crew.core.presentation.generated.resources.err_invalid_quest_photo_tags_desc
+import crew.core.presentation.generated.resources.err_invalid_quest_photo_tags_title
 import crew.core.presentation.generated.resources.err_participant_not_available_desc
 import crew.core.presentation.generated.resources.err_participant_not_available_title
 import crew.core.presentation.generated.resources.err_participant_not_found_desc
@@ -64,6 +64,8 @@ import crew.core.presentation.generated.resources.err_quest_not_completed_desc
 import crew.core.presentation.generated.resources.err_quest_not_completed_title
 import crew.core.presentation.generated.resources.err_quest_not_found_desc
 import crew.core.presentation.generated.resources.err_quest_not_found_title
+import crew.core.presentation.generated.resources.err_quest_photo_already_submitted_desc
+import crew.core.presentation.generated.resources.err_quest_photo_already_submitted_title
 import crew.core.presentation.generated.resources.err_rate_limit_desc
 import crew.core.presentation.generated.resources.err_rate_limit_title
 import crew.core.presentation.generated.resources.err_same_password_desc
@@ -147,7 +149,8 @@ fun apiErrorUi(code: String): ApiErrorUi? = when (code) {
     "QUEST_NOT_FOUND" -> ApiErrorUi(Res.string.err_quest_not_found_title, Res.string.err_quest_not_found_desc, SnackbarVariant.Error)
     "QUEST_ALREADY_CLAIMED" -> ApiErrorUi(Res.string.err_quest_already_claimed_title, Res.string.err_quest_already_claimed_desc, SnackbarVariant.Warn)
     "QUEST_NOT_COMPLETED" -> ApiErrorUi(Res.string.err_quest_not_completed_title, Res.string.err_quest_not_completed_desc, SnackbarVariant.Warn)
-    "MEMORY_LIMIT_REACHED" -> ApiErrorUi(Res.string.err_memory_limit_reached_title, Res.string.err_memory_limit_reached_desc, SnackbarVariant.Warn)
+    "INVALID_QUEST_PHOTO_TAGS" -> ApiErrorUi(Res.string.err_invalid_quest_photo_tags_title, Res.string.err_invalid_quest_photo_tags_desc, SnackbarVariant.Warn)
+    "QUEST_PHOTO_ALREADY_SUBMITTED" -> ApiErrorUi(Res.string.err_quest_photo_already_submitted_title, Res.string.err_quest_photo_already_submitted_desc, SnackbarVariant.Warn)
     "EVENT_MEMORY_NOT_FOUND" -> ApiErrorUi(Res.string.err_event_memory_not_found_title, Res.string.err_event_memory_not_found_desc, SnackbarVariant.Error)
 
     else -> null

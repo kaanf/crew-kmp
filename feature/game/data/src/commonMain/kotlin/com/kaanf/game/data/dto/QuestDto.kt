@@ -9,6 +9,8 @@ data class QuestDto(
     val description: String,
     val points: Int,
     val target: Int,
+    /** Foto questlerinde etiketlenmesi gereken kişi sayısı; diğerlerinde 0. */
+    val requiredTags: Int = 0,
     val progress: Int,
     val completed: Boolean,
     val claimed: Boolean,

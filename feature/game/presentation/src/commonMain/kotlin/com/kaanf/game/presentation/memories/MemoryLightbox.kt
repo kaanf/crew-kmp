@@ -21,12 +21,18 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -39,6 +45,7 @@ import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessIcons
 import com.kaanf.core.designsystem.theme.AccessShapes
 import com.kaanf.game.domain.model.EventMemory
+import com.kaanf.game.presentation.quests.PhotoPin
 import crew.feature.game.presentation.generated.resources.Res
 import crew.feature.game.presentation.generated.resources.memories_shared_by_format
 import crew.feature.game.presentation.generated.resources.memories_shared_by_you
@@ -82,21 +89,7 @@ fun MemoryLightbox(
                     ),
                 verticalArrangement = Arrangement.spacedBy(14.dp),
             ) {
-                BaseImage(
-                    imageUrl = memory.imageUrl,
-                    contentScale = ContentScale.Crop,
-                    cacheKey = memory.id,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(1f / 1.2f)
-                        .clip(RoundedCornerShape(18.dp))
-                        .background(AccessDefaults.SurfaceElevated)
-                        .border(
-                            width = 1.dp,
-                            color = AccessDefaults.BorderSoft,
-                            shape = RoundedCornerShape(18.dp),
-                        ),
-                )
+                TaggedPhoto(memory = memory)
 
                 HorizontalDivider(color = Color.White.copy(alpha = 0.1f))
 
@@ -163,6 +156,51 @@ fun MemoryLightbox(
                     contentDescription = null,
                     tint = Color.White,
                     modifier = Modifier.size(19.dp),
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Fotoğraf kırpılmadan, kendi oranında çizilir: etiket pinleri 0-1 oranıyla saklandığı
+ * için kutunun çizilen kareyle birebir aynı olması gerekiyor. Ölçü yükleme bitince
+ * geldiğinden pinler o ana kadar çizilmez.
+ */
+@Composable
+private fun TaggedPhoto(
+    memory: EventMemory,
+    modifier: Modifier = Modifier,
+) {
+    val photoShape = RoundedCornerShape(18.dp)
+    var photoSize by remember { mutableStateOf(IntSize.Zero) }
+    val density = LocalDensity.current
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(photoShape)
+            .background(AccessDefaults.SurfaceElevated)
+            .border(width = 1.dp, color = AccessDefaults.BorderSoft, shape = photoShape)
+            .onSizeChanged { photoSize = it },
+    ) {
+        BaseImage(
+            imageUrl = memory.imageUrl,
+            contentScale = ContentScale.Fit,
+            cacheKey = memory.id,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        if (photoSize.height > 0) {
+            val boxWidth = with(density) { photoSize.width.toDp() }
+            val boxHeight = with(density) { photoSize.height.toDp() }
+            memory.tagged.forEachIndexed { index, tag ->
+                PhotoPin(
+                    xFraction = tag.pinX,
+                    yFraction = tag.pinY,
+                    number = index + 1,
+                    label = tag.fullName,
+                    boxWidth = boxWidth,
+                    boxHeight = boxHeight,
                 )
             }
         }

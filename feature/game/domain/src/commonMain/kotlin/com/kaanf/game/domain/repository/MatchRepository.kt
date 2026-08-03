@@ -5,6 +5,7 @@ import com.kaanf.core.domain.util.EmptyResult
 import com.kaanf.core.domain.util.Result
 import com.kaanf.game.domain.model.AddressBook
 import com.kaanf.game.domain.model.EventMemory
+import com.kaanf.game.domain.model.EventParticipant
 import com.kaanf.game.domain.model.GameTask
 import com.kaanf.game.domain.model.LeaderboardEntry
 import com.kaanf.game.domain.model.MatchHistoryEntry
@@ -13,6 +14,7 @@ import com.kaanf.game.domain.model.MatchParticipant
 import com.kaanf.game.domain.model.MatchScoreboard
 import com.kaanf.game.domain.model.MatchSnapshot
 import com.kaanf.game.domain.model.Quest
+import com.kaanf.game.domain.model.QuestPhotoTag
 
 interface MatchRepository {
     suspend fun getMyMatchQrToken(eventId: String): Result<String, DataError.Remote>
@@ -145,28 +147,34 @@ interface MatchRepository {
     ): EmptyResult<DataError.Remote>
 
     /**
-     * Etkinliğin "memory" fotoğrafları, yeniden eskiye sayfalı (match history ile aynı
+     * Etkinliğin foto quest fotoğrafları, yeniden eskiye sayfalı (match history ile aynı
      * sözleşme: `page` 0'dan başlar, dönen liste [size]'dan kısaysa son sayfadır).
-     * Oyun sürerken sunucu yalnız çağıranın kendi çektiklerini döner; etkinlik bitince
-     * tüm odanın rulosu açılır. URL'ler imzalı ve kısa ömürlü olduğundan görüntülemeden
-     * önce liste tazelenmeli.
+     * Oyun sürerken sunucu yalnız çağıranın yüklediklerini ve etiketlendiklerini döner;
+     * etkinlik bitince tüm odanın rulosu açılır. URL'ler imzalı ve kısa ömürlü olduğundan
+     * görüntülemeden önce liste tazelenmeli.
      */
     suspend fun getMemories(
         eventId: String, page: Int, size: Int,
     ): Result<List<EventMemory>, DataError.Remote>
 
     /**
-     * Kameradan çekilen fotoğrafı ruloya yükler (multipart). Sunucu yalnız Gameplay
-     * fazında ve check-in'li katılımcılara izin verir; kişi başı limit vardır.
+     * Foto questine kameradan çekilen fotoğrafı gönderir (multipart). [tags] questin
+     * `requiredTags` değeri kadar olmalı, çağıranı içermemeli ve pinleri 0-1 aralığında
+     * olmalı; sunucu yalnız Gameplay fazında, check-in'li katılımcılara ve quest başına
+     * tek fotoğrafa izin verir.
      */
-    suspend fun uploadMemory(
-        eventId: String, imageBytes: ByteArray, mimeType: String,
+    suspend fun uploadQuestPhoto(
+        eventId: String,
+        questKey: String,
+        tags: List<QuestPhotoTag>,
+        imageBytes: ByteArray,
+        mimeType: String,
     ): Result<EventMemory, DataError.Remote>
 
-    /** Kullanıcının kendi çektiği bir memory'yi siler; başkasınınki sunucuda 403'lenir. */
-    suspend fun deleteMemory(
-        eventId: String, memoryId: String,
-    ): EmptyResult<DataError.Remote>
+    /** Etkinliğin katılımcıları; foto questinde etiket seçiminin kaynağıdır. */
+    suspend fun getEventParticipants(
+        eventId: String,
+    ): Result<List<EventParticipant>, DataError.Remote>
 
     /**
      * Adres defteri: tanışılan kişiler + odadaki toplam kişi sayısı.
