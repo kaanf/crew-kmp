@@ -30,6 +30,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -45,6 +46,7 @@ import androidx.compose.ui.unit.sp
 import com.kaanf.core.designsystem.component.avatar.AvatarCircle
 import com.kaanf.core.designsystem.component.avatar.avatarContentFor
 import com.kaanf.core.designsystem.component.button.BaseButton
+import com.kaanf.core.designsystem.component.dialog.BaseDialog
 import com.kaanf.core.designsystem.component.layout.AppScaffold
 import com.kaanf.core.designsystem.component.layout.AppTopBar
 import com.kaanf.core.designsystem.component.sheet.ContainerBottomSheet
@@ -52,19 +54,26 @@ import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessIcons
 import com.kaanf.core.designsystem.theme.AccessShapes
 import com.kaanf.core.presentation.model.AppTopBarState
+import com.kaanf.core.presentation.permission.Permission
+import com.kaanf.core.presentation.permission.PermissionState
+import com.kaanf.core.presentation.permission.rememberPermissionController
 import com.kaanf.core.presentation.util.mediapicker.decodeImageForCrop
 import com.kaanf.game.domain.model.EventParticipant
+import com.kaanf.game.presentation.component.dialog.CameraPermissionDialog
 import com.kaanf.game.domain.model.Quest
 import com.kaanf.game.domain.model.QuestPhotoTag
 import crew.feature.game.presentation.generated.resources.Res
+import crew.feature.game.presentation.generated.resources.match_camera_permission_retry_action
 import crew.feature.game.presentation.generated.resources.quests_photo_hint_tap_photo
 import crew.feature.game.presentation.generated.resources.quests_photo_no_participants
 import crew.feature.game.presentation.generated.resources.quests_photo_picker_subtitle
 import crew.feature.game.presentation.generated.resources.quests_photo_picker_title
+import crew.feature.game.presentation.generated.resources.quests_photo_retake_action
 import crew.feature.game.presentation.generated.resources.quests_photo_selected_format
 import crew.feature.game.presentation.generated.resources.quests_photo_send_action
 import crew.feature.game.presentation.generated.resources.quests_photo_sending
 import crew.feature.game.presentation.generated.resources.quests_photo_sheet_subtitle_format
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -83,7 +92,6 @@ private const val MAX_UPLOAD_DIMENSION = 1600
 @Composable
 fun QuestPhotoTagScreen(
     quest: Quest,
-    imageBytes: ByteArray,
     participants: List<EventParticipant>,
     isUploading: Boolean,
     onLoadParticipants: () -> Unit,
@@ -91,15 +99,42 @@ fun QuestPhotoTagScreen(
     onSend: (List<QuestPhotoTag>, ImageBitmap) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var image by remember(imageBytes) { mutableStateOf<ImageBitmap?>(null) }
-    var tags by remember(imageBytes) { mutableStateOf(emptyList<QuestPhotoTag>()) }
-    var pendingPin by remember(imageBytes) { mutableStateOf<Pair<Float, Float>?>(null) }
+    var capturedBytes by remember { mutableStateOf<ByteArray?>(null) }
+    var image by remember(capturedBytes) { mutableStateOf<ImageBitmap?>(null) }
+    var tags by remember(capturedBytes) { mutableStateOf(emptyList<QuestPhotoTag>()) }
+    var pendingPin by remember(capturedBytes) { mutableStateOf<Pair<Float, Float>?>(null) }
 
-    LaunchedEffect(imageBytes) {
-        image = decodeImageForCrop(imageBytes, maxDimension = MAX_UPLOAD_DIMENSION)
+    LaunchedEffect(capturedBytes) {
+        image = capturedBytes?.let { decodeImageForCrop(it, maxDimension = MAX_UPLOAD_DIMENSION) }
     }
 
     BackHandler { onBack() }
+
+    val scope = rememberCoroutineScope()
+    val permissionController = rememberPermissionController()
+    var cameraPermission by remember { mutableStateOf(PermissionState.NOT_DETERMINED) }
+    var showPermissionDialog by remember { mutableStateOf(false) }
+
+    // Kutu kameraya dönüşmeden önce izin şart: actual'lar izni verilmiş kabul ediyor.
+    LaunchedEffect(Unit) {
+        cameraPermission = permissionController.requestPermission(Permission.CAMERA)
+        if (cameraPermission == PermissionState.PERMANENTLY_DENIED) showPermissionDialog = true
+    }
+
+    if (showPermissionDialog) {
+        BaseDialog(onDismissRequest = { showPermissionDialog = false }) {
+            CameraPermissionDialog(
+                onOpenSettings = {
+                    showPermissionDialog = false
+                    permissionController.openAppSettings()
+                },
+                onDismiss = {
+                    showPermissionDialog = false
+                    onBack()
+                },
+            )
+        }
+    }
 
     val nameOf = { participantId: String ->
         participants.firstOrNull { it.id == participantId }?.fullName.orEmpty()
@@ -123,20 +158,35 @@ fun QuestPhotoTagScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp, vertical = 12.dp),
         ) {
-            TaggablePhoto(
-                image = image,
-                tags = tags,
-                pendingPin = pendingPin,
-                labelOf = nameOf,
-                onTapPhoto = { x, y ->
-                    if (slotsLeft > 0) {
-                        pendingPin = x to y
-                        // Katılımcılar ancak gerçekten etiketlenecekse çekilir.
-                        onLoadParticipants()
-                    }
-                },
-                onRemoveTag = { tag -> tags = tags - tag },
-            )
+            if (capturedBytes == null) {
+                CaptureBox(
+                    isPermissionGranted = cameraPermission == PermissionState.GRANTED,
+                    onCaptured = { bytes -> capturedBytes = bytes },
+                    onRequestPermission = {
+                        scope.launch {
+                            cameraPermission = permissionController.requestPermission(Permission.CAMERA)
+                            if (cameraPermission == PermissionState.PERMANENTLY_DENIED) {
+                                showPermissionDialog = true
+                            }
+                        }
+                    },
+                )
+            } else {
+                TaggablePhoto(
+                    image = image,
+                    tags = tags,
+                    pendingPin = pendingPin,
+                    labelOf = nameOf,
+                    onTapPhoto = { x, y ->
+                        if (slotsLeft > 0) {
+                            pendingPin = x to y
+                            // Katılımcılar ancak gerçekten etiketlenecekse çekilir.
+                            onLoadParticipants()
+                        }
+                    },
+                    onRemoveTag = { tag -> tags = tags - tag },
+                )
+            }
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -173,15 +223,38 @@ fun QuestPhotoTagScreen(
                 )
             }
 
-            if (slotsLeft > 0) {
-                Text(
-                    text = stringResource(Res.string.quests_photo_hint_tap_photo),
-                    style = MaterialTheme.typography.labelMedium.copy(
-                        color = AccessDefaults.TextFaint,
-                        fontWeight = FontWeight.SemiBold,
-                    ),
+            if (capturedBytes != null) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
                     modifier = Modifier.padding(top = 12.dp),
-                )
+                ) {
+                    Text(
+                        text = if (slotsLeft > 0) {
+                            stringResource(Res.string.quests_photo_hint_tap_photo)
+                        } else {
+                            ""
+                        },
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            color = AccessDefaults.TextFaint,
+                            fontWeight = FontWeight.SemiBold,
+                        ),
+                        modifier = Modifier.weight(1f),
+                    )
+                    Text(
+                        text = stringResource(Res.string.quests_photo_retake_action),
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            color = AccessDefaults.TextSecondary,
+                            fontWeight = FontWeight.SemiBold,
+                        ),
+                        // Kare sıfırlanınca etiketler de gider: pinler o kareye aitti.
+                        modifier = Modifier
+                            .clip(AccessShapes.Pill)
+                            .background(AccessDefaults.SurfaceElevated)
+                            .clickable { capturedBytes = null }
+                            .padding(horizontal = 13.dp, vertical = 7.dp),
+                    )
+                }
             }
 
             BaseButton(
@@ -210,6 +283,45 @@ fun QuestPhotoTagScreen(
                 },
             )
         }
+    }
+}
+
+/**
+ * Fotoğraf çekilene kadar aynı kutu kameradır. Oran 3:4: kamera önizlemesinin de,
+ * çekilen karenin de doğal oranı, böylece çekimde kutu neredeyse hiç zıplamaz.
+ */
+@Composable
+private fun CaptureBox(
+    isPermissionGranted: Boolean,
+    onCaptured: (ByteArray) -> Unit,
+    onRequestPermission: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val boxModifier = modifier
+        .fillMaxWidth()
+        .aspectRatio(3f / 4f)
+        .clip(RoundedCornerShape(18.dp))
+        .background(AccessDefaults.SurfaceElevated)
+
+    if (isPermissionGranted) {
+        PhotoCaptureFrame(modifier = boxModifier, onCaptured = onCaptured)
+        return
+    }
+
+    // İzin reddedildi: ekran çıkmaz sokak olmasın, kutunun kendisi yeniden sorar.
+    Box(modifier = boxModifier, contentAlignment = Alignment.Center) {
+        Text(
+            text = stringResource(Res.string.match_camera_permission_retry_action),
+            style = MaterialTheme.typography.labelMedium.copy(
+                color = AccessDefaults.OnAccent,
+                fontWeight = FontWeight.SemiBold,
+            ),
+            modifier = Modifier
+                .clip(AccessShapes.Pill)
+                .background(AccessDefaults.Accent)
+                .clickable(onClick = onRequestPermission)
+                .padding(horizontal = 16.dp, vertical = 10.dp),
+        )
     }
 }
 

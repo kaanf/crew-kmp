@@ -18,10 +18,12 @@ import crew.core.designsystem.generated.resources.ic_info
 import crew.core.designsystem.generated.resources.ic_key_lock
 import crew.core.designsystem.generated.resources.ic_key_open
 import crew.core.designsystem.generated.resources.ic_left_arrow
+import crew.core.designsystem.generated.resources.ic_lightning
 import crew.core.designsystem.generated.resources.ic_mail
 import crew.core.designsystem.generated.resources.ic_more
 import crew.core.designsystem.generated.resources.ic_pin
 import crew.core.designsystem.generated.resources.ic_qr
+import crew.core.designsystem.generated.resources.ic_refresh
 import crew.core.designsystem.generated.resources.ic_safety
 import crew.core.designsystem.generated.resources.ic_sparkle
 import crew.core.designsystem.generated.resources.ic_target
@@ -46,6 +48,8 @@ object AccessIcons {
     val WifiOff = Res.drawable.ic_wifi_off
     val Bell = Res.drawable.ic_bell
     val Camera = Res.drawable.ic_camera
+    val Lightning = Res.drawable.ic_lightning
+    val Refresh = Res.drawable.ic_refresh
     val Check = Res.drawable.ic_check
     val Clock = Res.drawable.ic_clock
     val Trophy = Res.drawable.ic_trophy
