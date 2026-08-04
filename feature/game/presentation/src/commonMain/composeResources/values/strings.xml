@@ -14,6 +14,18 @@
     <string name="how_to_play_step_3_title">Do the task.\nThey confirm.</string>
     <string name="how_to_play_step_3_subtitle">Tasks are short &#8212; say hi to a stranger, swap a story. The other player confirms you actually did it.</string>
 
+    <string name="coachmark_intro_title">&#10024; Three beats, all night.</string>
+    <string name="coachmark_intro_body">Meet someone &#8594; rock paper scissors &#8594; loser does a small task. That's the whole game, about two minutes a round.</string>
+    <string name="coachmark_qr_title">&#x1F39F;&#xFE0F; This code is your invite.</string>
+    <string name="coachmark_qr_body">Ask someone new if they're in and let them scan it. You're paired the second they do.</string>
+    <string name="coachmark_scan_title">&#x1F4F7; Or scan theirs instead.</string>
+    <string name="coachmark_scan_body">Same result. Point your camera at their code, either way works.</string>
+    <string name="coachmark_score_title">&#x270C;&#xFE0F; Win the throw, bank +3.</string>
+    <string name="coachmark_score_body">Throw for real, then both tap who won. Winner banks +3 pts and picks the loser's task. Your total lives here.</string>
+    <string name="coachmark_score_highlight">+3 pts</string>
+    <string name="coachmark_tabs_title">&#x1F3C6; Quests and standings.</string>
+    <string name="coachmark_tabs_body">Play brings back your code. Leaderboard shows where you sit, and quests up top hold extra points.</string>
+
     <string name="match_task_card_reject_label">REJECT</string>
     <string name="match_task_card_variant_social">SOCIAL</string>
     <string name="match_task_card_variant_bold">BOLD</string>

@@ -22,6 +22,8 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.backhandler.BackHandler
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.kaanf.core.designsystem.component.coachmark.CoachmarkHost
+import com.kaanf.core.designsystem.component.coachmark.coachmarkTarget
 import com.kaanf.core.designsystem.component.dialog.BaseDialog
 import com.kaanf.core.designsystem.component.layout.AppScaffold
 import com.kaanf.core.designsystem.component.layout.AppTopBar
@@ -31,6 +33,8 @@ import com.kaanf.core.presentation.util.ObserveAsEvents
 import com.kaanf.game.presentation.component.sheet.GameResponseSheet
 import com.kaanf.game.presentation.gamelobby.component.dialog.LeaveEventDialog
 import com.kaanf.game.presentation.history.HistoryTab
+import com.kaanf.game.presentation.session.coachmark.GameCoachmarkKey
+import com.kaanf.game.presentation.session.coachmark.rememberGameCoachmarkSteps
 import com.kaanf.game.presentation.leaderboard.LeaderboardTab
 import com.kaanf.game.presentation.session.component.GameBottomBar
 import com.kaanf.game.presentation.session.component.GameBottomTab
@@ -76,6 +80,10 @@ fun MatchContainerRoot(
     // Tab'lar saf UI durumu; navigasyon yok, hepsi bu container içinde yaşar.
     var selectedTab by rememberSaveable { mutableStateOf(GameBottomTab.Play) }
 
+    // ponytail: kalıcılık yok, tur her app açılışında bir kez gösterilir.
+    // Kalıcı istenirse LanguageStore pattern'i (DataStore boolean) kopyalanır.
+    var showCoachmark by rememberSaveable { mutableStateOf(true) }
+
     // Etkinlik bitince Play kilitlenir, leaderboard açılır; maç aktivitesi başlarsa
     // (davet sheet'i ya da faz Idle'dan çıktıysa) Play'e dön — davet/faz UI'ının
     // tek sahibi Play içeriği.
@@ -94,6 +102,8 @@ fun MatchContainerRoot(
         onAction = viewModel::onAction,
         onQuestsClick = onNavigateToQuests,
         onPassportClick = onNavigateToPassport,
+        showCoachmark = showCoachmark,
+        onCoachmarkFinish = { showCoachmark = false },
     )
 }
 
@@ -107,6 +117,8 @@ fun MatchContainerScreen(
     modifier: Modifier = Modifier,
     onQuestsClick: () -> Unit = {},
     onPassportClick: () -> Unit = {},
+    showCoachmark: Boolean = false,
+    onCoachmarkFinish: () -> Unit = {},
 ) {
     val isIdle = state.phase == MatchPhase.Idle
 
@@ -159,83 +171,97 @@ fun MatchContainerScreen(
         }
     }
 
-    AppScaffold(
-        topBar = {
-            when {
-                !isIdle -> AppTopBar(
-                    state = topBarStateFor(state.phase),
-                    onBackClick = { onAction(MatchSessionAction.OnBackClick) },
-                )
+    // Host scaffold'ın tamamını sarar: tur top bar'ı da karartır ve son adım
+    // scaffold içindeki bottom bar'ı hedefleyebilir.
+    CoachmarkHost(
+        steps = rememberGameCoachmarkSteps(),
+        visible = showCoachmark &&
+            isIdle &&
+            selectedTab == GameBottomTab.Play &&
+            !state.showMatchRequestSheet &&
+            !state.showExitConfirmDialog,
+        onFinish = onCoachmarkFinish,
+    ) {
+        AppScaffold(
+            topBar = {
+                when {
+                    !isIdle -> AppTopBar(
+                        state = topBarStateFor(state.phase),
+                        onBackClick = { onAction(MatchSessionAction.OnBackClick) },
+                    )
 
-                selectedTab == GameBottomTab.Play -> AppTopBar(
-                    state = AppTopBarState.Game(
-                        showQuestsAction = true,
-                        showPassportAction = true,
-                    ),
-                    onLeftClick = onQuestsClick,
-                    onPassportClick = onPassportClick,
-                    onRightClick = { onAction(MatchSessionAction.OnBackClick) },
-                )
-
-                else -> AppTopBar(
-                    state = AppTopBarState.Game(
-                        stringResource(
-                            if (selectedTab == GameBottomTab.Leaderboard) {
-                                Res.string.leaderboard_top_bar_title
-                            } else {
-                                Res.string.history_top_bar_title
-                            },
+                    selectedTab == GameBottomTab.Play -> AppTopBar(
+                        state = AppTopBarState.Game(
+                            showQuestsAction = true,
+                            showPassportAction = true,
                         ),
-                    ),
-                    onRightClick = { onAction(MatchSessionAction.OnBackClick) },
-                )
-            }
-        },
-    ) { innerPadding ->
-        Box(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .consumeWindowInsets(innerPadding),
-        ) {
-            if (isIdle && selectedTab != GameBottomTab.Play) {
-                when (selectedTab) {
-                    GameBottomTab.Leaderboard -> LeaderboardTab(
-                        modifier = Modifier.fillMaxSize(),
+                        onLeftClick = onQuestsClick,
+                        onPassportClick = onPassportClick,
+                        onRightClick = { onAction(MatchSessionAction.OnBackClick) },
                     )
 
-                    else -> HistoryTab(modifier = Modifier.fillMaxSize())
-                }
-            } else {
-                AnimatedContent(
-                    targetState = state.phase,
-                    contentKey = { it.key },
-                    transitionSpec = {
-                        (slideInHorizontally { it / 4 } + fadeIn()) togetherWith
-                            (slideOutHorizontally { -it / 4 } + fadeOut()) using
-                            SizeTransform(clip = false)
-                    },
-                    contentAlignment = Alignment.Center,
-                    label = "match_phase",
-                    modifier = Modifier.fillMaxSize(),
-                ) { phase ->
-                    MatchPhaseContent(
-                        phase = phase,
-                        state = state,
-                        onAction = onAction,
-                        modifier = Modifier.fillMaxSize(),
+                    else -> AppTopBar(
+                        state = AppTopBarState.Game(
+                            stringResource(
+                                if (selectedTab == GameBottomTab.Leaderboard) {
+                                    Res.string.leaderboard_top_bar_title
+                                } else {
+                                    Res.string.history_top_bar_title
+                                },
+                            ),
+                        ),
+                        onRightClick = { onAction(MatchSessionAction.OnBackClick) },
                     )
                 }
-            }
+            },
+        ) { innerPadding ->
+            Box(
+                modifier = modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .consumeWindowInsets(innerPadding),
+            ) {
+                if (isIdle && selectedTab != GameBottomTab.Play) {
+                    when (selectedTab) {
+                        GameBottomTab.Leaderboard -> LeaderboardTab(
+                            modifier = Modifier.fillMaxSize(),
+                        )
 
-            // Tek bottom bar; yalnız ana (Idle) ekranlarda, faz ekranlarında gösterilmez.
-            if (isIdle) {
-                GameBottomBar(
-                    activeTab = selectedTab,
-                    isGameEnded = state.isGameEnded,
-                    onTabClick = onTabSelected,
-                    modifier = Modifier.align(Alignment.BottomCenter),
-                )
+                        else -> HistoryTab(modifier = Modifier.fillMaxSize())
+                    }
+                } else {
+                    AnimatedContent(
+                        targetState = state.phase,
+                        contentKey = { it.key },
+                        transitionSpec = {
+                            (slideInHorizontally { it / 4 } + fadeIn()) togetherWith
+                                (slideOutHorizontally { -it / 4 } + fadeOut()) using
+                                SizeTransform(clip = false)
+                        },
+                        contentAlignment = Alignment.Center,
+                        label = "match_phase",
+                        modifier = Modifier.fillMaxSize(),
+                    ) { phase ->
+                        MatchPhaseContent(
+                            phase = phase,
+                            state = state,
+                            onAction = onAction,
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                    }
+                }
+
+                // Tek bottom bar; yalnız ana (Idle) ekranlarda, faz ekranlarında gösterilmez.
+                if (isIdle) {
+                    GameBottomBar(
+                        activeTab = selectedTab,
+                        isGameEnded = state.isGameEnded,
+                        onTabClick = onTabSelected,
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .coachmarkTarget(GameCoachmarkKey.Tabs),
+                    )
+                }
             }
         }
     }

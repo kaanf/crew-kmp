@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import com.kaanf.core.designsystem.component.avatar.AvatarCircle
 import com.kaanf.core.designsystem.component.avatar.avatarContentFor
 import com.kaanf.core.designsystem.component.button.BaseMiniButton
+import com.kaanf.core.designsystem.component.coachmark.coachmarkTarget
 import com.kaanf.core.designsystem.component.qr.UserQrCard
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessIcons
@@ -35,10 +36,10 @@ import com.kaanf.core.designsystem.component.dialog.BaseDialog
 import com.kaanf.core.presentation.permission.Permission
 import com.kaanf.core.presentation.permission.PermissionState
 import com.kaanf.core.presentation.permission.rememberPermissionController
-import com.kaanf.game.presentation.component.OnboardingInfoCard
 import com.kaanf.game.presentation.component.dialog.CameraPermissionDialog
 import com.kaanf.game.presentation.session.MatchSessionAction
 import com.kaanf.game.presentation.session.MatchSessionState
+import com.kaanf.game.presentation.session.coachmark.GameCoachmarkKey
 import crew.feature.game.presentation.generated.resources.Res
 import crew.feature.game.presentation.generated.resources.leaderboard_points_format
 import crew.feature.game.presentation.generated.resources.match_phase_qr_home_description
@@ -93,6 +94,7 @@ fun QrHomePhase(
             )
 
             Column(
+                modifier = Modifier.coachmarkTarget(GameCoachmarkKey.Score),
                 verticalArrangement = Arrangement.spacedBy(2.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
@@ -117,7 +119,9 @@ fun QrHomePhase(
 
         UserQrCard(
             inputText = state.matchQrToken.orEmpty(),
-            modifier = Modifier.fillMaxWidth(0.85f),
+            modifier = Modifier
+                .coachmarkTarget(GameCoachmarkKey.Qr)
+                .fillMaxWidth(0.85f),
         )
 
         Text(
@@ -131,6 +135,7 @@ fun QrHomePhase(
 
         BaseMiniButton(
             text = stringResource(Res.string.match_phase_qr_home_scan_action),
+            modifier = Modifier.coachmarkTarget(GameCoachmarkKey.Scan),
             backgroundColor = AccessDefaults.Surface,
             onClick = {
                 scope.launch {
