@@ -1,6 +1,7 @@
 package com.kaanf.game.presentation.session.phase
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -77,34 +78,36 @@ fun QrHomePhase(
             .verticalScroll(scrollState)
             .padding(start = 16.dp, end = 16.dp, bottom = 72.dp),
         verticalArrangement = Arrangement.spacedBy(
-            space = 12.dp,
+            space = 16.dp,
             alignment = Alignment.CenterVertically
         ),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-            AvatarCircle(
-                content = avatarContentFor(
-                    imageUrl = state.currentUserPhotoUrl,
-                    initialsLabel = state.currentUserName.orEmpty().take(1).uppercase()
-                        .ifEmpty { stringResource(Res.string.match_you_avatar_label) },
-                    seed = state.currentUserName.orEmpty(),
-                ),
-                avatarSize = 48,
-                textSize = 24.0,
-            )
-
             Column(
                 modifier = Modifier.coachmarkTarget(GameCoachmarkKey.Score),
                 verticalArrangement = Arrangement.spacedBy(2.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
+                AvatarCircle(
+                    borderSize = 0,
+                    content = avatarContentFor(
+                        imageUrl = state.currentUserPhotoUrl,
+                        initialsLabel = state.currentUserName.orEmpty().take(1).uppercase()
+                            .ifEmpty { stringResource(Res.string.match_you_avatar_label) },
+                        seed = state.currentUserName.orEmpty(),
+                    ),
+                    avatarSize = 64,
+                    textSize = 24.0,
+                )
+
                 Text(
                     text = state.currentUserName.orEmpty(),
-                    style = MaterialTheme.typography.titleSmall.copy(
+                    style = MaterialTheme.typography.titleMedium.copy(
                         color = AccessDefaults.TextPrimary,
                         fontWeight = FontWeight.Bold,
                     ),
                 )
+
                 Text(
                     text = stringResource(
                         Res.string.leaderboard_points_format,
@@ -121,7 +124,7 @@ fun QrHomePhase(
             inputText = state.matchQrToken.orEmpty(),
             modifier = Modifier
                 .coachmarkTarget(GameCoachmarkKey.Qr)
-                .fillMaxWidth(0.85f),
+                .fillMaxWidth(0.8f),
         )
 
         Text(
@@ -150,12 +153,6 @@ fun QrHomePhase(
             textColor = AccessDefaults.TextPrimary,
             leadingIcon = AccessIcons.QR,
         )
-
-        // Fotoğraf akışı artık burada değil: serbest çekim kalktı, kamera yalnız
-        // Quests ekranındaki foto questlerinin içinden açılıyor.
-
-        // "Atışı kaybettin" kartı geri gelirse: GlowInfoCard(accentColor = AccessDefaults.Coral)
-        // + match_phase_lost_throw_* stringleri.
     }
 }
 
