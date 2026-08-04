@@ -3,6 +3,7 @@ package com.kaanf.game.presentation.quests
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,10 +16,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -49,6 +52,9 @@ internal fun Modifier.offsetPin(
  * kutunun ölçüsü ([boxWidth]/[boxHeight]) dışarıdan gelir çünkü oranı piksele çeviren
  * tek yer burasıdır. Kutunun fotoğrafla birebir aynı olması şart (aspectRatio fotoğrafın
  * oranına eşit), yoksa pin kırpılmış alana göre kayar.
+ *
+ * [onMove] verilirse pin sürüklenebilir: delta piksel oranına çevrilip yeni
+ * 0-1 konumu olarak yukarı bildirilir; state'in sahibi ekrandır.
  */
 @Composable
 internal fun PhotoPin(
@@ -60,11 +66,31 @@ internal fun PhotoPin(
     boxHeight: Dp,
     modifier: Modifier = Modifier,
     onRemove: (() -> Unit)? = null,
+    onMove: ((xFraction: Float, yFraction: Float) -> Unit)? = null,
 ) {
+    // Drag handler'ın pointerInput coroutine'i recomposition'da yeniden kurulmaz;
+    // güncel oranları stale capture yerine buradan okur.
+    val currentX = rememberUpdatedState(xFraction)
+    val currentY = rememberUpdatedState(yFraction)
+    val dragModifier = if (onMove != null) {
+        Modifier.pointerInput(boxWidth, boxHeight) {
+            detectDragGestures { change, dragAmount ->
+                change.consume()
+                onMove(
+                    (currentX.value + dragAmount.x / boxWidth.toPx()).coerceIn(0f, 1f),
+                    (currentY.value + dragAmount.y / boxHeight.toPx()).coerceIn(0f, 1f),
+                )
+            }
+        }
+    } else {
+        Modifier
+    }
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = modifier.offsetPin(xFraction, yFraction, boxWidth, boxHeight),
+        modifier = modifier
+            .offsetPin(xFraction, yFraction, boxWidth, boxHeight)
+            .then(dragModifier),
     ) {
         Box(
             modifier = Modifier

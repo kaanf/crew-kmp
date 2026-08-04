@@ -185,6 +185,11 @@ fun QuestPhotoTagScreen(
                         }
                     },
                     onRemoveTag = { tag -> tags = tags - tag },
+                    onMoveTag = { tag, x, y ->
+                        tags = tags.map {
+                            if (it.participantId == tag.participantId) it.copy(pinX = x, pinY = y) else it
+                        }
+                    },
                 )
             }
 
@@ -337,6 +342,7 @@ private fun TaggablePhoto(
     labelOf: (String) -> String,
     onTapPhoto: (Float, Float) -> Unit,
     onRemoveTag: (QuestPhotoTag) -> Unit,
+    onMoveTag: (QuestPhotoTag, Float, Float) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val photoShape = RoundedCornerShape(18.dp)
@@ -380,6 +386,7 @@ private fun TaggablePhoto(
                 boxWidth = maxWidth,
                 boxHeight = maxHeight,
                 onRemove = { onRemoveTag(tag) },
+                onMove = { x, y -> onMoveTag(tag, x, y) },
             )
         }
         pendingPin?.let { (x, y) ->
