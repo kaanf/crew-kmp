@@ -1,6 +1,7 @@
 package com.kaanf.core.designsystem.component.card
 
 import androidx.compose.animation.core.animateFloatAsState
+import com.kaanf.core.designsystem.markImmutable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -32,8 +33,11 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
@@ -81,7 +85,11 @@ fun GradientChallengeCard(
             }
             .clip(RoundedCornerShape(28.dp))
             .drawWithCache {
-                val corner = 28.dp.toPx()
+                // Gradient'ler yumuşak olduğu için tam çözünürlükte rasterize etmeye gerek
+                // yok: küçük boyanıp büyütülünce göz ayırt edemiyor ama LazyRow'a her
+                // girişte main thread'de ödenen CPU raster maliyeti ~20 kat düşüyor.
+                val rasterScale = CARD_RASTER_PX / size.width
+                val corner = 28.dp.toPx() * rasterScale
 
                 val backgroundBrush = Brush.verticalGradient(
                     colors = colors.backgroundColors,
@@ -92,17 +100,16 @@ fun GradientChallengeCard(
                 val glowBrush = Brush.radialGradient(
                     colors = colors.glowColors,
                     center = Offset(0f, 0f),
-                    radius = size.width * 1.45f,
+                    radius = CARD_RASTER_PX * 1.45f,
                 )
 
-                val width = size.width.toInt().coerceAtLeast(1)
-                val height = size.height.toInt().coerceAtLeast(1)
-                val cachedImage = ImageBitmap(width, height)
+                val rasterHeight = (size.height * rasterScale).toInt().coerceAtLeast(1)
+                val cachedImage = ImageBitmap(CARD_RASTER_PX.toInt(), rasterHeight)
                 CanvasDrawScope().draw(
                     density = this,
                     layoutDirection = layoutDirection,
                     canvas = Canvas(cachedImage),
-                    size = Size(size.width, size.height),
+                    size = Size(CARD_RASTER_PX, rasterHeight.toFloat()),
                 ) {
                     drawRect(brush = backgroundBrush)
                     drawRoundRect(
@@ -110,9 +117,23 @@ fun GradientChallengeCard(
                         cornerRadius = CornerRadius(corner, corner),
                     )
                 }
+                cachedImage.markImmutable()
+
+                val source = IntSize(CARD_RASTER_PX.toInt(), rasterHeight)
+                val destination = IntSize(
+                    size.width.toInt().coerceAtLeast(1),
+                    size.height.toInt().coerceAtLeast(1),
+                )
 
                 onDrawBehind {
-                    drawImage(cachedImage)
+                    drawImage(
+                        image = cachedImage,
+                        srcOffset = IntOffset.Zero,
+                        srcSize = source,
+                        dstOffset = IntOffset.Zero,
+                        dstSize = destination,
+                        filterQuality = FilterQuality.Low,
+                    )
                 }
             }
             .border(
@@ -350,3 +371,6 @@ fun MoreDeckCard() {
         },
     )
 }
+
+// 200dp kart @3x'te ~600px; yumuşak gradient için 128px raster + upscale yeterli.
+private const val CARD_RASTER_PX = 128f

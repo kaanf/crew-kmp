@@ -1,6 +1,7 @@
 package com.kaanf.home.presentation.component
 
 import androidx.compose.ui.Modifier
+import com.kaanf.core.designsystem.markImmutable
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -30,6 +31,7 @@ fun Modifier.verticalGradientScrim(brush: Brush): Modifier = drawWithCache {
     ) {
         drawRect(brush)
     }
+    scrim.markImmutable()
 
     val source = IntSize(RASTER_WIDTH, height)
     val destination = IntSize(size.width.toInt().coerceAtLeast(1), height)

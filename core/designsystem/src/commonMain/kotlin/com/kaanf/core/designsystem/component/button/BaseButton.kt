@@ -1,6 +1,7 @@
 package com.kaanf.core.designsystem.component.button
 
 import androidx.compose.foundation.background
+import com.kaanf.core.designsystem.markImmutable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -215,6 +216,7 @@ private fun AnimatedBorderPaint(
                     ),
                 )
             }
+            gradientImage.markImmutable()
 
             val glowSource = IntSize(GLOW_RASTER_PX, GLOW_RASTER_PX)
             val glowDestination = IntSize(sideInt, sideInt)
