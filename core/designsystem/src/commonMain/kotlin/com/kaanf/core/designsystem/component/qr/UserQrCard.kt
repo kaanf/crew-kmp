@@ -1,6 +1,7 @@
 package com.kaanf.core.designsystem.component.qr
 
 import androidx.compose.foundation.background
+import com.kaanf.core.designsystem.markImmutable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -43,7 +44,7 @@ fun UserQrCard(
     inputText: String,
     qrContentDescription: String = "Logo QR",
 ) {
-    val centerLogo = painterResource(AccessIcons.LogoLetter)
+    // val centerLogo = painterResource(AccessIcons.AppleLogo)
 
     val painter = rememberQrKitPainter(inputText) {
         shapes = QrKitShapes(
@@ -55,20 +56,12 @@ fun UserQrCard(
         colors = QrKitColors(
             darkBrush = QrKitBrush.solidBrush(AccessDefaults.TextPrimary),
         )
-        logo = QrKitLogo(centerLogo, padding = QrKitLogoPadding.Natural(0.2f), shape = QrKitLogoKitShape.Default)
     }
 
     Box(
         modifier = modifier
             .fillMaxSize()
-            .aspectRatio(1f)
-            .background(
-                AccessDefaults.SurfaceElevated,
-                shape = AccessShapes.Large
-            )
-            .padding(
-                all = 12.dp
-            ),
+            .aspectRatio(1f),
         contentAlignment = Alignment.Center
     ) {
         Box(
@@ -90,6 +83,7 @@ fun UserQrCard(
                             ) {
                                 with(painter) { draw(this@draw.size) }
                             }
+                            image.markImmutable()
                             cachedQrKey = key
                             cachedQr = image
                         }
@@ -102,17 +96,6 @@ fun UserQrCard(
 
 private data class QrCacheKey(val data: String, val width: Int, val height: Int)
 
-// QR'ı çizmek ~55ms sürüyor (yüzlerce daire modül + logo) ve painter'ın kendi buffer'ı
-// ekran composition'dan düşünce ölüyor; Quests'e her gidip gelişte yeniden ödeniyordu.
-// Rasterize edilmiş kare composition'a bağlı olmadığı için burada saklanabiliyor.
-//
-// Anahtar = veri + boyut. Token yenilenirse ya da kart boyutu değişirse kare otomatik
-// yeniden üretilir, bayat QR gösterilemez. Renk anahtara girmiyor çünkü AccessDefaults
-// sabit paletli; çalışma anında tema değişimi eklenirse renk de anahtara girmeli.
-//
-// ponytail: tek girişlik cache. Kullanıcının kendi QR'ı tek, token değişince yenisi
-// eskisini düşürür. Aynı anda birden çok QR gösterilirse LRU'ya çıkılır.
-// Kare süreç boyunca tutulur (~6MB); süreç ölürse baştan üretilir, sorun olmaz.
 private var cachedQrKey: QrCacheKey? = null
 private var cachedQr: ImageBitmap? = null
 

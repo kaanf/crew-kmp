@@ -1,6 +1,7 @@
 package com.kaanf.home.presentation.component
 
 import androidx.compose.foundation.border
+import com.kaanf.core.designsystem.markImmutable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -88,6 +89,7 @@ fun Modifier.eventHeroBackground(
                 drawRect(limeGlow)
                 drawRect(centerDark)
             }
+            cachedImage.markImmutable()
 
             onDrawBehind {
                 drawImage(cachedImage)

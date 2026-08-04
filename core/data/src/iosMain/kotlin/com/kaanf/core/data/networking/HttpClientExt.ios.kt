@@ -6,8 +6,10 @@ import io.ktor.client.engine.darwin.DarwinHttpRequestException
 import io.ktor.client.plugins.HttpRequestTimeoutException
 import io.ktor.client.statement.HttpResponse
 import io.ktor.util.network.UnresolvedAddressException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerializationException
 import platform.Foundation.NSURLErrorCallIsActive
 import platform.Foundation.NSURLErrorCannotFindHost
@@ -24,8 +26,9 @@ import platform.Foundation.NSURLErrorTimedOut
 actual suspend fun <T> platformSafeCall(
     execute: suspend () -> HttpResponse,
     handleResponse: suspend (HttpResponse) -> Result<T, DataError.Remote>,
-): Result<T, DataError.Remote> {
-    return try {
+): Result<T, DataError.Remote> = withContext(Dispatchers.Default) {
+    // Parse + mapping CPU işi; Main'de koşarsa animasyon karelerini yer.
+    try {
         val response = execute()
         handleResponse(response)
     } catch (e: DarwinHttpRequestException) {

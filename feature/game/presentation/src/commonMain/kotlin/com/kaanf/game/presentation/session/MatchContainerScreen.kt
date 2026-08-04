@@ -67,7 +67,6 @@ fun MatchContainerRoot(
         when (event) {
             MatchSessionEvent.NavigateToScanOpponent -> onNavigateToScanOpponent()
             MatchSessionEvent.NavigateToDashboard -> onNavigateToDashboard()
-            // Lobi event'leri; bu ekranda tüketilmez.
             MatchSessionEvent.NavigateToGame,
             MatchSessionEvent.NavigateBack -> Unit
         }
@@ -171,8 +170,6 @@ fun MatchContainerScreen(
         }
     }
 
-    // Host scaffold'ın tamamını sarar: tur top bar'ı da karartır ve son adım
-    // scaffold içindeki bottom bar'ı hedefleyebilir.
     CoachmarkHost(
         steps = rememberGameCoachmarkSteps(),
         visible = showCoachmark &&
@@ -251,7 +248,6 @@ fun MatchContainerScreen(
                     }
                 }
 
-                // Tek bottom bar; yalnız ana (Idle) ekranlarda, faz ekranlarında gösterilmez.
                 if (isIdle) {
                     GameBottomBar(
                         activeTab = selectedTab,

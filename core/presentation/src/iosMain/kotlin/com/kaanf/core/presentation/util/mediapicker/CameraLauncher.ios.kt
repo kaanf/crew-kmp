@@ -42,12 +42,13 @@ actual fun rememberCameraLauncher(
                 scope.launch {
                     // Encode the captured image to JPEG; same raw-bytes contract as the gallery
                     // picker (crop + single WebP encode happen later from this full-res source).
-                    val nsData = UIImageJPEGRepresentation(image, 1.0) ?: return@launch
-                    val rawBytes = ByteArray(nsData.length.toInt())
-
-                    withContext(Dispatchers.Default) {
-                        memcpy(rawBytes.refTo(0), nsData.bytes, nsData.length)
-                    }
+                    // Encode off the main thread: full-res JPEG encoding blocks the render loop.
+                    val rawBytes = withContext(Dispatchers.Default) {
+                        val nsData = UIImageJPEGRepresentation(image, 1.0) ?: return@withContext null
+                        ByteArray(nsData.length.toInt()).also {
+                            memcpy(it.refTo(0), nsData.bytes, nsData.length)
+                        }
+                    } ?: return@launch
 
                     onResult(
                         PickedImageData(
