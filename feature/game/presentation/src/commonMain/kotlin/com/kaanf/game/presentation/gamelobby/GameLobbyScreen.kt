@@ -116,6 +116,8 @@ fun GameLobbyRoot(
     }
 }
 
+private const val SHOW_GAME_START_SHEET = false
+
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun GameLobbyScreen(
@@ -128,7 +130,9 @@ fun GameLobbyScreen(
         onAction(GameLobbyAction.OnBackClick)
     }
 
-    if (state.showGameStartSheet) {
+    // ponytail: sheet yerine lobide LIVE + "Enter the game" butonu gösteriliyor;
+    // sheet'e dönmek istenirse bu bayrağı true yapmak yeterli.
+    if (SHOW_GAME_START_SHEET && state.showGameStartSheet) {
         BackHandler(enabled = !state.showExitConfirmDialog) {
             onAction(GameLobbyAction.OnBackClick)
         }
@@ -212,8 +216,17 @@ private fun GameLobbyContent(
 
         MinuteSecondCountdownCard(
             targetEpochMillis = state.targetEpochMillis,
+            isLive = state.showGameStartSheet,
             onFinished = { onAction(GameLobbyAction.OnCountdownFinished) },
         )
+
+        if (state.showGameStartSheet) {
+            BaseButton(
+                text = "Enter the game",
+                filled = true,
+                onClick = { onAction(GameLobbyAction.OnEnterGameClick) },
+            )
+        }
 
         Spacer(modifier = Modifier.height(1.dp))
 

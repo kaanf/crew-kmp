@@ -26,6 +26,7 @@ import kotlin.time.Clock
 fun MinuteSecondCountdownCard(
     targetEpochMillis: Long,
     modifier: Modifier = Modifier,
+    isLive: Boolean = false,
     onFinished: () -> Unit = {},
 ) {
     var nowMillis by remember {
@@ -56,7 +57,7 @@ fun MinuteSecondCountdownCard(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "GAME STARTS IN",
+            text = if (isLive) "THE GAME IS" else "GAME STARTS IN",
             style = MaterialTheme.typography.labelSmall.copy(
                 color = AccessDefaults.TextMuted,
                 fontWeight = FontWeight.SemiBold,
@@ -65,16 +66,22 @@ fun MinuteSecondCountdownCard(
             ),
         )
 
+        val color = if (isLive) AccessDefaults.Accent else AccessDefaults.TextPrimary
+
         Text(
-            text = "${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}",
+            text = if (isLive) {
+                "LIVE"
+            } else {
+                "${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}"
+            },
             modifier = modifier,
             style = MaterialTheme.typography.displayLarge.copy(
-                color = AccessDefaults.TextPrimary,
+                color = color,
                 fontSize = 72.sp,
                 fontWeight = FontWeight.SemiBold,
                 letterSpacing = 0.sp,
                 shadow = Shadow(
-                    color = AccessDefaults.TextPrimary.copy(alpha = 0.5f),
+                    color = color.copy(alpha = 0.5f),
                     offset = Offset.Zero,
                     blurRadius = 48f,
                 ),
