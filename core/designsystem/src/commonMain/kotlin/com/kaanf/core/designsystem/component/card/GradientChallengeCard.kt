@@ -148,7 +148,7 @@ fun GradientChallengeCard(
                 verticalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(
-                    text = "● ${card.variant.name.uppercase()}",
+                    text = "● ${card.variant.label()}",
                     color = card.variant.getColor(),
                     fontFamily = JetbrainsMono,
                     fontWeight = FontWeight.Bold,
@@ -318,6 +318,12 @@ private fun getChallengeCardColor(variant: ChallengeCardVariant): ChallengeCardC
         // Final round da Amber ailesini kullanır; vitrin kartında ayrı palet gerekmedi.
         ChallengeCardVariant.FinalRound -> getChallengeCardColor(ChallengeCardVariant.Funny)
     }
+}
+
+// Enum adı tek kelime olduğu için FinalRound "FINALROUND" basılıyordu; diğerleri doğru.
+private fun ChallengeCardVariant.label(): String = when (this) {
+    ChallengeCardVariant.FinalRound -> "FINAL ROUND"
+    else -> name.uppercase()
 }
 
 private fun ChallengeCardVariant.getColor(): Color {
