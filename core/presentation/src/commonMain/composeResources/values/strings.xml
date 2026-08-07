@@ -38,6 +38,8 @@
     <string name="err_rate_limit_desc">Too many attempts. Please try again shortly.</string>
     <string name="err_identity_already_linked_title">Already connected</string>
     <string name="err_identity_already_linked_desc">This sign-in method is already linked to another account.</string>
+    <string name="err_last_sign_in_method_title">Keep one way in</string>
+    <string name="err_last_sign_in_method_desc">This is the only way into your account. Link another method before removing it.</string>
 
     <string name="err_event_not_found_title">Event unavailable</string>
     <string name="err_event_not_found_desc">This event is no longer available.</string>

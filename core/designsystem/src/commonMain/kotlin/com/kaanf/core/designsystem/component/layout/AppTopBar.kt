@@ -63,6 +63,7 @@ import crew.core.designsystem.generated.resources.profile_title
 import crew.core.designsystem.generated.resources.register_text
 import crew.core.designsystem.generated.resources.rps_ready_title
 import crew.core.designsystem.generated.resources.scan_opponent_title
+import crew.core.designsystem.generated.resources.sign_in_methods_title
 import crew.core.designsystem.generated.resources.ticket_qr_title
 import crew.core.designsystem.generated.resources.who_won_title
 import crew.core.designsystem.generated.resources.winner_confirms_title
@@ -379,6 +380,7 @@ private val AppTopBarState.titleResource: StringResource
         is AppTopBarState.Game -> Res.string.game_qr_home_title
 
         is AppTopBarState.Profile -> Res.string.profile_title
+        AppTopBarState.SignInMethods -> Res.string.sign_in_methods_title
         AppTopBarState.EventDetail -> Res.string.event_detail_title
         AppTopBarState.ImageCrop -> Res.string.image_crop_title
         AppTopBarState.TicketQr -> Res.string.ticket_qr_title
@@ -404,6 +406,7 @@ private val AppTopBarState.navigationIcon: DrawableResource?
         AppTopBarState.Login,
         AppTopBarState.Register,
         is AppTopBarState.Profile,
+        AppTopBarState.SignInMethods,
         AppTopBarState.EventDetail,
         AppTopBarState.TicketQr,
         AppTopBarState.EventCode,

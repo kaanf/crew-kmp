@@ -9,6 +9,7 @@
     <string name="register_text">Sign up</string>
 
     <string name="profile_title">Profile</string>
+    <string name="sign_in_methods_title">Sign-in methods</string>
     <string name="profile_sign_out">Sign out</string>
     <string name="profile_cancel">Cancel</string>
     <string name="profile_save_changes">Save changes</string>

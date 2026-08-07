@@ -36,6 +36,7 @@ import com.kaanf.core.presentation.util.mediapicker.rememberImagePickerLauncher
 import com.kaanf.home.presentation.profile.component.DeleteAccountDialog
 import com.kaanf.home.presentation.profile.component.EditNameDialog
 import com.kaanf.home.presentation.profile.component.ProfileDetailsCard
+import com.kaanf.home.presentation.profile.component.SignInMethodsRow
 import crew.feature.home.presentation.generated.resources.Res
 import crew.feature.home.presentation.generated.resources.profile_language_czech
 import crew.feature.home.presentation.generated.resources.profile_language_english
@@ -47,6 +48,7 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun ProfileRoot(
     onBack: () -> Unit,
+    onSignInMethodsClick: () -> Unit,
     onSignedOut: () -> Unit,
     viewModel: ProfileViewModel = koinViewModel(),
 ) {
@@ -109,6 +111,7 @@ fun ProfileRoot(
                 is ProfileAction.OnChangePhotoClick -> showSourceSheet = true
                 is ProfileAction.OnEditNameClick -> showNameDialog = true
                 is ProfileAction.OnDeleteAccountClick -> showDeleteDialog = true
+                is ProfileAction.OnSignInMethodsClick -> onSignInMethodsClick()
                 // Session is cleared NonCancellable in the VM; navigating here wipes the home stack.
                 is ProfileAction.OnSignOutClick -> onSignedOut()
                 else -> Unit
@@ -177,6 +180,12 @@ fun ProfileScreen(
                     language = stringResource(state.language.labelRes()),
                     onEditName = { onAction(ProfileAction.OnEditNameClick) },
                     onDeleteAccount = { onAction(ProfileAction.OnDeleteAccountClick) },
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                SignInMethodsRow(
+                    onClick = { onAction(ProfileAction.OnSignInMethodsClick) },
                 )
             }
 

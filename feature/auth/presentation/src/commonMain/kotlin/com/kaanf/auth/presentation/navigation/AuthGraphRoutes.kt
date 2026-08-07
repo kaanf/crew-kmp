@@ -26,4 +26,9 @@ sealed interface AuthGraphRoutes {
 
     @Serializable
     data object ForgotPassword : AuthGraphRoutes
+
+    // Oturum açıkken profilden gelinen ayar ekranı; auth grafiğinin başlangıç akışının parçası
+    // değil, NavigationRoot'ta üst seviyede kayıtlı.
+    @Serializable
+    data object SignInMethods : AuthGraphRoutes
 }

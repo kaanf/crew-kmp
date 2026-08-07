@@ -19,6 +19,7 @@ import crew.core.designsystem.generated.resources.ic_key_lock
 import crew.core.designsystem.generated.resources.ic_key_open
 import crew.core.designsystem.generated.resources.ic_left_arrow
 import crew.core.designsystem.generated.resources.ic_lightning
+import crew.core.designsystem.generated.resources.ic_link
 import crew.core.designsystem.generated.resources.ic_mail
 import crew.core.designsystem.generated.resources.ic_more
 import crew.core.designsystem.generated.resources.ic_pin
@@ -60,6 +61,7 @@ object AccessIcons {
     val Trash = Res.drawable.ic_trash
     val Target = Res.drawable.ic_target
     val Mail = Res.drawable.ic_mail
+    val Link = Res.drawable.ic_link
     val GoogleG = Res.drawable.ic_google_g
     val AppleLogo = Res.drawable.ic_apple_logo
     val PixelArt = Res.drawable.crew_pixel_art
