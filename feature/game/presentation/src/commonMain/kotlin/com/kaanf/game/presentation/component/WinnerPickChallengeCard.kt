@@ -33,11 +33,12 @@ import crew.feature.game.presentation.generated.resources.match_points_format
 import crew.feature.game.presentation.generated.resources.match_points_signed_format
 import crew.feature.game.presentation.generated.resources.match_task_card_reject_label
 import crew.feature.game.presentation.generated.resources.match_task_card_variant_bold
-import crew.feature.game.presentation.generated.resources.match_task_card_variant_final
+import crew.feature.game.presentation.generated.resources.match_task_card_variant_challenge
+import crew.feature.game.presentation.generated.resources.match_task_card_variant_confession
 import crew.feature.game.presentation.generated.resources.match_task_card_variant_flirty
-import crew.feature.game.presentation.generated.resources.match_task_card_variant_funny
 import crew.feature.game.presentation.generated.resources.match_task_card_variant_icebreaker
-import crew.feature.game.presentation.generated.resources.match_task_card_variant_social
+import crew.feature.game.presentation.generated.resources.match_task_card_variant_photo
+import crew.feature.game.presentation.generated.resources.match_task_card_variant_storytime
 import crew.feature.game.presentation.generated.resources.match_task_card_variant_team
 import org.jetbrains.compose.resources.stringResource
 
@@ -140,14 +141,16 @@ private fun CardBadge(
     variant: ChallengeCardVariant,
 ) {
     val label = when (variant) {
-        ChallengeCardVariant.Social -> stringResource(Res.string.match_task_card_variant_social)
-        ChallengeCardVariant.Bold -> stringResource(Res.string.match_task_card_variant_bold)
         ChallengeCardVariant.Icebreaker -> stringResource(Res.string.match_task_card_variant_icebreaker)
-        ChallengeCardVariant.Flirty -> stringResource(Res.string.match_task_card_variant_flirty)
         ChallengeCardVariant.Team -> stringResource(Res.string.match_task_card_variant_team)
-        ChallengeCardVariant.Funny -> stringResource(Res.string.match_task_card_variant_funny)
-        ChallengeCardVariant.FinalRound -> stringResource(Res.string.match_task_card_variant_final)
+        ChallengeCardVariant.Storytime -> stringResource(Res.string.match_task_card_variant_storytime)
+        ChallengeCardVariant.Challenge -> stringResource(Res.string.match_task_card_variant_challenge)
+        ChallengeCardVariant.Photo -> stringResource(Res.string.match_task_card_variant_photo)
+        ChallengeCardVariant.Bold -> stringResource(Res.string.match_task_card_variant_bold)
+        ChallengeCardVariant.Confession -> stringResource(Res.string.match_task_card_variant_confession)
+        ChallengeCardVariant.Flirty -> stringResource(Res.string.match_task_card_variant_flirty)
     }
+    val badgeText = "${variant.emoji} $label"
 
     Box(
         modifier = Modifier
@@ -160,7 +163,7 @@ private fun CardBadge(
         contentAlignment = Alignment.Center,
     ) {
         Text(
-            text = label,
+            text = badgeText,
             style = MaterialTheme.typography.labelSmall.copy(
                 color = variant.taskAccentColor(),
             ),
@@ -170,12 +173,13 @@ private fun CardBadge(
 
 internal fun ChallengeCardVariant.taskAccentColor(): Color {
     return when (this) {
-        ChallengeCardVariant.Social -> AccessDefaults.Sky
-        ChallengeCardVariant.Bold -> AccessDefaults.Coral
         ChallengeCardVariant.Icebreaker -> AccessDefaults.Accent
-        ChallengeCardVariant.Flirty -> AccessDefaults.Rose
         ChallengeCardVariant.Team -> AccessDefaults.Teal
-        ChallengeCardVariant.Funny -> AccessDefaults.Amber
-        ChallengeCardVariant.FinalRound -> AccessDefaults.Amber
+        ChallengeCardVariant.Storytime -> AccessDefaults.Amber
+        ChallengeCardVariant.Challenge -> AccessDefaults.Sky
+        ChallengeCardVariant.Photo -> AccessDefaults.Mint
+        ChallengeCardVariant.Bold -> AccessDefaults.Coral
+        ChallengeCardVariant.Confession -> AccessDefaults.Violet
+        ChallengeCardVariant.Flirty -> AccessDefaults.Rose
     }
 }

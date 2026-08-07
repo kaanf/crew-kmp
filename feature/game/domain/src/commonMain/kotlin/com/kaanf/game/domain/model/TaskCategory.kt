@@ -6,8 +6,12 @@ package com.kaanf.game.domain.model
  */
 enum class TaskCategory {
     Icebreaker,
-    Social,
+    Team,
+    Storytime,
+    Challenge,
+    Photo,
     Bold,
-    FinalRound,
+    Confession,
+    Flirty,
     Unknown,
 }

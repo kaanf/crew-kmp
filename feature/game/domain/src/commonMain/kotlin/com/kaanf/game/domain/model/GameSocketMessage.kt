@@ -96,7 +96,7 @@ sealed interface GameSocketMessage {
         val taskTitle: String,
         val taskPoints: Int,
         val taskRejectPoints: Int,
-        val taskCategories: List<TaskCategory>,
+        val taskCategory: TaskCategory,
     ) : GameSocketMessage
 
     data class TaskStarted(

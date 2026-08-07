@@ -136,7 +136,7 @@ private fun Preview() {
                 id = "1",
                 title = "🌍 Get two strangers to teach you the same word in their language.",
                 points = 20,
-                categories = listOf(TaskCategory.Social),
+                category = TaskCategory.Icebreaker,
             ),
         )
     }

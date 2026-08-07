@@ -502,7 +502,7 @@ class MatchSessionViewModel(
                                 title = message.taskTitle,
                                 points = message.taskPoints,
                                 rejectPoints = message.taskRejectPoints,
-                                categories = message.taskCategories,
+                                category = message.taskCategory,
                             ),
                         ),
                     )

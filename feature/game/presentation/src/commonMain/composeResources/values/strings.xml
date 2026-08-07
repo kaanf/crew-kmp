@@ -27,13 +27,14 @@
     <string name="coachmark_tabs_body">Play brings back your code. Leaderboard shows where you sit, and quests up top hold extra points.</string>
 
     <string name="match_task_card_reject_label">REJECT</string>
-    <string name="match_task_card_variant_social">SOCIAL</string>
-    <string name="match_task_card_variant_bold">BOLD</string>
     <string name="match_task_card_variant_icebreaker">ICEBREAKER</string>
-    <string name="match_task_card_variant_flirty">FLIRTY</string>
     <string name="match_task_card_variant_team">TEAM</string>
-    <string name="match_task_card_variant_funny">FUNNY</string>
-    <string name="match_task_card_variant_final">FINAL ROUND</string>
+    <string name="match_task_card_variant_storytime">STORYTIME</string>
+    <string name="match_task_card_variant_challenge">CHALLENGE</string>
+    <string name="match_task_card_variant_photo">PHOTO</string>
+    <string name="match_task_card_variant_bold">BOLD</string>
+    <string name="match_task_card_variant_confession">CONFESSION</string>
+    <string name="match_task_card_variant_flirty">FLIRTY</string>
 
     <string name="match_phase_qr_home_description">Walk up to someone. Ask if they want to play.\nLet them scan you.</string>
     <string name="match_phase_qr_home_scan_action">Or Scan Them Instead</string>
@@ -135,10 +136,10 @@
     <string name="match_task_reject_confirm_stay">Keep the task</string>
     <string name="match_task_reject_confirm_reject">Reject anyway</string>
 
-    <string name="phase_bold_started_title">Bold round has begun</string>
-    <string name="phase_bold_started_description">Braver challenges just entered the deck.</string>
-    <string name="phase_final_started_title">Final round!</string>
-    <string name="phase_final_started_description">Last stretch — the boldest tasks are in play.</string>
+    <string name="phase_bold_started_title">The night heats up</string>
+    <string name="phase_bold_started_description">More personal and daring tasks just entered the deck.</string>
+    <string name="phase_final_started_title">Final phase!</string>
+    <string name="phase_final_started_description">Last stretch — the boldest and flirtiest tasks are in play.</string>
 
     <string name="match_invite_declined_title">Invite declined</string>
     <string name="match_invite_declined_description">Your opponent didn't accept the match.</string>

@@ -12,7 +12,7 @@ data class DashboardState(
     val tasks: List<ChallengeCardUiModel> = listOf(
         ChallengeCardUiModel(
             description = "Get two strangers to teach you the same word in their language. Both of them, same word.",
-            variant = ChallengeCardVariant.Social,
+            variant = ChallengeCardVariant.Storytime,
             points = 20,
         ),
         ChallengeCardUiModel(

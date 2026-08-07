@@ -166,7 +166,7 @@ fun SocketEnvelopeDto.toDomain(json: Json): GameSocketMessage = when (type) {
                 taskTitle = it.taskTitle,
                 taskPoints = it.taskPoints,
                 taskRejectPoints = it.taskRejectPoints,
-                taskCategories = it.taskCategories.map { category -> category.toTaskCategory() },
+                taskCategory = it.taskCategory.toTaskCategory(),
             )
         }
         ?: GameSocketMessage.Unknown(type)

@@ -35,5 +35,5 @@ data class MatchSnapshotTaskDto(
     val title: String,
     val points: Int,
     val rejectPoints: Int = -5,
-    val categories: List<String> = emptyList(),
+    val category: String = "ICEBREAKER",
 )

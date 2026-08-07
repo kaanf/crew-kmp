@@ -40,6 +40,7 @@ object AccessDefaults {
     val Teal = Color(0xFF5BE0C5)
     val Amber = Color(0xFFFFB341)
     val Mint = Color(0xFF6BE7A5)
+    val Violet = Color(0xFF9D7AFF)
 
     val CrewSurface2Focused = Color(0xFF28231A)
     val LoadingOverlayScrim = Color(0xD6050505)
