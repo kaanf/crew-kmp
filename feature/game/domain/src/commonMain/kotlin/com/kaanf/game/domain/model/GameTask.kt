@@ -6,5 +6,5 @@ data class GameTask(
     val points: Int,
     // Reddedilince skora uygulanan işaretli, göreve özel ceza (örn. -5, -35).
     val rejectPoints: Int = -5,
-    val categories: List<TaskCategory>,
+    val category: TaskCategory,
 )

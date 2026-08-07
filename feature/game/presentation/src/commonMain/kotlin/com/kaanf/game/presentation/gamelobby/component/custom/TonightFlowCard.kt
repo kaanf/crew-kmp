@@ -46,9 +46,9 @@ fun TonightFlowCard(
     modifier: Modifier = Modifier,
     totalDuration: String = "1h 45m",
     steps: List<FlowStep> = listOf(
-        FlowStep("Icebreaker", "20:15 – 20:45", Color(0xFFC8FF3D)),
-        FlowStep("Bold", "20:45 – 21:30", Color(0xFFFF7A5C)),
-        FlowStep("Final Round", "21:30 – 22:00", Color(0xFFFF5A7A)),
+        FlowStep("Warm-up", "20:15 – 20:45", Color(0xFFC8FF3D)),
+        FlowStep("Heating up", "20:45 – 21:30", Color(0xFFFF7A5C)),
+        FlowStep("Bold & flirty", "21:30 – 22:00", Color(0xFFFF5A7A)),
     )
 ) {
     Column(

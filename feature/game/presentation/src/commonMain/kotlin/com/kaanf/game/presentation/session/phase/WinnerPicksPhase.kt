@@ -207,19 +207,19 @@ private val sampleWinnerTasks = listOf(
     GameTask(
         id = "1",
         title = "🌍 Get two strangers to teach you the same word in their language.",
-        categories = listOf(TaskCategory.Social),
+        category = TaskCategory.Storytime,
         points = 20,
     ),
     GameTask(
         id = "2",
         title = "🕺 Walk to the loudest table and convince one of them to teach you a dance move.",
-        categories = listOf(TaskCategory.Bold),
+        category = TaskCategory.Bold,
         points = 35,
     ),
     GameTask(
         id = "3",
         title = "🎨 Find someone wearing your favourite colour. Ask why they chose it tonight.",
-        categories = listOf(TaskCategory.Icebreaker),
+        category = TaskCategory.Icebreaker,
         points = 10,
     ),
 )

@@ -24,7 +24,7 @@ fun MatchSnapshotDto.toDomain(): MatchSnapshot = MatchSnapshot(
             title = it.title,
             points = it.points,
             rejectPoints = it.rejectPoints,
-            categories = it.categories.map { category -> category.toTaskCategory() },
+            category = it.category.toTaskCategory(),
         )
     },
     completed = completed,

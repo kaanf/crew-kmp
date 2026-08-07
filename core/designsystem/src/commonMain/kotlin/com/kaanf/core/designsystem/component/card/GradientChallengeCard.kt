@@ -148,7 +148,7 @@ fun GradientChallengeCard(
                 verticalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(
-                    text = "● ${card.variant.label()}",
+                    text = "${card.variant.emoji} ${card.variant.name.uppercase()}",
                     color = card.variant.getColor(),
                     fontFamily = JetbrainsMono,
                     fontWeight = FontWeight.Bold,
@@ -195,7 +195,7 @@ private data class ChallengeCardColors(
 
 private fun getChallengeCardColor(variant: ChallengeCardVariant): ChallengeCardColors {
     return when (variant) {
-        ChallengeCardVariant.Social -> ChallengeCardColors(
+        ChallengeCardVariant.Challenge -> ChallengeCardColors(
             backgroundColors = listOf(
                 Color(0xFF101923),
                 Color(0xFF0E151D),
@@ -295,7 +295,7 @@ private fun getChallengeCardColor(variant: ChallengeCardVariant): ChallengeCardC
             accent = AccessDefaults.Teal,
         )
 
-        ChallengeCardVariant.Funny -> ChallengeCardColors(
+        ChallengeCardVariant.Storytime -> ChallengeCardColors(
             backgroundColors = listOf(
                 Color(0xFF241A0D),
                 Color(0xFF1E150B),
@@ -315,26 +315,58 @@ private fun getChallengeCardColor(variant: ChallengeCardVariant): ChallengeCardC
             accent = AccessDefaults.Amber,
         )
 
-        // Final round da Amber ailesini kullanır; vitrin kartında ayrı palet gerekmedi.
-        ChallengeCardVariant.FinalRound -> getChallengeCardColor(ChallengeCardVariant.Funny)
-    }
-}
+        ChallengeCardVariant.Photo -> ChallengeCardColors(
+            backgroundColors = listOf(
+                Color(0xFF10231B),
+                Color(0xFF0E1D17),
+                Color(0xFF0B1712),
+                Color(0xFF08110D),
+                Color(0xFF050B09),
+            ),
+            glowColors = listOf(
+                Color(0x336BE7A5),
+                Color(0x226BE7A5),
+                Color.Transparent,
+            ),
+            borderColors = listOf(
+                Color(0xFF245C46),
+                Color(0xFF143429),
+            ),
+            accent = AccessDefaults.Mint,
+        )
 
-// Enum adı tek kelime olduğu için FinalRound "FINALROUND" basılıyordu; diğerleri doğru.
-private fun ChallengeCardVariant.label(): String = when (this) {
-    ChallengeCardVariant.FinalRound -> "FINAL ROUND"
-    else -> name.uppercase()
+        ChallengeCardVariant.Confession -> ChallengeCardColors(
+            backgroundColors = listOf(
+                Color(0xFF171023),
+                Color(0xFF130E1D),
+                Color(0xFF0F0B17),
+                Color(0xFF0B0812),
+                Color(0xFF07050C),
+            ),
+            glowColors = listOf(
+                Color(0x339D7AFF),
+                Color(0x229D7AFF),
+                Color.Transparent,
+            ),
+            borderColors = listOf(
+                Color(0xFF3A2A5E),
+                Color(0xFF211838),
+            ),
+            accent = AccessDefaults.Violet,
+        )
+    }
 }
 
 private fun ChallengeCardVariant.getColor(): Color {
     return when (this) {
-        ChallengeCardVariant.Social -> AccessDefaults.Sky
-        ChallengeCardVariant.Bold -> AccessDefaults.Coral
         ChallengeCardVariant.Icebreaker -> AccessDefaults.Accent
-        ChallengeCardVariant.Flirty -> AccessDefaults.Rose
         ChallengeCardVariant.Team -> AccessDefaults.Teal
-        ChallengeCardVariant.Funny -> AccessDefaults.Amber
-        ChallengeCardVariant.FinalRound -> AccessDefaults.Amber
+        ChallengeCardVariant.Storytime -> AccessDefaults.Amber
+        ChallengeCardVariant.Challenge -> AccessDefaults.Sky
+        ChallengeCardVariant.Photo -> AccessDefaults.Mint
+        ChallengeCardVariant.Bold -> AccessDefaults.Coral
+        ChallengeCardVariant.Confession -> AccessDefaults.Violet
+        ChallengeCardVariant.Flirty -> AccessDefaults.Rose
     }
 }
 

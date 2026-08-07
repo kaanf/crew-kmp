@@ -1,5 +1,12 @@
 package com.kaanf.core.presentation.model
 
-enum class ChallengeCardVariant {
-    Social, Bold, Icebreaker, Flirty, Team, Funny, FinalRound
+enum class ChallengeCardVariant(val emoji: String) {
+    Icebreaker("🧊"),
+    Team("🤝"),
+    Storytime("📖"),
+    Challenge("🎯"),
+    Photo("📸"),
+    Bold("🔥"),
+    Confession("🤫"),
+    Flirty("😏"),
 }

@@ -9,13 +9,17 @@ fun TaskDto.toDomain(): GameTask = GameTask(
     title = title,
     points = points,
     rejectPoints = rejectPoints,
-    categories = categories.map { it.toTaskCategory() },
+    category = category.toTaskCategory(),
 )
 
 internal fun String.toTaskCategory(): TaskCategory = when (uppercase()) {
     "ICEBREAKER" -> TaskCategory.Icebreaker
-    "SOCIAL" -> TaskCategory.Social
+    "TEAM" -> TaskCategory.Team
+    "STORYTIME" -> TaskCategory.Storytime
+    "CHALLENGE" -> TaskCategory.Challenge
+    "PHOTO" -> TaskCategory.Photo
     "BOLD" -> TaskCategory.Bold
-    "FINAL_ROUND" -> TaskCategory.FinalRound
+    "CONFESSION" -> TaskCategory.Confession
+    "FLIRTY" -> TaskCategory.Flirty
     else -> TaskCategory.Unknown
 }
