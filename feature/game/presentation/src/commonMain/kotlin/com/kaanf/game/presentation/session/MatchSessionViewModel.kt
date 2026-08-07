@@ -318,6 +318,10 @@ class MatchSessionViewModel(
                 currentUserScore = it.currentUserScore,
                 currentUserWinCount = it.currentUserWinCount,
                 currentUserMatchesCount = it.currentUserMatchesCount,
+                // Etkinlik bitişi maça değil geceye ait: sıfırlanırsa Play kilidi açılır ve
+                // kullanıcı leaderboard'dan geri düşer. Bayrağı bir sonraki CONNECTED'a
+                // kadar kaybetmemek için taşınır.
+                isGameEnded = it.isGameEnded,
             )
         }
     }
