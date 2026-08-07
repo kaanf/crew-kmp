@@ -1,5 +1,7 @@
 package com.kaanf.game.data.mappers
 
+import com.kaanf.game.data.dto.AnnouncementCocktailDto
+import com.kaanf.game.data.dto.AnnouncementPayloadDto
 import com.kaanf.game.data.dto.ConnectedPayloadDto
 import com.kaanf.game.data.dto.LobbyUserJoinedDto
 import com.kaanf.game.data.dto.LobbyUserLeftDto
@@ -19,6 +21,7 @@ import com.kaanf.game.data.dto.TaskOfferedPayloadDto
 import com.kaanf.game.data.dto.TaskRejectedPayloadDto
 import com.kaanf.game.data.dto.TaskStartedPayloadDto
 import com.kaanf.game.data.dto.ViewerStatsDto
+import com.kaanf.game.domain.model.AnnouncementCocktail
 import com.kaanf.game.domain.model.CurrentUserStats
 import com.kaanf.game.domain.model.GameSocketMessage
 import com.kaanf.game.domain.model.LobbyMember
@@ -31,6 +34,21 @@ private fun LobbyMemberDto.toDomain(): LobbyMember {
         userId = userId,
         fullName = fullName,
         profilePictureUrl = profilePictureUrl
+    )
+}
+
+private fun AnnouncementCocktailDto.toDomain(): AnnouncementCocktail {
+    return AnnouncementCocktail(
+        name = name,
+        venueName = venueName,
+        tagline = tagline,
+        story = story,
+        signature = signature,
+        imageUrl = imageUrl,
+        nose = nose,
+        palate = palate,
+        finish = finish,
+        servingNote = servingNote,
     )
 }
 
@@ -230,6 +248,18 @@ fun SocketEnvelopeDto.toDomain(json: Json): GameSocketMessage = when (type) {
             GameSocketMessage.MatchInviteExpired(
                 inviteId = it.inviteId,
                 eventId = it.eventId,
+            )
+        }
+        ?: GameSocketMessage.Unknown(type)
+
+    "ANNOUNCEMENT" -> json.decodePayloadOrNull<AnnouncementPayloadDto>(payload)
+        ?.let {
+            GameSocketMessage.Announcement(
+                eventId = it.eventId,
+                title = it.title,
+                body = it.body,
+                durationSeconds = it.durationSeconds,
+                cocktail = it.cocktail?.toDomain(),
             )
         }
         ?: GameSocketMessage.Unknown(type)

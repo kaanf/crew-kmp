@@ -37,6 +37,7 @@ import com.kaanf.core.designsystem.component.dialog.BaseDialog
 import com.kaanf.core.presentation.permission.Permission
 import com.kaanf.core.presentation.permission.PermissionState
 import com.kaanf.core.presentation.permission.rememberPermissionController
+import com.kaanf.game.presentation.component.AnnouncementChip
 import com.kaanf.game.presentation.component.dialog.CameraPermissionDialog
 import com.kaanf.game.presentation.session.MatchSessionAction
 import com.kaanf.game.presentation.session.MatchSessionState
@@ -72,17 +73,20 @@ fun QrHomePhase(
             )
         }
     }
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(scrollState)
-            .padding(start = 16.dp, end = 16.dp, bottom = 72.dp),
-        verticalArrangement = Arrangement.spacedBy(
-            space = 16.dp,
-            alignment = Alignment.CenterVertically
-        ),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
+    // Duyuru chip'i içeriğin üstünde ayrı bir katmanda durur: top bar ile avatar arasına
+    // oturur, gelip gidince aşağıdaki içerik yerinden oynamaz.
+    Box(modifier = modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(scrollState)
+                .padding(start = 16.dp, end = 16.dp, bottom = 72.dp),
+            verticalArrangement = Arrangement.spacedBy(
+                space = 16.dp,
+                alignment = Alignment.CenterVertically
+            ),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
             Column(
                 modifier = Modifier.coachmarkTarget(GameCoachmarkKey.Score),
                 verticalArrangement = Arrangement.spacedBy(2.dp),
@@ -120,39 +124,53 @@ fun QrHomePhase(
                 )
             }
 
-        UserQrCard(
-            inputText = state.matchQrToken.orEmpty(),
-            modifier = Modifier
-                .coachmarkTarget(GameCoachmarkKey.Qr)
-                .fillMaxWidth(0.8f),
-        )
+            UserQrCard(
+                inputText = state.matchQrToken.orEmpty(),
+                modifier = Modifier
+                    .coachmarkTarget(GameCoachmarkKey.Qr)
+                    .fillMaxWidth(0.8f),
+            )
 
-        Text(
-            text = stringResource(Res.string.match_phase_qr_home_description),
-            style = MaterialTheme.typography.bodySmall.copy(
-                color = AccessDefaults.TextSecondary,
-                fontWeight = FontWeight.Medium,
-                textAlign = TextAlign.Center,
-            ),
-        )
+            Text(
+                text = stringResource(Res.string.match_phase_qr_home_description),
+                style = MaterialTheme.typography.bodySmall.copy(
+                    color = AccessDefaults.TextSecondary,
+                    fontWeight = FontWeight.Medium,
+                    textAlign = TextAlign.Center,
+                ),
+            )
 
-        BaseMiniButton(
-            text = stringResource(Res.string.match_phase_qr_home_scan_action),
-            modifier = Modifier.coachmarkTarget(GameCoachmarkKey.Scan),
-            backgroundColor = AccessDefaults.Surface,
-            onClick = {
-                scope.launch {
-                    when (permissionController.requestPermission(Permission.CAMERA)) {
-                        PermissionState.GRANTED -> onAction(MatchSessionAction.OnScanClicked)
-                        PermissionState.PERMANENTLY_DENIED -> showCameraPermissionDialog = true
-                        else -> Unit
+            BaseMiniButton(
+                text = stringResource(Res.string.match_phase_qr_home_scan_action),
+                modifier = Modifier.coachmarkTarget(GameCoachmarkKey.Scan),
+                backgroundColor = AccessDefaults.Surface,
+                onClick = {
+                    scope.launch {
+                        when (permissionController.requestPermission(Permission.CAMERA)) {
+                            PermissionState.GRANTED -> onAction(MatchSessionAction.OnScanClicked)
+                            PermissionState.PERMANENTLY_DENIED -> showCameraPermissionDialog = true
+                            else -> Unit
+                        }
                     }
-                }
-            },
-            filled = false,
-            textColor = AccessDefaults.TextPrimary,
-            leadingIcon = AccessIcons.QR,
-        )
+                },
+                filled = false,
+                textColor = AccessDefaults.TextPrimary,
+                leadingIcon = AccessIcons.QR,
+            )
+        }
+
+        state.announcementBody?.let { body ->
+            AnnouncementChip(
+                body = body,
+                endsAtEpochMillis = state.announcementEndsAtEpochMillis,
+                modifier = Modifier.align(Alignment.TopCenter).padding(top = 8.dp),
+                onClick = if (state.announcementCocktail != null) {
+                    { onAction(MatchSessionAction.OnAnnouncementClicked) }
+                } else {
+                    null
+                },
+            )
+        }
     }
 }
 

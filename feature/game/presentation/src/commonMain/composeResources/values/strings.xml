@@ -225,4 +225,10 @@
     <string name="passport_source_task_format">Task · &#8220;%1$s&#8221;</string>
     <string name="passport_collect_action">Collect a new stamp</string>
     <string name="passport_share_action">Share page</string>
+    <string name="cocktail_notes_kicker">Notes</string>
+    <string name="cocktail_note_nose">Nose</string>
+    <string name="cocktail_note_palate">Palate</string>
+    <string name="cocktail_note_finish">Finish</string>
+    <string name="cocktail_offer_hint">Show this screen to order</string>
+    <string name="cocktail_photo_placeholder">cocktail photo</string>
 </resources>

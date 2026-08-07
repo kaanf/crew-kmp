@@ -102,7 +102,24 @@ class EventConnectionClientImpl(
         val signals: SharedFlow<SocketSignal>,
         val connectionState: StateFlow<GameConnectionState>,
         val lastConnected: StateFlow<GameSocketMessage.Connected?>,
+        val activeAnnouncement: StateFlow<TimedAnnouncement?>,
     )
+
+    /** Süresi dolmamış duyuru; geç aboneye kalan süreyle replay'lenir. */
+    private class TimedAnnouncement(
+        val message: GameSocketMessage.Announcement,
+        val expiresAtMillis: Long,
+    ) {
+        /** Kalan süre bittiyse null; aksi halde geri sayım kaldığı yerden sürsün diye kırpılmış kopya. */
+        fun remainingOrNull(nowMillis: Long): GameSocketMessage.Announcement? {
+            val remainingSeconds = ((expiresAtMillis - nowMillis) / 1000).toInt()
+            return if (remainingSeconds > 0) {
+                message.copy(durationSeconds = remainingSeconds)
+            } else {
+                null
+            }
+        }
+    }
 
     // Soketin tek kaynağı: hem mesajlar hem de bağlantı durumu aynı paylaşılan akıştan
     // türetilir. Böylece observeEvents veya observeConnectionState'ten *hangisi* collect
@@ -120,7 +137,16 @@ class EventConnectionClientImpl(
         // idempotent olduğundan nadir çift teslim zararsız.
         emitAll(
             stream.signals
-                .onSubscription { stream.lastConnected.value?.let { emit(SocketSignal.Message(it)) } }
+                .onSubscription {
+                    stream.lastConnected.value?.let { emit(SocketSignal.Message(it)) }
+                    // Duyuru da replay'lenir: soket ayaktayken (graph'tan 5 sn içinde çıkıp
+                    // dönmek gibi) yeni abone ANNOUNCEMENT'ı kaçırır ve chip kaybolurdu.
+                    // Soket koptuğunda gerek yok; backend aktif duyuruyu CONNECTED'tan hemen
+                    // sonra kalan süreyle zaten tekrar yolluyor.
+                    stream.activeAnnouncement.value
+                        ?.remainingOrNull(Clock.System.now().toEpochMilliseconds())
+                        ?.let { emit(SocketSignal.Message(it)) }
+                }
                 .filterIsInstance<SocketSignal.Message>()
                 .map { it.message },
         )
@@ -150,6 +176,8 @@ class EventConnectionClientImpl(
         val connectionState = MutableStateFlow<GameConnectionState>(GameConnectionState.Connecting)
         // Son CONNECTED snapshot'ı: observeEvents geç aboneye bunu replay'ler (üstte açıklandı).
         val lastConnected = MutableStateFlow<GameSocketMessage.Connected?>(null)
+        // Süreli duyuru; aynı sebeple geç aboneye kalan süreyle replay'lenir.
+        val activeAnnouncement = MutableStateFlow<TimedAnnouncement?>(null)
 
         // Soketin yaşam döngüsü auth + ağ + foreground kapısına bağlı. Kapı her açıldığında
         // flatMapLatest yeni bir bağlantı kurar; bu da backoff sayacını 0'a çekerek ağ/ön plan
@@ -181,6 +209,16 @@ class EventConnectionClientImpl(
                     signal is SocketSignal.Update -> connectionState.value = signal.state
                     signal is SocketSignal.Message && signal.message is GameSocketMessage.Connected ->
                         lastConnected.value = signal.message
+
+                    signal is SocketSignal.Message && signal.message is GameSocketMessage.Announcement ->
+                        activeAnnouncement.value = signal.message.durationSeconds
+                            ?.let { seconds ->
+                                TimedAnnouncement(
+                                    message = signal.message,
+                                    expiresAtMillis = Clock.System.now().toEpochMilliseconds() +
+                                        seconds * 1000L,
+                                )
+                            }
                 }
             }
             // Aboneliği kalmayan stream'i map'ten düşür; aksi halde her distinct event kalıcı
@@ -200,6 +238,7 @@ class EventConnectionClientImpl(
             signals = signals,
             connectionState = connectionState,
             lastConnected = lastConnected,
+            activeAnnouncement = activeAnnouncement,
         )
         return stream
     }

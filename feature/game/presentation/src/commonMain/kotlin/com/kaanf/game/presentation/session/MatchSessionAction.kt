@@ -32,4 +32,7 @@ sealed interface MatchSessionAction {
     data class OnConfirmTask(val completed: Boolean) : MatchSessionAction
 
     data object OnFinishMatch : MatchSessionAction
+
+    data object OnAnnouncementClicked : MatchSessionAction
+    data object OnAnnouncementDismissed : MatchSessionAction
 }
