@@ -10,8 +10,6 @@ data class EventDetailUiModel(
     val heroDate: String,
     val hasMyTicket: Boolean,
     val doorsOpenAt: Instant,
-    val goingCount: Int,
-    val spotsLeft: Int,
     val formattedPrice: String,
     val isFree: Boolean,
     /** Sunucunun yükleme anındaki fazı: Gameplay → başladı, Finished → bitti; CTA kilitlenir. */
