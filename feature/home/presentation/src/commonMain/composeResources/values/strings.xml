@@ -74,7 +74,6 @@
     <string name="ticket_qr_load_error_title">Couldn&apos;t load your ticket</string>
     <string name="ticket_qr_load_error_description">Check your connection and try again.</string>
     <string name="ticket_qr_retry_action">TRY AGAIN</string>
-    <string name="event_detail_directions_action">GET DIRECTIONS</string>
     <string name="event_detail_load_error_title">Couldn&apos;t load this event</string>
     <string name="event_detail_load_error_description">Check your connection and try again.</string>
 

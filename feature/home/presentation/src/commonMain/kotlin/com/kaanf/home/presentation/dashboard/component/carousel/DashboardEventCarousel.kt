@@ -188,7 +188,7 @@ private fun CarouselEventCard(
         ) {
             Text(
                 text = event.date,
-                style = MaterialTheme.typography.labelSmall.copy(
+                style = MaterialTheme.typography.labelMedium.copy(
                     color = AccessDefaults.Accent,
                     fontWeight = FontWeight.Bold,
                     fontSize = 11.sp,
@@ -211,7 +211,7 @@ private fun CarouselEventCard(
             ) {
                 Text(
                     text = event.formattedPrice,
-                    style = MaterialTheme.typography.labelSmall.copy(
+                    style = MaterialTheme.typography.labelMedium.copy(
                         color = AccessDefaults.TextPrimary,
                         fontSize = 14.sp,
                     ),

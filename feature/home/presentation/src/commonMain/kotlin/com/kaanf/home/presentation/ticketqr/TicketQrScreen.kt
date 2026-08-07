@@ -44,7 +44,7 @@ import com.kaanf.core.presentation.util.ObserveAsEvents
 import com.kaanf.home.presentation.eventcode.EventCodeContent
 import com.kaanf.home.presentation.ticketqr.component.qr.TicketQrInfoCard
 import com.kaanf.home.presentation.ticketqr.component.successcard.TicketSuccessCard
-import com.kaanf.home.presentation.component.EventVenueDirectionsCard
+import com.kaanf.home.presentation.component.EventVenueLine
 import crew.feature.home.presentation.generated.resources.Res
 import crew.feature.home.presentation.generated.resources.ticket_qr_getting_there
 import crew.feature.home.presentation.generated.resources.ticket_qr_info_action
@@ -238,7 +238,7 @@ private fun TicketQrContent(
                         color = AccessDefaults.TextMuted,
                         modifier = Modifier.padding(top = 8.dp),
                     )
-                    EventVenueDirectionsCard(location = location)
+                    EventVenueLine(location = location)
                 }
 
                 Spacer(Modifier.height(8.dp))

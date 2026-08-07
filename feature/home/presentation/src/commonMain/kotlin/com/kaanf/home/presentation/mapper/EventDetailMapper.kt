@@ -14,8 +14,6 @@ fun EventDetail.toUiModel(): EventDetailUiModel {
         heroDate = startsAt.toEventDetailDateText(),
         doorsOpenAt = doorsOpenAt,
         hasMyTicket = hasMyTicket,
-        goingCount = soldCount,
-        spotsLeft = (capacity - soldCount).coerceAtLeast(0),
         formattedPrice = price.format(),
         isFree = price.amount == 0L,
         // Backend EventPhase.name gönderir: NotOpened / EntryOpen / Gameplay / Finished.

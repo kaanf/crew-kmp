@@ -24,30 +24,41 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun EventOnboardingCard() {
-    Column(
-        modifier = Modifier
-            .padding(4.dp)
-    ) {
-        Text(
-            text = "HOW IT WORKS",
-            style = MaterialTheme.typography.labelSmall.copy(
-                color = AccessDefaults.TextMuted,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Medium
-            )
+    Column(modifier = Modifier.fillMaxWidth().padding(top = 14.dp)) {
+        // About / Where bloklarıyla aynı ayırıcı; liste aralığıyla birlikte 26.dp üst boşluk verir.
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .background(AccessDefaults.BorderSoft),
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        eventOnboardingItems.forEachIndexed { index, item ->
-            EventOnboardingRow(
-                count = index + 1,
-                title = item.title,
-                description = item.description
+        Column(
+            modifier = Modifier
+                .padding(4.dp)
+                .padding(top = 11.dp)
+        ) {
+            Text(
+                text = "HOW IT WORKS",
+                style = MaterialTheme.typography.labelSmall.copy(
+                    color = AccessDefaults.TextMuted,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium
+                )
             )
 
-            if (index != eventOnboardingItems.lastIndex) {
-                Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(12.dp))
+
+            eventOnboardingItems.forEachIndexed { index, item ->
+                EventOnboardingRow(
+                    count = index + 1,
+                    title = item.title,
+                    description = item.description
+                )
+
+                if (index != eventOnboardingItems.lastIndex) {
+                    Spacer(modifier = Modifier.height(20.dp))
+                }
             }
         }
     }

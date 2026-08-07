@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -189,6 +190,11 @@ private fun EventDetailContent(
                 EventDetailHero(
                     imageUrls = event.imageUrls,
                     title = event.title,
+                    meta = listOfNotNull(
+                        event.heroDate,
+                        event.doorsOpenAt.toClockText(),
+                        event.location?.name,
+                    ).joinToString(META_SEPARATOR),
                     // Draw fazında okunur; parallax scroll'da recomposition tetiklemez.
                     scrollOffset = {
                         if (listState.firstVisibleItemIndex == 0) {
@@ -203,10 +209,6 @@ private fun EventDetailContent(
 
             item(contentType = "event-info") {
                 EventDetailInfoSection(
-                    date = event.heroDate,
-                    doorsTime = event.doorsOpenAt.toClockText(),
-                    goingCount = event.goingCount,
-                    spotsLeft = event.spotsLeft,
                     description = event.description,
                     location = event.location,
                     modifier = Modifier.padding(horizontal = BodyPadding),
@@ -277,6 +279,7 @@ private fun EventDetailContent(
 private fun EventDetailHero(
     imageUrls: List<String>,
     title: String,
+    meta: String,
     scrollOffset: () -> Float,
     onImageClick: (Int) -> Unit,
 ) {
@@ -332,14 +335,7 @@ private fun EventDetailHero(
             )
         }
 
-        Text(
-            text = title,
-            style = MaterialTheme.typography.displaySmall.copy(
-                fontWeight = FontWeight.ExtraBold,
-                fontSize = 34.sp,
-                lineHeight = 34.sp,
-                letterSpacing = (-1.4).sp,
-            ),
+        Column(
             modifier = Modifier
                 .align(Alignment.BottomStart)
                 .graphicsLayer {
@@ -349,9 +345,31 @@ private fun EventDetailHero(
                 }
                 .padding(horizontal = BodyPadding)
                 .padding(bottom = 22.dp),
-        )
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.displaySmall.copy(
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 34.sp,
+                    lineHeight = 34.sp,
+                    letterSpacing = (-1.4).sp,
+                ),
+            )
+
+            Text(
+                text = meta,
+                style = MaterialTheme.typography.bodySmall.copy(
+                    color = AccessDefaults.TextSecondary,
+                ),
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
     }
 }
+
+private const val META_SEPARATOR = " · "
 
 private val HeroHeight = 396.dp
 private val HeroTitleFadeDistance = 260.dp
