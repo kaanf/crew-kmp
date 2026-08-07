@@ -27,14 +27,14 @@
     <string name="coachmark_tabs_body">Play brings back your code. Leaderboard shows where you sit, and quests up top hold extra points.</string>
 
     <string name="match_task_card_reject_label">REJECT</string>
-    <string name="match_task_card_variant_icebreaker">ICEBREAKER</string>
-    <string name="match_task_card_variant_team">TEAM</string>
-    <string name="match_task_card_variant_storytime">STORYTIME</string>
-    <string name="match_task_card_variant_challenge">CHALLENGE</string>
-    <string name="match_task_card_variant_photo">PHOTO</string>
-    <string name="match_task_card_variant_bold">BOLD</string>
-    <string name="match_task_card_variant_confession">CONFESSION</string>
-    <string name="match_task_card_variant_flirty">FLIRTY</string>
+    <string name="match_task_card_variant_icebreaker">Icebreaker</string>
+    <string name="match_task_card_variant_team">Team</string>
+    <string name="match_task_card_variant_storytime">Storytime</string>
+    <string name="match_task_card_variant_challenge">Challenge</string>
+    <string name="match_task_card_variant_photo">Photo</string>
+    <string name="match_task_card_variant_bold">Bold</string>
+    <string name="match_task_card_variant_confession">Confession</string>
+    <string name="match_task_card_variant_flirty">Flirty</string>
 
     <string name="match_phase_qr_home_description">Walk up to someone. Ask if they want to play.\nLet them scan you.</string>
     <string name="match_phase_qr_home_scan_action">Or Scan Them Instead</string>

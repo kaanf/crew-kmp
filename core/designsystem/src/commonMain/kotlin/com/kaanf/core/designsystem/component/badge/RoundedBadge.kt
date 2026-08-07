@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kaanf.core.designsystem.theme.AccessDefaults
@@ -25,6 +26,8 @@ fun RoundedBadge(
     borderColor: Color = AccessDefaults.BorderSoft,
     textColor: Color = AccessDefaults.TextSecondary,
     isLive: Boolean = false,
+    /** null = labelMedium'un kendi kalınlığı. */
+    fontWeight: FontWeight? = null,
     text: String
 ) {
     Box(
@@ -44,11 +47,13 @@ fun RoundedBadge(
                 vertical = 6.dp
             )
     ) {
+        val labelStyle = MaterialTheme.typography.labelMedium
         Text(
             text = text,
-            style = MaterialTheme.typography.labelMedium.copy(
+            style = labelStyle.copy(
                 fontSize = 11.sp,
-                color = textColor
+                color = textColor,
+                fontWeight = fontWeight ?: labelStyle.fontWeight,
             )
         )
     }
