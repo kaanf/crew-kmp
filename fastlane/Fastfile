@@ -27,8 +27,30 @@ end
 
 desc "Archive alır ve App Store Connect'e yükler (bump yapmaz)"
 lane :ios_upload do
-  build_app(project: XCODEPROJ, scheme: "iosApp", export_method: "app-store")
-  upload_to_testflight(skip_waiting_for_build_processing: true)
+  # Dağıtım sertifikası keychain'de yok; imzalama ve yükleme ASC API key ile yapılır.
+  api_key = app_store_connect_api_key(
+    key_id: ENV.fetch("ASC_KEY_ID"),
+    issuer_id: ENV.fetch("ASC_ISSUER_ID"),
+    key_filepath: ENV.fetch("ASC_KEY_PATH")
+  )
+
+  # gym'in api_key seçeneği yok; cloud signing için anahtarı xcodebuild'e elle geçiriyoruz.
+  signing_args = [
+    "-allowProvisioningUpdates",
+    "-authenticationKeyPath", ENV.fetch("ASC_KEY_PATH"),
+    "-authenticationKeyID", ENV.fetch("ASC_KEY_ID"),
+    "-authenticationKeyIssuerID", ENV.fetch("ASC_ISSUER_ID")
+  ].join(" ")
+
+  build_app(
+    project: XCODEPROJ,
+    scheme: "iosApp",
+    export_method: "app-store",
+    # xcargs yalnız archive'a, export_xcargs export adımına geçer; ikisi de profili otomatik çeksin.
+    xcargs: signing_args,
+    export_xcargs: signing_args
+  )
+  upload_to_testflight(api_key: api_key, skip_waiting_for_build_processing: true)
 end
 
 desc "İmzalı release APK üretir"
