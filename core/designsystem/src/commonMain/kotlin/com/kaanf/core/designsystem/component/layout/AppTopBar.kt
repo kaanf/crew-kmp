@@ -238,10 +238,10 @@ fun AppTopBar(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     if (state.showQuestsAction) {
-                        GameActionButton(icon = AccessIcons.Target, onClick = onLeftClick)
+                        GameActionButton(emoji = "🎯", onClick = onLeftClick)
                     }
                     if (state.showPassportAction) {
-                        GameActionButton(icon = AccessIcons.User, onClick = onPassportClick)
+                        GameActionButton(emoji = "📘", onClick = onPassportClick)
                     }
                 }
             }
@@ -343,7 +343,7 @@ fun AppTopBar(
 
 @Composable
 private fun GameActionButton(
-    icon: DrawableResource,
+    emoji: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -359,12 +359,7 @@ private fun GameActionButton(
             )
             .size(32.dp),
     ) {
-        Icon(
-            painter = painterResource(icon),
-            contentDescription = null,
-            tint = AccessDefaults.TextPrimary,
-            modifier = Modifier.size(20.dp),
-        )
+        Text(text = emoji, fontSize = 16.sp)
     }
 }
 

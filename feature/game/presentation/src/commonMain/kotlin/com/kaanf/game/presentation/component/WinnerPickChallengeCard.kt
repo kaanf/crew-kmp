@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,6 +22,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kaanf.core.designsystem.component.badge.RoundedBadge
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessShapes
 import com.kaanf.core.designsystem.theme.JetbrainsMono
@@ -150,25 +150,15 @@ private fun CardBadge(
         ChallengeCardVariant.Confession -> stringResource(Res.string.match_task_card_variant_confession)
         ChallengeCardVariant.Flirty -> stringResource(Res.string.match_task_card_variant_flirty)
     }
-    val badgeText = "${variant.emoji} $label"
+    val accent = variant.taskAccentColor()
 
-    Box(
-        modifier = Modifier
-            .wrapContentSize()
-            .background(
-                color = variant.taskAccentColor().copy(alpha = 0.1f),
-                shape = AccessShapes.XSmall,
-            )
-            .padding(horizontal = 4.dp, vertical = 2.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = badgeText,
-            style = MaterialTheme.typography.labelSmall.copy(
-                color = variant.taskAccentColor(),
-            ),
-        )
-    }
+    RoundedBadge(
+        text = "${variant.emoji} $label",
+        backgroundColor = accent.copy(alpha = 0.12f),
+        borderColor = accent.copy(alpha = 0.55f),
+        textColor = accent,
+        fontWeight = FontWeight.Bold,
+    )
 }
 
 internal fun ChallengeCardVariant.taskAccentColor(): Color {
