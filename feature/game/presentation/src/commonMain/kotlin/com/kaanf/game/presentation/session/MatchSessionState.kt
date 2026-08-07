@@ -2,6 +2,7 @@ package com.kaanf.game.presentation.session
 
 import androidx.compose.runtime.Immutable
 import com.kaanf.core.presentation.model.LobbyMember
+import com.kaanf.game.domain.model.AnnouncementCocktail
 import com.kaanf.game.domain.model.GameConnectionState
 import com.kaanf.game.domain.model.GameSocketMessage
 import com.kaanf.game.domain.model.GameTask
@@ -53,6 +54,15 @@ data class MatchSessionState(
     val showExitConfirmDialog: Boolean = false,
     /** Etkinlik süresi doldu: Play kilitli, yalnız leaderboard/history açık. */
     val isGameEnded: Boolean = false,
+    // Mekân duyurusu (ör. barda indirimli içki). Yalnız süreli duyurular chip'e düşer;
+    // bitiş anı mutlak epoch tutulur ki arka plandan/yeniden bağlanınca geri sayım kaymasın.
+    val announcementBody: String? = null,
+    val announcementEndsAtEpochMillis: Long = 0L,
+    /** Duyurunun başlığı; kokteyl sheet'inde indirim satırı olarak gösterilir. */
+    val announcementTitle: String? = null,
+    /** Doluysa chip tıklanabilir ve kokteyl sheet'ini açar. */
+    val announcementCocktail: AnnouncementCocktail? = null,
+    val showAnnouncementSheet: Boolean = false,
     val errorMessage: String? = null,
 ) {
     val isConnected: Boolean get() = connectionState is GameConnectionState.Connected

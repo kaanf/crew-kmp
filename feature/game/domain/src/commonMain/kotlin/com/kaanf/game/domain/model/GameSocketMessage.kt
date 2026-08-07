@@ -139,6 +139,20 @@ sealed interface GameSocketMessage {
         val profilePictureUrl: String?,
     ) : GameSocketMessage
 
+    /**
+     * Mekân duyurusu (ör. barda indirimli içki). [durationSeconds] doluysa duyuru o süre
+     * boyunca aktiftir; backend süresi dolmamış duyuruyu her (yeniden) bağlanışta kalan
+     * süreyle tekrar yollar, bu yüzden client'ın kalıcı saklamasına gerek yok.
+     */
+    data class Announcement(
+        val eventId: String,
+        val title: String,
+        val body: String,
+        val durationSeconds: Int?,
+        /** Doluysa chip tıklanabilir olur ve kokteyl sheet'ini açar. */
+        val cocktail: AnnouncementCocktail?,
+    ) : GameSocketMessage
+
     data class LobbyUserLeft(
         val userId: String,
         val totalCount: Int,

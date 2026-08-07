@@ -30,6 +30,7 @@ import com.kaanf.core.designsystem.component.layout.AppTopBar
 import com.kaanf.core.designsystem.component.sheet.ContainerBottomSheet
 import com.kaanf.core.presentation.model.AppTopBarState
 import com.kaanf.core.presentation.util.ObserveAsEvents
+import com.kaanf.game.presentation.component.sheet.CocktailSheet
 import com.kaanf.game.presentation.component.sheet.GameResponseSheet
 import com.kaanf.game.presentation.gamelobby.component.dialog.LeaveEventDialog
 import com.kaanf.game.presentation.history.HistoryTab
@@ -166,6 +167,18 @@ fun MatchContainerScreen(
                     onAccept = { onAction(MatchSessionAction.OnInviteAccepted) },
                     onDecline = { onAction(MatchSessionAction.OnInviteDeclined) },
                 )
+            }
+        }
+    }
+
+    // Duyuru chip'i yalnız QR home'da görünür, sheet de oradan açılır; süre dolunca
+    // VM state'i temizlediği için sheet kendiliğinden kapanır.
+    if (state.showAnnouncementSheet) {
+        state.announcementCocktail?.let { cocktail ->
+            ContainerBottomSheet(
+                onDismiss = { onAction(MatchSessionAction.OnAnnouncementDismissed) },
+            ) {
+                CocktailSheet(cocktail = cocktail, offerTitle = state.announcementTitle)
             }
         }
     }

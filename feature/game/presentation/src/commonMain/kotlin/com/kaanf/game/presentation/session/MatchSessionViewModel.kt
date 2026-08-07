@@ -350,6 +350,7 @@ class MatchSessionViewModel(
             is GameSocketMessage.GameStarted,
             is GameSocketMessage.LobbyUserJoined,
             is GameSocketMessage.LobbyUserLeft,
+            is GameSocketMessage.Announcement,
             is GameSocketMessage.Unknown,
             -> Unit
 
@@ -612,13 +613,59 @@ class MatchSessionViewModel(
                 loadScoreboard()
             }
 
+            is GameSocketMessage.Announcement -> showAnnouncement(message)
+
             is GameSocketMessage.GameStarted,
             is GameSocketMessage.Unknown -> Unit
         }
     }
 
+    /**
+     * Süreli duyuru QR home'daki chip'e düşer ve süresi dolunca kendi kendine kalkar.
+     * Süresiz duyuru backend sözleşmesinde tek seferlik toast; snackbar'a yollanır.
+     * Bitiş anı mutlak epoch tutulduğu için kilit/arka plan/yeniden bağlanma geri sayımı
+     * bozmaz (backend yeniden bağlananlara duyuruyu kalan süreyle tekrar yollar).
+     */
+    private suspend fun showAnnouncement(message: GameSocketMessage.Announcement) {
+        val durationSeconds = message.durationSeconds
+        if (durationSeconds == null || durationSeconds <= 0) {
+            snackbarController.show(announcementSnackbar(message))
+            return
+        }
+        val endsAtMillis = Clock.System.now().toEpochMilliseconds() + durationSeconds * 1000L
+        _state.update {
+            it.copy(
+                announcementBody = message.body,
+                announcementTitle = message.title,
+                announcementCocktail = message.cocktail,
+                announcementEndsAtEpochMillis = endsAtMillis,
+            )
+        }
+        announcementJob?.cancel()
+        announcementJob = viewModelScope.launch {
+            delay(durationSeconds * 1000L)
+            _state.update {
+                it.copy(
+                    announcementBody = null,
+                    announcementTitle = null,
+                    announcementCocktail = null,
+                    announcementEndsAtEpochMillis = 0L,
+                    showAnnouncementSheet = false,
+                )
+            }
+        }
+    }
+
+    private fun announcementSnackbar(message: GameSocketMessage.Announcement) = SnackbarMessage(
+        title = UIText.DynamicString(message.title),
+        description = UIText.DynamicString(message.body),
+        variant = SnackbarVariant.Accent,
+        icon = SnackbarIcon.Celebration,
+    )
+
     private var gameEndJob: Job? = null
     private var phaseSnackbarJob: Job? = null
+    private var announcementJob: Job? = null
 
     /**
      * Backend oyun bitişi için push göndermez (ServerMessageType'ta GAME_ENDED yok);
@@ -681,6 +728,13 @@ class MatchSessionViewModel(
     // region Actions
     fun onAction(action: MatchSessionAction) {
         when (action) {
+            MatchSessionAction.OnAnnouncementClicked -> _state.update {
+                it.copy(showAnnouncementSheet = it.announcementCocktail != null)
+            }
+
+            MatchSessionAction.OnAnnouncementDismissed ->
+                _state.update { it.copy(showAnnouncementSheet = false) }
+
             MatchSessionAction.OnBackClick -> _state.update { it.copy(showExitConfirmDialog = true) }
             MatchSessionAction.OnExitDismissed -> _state.update { it.copy(showExitConfirmDialog = false) }
             MatchSessionAction.OnExitConfirmed -> onExitConfirmed()
