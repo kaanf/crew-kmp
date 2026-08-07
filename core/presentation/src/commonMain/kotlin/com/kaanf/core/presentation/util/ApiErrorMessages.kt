@@ -31,6 +31,8 @@ import crew.core.presentation.generated.resources.err_invalid_entry_code_title
 import crew.core.presentation.generated.resources.err_invalid_match_qr_desc
 import crew.core.presentation.generated.resources.err_invalid_match_qr_title
 import crew.core.presentation.generated.resources.err_invalid_profile_picture_desc
+import crew.core.presentation.generated.resources.err_last_sign_in_method_desc
+import crew.core.presentation.generated.resources.err_last_sign_in_method_title
 import crew.core.presentation.generated.resources.err_invalid_profile_picture_title
 import crew.core.presentation.generated.resources.err_match_invite_not_found_desc
 import crew.core.presentation.generated.resources.err_match_invite_not_found_title
@@ -114,6 +116,7 @@ fun apiErrorUi(code: String): ApiErrorUi? = when (code) {
     "INVALID_PROFILE_PICTURE" -> ApiErrorUi(Res.string.err_invalid_profile_picture_title, Res.string.err_invalid_profile_picture_desc, SnackbarVariant.Error)
     "RATE_LIMIT_EXCEEDED" -> ApiErrorUi(Res.string.err_rate_limit_title, Res.string.err_rate_limit_desc, SnackbarVariant.Warn)
     "IDENTITY_ALREADY_LINKED" -> ApiErrorUi(Res.string.err_identity_already_linked_title, Res.string.err_identity_already_linked_desc, SnackbarVariant.Warn)
+    "LAST_SIGN_IN_METHOD" -> ApiErrorUi(Res.string.err_last_sign_in_method_title, Res.string.err_last_sign_in_method_desc, SnackbarVariant.Warn)
 
     "EVENT_NOT_FOUND" -> ApiErrorUi(Res.string.err_event_not_found_title, Res.string.err_event_not_found_desc, SnackbarVariant.Error)
     "TICKET_NOT_FOUND" -> ApiErrorUi(Res.string.err_ticket_not_found_title, Res.string.err_ticket_not_found_desc, SnackbarVariant.Error)

@@ -7,8 +7,10 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import com.kaanf.auth.presentation.navigation.AuthGraphRoutes
 import com.kaanf.auth.presentation.navigation.authGraph
+import com.kaanf.auth.presentation.signinmethods.SignInMethodsRoot
 import com.kaanf.game.presentation.navigation.GameGraphRoutes
 import com.kaanf.game.presentation.navigation.gameGraph
 import com.kaanf.home.presentation.navigation.HomeGraphRoutes
@@ -67,8 +69,19 @@ fun NavigationRoot(
             },
         )
 
+        // Oturum açıkken profilden gelinir; auth grafiğinin giriş akışına ait olmadığı için
+        // üst seviyede durur ve geri tuşuyla profile döner.
+        composable<AuthGraphRoutes.SignInMethods> {
+            SignInMethodsRoot(onBack = { navController.popBackStack() })
+        }
+
         homeGraph(
             navController = navController,
+            onSignInMethodsClick = {
+                navController.navigate(AuthGraphRoutes.SignInMethods) {
+                    launchSingleTop = true
+                }
+            },
             onGameCodeSuccess = { eventId ->
                 navController.navigate(GameGraphRoutes.Graph(eventId = eventId)) {
                     popUpTo(HomeGraphRoutes.Dashboard) {

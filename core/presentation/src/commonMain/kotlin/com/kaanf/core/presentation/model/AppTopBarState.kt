@@ -10,6 +10,7 @@ sealed interface AppTopBarState {
         val hasUnsavedChanges: Boolean = false,
         val isSaving: Boolean = false,
     ) : AppTopBarState
+    data object SignInMethods : AppTopBarState
     data object EventDetail : AppTopBarState
     data object TicketQr : AppTopBarState
     data object EventCode : AppTopBarState

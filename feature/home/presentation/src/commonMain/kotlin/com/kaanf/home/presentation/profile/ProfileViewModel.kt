@@ -62,6 +62,7 @@ class ProfileViewModel(
             is ProfileAction.OnNameEdited -> onNameEdited(action.name)
             is ProfileAction.OnSaveChanges -> saveChanges()
             is ProfileAction.OnCancelEdit -> cancelEdit()
+            is ProfileAction.OnSignInMethodsClick -> Unit
             is ProfileAction.OnSignOutClick -> signOut()
             is ProfileAction.OnDeleteAccountClick -> Unit
             is ProfileAction.OnDeleteAccountConfirm -> deleteAccount()

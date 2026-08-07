@@ -10,6 +10,7 @@ sealed interface ProfileAction {
     class OnNameEdited(val name: String) : ProfileAction
     data object OnSaveChanges : ProfileAction
     data object OnCancelEdit : ProfileAction
+    data object OnSignInMethodsClick : ProfileAction
     data object OnSignOutClick : ProfileAction
     data object OnDeleteAccountClick : ProfileAction
     data object OnDeleteAccountConfirm : ProfileAction

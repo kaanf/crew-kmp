@@ -13,6 +13,7 @@ import com.kaanf.home.presentation.ticketqr.TicketQrRoot
 fun NavGraphBuilder.homeGraph(
     navController: NavController,
     onGameCodeSuccess: (eventId: String) -> Unit,
+    onSignInMethodsClick: () -> Unit,
     onSignOut: () -> Unit,
 ) {
     navigation<HomeGraphRoutes.Graph>(
@@ -40,6 +41,7 @@ fun NavGraphBuilder.homeGraph(
                 onBack = {
                     navController.popBackStack()
                 },
+                onSignInMethodsClick = onSignInMethodsClick,
                 onSignedOut = onSignOut,
             )
         }

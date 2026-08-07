@@ -86,4 +86,48 @@
 
     <string name="profile_picture_uploaded_title">Photo uploaded</string>
     <string name="profile_picture_uploaded_description">Your profile picture is set.</string>
+
+    <!-- Sign-in methods -->
+    <string name="sign_in_methods_headline">Ways into your Crew account</string>
+    <string name="sign_in_methods_description">Link more than one and any of them opens this same profile — same points, same badges, same memories. Nothing is duplicated.</string>
+    <string name="sign_in_methods_section">YOUR METHODS</string>
+    <string name="sign_in_methods_count">%1$d OF 3 LINKED</string>
+    <string name="sign_in_methods_email">Email</string>
+    <string name="sign_in_methods_sign_up_chip">SIGN-UP METHOD</string>
+    <string name="sign_in_methods_not_connected">Not connected</string>
+    <string name="sign_in_methods_no_password">No password set</string>
+    <string name="sign_in_methods_connect">Connect</string>
+    <string name="sign_in_methods_unlink">Unlink</string>
+    <string name="sign_in_methods_locked">Locked</string>
+    <string name="sign_in_methods_change_password">Change password</string>
+    <string name="sign_in_methods_last_warning">One method left. Link a second one — if you lose access to %1$s, that\'s the only thing standing between you and your account.</string>
+    <string name="sign_in_methods_footer">Crew never posts anywhere and never reads your contacts. Linking only proves it\'s you.</string>
+
+    <string name="sign_in_methods_unlink_title">Stop signing in with %1$s?</string>
+    <string name="sign_in_methods_unlink_description">Your profile, points, badges and memories all stay. You just won\'t be able to use %1$s at the door any more.</string>
+    <string name="sign_in_methods_unlink_confirm">Unlink %1$s</string>
+    <string name="sign_in_methods_unlink_cancel">Keep it</string>
+
+    <string name="sign_in_methods_conflict_title">That %1$s account belongs to another player</string>
+    <string name="sign_in_methods_conflict_description">It already opens a different Crew profile. We won\'t merge two histories on our own — sign in with that account instead, or ask the door team for help.</string>
+    <string name="sign_in_methods_conflict_confirm">Got it</string>
+
+    <string name="sign_in_methods_password_set_title">Set a password</string>
+    <string name="sign_in_methods_password_set_description">Right now only your social account opens Crew. A password means you get in even without it.</string>
+    <string name="sign_in_methods_password_change_title">Change your password</string>
+    <string name="sign_in_methods_password_current_label">CURRENT PASSWORD</string>
+    <string name="sign_in_methods_password_current_placeholder">Your current password</string>
+    <string name="sign_in_methods_password_new_label">NEW PASSWORD</string>
+    <string name="sign_in_methods_password_placeholder">At least 9 characters</string>
+    <string name="sign_in_methods_password_hint">Use at least 9 characters with one uppercase letter and one digit.</string>
+    <string name="sign_in_methods_password_email_note">You sign in with %1$s.</string>
+    <string name="sign_in_methods_password_save">Save password</string>
+    <string name="sign_in_methods_password_cancel">Cancel</string>
+
+    <string name="sign_in_methods_linked_title">%1$s linked</string>
+    <string name="sign_in_methods_linked_description">You can now open this profile with %1$s.</string>
+    <string name="sign_in_methods_unlinked_title">%1$s unlinked</string>
+    <string name="sign_in_methods_unlinked_description">It no longer opens your Crew account.</string>
+    <string name="sign_in_methods_password_saved_title">Password saved</string>
+    <string name="sign_in_methods_password_saved_description">You can sign in with your email and password.</string>
 </resources>
