@@ -109,7 +109,10 @@ fun RpsReadyPhase(
             onClick = onReadyClick,
             filled = true,
             isLoading = isWaiting,
-            loadingText = stringResource(Res.string.match_phase_rps_ready_loading, opponentInitial),
+            loadingText = stringResource(
+                Res.string.match_phase_rps_ready_loading,
+                opponentFullName.ifBlank { opponentInitial },
+            ),
         )
     }
 }

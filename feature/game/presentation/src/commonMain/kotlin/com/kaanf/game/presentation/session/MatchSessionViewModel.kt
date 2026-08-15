@@ -11,6 +11,7 @@ import com.kaanf.core.domain.logging.CrewLogger
 import com.kaanf.core.domain.util.onFailure
 import com.kaanf.core.domain.util.onSuccess
 import com.kaanf.core.domain.repository.UserRepository
+import com.kaanf.core.domain.review.requestAppReview
 import com.kaanf.core.presentation.model.LobbyMember
 import com.kaanf.core.presentation.model.UserAvatar
 import com.kaanf.core.presentation.snackbar.SnackbarController
@@ -1084,6 +1085,28 @@ class MatchSessionViewModel(
         }
     }
 
+    /**
+     * Oyun bitip skor tablosu görüldükten SONRA ayrılmak, puan istemek için en iyi an:
+     * kullanıcı beklediği içeriği tüketmiş ve yarıda kalan bir işi yok. Leaderboard'a
+     * girerken sormuyoruz — tam da görmek istediği ekranın önünü kesmiş olurduk ve
+     * sıralamanın alt yarısındaki kişiye sonucu sindirmeden sormuş olurduk.
+     *
+     * Hiç oynamamış birine sormanın anlamı yok; en az iki maç şartı onu eliyor.
+     * "Bir kez sor" sayacı tutmuyoruz: iOS zaten yılda 3 gösterimle kendisi sınırlıyor,
+     * aynı işi ikinci kez yapmak boşuna. Fazla tetiklendiği görülürse buraya lokal bir
+     * flag eklenir.
+     */
+    private fun maybeRequestAppReview() {
+        val state = _state.value
+        // TODO(geçici): prompt gelmezse hangi koşulun elediğini görmek için. Doğrulanınca sil.
+        logger.info(
+            "review-check: ended=${state.isGameEnded} matches=${state.currentUserMatchesCount}",
+        )
+        if (state.isGameEnded && state.currentUserMatchesCount >= 2) {
+            requestAppReview()
+        }
+    }
+
     private fun onExitConfirmed() {
         _state.update { it.copy(showExitConfirmDialog = false) }
         val matchId = _state.value.matchId
@@ -1091,6 +1114,7 @@ class MatchSessionViewModel(
         val shouldForfeit =
             matchId != null && phase != MatchPhase.Idle && phase !is MatchPhase.Scoreboard
         if (!shouldForfeit) {
+            maybeRequestAppReview()
             sendEvent(MatchSessionEvent.NavigateToDashboard)
             return
         }

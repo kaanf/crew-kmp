@@ -64,11 +64,11 @@ androidx-browser = "1.8.0"
 #wiretap = "1.0.0-RC14"
 
 projectApplicationId = "com.kaanf.crew"
-projectVersionName = "1.0"
+projectVersionName = "1.1"
 projectMinSdkVersion = "26"
 projectTargetSdkVersion = "36"
 projectCompileSdkVersion = "36"
-projectVersionCode = "14"
+projectVersionCode = "17"
 
 # Desktop Version
 desktopPackageName = "Crew"

@@ -34,7 +34,9 @@ lane :ios_upload do
     key_filepath: ENV.fetch("ASC_KEY_PATH")
   )
 
-  # gym'in api_key seçeneği yok; cloud signing için anahtarı xcodebuild'e elle geçiriyoruz.
+  # Archive adımına anahtarı elle geçiyoruz; gym yalnız export'a kendisi ekliyor
+  # (lane context'teki api_key'den). export_xcargs'a da yazarsak xcodebuild
+  # "-authenticationKeyPath may only be provided once" ile patlar.
   signing_args = [
     "-allowProvisioningUpdates",
     "-authenticationKeyPath", ENV.fetch("ASC_KEY_PATH"),
@@ -46,16 +48,15 @@ lane :ios_upload do
     project: XCODEPROJ,
     scheme: "iosApp",
     export_method: "app-store",
-    # xcargs yalnız archive'a, export_xcargs export adımına geçer; ikisi de profili otomatik çeksin.
-    xcargs: signing_args,
-    export_xcargs: signing_args
+    xcargs: signing_args
   )
   upload_to_testflight(api_key: api_key, skip_waiting_for_build_processing: true)
 end
 
 desc "İmzalı release APK üretir"
 lane :android_apk do
-  gradle(project_dir: "..", task: "androidApp:assembleRelease")
+  # fastlane zaten repo kökünden çalışır; ".." bir üst dizine kaçıp gradlew'i kaybediyordu.
+  gradle(project_dir: ".", task: "androidApp:assembleRelease")
   apk = lane_context[SharedValues::GRADLE_APK_OUTPUT_PATH]
   UI.user_error!("APK imzasız — CREW_STORE_FILE/CREW_STORE_PASSWORD/CREW_KEY_ALIAS/CREW_KEY_PASSWORD tanımlı değil") if apk.to_s.include?("unsigned")
   UI.success(apk)
