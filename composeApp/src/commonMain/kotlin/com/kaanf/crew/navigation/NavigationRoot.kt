@@ -90,15 +90,6 @@ fun NavigationRoot(
                     launchSingleTop = true
                 }
             },
-            onSignOut = {
-                navController.navigate(AuthGraphRoutes.Graph) {
-                    // Wipe the entire home back stack so back can't return into the app.
-                    popUpTo(HomeGraphRoutes.Graph) {
-                        inclusive = true
-                    }
-                    launchSingleTop = true
-                }
-            },
         )
 
         gameGraph(

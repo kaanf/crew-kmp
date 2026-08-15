@@ -17,8 +17,6 @@ data class ProfileState(
     val pendingCropBytes: ByteArray? = null,
     val isSaving: Boolean = false,
     val isDeletingAccount: Boolean = false,
-    // Set once the backend confirms deletion; the screen navigates to auth when it flips.
-    val accountDeleted: Boolean = false,
 ) {
     val displayedName: String
         get() = editedName ?: fullName
@@ -56,7 +54,6 @@ data class ProfileState(
         if (!byteArrayEquals(pendingCropBytes, other.pendingCropBytes)) return false
         if (isSaving != other.isSaving) return false
         if (isDeletingAccount != other.isDeletingAccount) return false
-        if (accountDeleted != other.accountDeleted) return false
 
         return true
     }
@@ -72,7 +69,6 @@ data class ProfileState(
         result = 31 * result + (pendingCropBytes?.contentHashCode() ?: 0)
         result = 31 * result + isSaving.hashCode()
         result = 31 * result + isDeletingAccount.hashCode()
-        result = 31 * result + accountDeleted.hashCode()
         return result
     }
 }

@@ -18,6 +18,10 @@ class AuthSessionRepositoryImpl(
     override suspend fun logout() {
         val refreshToken = sessionStorage.observeAuthInfo().firstOrNull()?.refreshToken
 
+        // Oturumu önce yerelde kapatıyoruz: navigasyonu bu tetikliyor ve ağ yanıtını beklemek
+        // kullanıcıyı butona bastıktan sonra saniyelerce ekranda bırakabiliyordu.
+        sessionStorage.set(null)
+
         if (!refreshToken.isNullOrBlank()) {
             // Best-effort revoke; the result is intentionally ignored so a network failure still
             // lets the user sign out locally.
@@ -26,8 +30,6 @@ class AuthSessionRepositoryImpl(
                 body = RefreshRequest(refreshToken = refreshToken),
             )
         }
-
-        sessionStorage.set(null)
     }
 
     override suspend fun deleteAccount(): EmptyResult<DataError.Remote> {

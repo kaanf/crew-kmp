@@ -72,10 +72,10 @@ fun App(
 
     ObserveAsEvents(viewModel.events) { event ->
         when(event) {
-            is MainEvent.OnSessionExpired -> {
+            is MainEvent.OnSessionEnded -> {
                 navController.navigate(AuthGraphRoutes.Graph) {
                     // Wipe the entire home back stack so back can't return into the signed-out app.
-                    // Mirrors onSignOut; popUpTo(AuthGraph) was a no-op on cold-start-from-Home.
+                    // popUpTo(AuthGraph) was a no-op on cold-start-from-Home.
                     popUpTo(HomeGraphRoutes.Graph) {
                         inclusive = true
                     }
