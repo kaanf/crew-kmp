@@ -47,10 +47,10 @@ class MainViewModel(
             .observeAuthInfo()
             .onEach { authInfo ->
                 val currentRefreshToken = authInfo?.refreshToken
-                val isSessionExpired = previousRefreshToken != null && currentRefreshToken == null
+                val isSessionEnded = previousRefreshToken != null && currentRefreshToken == null
 
-                if (isSessionExpired) {
-                    eventChannel.send(MainEvent.OnSessionExpired)
+                if (isSessionEnded) {
+                    eventChannel.send(MainEvent.OnSessionEnded)
                 }
 
                 _state.update {

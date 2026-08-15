@@ -90,9 +90,9 @@ class ProfileViewModel(
                             variant = SnackbarVariant.Success,
                         ),
                     )
-                    // The screen observes this flag and navigates to auth; the session was
-                    // already cleared by the repository.
-                    _state.update { it.copy(isDeletingAccount = false, accountDeleted = true) }
+                    // Repository oturumu temizledi; navigasyonu MainViewModel'in session
+                    // gözlemcisi yapıyor, burada ayrıca yönlendirme yok.
+                    _state.update { it.copy(isDeletingAccount = false) }
                 }
 
                 is Result.Failure -> {

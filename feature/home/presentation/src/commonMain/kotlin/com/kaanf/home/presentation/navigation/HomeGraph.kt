@@ -14,7 +14,6 @@ fun NavGraphBuilder.homeGraph(
     navController: NavController,
     onGameCodeSuccess: (eventId: String) -> Unit,
     onSignInMethodsClick: () -> Unit,
-    onSignOut: () -> Unit,
 ) {
     navigation<HomeGraphRoutes.Graph>(
         startDestination = HomeGraphRoutes.Dashboard,
@@ -42,7 +41,6 @@ fun NavGraphBuilder.homeGraph(
                     navController.popBackStack()
                 },
                 onSignInMethodsClick = onSignInMethodsClick,
-                onSignedOut = onSignOut,
             )
         }
 

@@ -49,7 +49,6 @@ import org.koin.compose.viewmodel.koinViewModel
 fun ProfileRoot(
     onBack: () -> Unit,
     onSignInMethodsClick: () -> Unit,
-    onSignedOut: () -> Unit,
     viewModel: ProfileViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -57,11 +56,6 @@ fun ProfileRoot(
     var showSourceSheet by remember { mutableStateOf(false) }
     var showNameDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
-
-    // Deletion is confirmed by the backend before this flips; leaving here wipes the home stack.
-    LaunchedEffect(state.accountDeleted) {
-        if (state.accountDeleted) onSignedOut()
-    }
 
     val onPicked = { picked: PickedImageData ->
         viewModel.onAction(ProfileAction.OnPhotoPicked(picked.bytes, picked.mimeType))
@@ -112,8 +106,6 @@ fun ProfileRoot(
                 is ProfileAction.OnEditNameClick -> showNameDialog = true
                 is ProfileAction.OnDeleteAccountClick -> showDeleteDialog = true
                 is ProfileAction.OnSignInMethodsClick -> onSignInMethodsClick()
-                // Session is cleared NonCancellable in the VM; navigating here wipes the home stack.
-                is ProfileAction.OnSignOutClick -> onSignedOut()
                 else -> Unit
             }
         },
