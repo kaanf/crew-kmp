@@ -68,7 +68,7 @@ projectVersionName = "1.1"
 projectMinSdkVersion = "26"
 projectTargetSdkVersion = "36"
 projectCompileSdkVersion = "36"
-projectVersionCode = "17"
+projectVersionCode = "19"
 
 # Desktop Version
 desktopPackageName = "Crew"
