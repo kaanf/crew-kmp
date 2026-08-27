@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.firebase.appdistribution)
     alias(libs.plugins.google.services)
+    alias(libs.plugins.androidx.baselineprofile)
 }
 
 // App Distribution appId ile çalışır; google-services eklentisi (FCM) ise androidApp/google-services.json ister.
@@ -16,6 +17,9 @@ android.buildTypes.getByName("release") {
 }
 
 dependencies {
+    // Cold start profilini :benchmark üretir, release build'inde kütüphane profilleriyle birleşir.
+    baselineProfile(projects.benchmark)
+
     implementation(projects.composeApp)
     // PushTokenSync, UserRepository/SessionStorage arayüzlerini kullanır.
     implementation(projects.core.domain)
