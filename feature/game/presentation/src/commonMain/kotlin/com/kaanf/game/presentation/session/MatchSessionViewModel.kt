@@ -56,6 +56,8 @@ import crew.feature.game.presentation.generated.resources.match_opponent_disconn
 import crew.feature.game.presentation.generated.resources.match_opponent_reconnected_description
 import crew.feature.game.presentation.generated.resources.match_opponent_reconnected_title
 import crew.feature.game.presentation.generated.resources.match_points_earned_description
+import crew.feature.game.presentation.generated.resources.first_meeting_snackbar_description
+import crew.feature.game.presentation.generated.resources.first_meeting_snackbar_title
 import crew.feature.game.presentation.generated.resources.match_points_earned_title
 import crew.feature.game.presentation.generated.resources.match_task_rejected_points_description
 import crew.feature.game.presentation.generated.resources.match_task_rejected_points_title
@@ -234,6 +236,20 @@ class MatchSessionViewModel(
     private fun pointsEarnedSnackbar(points: Int) = SnackbarMessage(
         title = UIText.Resource(Res.string.match_points_earned_title, arrayOf(points)),
         description = UIText.Resource(Res.string.match_points_earned_description),
+        variant = SnackbarVariant.Accent,
+        icon = SnackbarIcon.Celebration,
+    )
+
+    private fun firstMeetingSnackbar(meeting: GameSocketMessage.FirstMeeting) = SnackbarMessage(
+        // Lakaplı kişide (şimdilik yalnız host 👑) isim emoji ile öne çıkar: puanı da daha yüksek.
+        title = UIText.Resource(
+            Res.string.first_meeting_snackbar_title,
+            arrayOf(meeting.title?.let { "${it.emoji} ${meeting.fullName}" } ?: meeting.fullName),
+        ),
+        description = UIText.Resource(
+            Res.string.first_meeting_snackbar_description,
+            arrayOf(meeting.pointsAwarded),
+        ),
         variant = SnackbarVariant.Accent,
         icon = SnackbarIcon.Celebration,
     )
@@ -576,6 +592,8 @@ class MatchSessionViewModel(
                     snackbarController.show(pointsEarnedSnackbar(earnedPoints))
                 }
                 loadScoreboard()
+                // Biten maç bir questi tamamlamış olabilir (tanışma FIRST_MEETING ile ayrıca gelir).
+                refreshBadges()
             }
 
             is GameSocketMessage.MatchInviteExpired -> {
@@ -612,6 +630,13 @@ class MatchSessionViewModel(
                     snackbarController.show(pointsEarnedSnackbar(message.winnerPointsAwarded))
                 }
                 loadScoreboard()
+                refreshBadges()
+            }
+
+            is GameSocketMessage.FirstMeeting -> {
+                // Puan otomatik gelmiyor; pasaport badge'ini yak ve claim'e çağır.
+                _state.update { it.copy(passportClaimable = true) }
+                snackbarController.show(firstMeetingSnackbar(message))
             }
 
             is GameSocketMessage.Announcement -> showAnnouncement(message)
@@ -1050,7 +1075,29 @@ class MatchSessionViewModel(
         }
     }
 
+    /**
+     * 🎯/📘 kırmızı noktaları: claim edilecek quest ya da tanışma puanı var mı.
+     * Best-effort — hata sessizce yutulur, bir sonraki tetikte tazelenir.
+     */
+    private fun refreshBadges() {
+        viewModelScope.launch {
+            matchRepository.getQuests(eventId).onSuccess { quests ->
+                _state.update { state ->
+                    state.copy(questsClaimable = quests.any { it.completed && !it.claimed })
+                }
+            }
+        }
+        viewModelScope.launch {
+            matchRepository.getAddressBook(eventId).onSuccess { book ->
+                _state.update { it.copy(passportClaimable = book.hasClaimable) }
+            }
+        }
+    }
+
     private fun loadMyParticipant(attempt: Int = 0) {
+        // Ekrandan her dönüşte (OnStatsRefreshRequested) ve init'te badge'ler de tazelenir:
+        // quest/pasaport ekranında claim yapıldıysa nokta burada söner. Retry'larda değil.
+        if (attempt == 0) refreshBadges()
         // App-bar stats'ının HTTP'den tazelenme sebebi: soketin replay'lediği CONNECTED
         // snapshot'ı bağlantı anına ait — ekrandan çıkıp soket ölmeden (5 sn) dönen VM'e
         // bayat skor gelir. Bu istek DB gerçeğini getirir; epoch guard, yanıt uçuştayken

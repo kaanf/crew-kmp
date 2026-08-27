@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -87,6 +88,15 @@ fun PassportStamp(
                     },
                 )
             }
+        }
+        // Toplanmamış tanışma puanı: köşedeki nokta, detay kartındaki claim piline çağırır.
+        if (!stamp.claimed) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .size(9.dp)
+                    .background(color = AccessDefaults.Coral, shape = CircleShape),
+            )
         }
     }
 }

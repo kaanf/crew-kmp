@@ -42,6 +42,8 @@ import com.kaanf.game.presentation.passport.component.PassportPageCard
 import com.kaanf.game.presentation.passport.component.PassportRareStampRow
 import com.kaanf.game.presentation.passport.component.PassportStampDetailCard
 import crew.feature.game.presentation.generated.resources.Res
+import crew.feature.game.presentation.generated.resources.passport_claim_all_format
+import crew.feature.game.presentation.generated.resources.passport_claim_all_loading
 import crew.feature.game.presentation.generated.resources.passport_collect_action
 import crew.feature.game.presentation.generated.resources.passport_eyebrow
 import crew.feature.game.presentation.generated.resources.passport_hint_highlight_format
@@ -81,6 +83,8 @@ fun PassportRoot(
         onBack = onBack,
         onCollectStamp = onCollectStamp,
         onSharePage = onSharePage,
+        onClaimStamp = viewModel::claim,
+        onClaimAll = viewModel::claimAll,
     )
 }
 
@@ -91,6 +95,8 @@ fun PassportScreen(
     onCollectStamp: () -> Unit,
     onSharePage: () -> Unit,
     modifier: Modifier = Modifier,
+    onClaimStamp: (String) -> Unit = {},
+    onClaimAll: () -> Unit = {},
 ) {
     // Seçim salt görsel bir detay paneli açar; kalıcı olması gerekmediği için VM'e taşınmadı.
     var selectedStampId by rememberSaveable { mutableStateOf<String?>(null) }
@@ -138,6 +144,20 @@ fun PassportScreen(
                 PassportStampDetailCard(
                     stamp = stamp,
                     modifier = Modifier.padding(top = 12.dp),
+                    isClaiming = state.claimingId == stamp.id,
+                    onClaim = { onClaimStamp(stamp.id) },
+                )
+            }
+            if (state.claimableTotal > 0) {
+                BaseButton(
+                    text = stringResource(Res.string.passport_claim_all_format, state.claimableTotal),
+                    onClick = onClaimAll,
+                    isLoading = state.isClaimingAll,
+                    loadingText = stringResource(Res.string.passport_claim_all_loading),
+                    filled = true,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp),
                 )
             }
             if (state.emptySlotCount > 0) {

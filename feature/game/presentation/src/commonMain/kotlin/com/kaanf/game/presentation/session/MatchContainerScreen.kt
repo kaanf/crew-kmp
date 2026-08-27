@@ -204,6 +204,8 @@ fun MatchContainerScreen(
                         state = AppTopBarState.Game(
                             showQuestsAction = true,
                             showPassportAction = true,
+                            questsBadge = state.questsClaimable,
+                            passportBadge = state.passportClaimable,
                         ),
                         onLeftClick = onQuestsClick,
                         onPassportClick = onPassportClick,

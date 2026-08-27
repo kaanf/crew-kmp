@@ -11,9 +11,15 @@ data class PassportState(
     val stamps: List<PassportStampUi> = emptyList(),
     /** Host'la maç yapılıp 👑 damgası alındı mı (nadir damga satırı için). */
     val hostStampCollected: Boolean = false,
+    /** Şu an claim isteği süren damganın id'si (userId); null = istek yok. */
+    val claimingId: String? = null,
+    val isClaimingAll: Boolean = false,
 ) {
     val rareCount: Int = stamps.count { it.isRare }
     val emptySlotCount: Int = (totalSlots - stamps.size).coerceAtLeast(0)
+
+    /** Bekleyen tanışma puanlarının toplamı; 0 ise "tümünü topla" gizlenir. */
+    val claimableTotal: Int = stamps.filter { !it.claimed }.sumOf { it.points }
 }
 
 data class PassportStampUi(
@@ -28,6 +34,9 @@ data class PassportStampUi(
     val firstMatchWon: Boolean,
     val firstMatchTaskTitle: String?,
     val isRare: Boolean = false,
+    /** Bu tanışmanın claim değeri (host daha değerli). */
+    val points: Int = 25,
+    val claimed: Boolean = true,
 )
 
 enum class StampShape { Round, Square, Notch, Diamond }

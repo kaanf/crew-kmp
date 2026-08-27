@@ -192,4 +192,17 @@ interface MatchRepository {
     suspend fun claimQuest(
         eventId: String, questKey: String,
     ): Result<Quest, DataError.Remote>
+
+    /**
+     * Tek bir tanışmanın puanını alır; güncel adres defterini döner. Tanışılmamış
+     * ya da zaten alınmış kişi sunucuda business hatasıyla düşer.
+     */
+    suspend fun claimMeeting(
+        eventId: String, metUserId: String,
+    ): Result<AddressBook, DataError.Remote>
+
+    /** Bekleyen tüm tanışma puanlarını tek seferde alır; güncel adres defterini döner. */
+    suspend fun claimAllMeetings(
+        eventId: String,
+    ): Result<AddressBook, DataError.Remote>
 }

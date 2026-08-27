@@ -132,6 +132,22 @@ sealed interface GameSocketMessage {
         val loserMatchesCount: Int,
     ) : GameSocketMessage
 
+    /**
+     * Adres defterinde yeni bir kişi açıldı. Puan burada verilmez; [pointsAwarded]
+     * pasaporttan claim edilebilecek tutardır (host daha değerli).
+     */
+    data class FirstMeeting(
+        val eventId: String,
+        val userId: String,
+        val fullName: String,
+        val profilePictureUrl: String?,
+        /** Sunucu lakabı (şimdilik yalnız host 👑). Null = sıradan katılımcı. */
+        val title: AddressBookTitle?,
+        /** Otomatik verilmez: pasaporttan claim edilebilecek tutar (host daha değerli). */
+        val pointsAwarded: Int,
+        val totalScore: Int,
+    ) : GameSocketMessage
+
     data class LobbyUserJoined(
         val userId: String,
         val totalCount: Int,

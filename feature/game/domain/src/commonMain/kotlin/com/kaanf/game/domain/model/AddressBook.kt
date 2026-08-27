@@ -10,7 +10,10 @@ import kotlin.time.Instant
 data class AddressBook(
     val totalCount: Int,
     val entries: List<AddressBookEntry>,
-)
+) {
+    /** Toplanmamış tanışma puanı var mı (pasaport badge'inin kaynağı). */
+    val hasClaimable: Boolean get() = entries.any { !it.claimed }
+}
 
 data class AddressBookEntry(
     val userId: String,
@@ -24,6 +27,10 @@ data class AddressBookEntry(
     val firstMatchTaskTitle: String?,
     /** Sunucu lakabı (şimdilik yalnız host 👑). Null = sıradan katılımcı. */
     val title: AddressBookTitle?,
+    /** Bu tanışmanın claim değeri (host daha değerli). */
+    val points: Int,
+    /** Tanışma puanı pasaporttan alındı mı. */
+    val claimed: Boolean,
 )
 
 data class AddressBookTitle(

@@ -3,6 +3,7 @@ package com.kaanf.game.data.mappers
 import com.kaanf.game.data.dto.AnnouncementCocktailDto
 import com.kaanf.game.data.dto.AnnouncementPayloadDto
 import com.kaanf.game.data.dto.ConnectedPayloadDto
+import com.kaanf.game.data.dto.FirstMeetingPayloadDto
 import com.kaanf.game.data.dto.LobbyUserJoinedDto
 import com.kaanf.game.data.dto.LobbyUserLeftDto
 import com.kaanf.game.data.dto.GameStartedPayloadDto
@@ -21,6 +22,7 @@ import com.kaanf.game.data.dto.TaskOfferedPayloadDto
 import com.kaanf.game.data.dto.TaskRejectedPayloadDto
 import com.kaanf.game.data.dto.TaskStartedPayloadDto
 import com.kaanf.game.data.dto.ViewerStatsDto
+import com.kaanf.game.domain.model.AddressBookTitle
 import com.kaanf.game.domain.model.AnnouncementCocktail
 import com.kaanf.game.domain.model.CurrentUserStats
 import com.kaanf.game.domain.model.GameSocketMessage
@@ -260,6 +262,22 @@ fun SocketEnvelopeDto.toDomain(json: Json): GameSocketMessage = when (type) {
                 body = it.body,
                 durationSeconds = it.durationSeconds,
                 cocktail = it.cocktail?.toDomain(),
+            )
+        }
+        ?: GameSocketMessage.Unknown(type)
+
+    "FIRST_MEETING" -> json.decodePayloadOrNull<FirstMeetingPayloadDto>(payload)
+        ?.let {
+            GameSocketMessage.FirstMeeting(
+                eventId = it.eventId,
+                userId = it.userId,
+                fullName = it.fullName,
+                profilePictureUrl = it.profilePictureUrl,
+                title = it.title?.let { title ->
+                    AddressBookTitle(key = title.key, label = title.label, emoji = title.emoji)
+                },
+                pointsAwarded = it.pointsAwarded,
+                totalScore = it.totalScore,
             )
         }
         ?: GameSocketMessage.Unknown(type)
