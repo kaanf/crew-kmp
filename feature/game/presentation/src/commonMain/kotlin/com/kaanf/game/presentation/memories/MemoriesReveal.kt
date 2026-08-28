@@ -199,14 +199,14 @@ private fun MemoriesRevealSheet(
             horizontalArrangement = Arrangement.spacedBy(9.dp),
             modifier = Modifier.heightIn(max = 420.dp),
         ) {
-            items(memories, key = { it.id }) { memory ->
+            items(memories, key = { it.id }, contentType = { "memory" }) { memory ->
                 RevealCell(
                     memory = memory,
                     onClick = { onMemoryClick(memory) },
                 )
             }
             if (!endReached) {
-                item(key = "page_loader", span = { GridItemSpan(maxLineSpan) }) {
+                item(key = "page_loader", contentType = "loader", span = { GridItemSpan(maxLineSpan) }) {
                     Box(
                         modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
                         contentAlignment = Alignment.Center,

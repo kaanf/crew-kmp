@@ -79,6 +79,13 @@ fun AppTopBar(
     modifier: Modifier = Modifier,
     state: AppTopBarState = AppTopBarState.Dashboard(profileImageUrl = null),
     elevated: () -> Boolean = { false },
+    /**
+     * Bar en üstteyken zemini saydam bırakır ve [elevated] açılınca alt gölgesiyle *aynı*
+     * alfadan kendi rengine döner. Altındaki içeriğin bar'ın arkasına kadar uzandığı
+     * ekranlar için (ör. etkinlik detayında hero'nun renk alanı). Varsayılan kapalı:
+     * [elevated] vermeyen ekranlarda bar kalıcı olarak saydam kalırdı.
+     */
+    transparentAtRest: Boolean = false,
     onBackClick: (() -> Unit) = {},
     onRightClick: (() -> Unit) = {},
     onLeftClick: (() -> Unit) = {},
@@ -96,17 +103,20 @@ fun AppTopBar(
     }
     val navigationIcon = state.navigationIcon
 
+    val barColor = when (state) {
+        AppTopBarState.ScanOpponent -> Color.Transparent
+        else -> AccessDefaults.Background
+    }.takeIf { it.alpha > 0f }
+
     Box(
         modifier = modifier
             .zIndex(1f)
             .fillMaxWidth()
-            .background(
-                when (state) {
-                    AppTopBarState.ScanOpponent -> Color.Transparent
-                    else -> AccessDefaults.Background
-                },
-            )
-            .statusBarsPadding()
+            // Zemin artık ayrı bir background() modifier'ı değil, gölgeyle aynı çizim
+            // bloğunda: ikisi de tek [overlayAlpha]'dan sürülüyor, dolayısıyla scroll'da
+            // eş zamanlı geliyor/gidiyor. statusBarsPadding'ten *önce* duruyor ki dolgu
+            // durum çubuğunu da kapsasın (background() da orada duruyordu); gölge yine
+            // size.height'ten başlıyor, o da bar'ın alt kenarı.
             .drawWithCache {
                 val shadowHeight = 24.dp.toPx()
                 val shadowBrush = Brush.verticalGradient(
@@ -121,6 +131,13 @@ fun AppTopBar(
                     endY = size.height + shadowHeight,
                 )
                 onDrawBehind {
+                    // Alfa yalnız burada okunuyor: animasyon draw fazını geçersiz kılar,
+                    // bar yeniden compose olmaz.
+                    val backgroundAlpha = if (transparentAtRest) overlayAlpha else 1f
+                    if (barColor != null && backgroundAlpha > 0f) {
+                        drawRect(color = barColor, alpha = backgroundAlpha)
+                    }
+
                     if (overlayAlpha <= 0f) return@onDrawBehind
 
                     drawRect(
@@ -130,7 +147,8 @@ fun AppTopBar(
                         alpha = overlayAlpha,
                     )
                 }
-            },
+            }
+            .statusBarsPadding(),
     ) {
         Box(
             modifier = Modifier

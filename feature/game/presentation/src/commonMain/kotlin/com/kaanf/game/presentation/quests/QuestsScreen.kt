@@ -148,8 +148,8 @@ fun QuestsScreen(
                 verticalArrangement = Arrangement.spacedBy(10.dp),
                 contentPadding = PaddingValues(bottom = 32.dp),
             ) {
-                item(key = "header") { QuestsHeader() }
-                items(state.quests, key = { it.key }) { quest ->
+                item(key = "header", contentType = "header") { QuestsHeader() }
+                items(state.quests, key = { it.key }, contentType = { "quest" }) { quest ->
                     QuestCard(
                         quest = quest,
                         photo = state.photos[quest.key],

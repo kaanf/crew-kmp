@@ -107,18 +107,18 @@ fun LeaderboardContent(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             contentPadding = PaddingValues(bottom = 84.dp),
         ) {
-            item(key = "header") { WrapHeader() }
+            item(key = "header", contentType = "header") { WrapHeader() }
             if (showPodium) {
-                item(key = "podium") {
+                item(key = "podium", contentType = "podium") {
                     Podium(
                         topEntries = state.entries.take(3),
                         currentUserId = state.currentUserId,
                     )
                 }
             }
-            item(key = "memories") { MemoriesRevealEntry() }
-            item(key = "board_header") { FullBoardHeader(playerCount = state.entries.size) }
-            items(state.entries, key = { it.userId }) { entry ->
+            item(key = "memories", contentType = "memories") { MemoriesRevealEntry() }
+            item(key = "board_header", contentType = "board_header") { FullBoardHeader(playerCount = state.entries.size) }
+            items(state.entries, key = { it.userId }, contentType = { "row" }) { entry ->
                 LeaderboardRow(
                     entry = entry,
                     isCurrentUser = entry.userId == state.currentUserId,
