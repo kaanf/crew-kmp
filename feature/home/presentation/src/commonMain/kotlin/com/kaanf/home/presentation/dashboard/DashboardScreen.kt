@@ -25,7 +25,11 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -36,6 +40,8 @@ import com.kaanf.core.designsystem.component.layout.AppTopBar
 import com.kaanf.core.designsystem.component.layout.FullScreenLoader
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.presentation.model.AppTopBarState
+import com.kaanf.core.presentation.permission.Permission
+import com.kaanf.core.presentation.permission.rememberPermissionController
 import com.kaanf.core.presentation.util.ObserveAsEvents
 import com.kaanf.core.designsystem.component.card.GradientChallengeCard
 import com.kaanf.core.designsystem.component.card.MoreDeckCard
@@ -80,6 +86,10 @@ fun DashboardRoot(
         }
     }
 
+    RequestNotificationPermissionEffect(
+        isReady = !state.isLoading && state.profilePictureUrl != null,
+    )
+
     val listState = rememberLazyListState()
 
     AppScaffold(
@@ -99,6 +109,26 @@ fun DashboardRoot(
             state = state,
             onAction = viewModel::onAction,
         )
+    }
+}
+
+/**
+ * Bildirim iznini açılışta değil, kullanıcı login olup profil fotoğrafını da yükledikten sonra
+ * dashboard'da ister. Sistem dialogu sınırlı sayıda gösterilebiliyor (Android'de iki red sonrası
+ * bir daha hiç, iOS'ta tek hak), o yüzden kullanıcı uygulamanın ne olduğunu anlamadan harcanmıyor.
+ *
+ * ponytail: kalıcı "soruldu" bayrağı yok — izin verilmiş/reddedilmişse requestPermission zaten
+ * dialog göstermeden dönüyor, tek maliyet bir suspend çağrısı.
+ */
+@Composable
+private fun RequestNotificationPermissionEffect(isReady: Boolean) {
+    val permissionController = rememberPermissionController()
+    var requested by rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(isReady) {
+        if (requested || !isReady) return@LaunchedEffect
+        requested = true
+        permissionController.requestPermission(Permission.REMOTE_NOTIFICATION)
     }
 }
 

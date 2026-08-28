@@ -256,10 +256,10 @@ fun AppTopBar(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     if (state.showQuestsAction) {
-                        GameActionButton(emoji = "🎯", onClick = onLeftClick)
+                        GameActionButton(emoji = "🎯", onClick = onLeftClick, showBadge = state.questsBadge)
                     }
                     if (state.showPassportAction) {
-                        GameActionButton(emoji = "📘", onClick = onPassportClick)
+                        GameActionButton(emoji = "📘", onClick = onPassportClick, showBadge = state.passportBadge)
                     }
                 }
             }
@@ -364,20 +364,32 @@ private fun GameActionButton(
     emoji: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    /** Claim edilecek bir şey var: sağ üst köşede kırmızı nokta. */
+    showBadge: Boolean = false,
 ) {
-    IconButton(
-        onClick = onClick,
-        modifier = modifier
-            .clip(CircleShape)
-            .background(AccessDefaults.SurfaceElevated)
-            .border(
-                width = 1.dp,
-                color = AccessDefaults.BorderSoft,
-                shape = CircleShape,
+    Box(modifier = modifier) {
+        IconButton(
+            onClick = onClick,
+            modifier = Modifier
+                .clip(CircleShape)
+                .background(AccessDefaults.SurfaceElevated)
+                .border(
+                    width = 1.dp,
+                    color = AccessDefaults.BorderSoft,
+                    shape = CircleShape,
+                )
+                .size(32.dp),
+        ) {
+            Text(text = emoji, fontSize = 16.sp)
+        }
+        if (showBadge) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .size(9.dp)
+                    .background(color = AccessDefaults.Coral, shape = CircleShape),
             )
-            .size(32.dp),
-    ) {
-        Text(text = emoji, fontSize = 16.sp)
+        }
     }
 }
 

@@ -21,6 +21,10 @@ sealed interface AppTopBarState {
         val showQuestsAction: Boolean = false,
         /** Quest ikonunun yanında damga pasaportu (adres defteri) ikonunu gösterir. */
         val showPassportAction: Boolean = false,
+        /** Claim edilecek quest var: 🎯 ikonuna kırmızı nokta. */
+        val questsBadge: Boolean = false,
+        /** Claim edilecek tanışma puanı var: 📘 ikonuna kırmızı nokta. */
+        val passportBadge: Boolean = false,
     ) : AppTopBarState
     data object ScanOpponent : AppTopBarState
     data object RpsReady : AppTopBarState

@@ -206,7 +206,7 @@
     <string name="passport_top_bar_title">Stamp Passport</string>
     <string name="passport_eyebrow">TRACE OF THE NIGHT</string>
     <string name="passport_title_format">%1$d stamps = %2$d strangers</string>
-    <string name="passport_subtitle">Every new person leaves their own stamp. Not points — the trace of who you played with tonight.</string>
+    <string name="passport_subtitle">Every new person leaves their own stamp — and meeting points waiting to be claimed.</string>
     <string name="passport_page_head">CREW · TONIGHT</string>
     <string name="passport_page_number">PAGE 01</string>
     <string name="passport_filled_format">%1$d / %2$d filled</string>
@@ -225,6 +225,12 @@
     <string name="passport_source_task_format">Task · &#8220;%1$s&#8221;</string>
     <string name="passport_collect_action">Collect a new stamp</string>
     <string name="passport_share_action">Share page</string>
+    <string name="passport_claim_all_format">Claim all +%1$d</string>
+    <string name="passport_claim_all_loading">CLAIMING…</string>
+    <string name="passport_claim_check_in_title">Not checked in</string>
+    <string name="passport_claim_check_in_description">Check in at the venue before collecting meeting points.</string>
+    <string name="first_meeting_snackbar_title">You met %1$s!</string>
+    <string name="first_meeting_snackbar_description">Claim +%1$d from your stamp passport 📘</string>
     <string name="cocktail_notes_kicker">Notes</string>
     <string name="cocktail_note_nose">Nose</string>
     <string name="cocktail_note_palate">Palate</string>
