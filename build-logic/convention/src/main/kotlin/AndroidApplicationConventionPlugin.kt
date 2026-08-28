@@ -76,13 +76,9 @@ class AndroidApplicationConventionPlugin: Plugin<Project> {
                         }
                     }
 
-                    create("benchmark") {
-                        initWith(getByName("release"))
-                        signingConfig = signingConfigs.getByName("debug")
-                        isDebuggable = false
-                        isProfileable = true
-                        matchingFallbacks += listOf("release")
-                    }
+                    // Elle yazılmış "benchmark" build type'ı kaldırıldı: androidx.baselineprofile
+                    // eklentisi release'ten kendi nonMinifiedRelease/benchmarkRelease type'larını
+                    // türetiyor. İkisini birden tutmak her modüle gereksiz bir varyant ekliyordu.
                 }
 
                 configureKotlinAndroid(this)

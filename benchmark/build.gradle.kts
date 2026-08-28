@@ -33,6 +33,14 @@ android {
     }
 }
 
+// Studio (2025.3) sync'te her modülün "debug" varyantı için AGP 9'un ProjectGraph modelini ister.
+// baselineprofile eklentisi bu modülde debug/release varyantlarını kapattığı için AGP null döner ve
+// sync NPE ile patlar. Varyantları açık bırakmak bedava: baseline profile task'ları yalnız
+// nonMinifiedRelease/benchmarkRelease icin uretiliyor.
+androidComponents {
+    beforeVariants { it.enable = true }
+}
+
 baselineProfile {
     managedDevices += "pixel6Api34"
     // CI'da fiziksel cihaz yok; emülatör üzerinden üret.

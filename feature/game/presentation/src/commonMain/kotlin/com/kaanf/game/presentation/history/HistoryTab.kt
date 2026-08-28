@@ -68,7 +68,7 @@ fun HistoryTab(modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.spacedBy(8.dp),
             contentPadding = PaddingValues(bottom = 84.dp),
         ) {
-            item(key = "log_header") {
+            item(key = "log_header", contentType = "header") {
                 Text(
                     text = stringResource(Res.string.history_match_log_label),
                     style = MaterialTheme.typography.labelSmall.copy(
@@ -78,11 +78,11 @@ fun HistoryTab(modifier: Modifier = Modifier) {
                     modifier = Modifier.padding(top = 16.dp, bottom = 4.dp),
                 )
             }
-            items(state.entries, key = { it.matchId }) { entry ->
+            items(state.entries, key = { it.matchId }, contentType = { "row" }) { entry ->
                 MatchLogCard(entry = entry)
             }
             if (!state.endReached) {
-                item(key = "page_loader") {
+                item(key = "page_loader", contentType = "loader") {
                     // Satır görünür olunca sıradaki sayfayı çek (sonsuz kaydırma).
                     LaunchedEffect(state.entries.size) { viewModel.loadNextPage() }
                     Box(

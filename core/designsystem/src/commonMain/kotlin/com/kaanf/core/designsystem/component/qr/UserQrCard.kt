@@ -68,34 +68,28 @@ fun UserQrCard(
             modifier = Modifier
                 .matchParentSize()
                 .semantics { contentDescription = qrContentDescription }
+                // Cache kompozisyona bağlı: eskiden dosya seviyesinde `var`'da tutuluyordu ve
+                // ekrandan çıkınca da tam boy bitmap (900px karede ~3 MB) süreç boyu asılı kalıyordu.
+                // drawWithCache zaten boyut değişiminde yeniden çalışır, ayrıca anahtar tutmaya gerek yok.
                 .drawWithCache {
                     val width = size.width.toInt().coerceAtLeast(1)
                     val height = size.height.toInt().coerceAtLeast(1)
-                    val key = QrCacheKey(inputText, width, height)
 
-                    val qrImage = cachedQr?.takeIf { cachedQrKey == key }
-                        ?: ImageBitmap(width, height).also { image ->
-                            CanvasDrawScope().draw(
-                                density = this,
-                                layoutDirection = layoutDirection,
-                                canvas = Canvas(image),
-                                size = Size(width.toFloat(), height.toFloat()),
-                            ) {
-                                with(painter) { draw(this@draw.size) }
-                            }
-                            image.markImmutable()
-                            cachedQrKey = key
-                            cachedQr = image
+                    val qrImage = ImageBitmap(width, height).also { image ->
+                        CanvasDrawScope().draw(
+                            density = this,
+                            layoutDirection = layoutDirection,
+                            canvas = Canvas(image),
+                            size = Size(width.toFloat(), height.toFloat()),
+                        ) {
+                            with(painter) { draw(this@draw.size) }
                         }
+                        image.markImmutable()
+                    }
 
                     onDrawBehind { drawImage(qrImage) }
                 },
         )
     }
 }
-
-private data class QrCacheKey(val data: String, val width: Int, val height: Int)
-
-private var cachedQrKey: QrCacheKey? = null
-private var cachedQr: ImageBitmap? = null
 

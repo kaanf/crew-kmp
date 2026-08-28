@@ -16,6 +16,8 @@ kotlin {
                 implementation(projects.core.designsystem)
                 implementation(projects.core.presentation)
 
+                implementation(libs.coil.compose)
+
                 implementation(compose.components.resources)
                 implementation(compose.components.uiToolingPreview)
                 implementation(compose.preview)

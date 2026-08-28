@@ -1,5 +1,6 @@
 package com.kaanf.core.data.networking
 
+import com.kaanf.core.data.BuildEnvironment
 import com.kaanf.core.domain.repository.SessionStorage
 import com.kaanf.core.domain.logging.CrewLogger
 import io.ktor.client.HttpClient
@@ -25,6 +26,7 @@ class HttpClientFactory(
     private val crewLogger: CrewLogger,
     private val sessionStorage: SessionStorage,
     private val sessionRefresher: SessionRefresher,
+    private val buildEnvironment: BuildEnvironment,
 ) {
     fun create(engine: HttpClientEngine): HttpClient {
         return HttpClient(engine) {
@@ -48,7 +50,9 @@ class HttpClientFactory(
                             crewLogger.debug(message)
                         }
                     }
-                level = LogLevel.ALL
+                // LogLevel.ALL her yanıt gövdesini String'e çevirip biriktiriyor (CPU + GC)
+                // ve bearer token'ları logcat'e yazıyor: yalnız debug binary'de açık.
+                level = if (buildEnvironment.isDebug) LogLevel.ALL else LogLevel.NONE
                 // İkili gövdeleri (örn. signed URL'e giden profil fotoğrafı upload'ı) metne
                 // çevirmek, logger'ın StringBuilder'ını megabaytlarca şişirip OOM'a yol açıyor.
                 // Yalnızca JSON ve gövdesiz istekleri logla; binary içerikleri loglama dışı tut.
