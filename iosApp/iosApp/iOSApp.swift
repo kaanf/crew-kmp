@@ -13,7 +13,9 @@ class AppDelegate: NSObject, UIApplicationDelegate, MessagingDelegate, UNUserNot
         FirebaseApp.configure()
         Messaging.messaging().delegate = self
         UNUserNotificationCenter.current().delegate = self
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { _, _ in }
+        // Bildirim izni burada istenmiyor: kullanicinin tek reddetme hakki var, onu acilista
+        // harcamamak icin dashboard'da (login + profil fotografi sonrasi) isteniyor.
+        // registerForRemoteNotifications izinden bagimsiz calisir; APNs token'i FCM icin gerekli.
         application.registerForRemoteNotifications()
         return true
     }

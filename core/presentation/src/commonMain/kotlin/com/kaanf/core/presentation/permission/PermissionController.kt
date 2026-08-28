@@ -41,5 +41,6 @@ class PermissionController(
 fun Permission.toMokoPermission(): dev.icerock.moko.permissions.Permission {
     return when(this) {
         Permission.CAMERA -> dev.icerock.moko.permissions.Permission.CAMERA
+        Permission.REMOTE_NOTIFICATION -> dev.icerock.moko.permissions.Permission.REMOTE_NOTIFICATION
     }
 }
