@@ -22,6 +22,10 @@ data class AddressBookEntryDto(
     val firstMatchWon: Boolean = false,
     val firstMatchTaskTitle: String? = null,
     val title: TitleDto? = null,
+    // Tanışmanın claim değeri ve durumu; default'lar eski sunucuya karşı güvenli
+    // (claimed=true → yanlışlıkla claim edilebilir görünmez).
+    val points: Int = 25,
+    val claimed: Boolean = true,
 )
 
 @Serializable

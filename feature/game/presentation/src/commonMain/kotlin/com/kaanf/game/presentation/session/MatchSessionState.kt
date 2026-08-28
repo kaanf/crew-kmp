@@ -64,6 +64,10 @@ data class MatchSessionState(
     val announcementCocktail: AnnouncementCocktail? = null,
     val showAnnouncementSheet: Boolean = false,
     val errorMessage: String? = null,
+    // Kırmızı nokta badge'leri: claim edilecek bir şey var mı. Maç bitişlerinde ve
+    // ekrandan dönüşteki stats yenilemesinde tazelenir.
+    val questsClaimable: Boolean = false,
+    val passportClaimable: Boolean = false,
 ) {
     val isConnected: Boolean get() = connectionState is GameConnectionState.Connected
 

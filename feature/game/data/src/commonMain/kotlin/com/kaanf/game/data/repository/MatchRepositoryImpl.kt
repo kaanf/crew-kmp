@@ -281,4 +281,20 @@ class MatchRepositoryImpl(
             route = "/events/$eventId/quests/$questKey/claim",
         ).map { it.toDomain() }
     }
+
+    override suspend fun claimMeeting(
+        eventId: String, metUserId: String,
+    ): Result<AddressBook, DataError.Remote> {
+        return httpClient.post<AddressBookDto>(
+            route = "/events/$eventId/address-book/$metUserId/claim",
+        ).map { it.toDomain() }
+    }
+
+    override suspend fun claimAllMeetings(
+        eventId: String,
+    ): Result<AddressBook, DataError.Remote> {
+        return httpClient.post<AddressBookDto>(
+            route = "/events/$eventId/address-book/claim-all",
+        ).map { it.toDomain() }
+    }
 }

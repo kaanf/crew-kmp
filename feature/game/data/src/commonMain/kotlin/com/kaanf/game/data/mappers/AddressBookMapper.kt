@@ -20,4 +20,6 @@ fun AddressBookEntryDto.toDomain(): AddressBookEntry = AddressBookEntry(
     firstMatchWon = firstMatchWon,
     firstMatchTaskTitle = firstMatchTaskTitle,
     title = title?.let { AddressBookTitle(key = it.key, label = it.label, emoji = it.emoji) },
+    points = points,
+    claimed = claimed,
 )
