@@ -11,9 +11,12 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import kotlin.math.min
 
@@ -23,7 +26,15 @@ fun Modifier.eventHeroBackground(
     return this
         .clip(shape)
         .drawWithCache {
-            val minSize = min(size.width, size.height)
+            // Gradient'ler yumuşak: tam çözünürlükte rasterize etmeye gerek yok. Tam boyda
+            // ~1170x600 px'lik bir ImageBitmap (~2.8 MB) ve 4 tam boy gradient dolgusu
+            // (~2.8M piksel yazımı) main thread'de ödeniyordu; küçük boyayıp büyütmek gözle
+            // ayırt edilmiyor ama maliyeti ~30 kat düşürüyor. (Aynı desen verticalGradientScrim,
+            // GradientChallengeCard ve softShadow'da da kullanılıyor.)
+            val rasterScale = RASTER_PX / size.width
+            val rasterWidth = RASTER_PX
+            val rasterHeight = (size.height * rasterScale).coerceAtLeast(1f)
+            val minSize = min(rasterWidth, rasterHeight)
 
             val baseGradient = Brush.linearGradient(
                 colorStops = arrayOf(
@@ -33,8 +44,8 @@ fun Modifier.eventHeroBackground(
                     0.78f to Color(0xFF0F0B08),
                     1.00f to Color(0xFF0B0805),
                 ),
-                start = Offset(size.width * 0.15f, 0f),
-                end = Offset(size.width * 0.85f, size.height)
+                start = Offset(rasterWidth * 0.15f, 0f),
+                end = Offset(rasterWidth * 0.85f, rasterHeight)
             )
 
             val coralGlow = Brush.radialGradient(
@@ -45,7 +56,7 @@ fun Modifier.eventHeroBackground(
                     0.72f to Color(0xFFFF7A5C).copy(alpha = 0.025f),
                     1.00f to Color.Transparent,
                 ),
-                center = Offset(size.width * 0.98f, size.height * 0.02f),
+                center = Offset(rasterWidth * 0.98f, rasterHeight * 0.02f),
                 radius = minSize * 1.25f
             )
 
@@ -57,7 +68,7 @@ fun Modifier.eventHeroBackground(
                     0.74f to Color(0xFFC8FF3D).copy(alpha = 0.025f),
                     1.00f to Color.Transparent,
                 ),
-                center = Offset(size.width * 0.02f, size.height * 1.02f),
+                center = Offset(rasterWidth * 0.02f, rasterHeight * 1.02f),
                 radius = minSize * 1.64f
             )
 
@@ -68,21 +79,18 @@ fun Modifier.eventHeroBackground(
                     0.75f to Color.Black.copy(alpha = 0.04f),
                     1.00f to Color.Transparent,
                 ),
-                center = Offset(size.width * 0.5f, size.height * 0.52f),
+                center = Offset(rasterWidth * 0.5f, rasterHeight * 0.52f),
                 radius = minSize * 0.55f
             )
 
-            // Gradient'leri her karede yeniden boyamak yerine bir kez bir bitmap'e
-            // rasterize edip (size değişene kadar yeniden çalışmaz), scroll sırasında
-            // sadece hazır bitmap'i basıyoruz. drawImage = ucuz textured blit.
-            val width = size.width.toInt().coerceAtLeast(1)
-            val height = size.height.toInt().coerceAtLeast(1)
-            val cachedImage = ImageBitmap(width, height)
+            val sourceWidth = rasterWidth.toInt().coerceAtLeast(1)
+            val sourceHeight = rasterHeight.toInt().coerceAtLeast(1)
+            val cachedImage = ImageBitmap(sourceWidth, sourceHeight)
             CanvasDrawScope().draw(
                 density = this,
                 layoutDirection = layoutDirection,
                 canvas = Canvas(cachedImage),
-                size = Size(size.width, size.height),
+                size = Size(rasterWidth, rasterHeight),
             ) {
                 drawRect(baseGradient)
                 drawRect(coralGlow)
@@ -91,8 +99,21 @@ fun Modifier.eventHeroBackground(
             }
             cachedImage.markImmutable()
 
+            val source = IntSize(sourceWidth, sourceHeight)
+            val destination = IntSize(
+                size.width.toInt().coerceAtLeast(1),
+                size.height.toInt().coerceAtLeast(1),
+            )
+
             onDrawBehind {
-                drawImage(cachedImage)
+                drawImage(
+                    image = cachedImage,
+                    srcOffset = IntOffset.Zero,
+                    srcSize = source,
+                    dstOffset = IntOffset.Zero,
+                    dstSize = destination,
+                    filterQuality = FilterQuality.Low,
+                )
             }
         }
         .border(
@@ -101,3 +122,6 @@ fun Modifier.eventHeroBackground(
             shape = shape
         )
 }
+
+// Kart @3x'te ~1170px genişliğinde; yumuşak gradient için 160px raster + upscale yeterli.
+private const val RASTER_PX = 160f

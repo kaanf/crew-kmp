@@ -3,6 +3,7 @@ package com.kaanf.home.presentation.eventdetail
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -26,13 +28,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -44,6 +46,8 @@ import com.kaanf.core.designsystem.component.layout.FullScreenLoader
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.presentation.model.AppTopBarState
 import com.kaanf.core.presentation.util.ObserveAsEvents
+import com.kaanf.home.presentation.component.background.DynamicEventBackground
+import com.kaanf.home.presentation.component.softShadow
 import com.kaanf.home.presentation.component.verticalGradientScrim
 import com.kaanf.home.presentation.eventdetail.component.EventDetailInfoSection
 import com.kaanf.home.presentation.eventdetail.component.EventImageViewer
@@ -87,16 +91,21 @@ fun EventDetailRoot(
             AppTopBar(
                 state = AppTopBarState.EventDetail,
                 elevated = { listState.canScrollBackward },
+                transparentAtRest = true,
                 onBackClick = { onBackClick() },
             )
         },
     ) { innerPadding ->
         EventDetailScreen(
+            // Üst boşluk bilerek uygulanmıyor: hero'nun renk alanı bar'ın arkasına kadar
+            // uzansın ki saydam bar boyalı zemini göstersin. Kartı bar'ın altında tutan
+            // boşluk hero öğesinin *içinde* (topInset), böylece arka plan yukarı taşıyor.
             modifier = Modifier
-                .padding(innerPadding)
+                .padding(bottom = innerPadding.calculateBottomPadding())
                 .consumeWindowInsets(innerPadding),
             listState = listState,
             state = state,
+            topInset = innerPadding.calculateTopPadding(),
             onAction = viewModel::onAction,
         )
     }
@@ -108,6 +117,8 @@ fun EventDetailScreen(
     listState: LazyListState,
     state: EventDetailState,
     onAction: (EventDetailAction) -> Unit,
+    /** Üst bar'ın kapladığı yükseklik; hero içeriği bu kadar aşağıdan başlar. */
+    topInset: Dp = 0.dp,
 ) {
     Crossfade(
         targetState = state.event,
@@ -116,7 +127,9 @@ fun EventDetailScreen(
     ) { event ->
         if (event == null) {
             Box(
-                modifier = Modifier.fillMaxSize(),
+                // İçerik bar'ın arkasına uzanıyor; yükleyici/hata yine bar'ın altındaki
+                // alanda ortalansın.
+                modifier = Modifier.fillMaxSize().padding(top = topInset),
                 contentAlignment = Alignment.Center,
             ) {
                 if (state.loadFailed) {
@@ -132,6 +145,7 @@ fun EventDetailScreen(
                 listState = listState,
                 event = event,
                 isCheckingOut = state.isCheckingOut,
+                topInset = topInset,
                 onAction = onAction,
             )
         }
@@ -172,6 +186,7 @@ private fun EventDetailContent(
     listState: LazyListState,
     event: EventDetailUiModel,
     isCheckingOut: Boolean,
+    topInset: Dp,
     onAction: (EventDetailAction) -> Unit,
 ) {
     // null = kapalı; saf UI durumu olduğu için ViewModel'e taşınmaz.
@@ -180,31 +195,60 @@ private fun EventDetailContent(
     Box(
         modifier = Modifier.fillMaxSize(),
     ) {
+        // Kapak görselinden türeyen yavaş renk alanı; gövde kartları üstünde opak
+        // durduğu için okunabilirliği bozmuyor.
+        // Draw fazında okunur; scroll'da recomposition tetiklemez.
+        val scrollOffset: () -> Float = {
+            if (listState.firstVisibleItemIndex == 0) {
+                listState.firstVisibleItemScrollOffset.toFloat()
+            } else {
+                Float.MAX_VALUE
+            }
+        }
+
         LazyColumn(
             state = listState,
             modifier = Modifier
                 .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            // Kart ve başlık tek öğe: renk alanı bu bloğun arkasında duruyor ve onunla
+            // birlikte kayıyor. Ayrı bir sabit katmanı scroll ofsetiyle kaydırmak,
+            // ofset ilk öğe ekrandan çıkınca süreksiz hale geldiği için zıplıyordu.
             item(contentType = "hero") {
-                EventDetailHero(
-                    imageUrls = event.imageUrls,
-                    title = event.title,
-                    meta = listOfNotNull(
-                        event.heroDate,
-                        event.doorsOpenAt.toClockText(),
-                        event.location?.name,
-                    ).joinToString(META_SEPARATOR),
-                    // Draw fazında okunur; parallax scroll'da recomposition tetiklemez.
-                    scrollOffset = {
-                        if (listState.firstVisibleItemIndex == 0) {
-                            listState.firstVisibleItemScrollOffset.toFloat()
-                        } else {
-                            Float.MAX_VALUE
-                        }
-                    },
-                    onImageClick = { page -> viewerPage = page },
-                )
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    event.imageUrls.firstOrNull()?.let { coverUrl ->
+                        DynamicEventBackground(
+                            imageUrl = coverUrl,
+                            modifier = Modifier.matchParentSize(),
+                        )
+                    }
+
+                    // Dolgu Column'da, Box'ta değil: renk alanı (matchParentSize) bar'ın
+                    // arkasını da boyasın, kart yine bar'ın altında kalsın.
+                    Column(
+                        modifier = Modifier.padding(top = topInset),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        EventDetailHero(
+                            imageUrls = event.imageUrls,
+                            scrollOffset = scrollOffset,
+                            onImageClick = { page -> viewerPage = page },
+                        )
+
+                        EventDetailHeading(
+                            title = event.title,
+                            meta = listOfNotNull(
+                                event.heroDate,
+                                event.doorsOpenAt.toClockText(),
+                                event.location?.name,
+                            ).joinToString(META_SEPARATOR),
+                            modifier = Modifier.padding(horizontal = BodyPadding),
+                        )
+
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
+                }
             }
 
             item(contentType = "event-info") {
@@ -278,51 +322,75 @@ private fun EventDetailContent(
 @Composable
 private fun EventDetailHero(
     imageUrls: List<String>,
-    title: String,
-    meta: String,
     scrollOffset: () -> Float,
     onImageClick: (Int) -> Unit,
 ) {
     val pagerState = rememberPagerState(pageCount = { imageUrls.size })
 
+    // clipToBounds yok: hale kartın dışına taşan tek şey ve burada kırpılırdı.
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(HeroHeight)
-            .clipToBounds(),
+            .height(HeroImageSize + HeroImageMargin * 2),
     ) {
+        // Kart sabit, parallax içerideki görselde: kart kendisi kaysaydı yuvarlak alt
+        // köşeleri ve halesi kayarken kırpılırdı.
         Box(
             modifier = Modifier
-                .matchParentSize()
+                .align(Alignment.Center)
+                .size(HeroImageSize)
+                // Kartın clip'inden önce: hale kutunun dışına taşmalı.
+                // Dar + koyu + aşağı kaymış hale: yayılım daralınca sönüm kartın kenarında
+                // toplanıyor, koyuluk artınca kart zeminden ayrışıyor. offsetY hale'nin
+                // kartın altına taşma payı — üstte hep `spread` kadar kalır, aşağıda
+                // `spread + offsetY`; aradaki fark büyüdükçe ışık tepeden geliyormuş gibi
+                // okunur ve kart daha yüksekte durur (12 üst / 28 alt).
+                .softShadow(
+                    cornerRadius = HeroImageCorner,
+                    spread = 12.dp,
+                    offsetY = 16.dp,
+                    maxAlpha = 0.45f,
+                )
                 .graphicsLayer {
-                    translationY = scrollOffset().coerceIn(0f, size.height) * 0.35f
+                    shadowElevation = HeroImageElevation.toPx()
+                    shape = RoundedCornerShape(HeroImageCorner)
+                    clip = true
                 },
         ) {
-            if (imageUrls.size > 1) {
-                HorizontalPager(
-                    state = pagerState,
-                    modifier = Modifier.matchParentSize(),
-                ) { page ->
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .graphicsLayer {
+                        translationY = scrollOffset().coerceIn(0f, size.height) * 0.35f
+                    },
+            ) {
+                if (imageUrls.size > 1) {
+                    HorizontalPager(
+                        state = pagerState,
+                        modifier = Modifier.matchParentSize(),
+                    ) { page ->
+                        BaseImage(
+                            imageUrl = imageUrls[page],
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clickable { onImageClick(page) },
+                            contentScale = ContentScale.Crop,
+                        )
+                    }
+                } else {
                     BaseImage(
-                        imageUrl = imageUrls[page],
+                        imageUrl = imageUrls.first(),
                         modifier = Modifier
-                            .fillMaxSize()
-                            .clickable { onImageClick(page) },
+                            .matchParentSize()
+                            .clickable { onImageClick(0) },
                         contentScale = ContentScale.Crop,
                     )
                 }
-            } else {
-                BaseImage(
-                    imageUrl = imageUrls.first(),
-                    modifier = Modifier
-                        .matchParentSize()
-                        .clickable { onImageClick(0) },
-                    contentScale = ContentScale.Crop,
-                )
             }
-        }
 
-        Box(modifier = Modifier.matchParentSize().verticalGradientScrim(HeroScrim))
+            // Scrim kartın içinde: kenar boşluklarının üstüne taşmasın.
+            Box(modifier = Modifier.matchParentSize().verticalGradientScrim(HeroScrim))
+        }
 
         if (imageUrls.size > 1) {
             PagerDots(
@@ -335,52 +403,57 @@ private fun EventDetailHero(
             )
         }
 
-        Column(
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .graphicsLayer {
-                    val offset = scrollOffset()
-                    alpha = (1f - offset / HeroTitleFadeDistance.toPx()).coerceIn(0f, 1f)
-                    translationY = -offset * 0.12f
-                }
-                .padding(horizontal = BodyPadding)
-                .padding(bottom = 22.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.displaySmall.copy(
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 34.sp,
-                    lineHeight = 34.sp,
-                    letterSpacing = (-1.4).sp,
-                ),
-            )
+    }
+}
 
-            Text(
-                text = meta,
-                style = MaterialTheme.typography.bodySmall.copy(
-                    color = AccessDefaults.TextSecondary,
-                ),
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-            )
-        }
+/** Başlık artık görselin üstünde değil altında: kart tek parça kalıyor. */
+@Composable
+private fun EventDetailHeading(
+    title: String,
+    meta: String,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.displaySmall.copy(
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 34.sp,
+                lineHeight = 34.sp,
+                letterSpacing = (-1.4).sp,
+            ),
+        )
+
+        Text(
+            text = meta,
+            style = MaterialTheme.typography.bodySmall.copy(
+                color = AccessDefaults.TextSecondary,
+            ),
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+        )
     }
 }
 
 private const val META_SEPARATOR = " · "
 
-private val HeroHeight = 396.dp
-private val HeroTitleFadeDistance = 260.dp
+private val HeroImageSize = 240.dp
+private val HeroImageMargin = 18.dp
+private val HeroImageCorner = 24.dp
+
+// Yayılan gölgeyi softShadow veriyor; bu yalnız kartın kenarındaki temas gölgesi.
+private val HeroImageElevation = 8.dp
 private val BodyPadding = 22.dp
 
+// Alt etek kaldırıldı: başlık artık kartın üstünde değil, orada karartacak bir şey yok.
+// Üstteki tek durak PagerDots okunsun diye.
 private val HeroScrim = Brush.verticalGradient(
-    0f to AccessDefaults.Background.copy(alpha = 0.55f),
-    0.22f to Color.Transparent,
-    0.46f to Color.Transparent,
-    0.74f to AccessDefaults.Background.copy(alpha = 0.42f),
-    0.99f to AccessDefaults.Background,
+    0f to AccessDefaults.Background.copy(alpha = 0.45f),
+    0.24f to Color.Transparent,
+    1f to Color.Transparent,
 )
 
 
