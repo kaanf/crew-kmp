@@ -1,8 +1,10 @@
 package com.kaanf.core.data.di
 
+import com.kaanf.core.data.BuildEnvironment
 import com.kaanf.core.data.session.DataStoreSessionStorage
 import com.kaanf.core.data.settings.DataStoreLanguageStore
 import com.kaanf.core.data.logging.KermitLogger
+import com.kaanf.core.data.logging.applyMinSeverity
 import com.kaanf.core.data.networking.HttpClientFactory
 import com.kaanf.core.data.networking.SessionRefresher
 import com.kaanf.core.data.networking.clearBearerToken
@@ -26,7 +28,9 @@ expect val platformCoreDataModule: Module
 val coreDataModule =
     module {
         includes(platformCoreDataModule)
-        single<CrewLogger> { KermitLogger }
+        // Sürümde debug/info kayıtları hiç yazılmasın: Kermit'in kendi eşiği,
+        // R8 tarafında -assumenosideeffects gerektirmeyen taşınabilir yolu.
+        single<CrewLogger> { KermitLogger.applyMinSeverity(get<BuildEnvironment>().isDebug) }
         single<SessionStorage> {
             // clearBearerToken lambda'sı HttpClient'ı tembel çözer: SessionStorage kurulurken
             // client henüz yok, bu yüzden çağrı anına ertelenir (döngüsel bağımlılık olmaz).
@@ -39,7 +43,7 @@ val coreDataModule =
         singleOf(::SessionRefresher)
         single {
             HttpClientFactory(
-                get(), get(), get()
+                get(), get(), get(), get()
             ).create(get())
         }
     }
