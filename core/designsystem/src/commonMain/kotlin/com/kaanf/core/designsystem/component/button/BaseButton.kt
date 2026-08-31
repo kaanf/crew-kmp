@@ -52,6 +52,7 @@ import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import com.kaanf.core.designsystem.theme.AccessShapes
+import com.kaanf.core.presentation.util.rememberIsResumed
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import kotlin.math.hypot
@@ -68,7 +69,6 @@ fun BaseButton(
     filled: Boolean = false,
     animatedBorder: Boolean = false,
     leadingIcon: DrawableResource? = null,
-    // Google "G" gibi çok renkli marka logoları boyanamaz; false ise ikon olduğu gibi çizilir.
     tintLeadingIcon: Boolean = true,
     backgroundColor: Color? = null,
     borderColor: Color? = null,
@@ -94,7 +94,8 @@ fun BaseButton(
             else -> AccessDefaults.TextFaint
         }
 
-    val borderAnimated = animatedBorder && isInteractionEnabled
+    val isResumed by rememberIsResumed()
+    val borderAnimated = animatedBorder && isInteractionEnabled && isResumed
 
     Box(
         modifier =
