@@ -27,9 +27,9 @@ data class MemoriesState(
 )
 
 /**
- * Etkinliğin foto quest karelerinin galerisi (leaderboard'daki "roll developed" reveal'ı).
- * Liste sunucu tarafında faza göre daralır/genişler. İmzalı URL'ler kısa ömürlü olduğundan
- * her açılışta [refresh].
+ * Etkinliğin görev fotoğrafları rulosu (etkinlik sonu leaderboard'daki ikon). Liste sunucu
+ * tarafında faza göre daralır/genişler. Kendiliğinden çekmez: container oyun bitince,
+ * rulo da her açılışta [refresh] çağırır (imzalı URL'ler kısa ömürlü).
  */
 class MemoriesViewModel(
     private val matchRepository: MatchRepository,
@@ -48,10 +48,6 @@ class MemoriesViewModel(
             started = SharingStarted.WhileSubscribed(5_000L),
             initialValue = _state.value,
         )
-
-    init {
-        refresh()
-    }
 
     /** İlk sayfayı çekip listeyi baştan kurar (imzalı URL'ler bayatlayabildiği için her açılışta). */
     fun refresh() {

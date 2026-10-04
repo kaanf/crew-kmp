@@ -5,7 +5,6 @@ import com.kaanf.core.domain.util.EmptyResult
 import com.kaanf.core.domain.util.Result
 import com.kaanf.game.domain.model.AddressBook
 import com.kaanf.game.domain.model.EventMemory
-import com.kaanf.game.domain.model.EventParticipant
 import com.kaanf.game.domain.model.GameTask
 import com.kaanf.game.domain.model.LeaderboardEntry
 import com.kaanf.game.domain.model.MatchHistoryEntry
@@ -14,7 +13,6 @@ import com.kaanf.game.domain.model.MatchParticipant
 import com.kaanf.game.domain.model.MatchScoreboard
 import com.kaanf.game.domain.model.MatchSnapshot
 import com.kaanf.game.domain.model.Quest
-import com.kaanf.game.domain.model.QuestPhotoTag
 
 interface MatchRepository {
     suspend fun getMyMatchQrToken(eventId: String): Result<String, DataError.Remote>
@@ -73,24 +71,18 @@ interface MatchRepository {
     suspend fun getTasks(eventId: String): Result<List<GameTask>, DataError.Remote>
 
     /**
-     * Kazananın seçtiği görevi rakibe (kaybedene) sunar. Sunucu kaybedene
-     * TASK_OFFERED push'lar; kaybeden bir görev onay ekranına yönlenir.
+     * Kazananın seçtiği görevi rakibe (kaybedene) sunar ve görevi anında başlatır: ayrı
+     * bir kabul adımı yok. Sunucu kaybedene TASK_OFFERED push'lar, kazanan ise bu
+     * çağrının başarısıyla onay ekranına geçer.
      */
     suspend fun offerTask(
         eventId: String, matchId: String, taskId: String,
     ): EmptyResult<DataError.Remote>
 
     /**
-     * Kaybeden sunulan görevi kabul eder. Sunucu iki tarafa da TASK_STARTED push'lar;
-     * geçiş o soket mesajıyla sürülür.
-     */
-    suspend fun acceptTask(
-        eventId: String, matchId: String,
-    ): EmptyResult<DataError.Remote>
-
-    /**
-     * Kaybeden sunulan görevi reddeder. Maç görev seçim adımına döner; sunucu yalnızca
-     * kazanana TASK_REJECTED push'lar, böylece kazanan başka bir görev seçebilir.
+     * Kaybeden aktif görevi reddeder (görev ekranındaki "başka görev iste"). Maç görev
+     * seçim adımına döner; sunucu yalnızca kazanana TASK_REJECTED push'lar, böylece
+     * kazanan başka bir görev seçebilir.
      */
     suspend fun rejectTask(
         eventId: String, matchId: String,
@@ -133,10 +125,13 @@ interface MatchRepository {
      * Aktif (terminal olmayan) bir maçtan ayrılır = forfeit. Sunucu çağıranı kaybeden,
      * rakibi kazanan sayar ve rakibe MATCH_CANCELLED push'lar. Yalnızca devam eden maçlarda
      * çağrılmalı; biten/iptal/ret maçlarda sunucu hata döner.
+     *
+     * true = forfeit (skor tablosu var); false = maç oynanmadan (Ready'de) vazgeçildi,
+     * kimse kazanmadı ve gösterilecek skor yok.
      */
     suspend fun cancelMatch(
         eventId: String, matchId: String,
-    ): EmptyResult<DataError.Remote>
+    ): Result<Boolean, DataError.Remote>
 
     /**
      * Puan tablosu ekranındaki "Finish" ile maçı sonlandırır; yalnızca çağıran oyuncuyu serbest
@@ -147,7 +142,7 @@ interface MatchRepository {
     ): EmptyResult<DataError.Remote>
 
     /**
-     * Etkinliğin foto quest fotoğrafları, yeniden eskiye sayfalı (match history ile aynı
+     * Etkinliğin fotoğrafları, yeniden eskiye sayfalı (match history ile aynı
      * sözleşme: `page` 0'dan başlar, dönen liste [size]'dan kısaysa son sayfadır).
      * Oyun sürerken sunucu yalnız çağıranın yüklediklerini ve etiketlendiklerini döner;
      * etkinlik bitince tüm odanın rulosu açılır. URL'ler imzalı ve kısa ömürlü olduğundan
@@ -158,23 +153,15 @@ interface MatchRepository {
     ): Result<List<EventMemory>, DataError.Remote>
 
     /**
-     * Foto questine kameradan çekilen fotoğrafı gönderir (multipart). [tags] questin
-     * `requiredTags` değeri kadar olmalı, çağıranı içermemeli ve pinleri 0-1 aralığında
-     * olmalı; sunucu yalnız Gameplay fazında, check-in'li katılımcılara ve quest başına
-     * tek fotoğrafa izin verir.
+     * PHOTO görevinin fotoğrafını gönderir (multipart). Yalnız kaybeden, görev aktifken ve
+     * maç başına bir kez yükleyebilir (ikincisi 409). Kazanana TASK_PHOTO_UPLOADED gider.
      */
-    suspend fun uploadQuestPhoto(
+    suspend fun uploadTaskPhoto(
         eventId: String,
-        questKey: String,
-        tags: List<QuestPhotoTag>,
+        matchId: String,
         imageBytes: ByteArray,
         mimeType: String,
     ): Result<EventMemory, DataError.Remote>
-
-    /** Etkinliğin katılımcıları; foto questinde etiket seçiminin kaynağıdır. */
-    suspend fun getEventParticipants(
-        eventId: String,
-    ): Result<List<EventParticipant>, DataError.Remote>
 
     /**
      * Adres defteri: tanışılan kişiler + odadaki toplam kişi sayısı.

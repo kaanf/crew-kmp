@@ -1,5 +1,7 @@
 package com.kaanf.game.presentation.passport
 
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -57,7 +59,6 @@ import crew.feature.game.presentation.generated.resources.passport_rare_host_nam
 import crew.feature.game.presentation.generated.resources.passport_rare_section_title
 import crew.feature.game.presentation.generated.resources.passport_share_action
 import crew.feature.game.presentation.generated.resources.passport_subtitle
-import crew.feature.game.presentation.generated.resources.passport_title_format
 import crew.feature.game.presentation.generated.resources.passport_top_bar_title
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -112,80 +113,85 @@ fun PassportScreen(
             )
         },
     ) { innerPadding ->
-        if (state.isLoading) {
-            FullScreenLoader(
-                modifier = Modifier
-                    .padding(innerPadding)
-                    .consumeWindowInsets(innerPadding),
-            )
-            return@AppScaffold
-        }
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .consumeWindowInsets(innerPadding)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp),
-        ) {
-            PassportHeader(stampCount = state.stamps.size)
-            PassportPageCard(
-                stamps = state.stamps,
-                totalSlots = state.totalSlots,
-                headerLeft = stringResource(Res.string.passport_page_head),
-                headerRight = stringResource(Res.string.passport_page_number),
-                selectedStampId = selectedStampId,
-                onStampClick = { id ->
-                    selectedStampId = if (selectedStampId == id) null else id
-                },
-            )
-            state.stamps.firstOrNull { it.id == selectedStampId }?.let { stamp ->
-                PassportStampDetailCard(
-                    stamp = stamp,
-                    modifier = Modifier.padding(top = 12.dp),
-                    isClaiming = state.claimingId == stamp.id,
-                    onClaim = { onClaimStamp(stamp.id) },
-                )
-            }
-            if (state.claimableTotal > 0) {
-                BaseButton(
-                    text = stringResource(Res.string.passport_claim_all_format, state.claimableTotal),
-                    onClick = onClaimAll,
-                    isLoading = state.isClaimingAll,
-                    loadingText = stringResource(Res.string.passport_claim_all_loading),
-                    filled = true,
+        // Veri genelde nav slide'ının ortasında gelir; sert geçiş "iki ekran açıldı" gibi görünüyordu.
+        Crossfade(
+            targetState = state.isLoading,
+            animationSpec = tween(durationMillis = 250),
+        ) { isLoading ->
+            if (isLoading) {
+                FullScreenLoader(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 16.dp),
+                        .padding(innerPadding)
+                        .consumeWindowInsets(innerPadding),
+                )
+                return@Crossfade
+            }
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .consumeWindowInsets(innerPadding)
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 20.dp),
+            ) {
+                PassportHeader()
+                PassportPageCard(
+                    stamps = state.stamps,
+                    totalSlots = state.totalSlots,
+                    headerLeft = stringResource(Res.string.passport_page_head),
+                    headerRight = stringResource(Res.string.passport_page_number),
+                    selectedStampId = selectedStampId,
+                    onStampClick = { id ->
+                        selectedStampId = if (selectedStampId == id) null else id
+                    },
+                )
+                state.stamps.firstOrNull { it.id == selectedStampId }?.let { stamp ->
+                    PassportStampDetailCard(
+                        stamp = stamp,
+                        modifier = Modifier.padding(top = 12.dp),
+                        isClaiming = state.claimingId == stamp.id,
+                        onClaim = { onClaimStamp(stamp.id) },
+                    )
+                }
+                if (state.claimableTotal > 0) {
+                    BaseButton(
+                        text = stringResource(Res.string.passport_claim_all_format, state.claimableTotal),
+                        onClick = onClaimAll,
+                        isLoading = state.isClaimingAll,
+                        loadingText = stringResource(Res.string.passport_claim_all_loading),
+                        filled = true,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 16.dp),
+                    )
+                }
+                if (state.emptySlotCount > 0) {
+                    MissingStampsHint(
+                        missingCount = state.emptySlotCount,
+                        modifier = Modifier.padding(top = 16.dp),
+                    )
+                }
+                Text(
+                    text = stringResource(Res.string.passport_rare_section_title),
+                    style = MaterialTheme.typography.labelSmall.copy(color = AccessDefaults.TextMuted),
+                    modifier = Modifier.padding(top = 24.dp, bottom = 4.dp),
+                )
+                // Sunucuda nadir damga kataloğu yok; şimdilik tek nadir host 👑. Katalog
+                // endpoint'i geldiğinde bu satır listeye dönüşür.
+                PassportRareStampRow(
+                    emoji = stringResource(Res.string.passport_rare_host_emoji),
+                    name = stringResource(Res.string.passport_rare_host_name),
+                    hint = stringResource(Res.string.passport_rare_host_hint),
+                    isCollected = state.hostStampCollected,
                 )
             }
-            if (state.emptySlotCount > 0) {
-                MissingStampsHint(
-                    missingCount = state.emptySlotCount,
-                    modifier = Modifier.padding(top = 16.dp),
-                )
-            }
-            Text(
-                text = stringResource(Res.string.passport_rare_section_title),
-                style = MaterialTheme.typography.labelSmall.copy(color = AccessDefaults.TextMuted),
-                modifier = Modifier.padding(top = 24.dp, bottom = 4.dp),
-            )
-            // Sunucuda nadir damga kataloğu yok; şimdilik tek nadir host 👑. Katalog
-            // endpoint'i geldiğinde bu satır listeye dönüşür.
-            PassportRareStampRow(
-                emoji = stringResource(Res.string.passport_rare_host_emoji),
-                name = stringResource(Res.string.passport_rare_host_name),
-                hint = stringResource(Res.string.passport_rare_host_hint),
-                isCollected = state.hostStampCollected,
-            )
         }
     }
 }
 
 @Composable
 private fun PassportHeader(
-    stampCount: Int,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -194,12 +200,6 @@ private fun PassportHeader(
             .padding(bottom = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(
-            text = stringResource(Res.string.passport_title_format, stampCount, stampCount),
-            style = MaterialTheme.typography.headlineLarge,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(top = 7.dp),
-        )
         Text(
             text = stringResource(Res.string.passport_subtitle),
             style = MaterialTheme.typography.bodySmall.copy(color = AccessDefaults.TextMuted),

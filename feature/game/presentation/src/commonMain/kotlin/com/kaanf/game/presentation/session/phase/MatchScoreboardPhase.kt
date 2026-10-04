@@ -2,35 +2,21 @@ package com.kaanf.game.presentation.session.phase
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.kaanf.core.designsystem.component.button.BaseButton
-import com.kaanf.core.designsystem.component.header.SectionHeader
 import com.kaanf.core.designsystem.component.progressbar.ThreeDotsAnimatedCard
-import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.CrewTheme
 import com.kaanf.game.domain.model.MatchScoreboardEntry
 import com.kaanf.game.presentation.session.component.MatchScoreboardCard
 import crew.feature.game.presentation.generated.resources.Res
 import crew.feature.game.presentation.generated.resources.match_phase_scoreboard_finish_action
 import crew.feature.game.presentation.generated.resources.match_phase_scoreboard_finish_loading
-import crew.feature.game.presentation.generated.resources.match_phase_scoreboard_subtitle_loading
-import crew.feature.game.presentation.generated.resources.match_phase_scoreboard_subtitle_loser_done
-import crew.feature.game.presentation.generated.resources.match_phase_scoreboard_subtitle_loser_forfeit
-import crew.feature.game.presentation.generated.resources.match_phase_scoreboard_subtitle_loser_not_done
-import crew.feature.game.presentation.generated.resources.match_phase_scoreboard_subtitle_winner_bailed
-import crew.feature.game.presentation.generated.resources.match_phase_scoreboard_subtitle_winner_done
-import crew.feature.game.presentation.generated.resources.match_phase_scoreboard_subtitle_winner_forfeit
-import crew.feature.game.presentation.generated.resources.match_phase_scoreboard_title_highlight
-import crew.feature.game.presentation.generated.resources.match_phase_scoreboard_title_prefix
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -48,41 +34,16 @@ fun MatchScoreboardPhase(
     currentUserPhotoUrl: String? = null,
     opponentPhotoUrl: String? = null,
 ) {
-    val myEntry = entries.firstOrNull { it.userId == currentUserId }
-    val titlePrefix = stringResource(Res.string.match_phase_scoreboard_title_prefix)
-    val titleHighlight = stringResource(Res.string.match_phase_scoreboard_title_highlight)
-
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 16.dp)
+            .padding(top = 16.dp, bottom = 16.dp),
         verticalArrangement = Arrangement.spacedBy(
             space = 12.dp,
         ),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        SectionHeader(
-            title = buildAnnotatedString {
-                withStyle(style = SpanStyle(color = AccessDefaults.TextPrimary)) {
-                    append(titlePrefix)
-                }
-                withStyle(
-                    style = SpanStyle(
-                        color = AccessDefaults.Accent,
-                        fontWeight = FontWeight.Bold,
-                    ),
-                ) {
-                    append(titleHighlight)
-                }
-            },
-            description = scoreboardSubtitle(
-                myEntry = myEntry,
-                completed = completed,
-                forfeit = forfeit,
-            ),
-            verticalSpacing = 12.dp,
-        )
-
         if (isLoading) {
             ThreeDotsAnimatedCard()
         } else {
@@ -99,6 +60,8 @@ fun MatchScoreboardPhase(
             }
         }
 
+        Spacer(modifier = Modifier.weight(1f))
+
         BaseButton(
             text = stringResource(Res.string.match_phase_scoreboard_finish_action),
             filled = true,
@@ -108,25 +71,6 @@ fun MatchScoreboardPhase(
             onClick = onFinish,
         )
     }
-}
-
-@Composable
-private fun scoreboardSubtitle(
-    myEntry: MatchScoreboardEntry?,
-    completed: Boolean,
-    forfeit: Boolean,
-): String = when {
-    myEntry == null -> stringResource(Res.string.match_phase_scoreboard_subtitle_loading)
-    // Forfeit: ayrılan her zaman kaybeden, kalan her zaman kazanan.
-    forfeit && myEntry.isWinner ->
-        stringResource(Res.string.match_phase_scoreboard_subtitle_winner_forfeit)
-    forfeit -> stringResource(Res.string.match_phase_scoreboard_subtitle_loser_forfeit)
-    myEntry.isWinner && completed -> stringResource(
-        Res.string.match_phase_scoreboard_subtitle_winner_done,
-    )
-    myEntry.isWinner -> stringResource(Res.string.match_phase_scoreboard_subtitle_winner_bailed)
-    completed -> stringResource(Res.string.match_phase_scoreboard_subtitle_loser_done)
-    else -> stringResource(Res.string.match_phase_scoreboard_subtitle_loser_not_done)
 }
 
 @Composable

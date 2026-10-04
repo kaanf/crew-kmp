@@ -45,7 +45,7 @@ import com.kaanf.core.designsystem.component.layout.FullScreenLoader
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.presentation.model.AppTopBarState
 import com.kaanf.core.presentation.util.ObserveAsEvents
-import com.kaanf.home.presentation.component.verticalGradientScrim
+import com.kaanf.core.designsystem.modifier.verticalGradientScrim
 import com.kaanf.home.presentation.eventdetail.component.EventDetailInfoSection
 import com.kaanf.home.presentation.eventdetail.component.EventImageViewer
 import com.kaanf.home.presentation.eventdetail.component.EventOnboardingCard

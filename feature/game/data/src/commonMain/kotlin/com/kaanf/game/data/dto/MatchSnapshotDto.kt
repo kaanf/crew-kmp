@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 /**
  * `GET /api/events/{eventId}/matches/current` yanıtı. `state` sunucu MatchState adı
- * (örn. "TaskOfferPending"). Aktif maç yoksa sunucu 204 döner; bu DTO hiç gelmez.
+ * (örn. "TaskActive"). Aktif maç yoksa sunucu 204 döner; bu DTO hiç gelmez.
  */
 @Serializable
 data class MatchSnapshotDto(
@@ -36,4 +36,6 @@ data class MatchSnapshotTaskDto(
     val points: Int,
     val rejectPoints: Int = -5,
     val category: String = "ICEBREAKER",
+    /** PHOTO görevinde kaybeden fotoğraf yükledi mi; zorunlu değil, kazanana uyarı içindir. */
+    val photoUploaded: Boolean = false,
 )

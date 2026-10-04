@@ -1,4 +1,4 @@
-package com.kaanf.home.presentation.component
+package com.kaanf.core.designsystem.modifier
 
 import androidx.compose.ui.Modifier
 import com.kaanf.core.designsystem.markImmutable

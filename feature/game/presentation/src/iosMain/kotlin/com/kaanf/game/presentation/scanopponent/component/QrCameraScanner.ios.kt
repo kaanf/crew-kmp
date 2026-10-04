@@ -12,6 +12,7 @@ import qrscanner.QrScanner
 actual fun QrCameraScanner(
     modifier: Modifier,
     onResult: (String) -> Unit,
+    onError: (String) -> Unit,
 ) {
     QrScanner(
         modifier = modifier,
@@ -20,7 +21,7 @@ actual fun QrCameraScanner(
         openImagePicker = false,
         onCompletion = onResult,
         imagePickerHandler = {},
-        onFailure = {},
+        onFailure = { onError(it) },
         overlayShape = OverlayShape.Rectangle,
         overlayColor = Color.Transparent,
         overlayBorderColor = Color.Transparent,

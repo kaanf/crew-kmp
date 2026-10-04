@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -36,6 +37,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.graphics.graphicsLayer
@@ -45,8 +47,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kaanf.core.designsystem.theme.BricolageGrotesque
+import androidx.compose.ui.unit.TextUnit
 import com.kaanf.core.designsystem.theme.AccessDefaults
-import com.kaanf.core.designsystem.theme.JetbrainsMono
 import com.kaanf.core.presentation.model.ChallengeCardUiModel
 import com.kaanf.core.presentation.model.ChallengeCardVariant
 import com.kaanf.core.presentation.util.dottedBorder
@@ -55,6 +58,9 @@ import com.kaanf.core.presentation.util.dottedBorder
 fun GradientChallengeCard(
     modifier: Modifier = Modifier,
     card: ChallengeCardUiModel,
+    cardSize: Dp = 200.dp,
+    // Oyun ekranlarında kart tek başına sahnede: görev metni büyük ve kalın, okunması tek bakışta.
+    emphasized: Boolean = false,
 ) {
     val colors = getChallengeCardColor(card.variant)
 
@@ -68,8 +74,7 @@ fun GradientChallengeCard(
 
     Box(
         modifier = modifier
-            .width(200.dp)
-            .height(200.dp)
+            .size(cardSize)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
@@ -150,21 +155,23 @@ fun GradientChallengeCard(
                 Text(
                     text = "${card.variant.emoji} ${card.variant.name.uppercase()}",
                     color = card.variant.getColor(),
-                    fontFamily = JetbrainsMono,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 10.sp,
+                    fontSize = if (emphasized) 12.sp else 10.sp,
                     letterSpacing = 2.sp,
                 )
 
                 Text(
                     text = card.description,
                     color = Color(0xFFF4EEE8),
-                    fontSize = 14.sp,
+                    fontFamily = if (emphasized) BricolageGrotesque else null,
+                    fontSize = if (emphasized) 19.sp else 14.sp,
                     minLines = 4,
-                    maxLines = 4,
+                    maxLines = if (emphasized) 6 else 4,
                     overflow = TextOverflow.Ellipsis,
-                    lineHeight = 20.sp,
-                    fontWeight = FontWeight.SemiBold,
+                    lineHeight = if (emphasized) 24.sp else 20.sp,
+                    fontWeight = if (emphasized) FontWeight.ExtraBold else FontWeight.SemiBold,
+                    letterSpacing = if (emphasized) (-0.2).sp else TextUnit.Unspecified,
+                    modifier = if (emphasized) Modifier.padding(top = 10.dp) else Modifier,
                 )
 
                 Spacer(modifier = Modifier.weight(1f))
@@ -173,8 +180,7 @@ fun GradientChallengeCard(
                     modifier = Modifier.fillMaxWidth(),
                     text = "+${card.points} PTS",
                     color = card.variant.getColor(),
-                    fontSize = 12.sp,
-                    fontFamily = JetbrainsMono,
+                    fontSize = if (emphasized) 15.sp else 12.sp,
                     textAlign = TextAlign.End,
                     fontWeight = FontWeight.ExtraBold,
                 )
@@ -391,7 +397,6 @@ fun MoreDeckCard() {
             ) {
                 Text(
                     text = "+187",
-                    fontFamily = JetbrainsMono,
                     color = AccessDefaults.TextPrimary,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold,
@@ -399,7 +404,6 @@ fun MoreDeckCard() {
 
                 Text(
                     text = "More\nin the\ndeck".uppercase(),
-                    fontFamily = JetbrainsMono,
                     color = AccessDefaults.TextMuted,
                     fontSize = 11.sp,
                     textAlign = TextAlign.Center,

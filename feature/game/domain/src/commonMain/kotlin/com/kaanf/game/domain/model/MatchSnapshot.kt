@@ -16,8 +16,10 @@ data class MatchSnapshot(
     val myReportedWinnerUserId: String?,
     val opponentReportedWinnerUserId: String?,
     val winnerUserId: String?,
-    /** Teklif/aktif görev; TaskOfferPending'den itibaren dolu (kaybeden katalogu görmez). */
+    /** Aktif görev; TaskActive'den itibaren dolu (kaybeden katalogu görmez). */
     val task: GameTask?,
+    /** PHOTO görevinde kaybeden fotoğrafı yükledi mi. */
+    val taskPhotoUploaded: Boolean,
     val completed: Boolean,
 )
 
@@ -34,7 +36,6 @@ enum class MatchSnapshotState {
     ResultConfirmation,
     Disputed,
     TaskPickPending,
-    TaskOfferPending,
     TaskActive,
     TaskConfirmPending,
     Completed,

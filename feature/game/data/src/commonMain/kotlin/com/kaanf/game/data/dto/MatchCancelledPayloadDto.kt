@@ -11,5 +11,6 @@ data class MatchCancelledPayloadDto(
     val cancelledByUserId: String,
     val winnerUserId: String? = null,
     val winnerTotalScore: Int? = null,
-    val winnerPointsAwarded: Int = 0,
+    // Ready'de vazgeçmede (Rejected) sunucu alanı açıkça null yollar; Int olursa decode patlar.
+    val winnerPointsAwarded: Int? = null,
 )

@@ -27,18 +27,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.TransformOrigin
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.zIndex
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.util.lerp
-import androidx.compose.ui.zIndex
 import com.kaanf.core.designsystem.component.badge.RoundedBadge
-import com.kaanf.home.presentation.component.verticalGradientScrim
+import com.kaanf.core.designsystem.modifier.verticalGradientScrim
 import com.kaanf.core.designsystem.component.image.BaseImage
+import com.kaanf.core.designsystem.modifier.carouselPage
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessIcons
 import com.kaanf.core.designsystem.theme.AccessShapes
@@ -47,37 +45,13 @@ import com.kaanf.home.presentation.model.EventDashboardUiModel
 import org.jetbrains.compose.resources.painterResource
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
-import kotlin.math.abs
-import kotlin.random.Random
 
-private const val MinTiltDegrees = 5f
-private const val MaxTiltDegrees = 11f
-private const val NeighbourScale = 0.78f
-private const val NeighbourAlpha = 0.55f
 private val CardHeight = 290.dp
 
 private val CardScrim = Brush.verticalGradient(
     0.35f to Color.Transparent,
     1f to Color.Black.copy(alpha = 0.85f),
 )
-private val NeighbourPull = 44.dp
-private val CenterElevation = 16.dp
-private val JitterX = 12.dp
-private val JitterY = 6.dp
-private const val JitterScale = 0.03f
-
-private data class CardJitter(val tilt: Float, val dx: Float, val dy: Float)
-
-private fun jitterFor(page: Int): CardJitter {
-    val random = Random(page)
-    val magnitude = MinTiltDegrees + random.nextFloat() * (MaxTiltDegrees - MinTiltDegrees)
-
-    return CardJitter(
-        tilt = if (random.nextBoolean()) magnitude else -magnitude,
-        dx = random.nextFloat() * 2f - 1f,
-        dy = random.nextFloat() * 2f - 1f,
-    )
-}
 
 @Composable
 fun DashboardEventCarousel(
@@ -104,8 +78,6 @@ fun DashboardEventCarousel(
             modifier = Modifier.fillMaxWidth(),
         ) { page ->
             val event = events[page % events.size]
-            val jitter = remember(page) { jitterFor(page) }
-
             CarouselEventCard(
                 event = event,
                 onClicked = {
@@ -118,27 +90,7 @@ fun DashboardEventCarousel(
                 modifier = Modifier
                     .zIndex(if (page == pagerState.currentPage) 1f else 0f)
                     .padding(vertical = 8.dp)
-                    .graphicsLayer {
-                        val offset = (
-                            (page - pagerState.currentPage) - pagerState.currentPageOffsetFraction
-                            ).coerceIn(-1f, 1f)
-                        val distance = abs(offset)
-
-                        rotationZ = distance * jitter.tilt
-                        transformOrigin = TransformOrigin(0.5f, 0.5f)
-                        translationX = -offset * NeighbourPull.toPx() +
-                            distance * jitter.dx * JitterX.toPx()
-                        translationY = distance * jitter.dy * JitterY.toPx()
-
-                        val scale = lerp(1f, NeighbourScale + jitter.dx * JitterScale, distance)
-                        scaleX = scale
-                        scaleY = scale
-                        alpha = lerp(1f, NeighbourAlpha, distance)
-
-                        shape = AccessShapes.Large
-                        clip = true
-                        shadowElevation = lerp(CenterElevation.toPx(), 0f, distance)
-                    },
+                    .carouselPage(pagerState = pagerState, page = page),
             )
         }
     }

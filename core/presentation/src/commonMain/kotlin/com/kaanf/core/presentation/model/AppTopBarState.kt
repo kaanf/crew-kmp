@@ -26,12 +26,21 @@ sealed interface AppTopBarState {
         /** Claim edilecek tanışma puanı var: 📘 ikonuna kırmızı nokta. */
         val passportBadge: Boolean = false,
     ) : AppTopBarState
+    /**
+     * Etkinlik sonu leaderboard ve foto rulosu: solda kapatma çarpısı, sağda ikisi
+     * arasında geçiş yapan vurgulu ikon (rulo kapalıyken resim, açıkken kupa).
+     */
+    data class Leaderboard(
+        val title: String,
+        val isRollOpen: Boolean = false,
+        /** Rulo boşsa geçiş ikonu gösterilmez. */
+        val showRollAction: Boolean = true,
+    ) : AppTopBarState
     data object ScanOpponent : AppTopBarState
     data object RpsReady : AppTopBarState
     data object RpsConfirmation : AppTopBarState
     data object WinnerPicks : AppTopBarState
     data object WinnerConfirms : AppTopBarState
     data object LoserWaits : AppTopBarState
-    data object LoserAccepts : AppTopBarState
     data object LoserActiveTask : AppTopBarState
 }

@@ -56,6 +56,9 @@ fun HistoryTab(modifier: Modifier = Modifier) {
     val viewModel: HistoryViewModel = koinViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
 
+    // Tab her açıldığında güncel geçmişi çek; liste ekranda kalır, loader yalnız ilk yüklemede.
+    LaunchedEffect(Unit) { viewModel.refresh() }
+
     when {
         state.isLoading -> FullScreenLoader(modifier = modifier)
 

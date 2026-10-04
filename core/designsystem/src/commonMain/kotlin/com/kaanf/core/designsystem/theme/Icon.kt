@@ -14,6 +14,7 @@ import crew.core.designsystem.generated.resources.ic_close
 import crew.core.designsystem.generated.resources.ic_clock
 import crew.core.designsystem.generated.resources.ic_google_g
 import crew.core.designsystem.generated.resources.ic_image
+import crew.core.designsystem.generated.resources.ic_memories
 import crew.core.designsystem.generated.resources.ic_info
 import crew.core.designsystem.generated.resources.ic_key_lock
 import crew.core.designsystem.generated.resources.ic_key_open
@@ -27,6 +28,7 @@ import crew.core.designsystem.generated.resources.ic_qr
 import crew.core.designsystem.generated.resources.ic_refresh
 import crew.core.designsystem.generated.resources.ic_safety
 import crew.core.designsystem.generated.resources.ic_sparkle
+import crew.core.designsystem.generated.resources.ic_star
 import crew.core.designsystem.generated.resources.ic_target
 import crew.core.designsystem.generated.resources.ic_trash
 import crew.core.designsystem.generated.resources.ic_trophy
@@ -54,7 +56,9 @@ object AccessIcons {
     val Check = Res.drawable.ic_check
     val Clock = Res.drawable.ic_clock
     val Trophy = Res.drawable.ic_trophy
+    val Star = Res.drawable.ic_star
     val Image = Res.drawable.ic_image
+    val Memories = Res.drawable.ic_memories
     val Lock = Res.drawable.ic_key_lock
     val LockOpen = Res.drawable.ic_key_open
     val Case = Res.drawable.ic_case

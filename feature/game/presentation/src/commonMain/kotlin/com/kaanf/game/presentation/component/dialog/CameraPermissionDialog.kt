@@ -31,6 +31,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 fun CameraPermissionDialog(
     onOpenSettings: () -> Unit,
     onDismiss: () -> Unit,
+    description: String = stringResource(Res.string.match_camera_permission_description),
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -46,7 +47,7 @@ fun CameraPermissionDialog(
         )
 
         Text(
-            text = stringResource(Res.string.match_camera_permission_description),
+            text = description,
             style = MaterialTheme.typography.bodySmall.copy(
                 color = AccessDefaults.TextSecondary,
                 fontSize = 12.sp,

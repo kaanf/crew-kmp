@@ -6,6 +6,9 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,6 +23,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.compose.ui.backhandler.BackHandler
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kaanf.core.designsystem.component.coachmark.CoachmarkHost
@@ -37,10 +42,11 @@ import com.kaanf.game.presentation.history.HistoryTab
 import com.kaanf.game.presentation.session.coachmark.GameCoachmarkKey
 import com.kaanf.game.presentation.session.coachmark.rememberGameCoachmarkSteps
 import com.kaanf.game.presentation.leaderboard.LeaderboardTab
+import com.kaanf.game.presentation.memories.MemoriesStackRoot
+import com.kaanf.game.presentation.memories.MemoriesViewModel
 import com.kaanf.game.presentation.session.component.GameBottomBar
 import com.kaanf.game.presentation.session.component.GameBottomTab
 import com.kaanf.game.presentation.session.component.LeaveMatchSheet
-import com.kaanf.game.presentation.session.phase.LoserAcceptsPhase
 import com.kaanf.game.presentation.session.phase.LoserActiveTaskPhase
 import com.kaanf.game.presentation.session.phase.LoserWaitsPhase
 import com.kaanf.game.presentation.session.phase.MatchScoreboardPhase
@@ -51,7 +57,19 @@ import com.kaanf.game.presentation.session.phase.WinnerConfirmsPhase
 import crew.feature.game.presentation.generated.resources.Res
 import crew.feature.game.presentation.generated.resources.history_top_bar_title
 import crew.feature.game.presentation.generated.resources.leaderboard_top_bar_title
+import crew.feature.game.presentation.generated.resources.match_phase_scoreboard_top_bar_title
+import crew.feature.game.presentation.generated.resources.match_task_reject_confirm_reject
+import crew.feature.game.presentation.generated.resources.match_task_reject_confirm_stay
+import crew.feature.game.presentation.generated.resources.match_task_reject_confirm_subtitle
+import crew.feature.game.presentation.generated.resources.match_task_reject_confirm_title
+import crew.feature.game.presentation.generated.resources.match_task_no_photo_confirm
+import crew.feature.game.presentation.generated.resources.match_task_no_photo_subtitle
+import crew.feature.game.presentation.generated.resources.match_task_no_photo_title
+import crew.feature.game.presentation.generated.resources.memories_top_bar_title
+import crew.feature.game.presentation.generated.resources.match_task_no_photo_wait
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
+import kotlin.math.abs
 import com.kaanf.game.presentation.session.phase.WinnerPicksPhase
 
 @Composable
@@ -61,8 +79,12 @@ fun MatchContainerRoot(
     onNavigateToDashboard: () -> Unit,
     onNavigateToQuests: () -> Unit,
     onNavigateToPassport: () -> Unit,
+    // Game entry'sine scope'lu; MemoriesStackRoot da aynı örneği alır (liste iki kez çekilmez).
+    memoriesViewModel: MemoriesViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val memoriesState by memoriesViewModel.state.collectAsStateWithLifecycle()
+    val hasMemories = memoriesState.memories.isNotEmpty()
 
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
@@ -79,6 +101,10 @@ fun MatchContainerRoot(
 
     // Tab'lar saf UI durumu; navigasyon yok, hepsi bu container içinde yaşar.
     var selectedTab by rememberSaveable { mutableStateOf(GameBottomTab.Play) }
+    // Rulo ayrı route değil: leaderboard'un yerine aynı container'da (aynı top bar) açılır.
+    var showMemories by rememberSaveable { mutableStateOf(false) }
+    var memoriesAutoOpened by rememberSaveable { mutableStateOf(false) }
+    var isCelebrationDone by rememberSaveable { mutableStateOf(false) }
 
     // ponytail: kalıcılık yok, tur her app açılışında bir kez gösterilir.
     // Kalıcı istenirse LanguageStore pattern'i (DataStore boolean) kopyalanır.
@@ -95,13 +121,34 @@ fun MatchContainerRoot(
         }
     }
 
+    // Oyun sürerken liste yalnız kendi fotoğraflarımdı; bitince sunucu tüm odanınkini döner.
+    LaunchedEffect(state.isGameEnded) {
+        if (state.isGameEnded) memoriesViewModel.refresh()
+    }
+    // Etkinlik bitince önce leaderboard konfetisi oynar, bitince rulo açılır. Bir kez:
+    // Quests'ten dönüşte ya da kullanıcı leaderboard'a geri geçtikten sonra tekrar açılmasın.
+    LaunchedEffect(state.isGameEnded, hasMemories, isCelebrationDone) {
+        if (state.isGameEnded && hasMemories && isCelebrationDone && !memoriesAutoOpened) {
+            showMemories = true
+            memoriesAutoOpened = true
+        }
+    }
+
     MatchContainerScreen(
         state = state,
         selectedTab = selectedTab,
-        onTabSelected = { selectedTab = it },
+        onTabSelected = {
+            selectedTab = it
+            showMemories = false
+        },
         onAction = viewModel::onAction,
         onQuestsClick = onNavigateToQuests,
         onPassportClick = onNavigateToPassport,
+        showMemories = showMemories,
+        hasMemories = hasMemories,
+        onMemoriesToggle = { showMemories = !showMemories },
+        onMemoriesClose = { showMemories = false },
+        onLeaderboardCelebrationDone = { isCelebrationDone = true },
         showCoachmark = showCoachmark,
         onCoachmarkFinish = { showCoachmark = false },
     )
@@ -117,13 +164,20 @@ fun MatchContainerScreen(
     modifier: Modifier = Modifier,
     onQuestsClick: () -> Unit = {},
     onPassportClick: () -> Unit = {},
+    showMemories: Boolean = false,
+    hasMemories: Boolean = false,
+    onMemoriesToggle: () -> Unit = {},
+    onMemoriesClose: () -> Unit = {},
+    onLeaderboardCelebrationDone: () -> Unit = {},
     showCoachmark: Boolean = false,
     onCoachmarkFinish: () -> Unit = {},
 ) {
     val isIdle = state.phase == MatchPhase.Idle
 
     BackHandler(enabled = !state.showExitConfirmDialog) {
-        if (isIdle && !state.isGameEnded && selectedTab != GameBottomTab.Play) {
+        if (showMemories) {
+            onMemoriesClose()
+        } else if (isIdle && !state.isGameEnded && selectedTab != GameBottomTab.Play) {
             onTabSelected(GameBottomTab.Play)
         } else {
             onAction(MatchSessionAction.OnBackClick)
@@ -150,6 +204,34 @@ fun MatchContainerScreen(
                     onLeave = { onAction(MatchSessionAction.OnExitConfirmed) },
                 )
             }
+        }
+    }
+
+    if (state.showTaskRejectConfirm) {
+        state.activeTask?.let { task ->
+            BaseDialog(onDismissRequest = { onAction(MatchSessionAction.OnRejectTaskDismissed) }) {
+                LeaveEventDialog(
+                    title = stringResource(Res.string.match_task_reject_confirm_title),
+                    subtitle = stringResource(Res.string.match_task_reject_confirm_subtitle, abs(task.rejectPoints)),
+                    stayLabel = stringResource(Res.string.match_task_reject_confirm_stay),
+                    leaveLabel = stringResource(Res.string.match_task_reject_confirm_reject),
+                    onStay = { onAction(MatchSessionAction.OnRejectTaskDismissed) },
+                    onLeave = { onAction(MatchSessionAction.OnRejectTaskConfirmed) },
+                )
+            }
+        }
+    }
+
+    (state.phase as? MatchPhase.WinnerConfirms)?.takeIf { it.showNoPhotoWarning }?.let {
+        BaseDialog(onDismissRequest = { onAction(MatchSessionAction.OnNoPhotoWarningDismissed) }) {
+            LeaveEventDialog(
+                title = stringResource(Res.string.match_task_no_photo_title),
+                subtitle = stringResource(Res.string.match_task_no_photo_subtitle, state.formattedOpponentName),
+                stayLabel = stringResource(Res.string.match_task_no_photo_wait),
+                leaveLabel = stringResource(Res.string.match_task_no_photo_confirm),
+                onStay = { onAction(MatchSessionAction.OnNoPhotoWarningDismissed) },
+                onLeave = { onAction(MatchSessionAction.OnConfirmTask(completed = true, skipPhotoCheck = true)) },
+            )
         }
     }
 
@@ -198,6 +280,8 @@ fun MatchContainerScreen(
                     !isIdle -> AppTopBar(
                         state = topBarStateFor(state.phase),
                         onBackClick = { onAction(MatchSessionAction.OnBackClick) },
+                        // Sağ üst yalnız görev ekranında dolu: görevi reddet.
+                        onRightClick = { onAction(MatchSessionAction.OnRejectTask) },
                     )
 
                     selectedTab == GameBottomTab.Play -> AppTopBar(
@@ -212,16 +296,21 @@ fun MatchContainerScreen(
                         onRightClick = { onAction(MatchSessionAction.OnBackClick) },
                     )
 
-                    else -> AppTopBar(
-                        state = AppTopBarState.Game(
-                            stringResource(
-                                if (selectedTab == GameBottomTab.Leaderboard) {
-                                    Res.string.leaderboard_top_bar_title
-                                } else {
-                                    Res.string.history_top_bar_title
-                                },
+                    // Leaderboard ve rulo aynı bar'ı paylaşır: çıkış solda, sağdaki ikon ikisi arasında geçiş.
+                    selectedTab == GameBottomTab.Leaderboard -> AppTopBar(
+                        state = AppTopBarState.Leaderboard(
+                            title = stringResource(
+                                if (showMemories) Res.string.memories_top_bar_title else Res.string.leaderboard_top_bar_title,
                             ),
+                            isRollOpen = showMemories,
+                            showRollAction = hasMemories,
                         ),
+                        onBackClick = { onAction(MatchSessionAction.OnBackClick) },
+                        onRightClick = onMemoriesToggle,
+                    )
+
+                    else -> AppTopBar(
+                        state = AppTopBarState.Game(stringResource(Res.string.history_top_bar_title)),
                         onRightClick = { onAction(MatchSessionAction.OnBackClick) },
                     )
                 }
@@ -229,37 +318,80 @@ fun MatchContainerScreen(
         ) { innerPadding ->
             Box(
                 modifier = modifier
+                    // Rulo açıkken içerik top bar'ın (zIndex 1) da üstünde: fırlatılan kare
+                    // ekrandaki her şeyin üzerinden geçer. Kutunun kendisi çizim/dokunma
+                    // almadığı için bar tıklanabilir kalır.
+                    .zIndex(if (showMemories) 2f else 0f)
                     .fillMaxSize()
                     .padding(innerPadding)
                     .consumeWindowInsets(innerPadding),
             ) {
-                if (isIdle && selectedTab != GameBottomTab.Play) {
-                    when (selectedTab) {
-                        GameBottomTab.Leaderboard -> LeaderboardTab(
+                val screen = when {
+                    !isIdle || selectedTab == GameBottomTab.Play -> ContainerScreen.Play
+                    selectedTab == GameBottomTab.Leaderboard && showMemories -> ContainerScreen.Memories
+                    selectedTab == GameBottomTab.Leaderboard -> ContainerScreen.Leaderboard
+                    else -> ContainerScreen.History
+                }
+                AnimatedContent(
+                    targetState = screen,
+                    transitionSpec = {
+                        when {
+                            // Rulo alttan yukarı çıkar, kapanınca aşağı iner; altındaki
+                            // leaderboard yerinde kalır.
+                            targetState == ContainerScreen.Memories ->
+                                slideInVertically(tween(MemoriesSlideMillis)) { it } togetherWith
+                                    fadeOut(tween(MemoriesSlideMillis))
+                            initialState == ContainerScreen.Memories ->
+                                fadeIn(tween(MemoriesSlideMillis)) togetherWith
+                                    slideOutVertically(tween(MemoriesSlideMillis)) { it }
+                            // Oyun bitişi (Play → Leaderboard) ve tab geçişleri: crossfade +
+                            // hafif yukarı kayma. ponytail: büyük slide yok, iOS'ta fade ucuz.
+                            else -> (fadeIn(tween(350, delayMillis = 90)) + slideInVertically(tween(350)) { it / 12 }) togetherWith
+                                fadeOut(tween(200))
+                        }.apply {
+                            // Rulo hem girerken hem çıkarken leaderboard'un üstünde kayar.
+                            targetContentZIndex = if (targetState == ContainerScreen.Memories) 1f else -1f
+                        }
+                    },
+                    label = "container_screen",
+                    // Rulodaki fırlatılan kare alt tab bar'ın da üstünden geçer.
+                    modifier = Modifier
+                        .zIndex(if (showMemories) 1f else 0f)
+                        .fillMaxSize(),
+                ) { target ->
+                    when (target) {
+                        ContainerScreen.Play -> AnimatedContent(
+                            targetState = state.phase,
+                            contentKey = { it.key },
+                            transitionSpec = {
+                                (slideInHorizontally { it / 4 } + fadeIn()) togetherWith
+                                    (slideOutHorizontally { -it / 4 } + fadeOut()) using
+                                    SizeTransform(clip = false)
+                            },
+                            contentAlignment = Alignment.Center,
+                            label = "match_phase",
                             modifier = Modifier.fillMaxSize(),
+                        ) { phase ->
+                            MatchPhaseContent(
+                                phase = phase,
+                                state = state,
+                                onAction = onAction,
+                                modifier = Modifier.fillMaxSize(),
+                            )
+                        }
+
+                        // Alt tab bar içeriğin üstüne biniyor (leaderboard'daki 84dp ile aynı pay).
+                        ContainerScreen.Memories -> MemoriesStackRoot(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(bottom = 84.dp),
                         )
 
-                        else -> HistoryTab(modifier = Modifier.fillMaxSize())
-                    }
-                } else {
-                    AnimatedContent(
-                        targetState = state.phase,
-                        contentKey = { it.key },
-                        transitionSpec = {
-                            (slideInHorizontally { it / 4 } + fadeIn()) togetherWith
-                                (slideOutHorizontally { -it / 4 } + fadeOut()) using
-                                SizeTransform(clip = false)
-                        },
-                        contentAlignment = Alignment.Center,
-                        label = "match_phase",
-                        modifier = Modifier.fillMaxSize(),
-                    ) { phase ->
-                        MatchPhaseContent(
-                            phase = phase,
-                            state = state,
-                            onAction = onAction,
+                        ContainerScreen.Leaderboard -> LeaderboardTab(
+                            onCelebrationDone = onLeaderboardCelebrationDone,
                             modifier = Modifier.fillMaxSize(),
                         )
+                        ContainerScreen.History -> HistoryTab(modifier = Modifier.fillMaxSize())
                     }
                 }
 
@@ -278,16 +410,23 @@ fun MatchContainerScreen(
     }
 }
 
+/** Container'ın gövdesinde o an hangi içerik var; geçiş animasyonu bunun üstünden. */
+private enum class ContainerScreen { Play, Leaderboard, Memories, History }
+
+private const val MemoriesSlideMillis = 380
+
+@Composable
 private fun topBarStateFor(phase: MatchPhase): AppTopBarState = when (phase) {
     MatchPhase.Idle -> AppTopBarState.Game()
     is MatchPhase.RpsReady -> AppTopBarState.RpsReady
     is MatchPhase.WhoWon -> AppTopBarState.RpsConfirmation
     is MatchPhase.WinnerPicks -> AppTopBarState.WinnerPicks
     MatchPhase.LoserWaits -> AppTopBarState.LoserWaits
-    is MatchPhase.LoserAccepts -> AppTopBarState.LoserAccepts
-    MatchPhase.TaskActive -> AppTopBarState.LoserActiveTask
+    is MatchPhase.TaskActive -> AppTopBarState.LoserActiveTask
     is MatchPhase.WinnerConfirms -> AppTopBarState.WinnerConfirms
-    is MatchPhase.Scoreboard -> AppTopBarState.GameLobby("")
+    is MatchPhase.Scoreboard -> AppTopBarState.GameLobby(
+        stringResource(Res.string.match_phase_scoreboard_top_bar_title),
+    )
 }
 
 @Composable
@@ -340,28 +479,25 @@ private fun MatchPhaseContent(
             modifier = modifier,
         )
 
-        is MatchPhase.LoserAccepts -> LoserAcceptsPhase(
-            opponentName = state.formattedOpponentName,
-            task = phase.task,
-            isResponding = phase.isResponding,
-            onAccept = { onAction(MatchSessionAction.OnAcceptTask) },
-            onReject = { onAction(MatchSessionAction.OnRejectTask) },
-            modifier = modifier,
-        )
-
-        MatchPhase.TaskActive -> LoserActiveTaskPhase(
+        is MatchPhase.TaskActive -> LoserActiveTaskPhase(
             opponentName = state.formattedOpponentName,
             task = state.activeTask,
             modifier = modifier,
             opponentImageUrl = state.opponentProfilePictureUrl,
+            isUploadingPhoto = phase.isUploadingPhoto,
+            photoUploaded = phase.photoUploaded,
+            onPhotoCaptured = { onAction(MatchSessionAction.OnTaskPhotoCaptured(it)) },
         )
 
         is MatchPhase.WinnerConfirms -> WinnerConfirmsPhase(
             opponentName = state.formattedOpponentName,
             task = state.activeTask,
             isConfirming = phase.isConfirming,
+            photoUploaded = phase.photoUploaded,
+            photo = phase.photo,
             onConfirm = { completed -> onAction(MatchSessionAction.OnConfirmTask(completed)) },
             modifier = modifier,
+            opponentImageUrl = state.opponentProfilePictureUrl,
         )
 
         is MatchPhase.Scoreboard -> MatchScoreboardPhase(

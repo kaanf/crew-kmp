@@ -6,8 +6,6 @@ plugins {
     alias(libs.plugins.androidx.baselineprofile)
 }
 
-// App Distribution appId ile çalışır; google-services eklentisi (FCM) ise androidApp/google-services.json ister.
-// Kimlik: GOOGLE_APPLICATION_CREDENTIALS env'i service account json'ına baksın.
 android.buildTypes.getByName("release") {
     firebaseAppDistribution {
         appId = "1:508051238075:android:9993908c62d66337498d9e"
@@ -17,13 +15,10 @@ android.buildTypes.getByName("release") {
 }
 
 dependencies {
-    // Cold start profilini :benchmark üretir, release build'inde kütüphane profilleriyle birleşir.
     baselineProfile(projects.benchmark)
 
     implementation(projects.composeApp)
-    // PushTokenSync, UserRepository/SessionStorage arayüzlerini kullanır.
     implementation(projects.core.domain)
-    // MainActivity, Apple deep link dönüşünü AppleSignInBridge'e iletir.
     implementation(projects.feature.auth.presentation)
 
     implementation(platform(libs.androidx.compose.bom))

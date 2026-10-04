@@ -1,9 +1,7 @@
 package com.kaanf.game.data.mappers
 
 import com.kaanf.game.data.dto.EventMemoryDto
-import com.kaanf.game.data.dto.EventParticipantDto
 import com.kaanf.game.domain.model.EventMemory
-import com.kaanf.game.domain.model.EventParticipant
 import com.kaanf.game.domain.model.MemoryTag
 import kotlin.time.Instant
 
@@ -14,6 +12,7 @@ fun EventMemoryDto.toDomain(): EventMemory = EventMemory(
     ownerProfilePictureUrl = ownerProfilePictureUrl,
     isMine = isMine,
     questKey = questKey,
+    taskTitle = taskTitle,
     tagged = tagged.map {
         MemoryTag(
             participantId = it.participantId,
@@ -24,12 +23,4 @@ fun EventMemoryDto.toDomain(): EventMemory = EventMemory(
         )
     },
     capturedAt = Instant.parse(createdAt),
-)
-
-fun EventParticipantDto.toDomain(): EventParticipant = EventParticipant(
-    id = id,
-    userId = userId,
-    fullName = fullName,
-    profilePictureUrl = profilePictureUrl,
-    isCheckedIn = attendanceState == "CHECKED_IN",
 )

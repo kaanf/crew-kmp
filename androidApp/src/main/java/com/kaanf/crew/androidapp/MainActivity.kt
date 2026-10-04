@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.kaanf.auth.presentation.social.AppleSignInBridge
+import com.kaanf.core.domain.review.attachAppReviewActivity
 import com.kaanf.crew.App
 
 class MainActivity : ComponentActivity() {
@@ -20,6 +21,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         dispatchAppleSignInIntent(intent)
+        attachAppReviewActivity(this)
 
         setContent {
             App(

@@ -39,6 +39,7 @@ object AccessDefaults {
     val Rose = Color(0xFFFF5A7A)
     val Teal = Color(0xFF5BE0C5)
     val Amber = Color(0xFFFFB341)
+    val Gold = Color(0xFFFFCC33)
     val Mint = Color(0xFF6BE7A5)
     val Violet = Color(0xFF9D7AFF)
     val Blush = Color(0xFFFF9EBB)

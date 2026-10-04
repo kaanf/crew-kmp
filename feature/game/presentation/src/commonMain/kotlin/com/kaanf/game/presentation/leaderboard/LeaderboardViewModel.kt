@@ -25,6 +25,8 @@ data class LeaderboardState(
     val entries: List<LeaderboardEntry> = emptyList(),
     /** Listede "benim" satırımı bulup ortalamak/vurgulamak için. */
     val currentUserId: String? = null,
+    /** Konfeti etkinlik başına bir kez patlar; rulodan/tab'dan dönüşte tekrar etmez. */
+    val isConfettiPending: Boolean = true,
 )
 
 class LeaderboardViewModel(
@@ -48,6 +50,10 @@ class LeaderboardViewModel(
         userRepository.observeCurrentUser()
             .onEach { user -> _state.update { it.copy(currentUserId = user?.id) } }
             .launchIn(viewModelScope)
+    }
+
+    fun onConfettiFinished() {
+        _state.update { it.copy(isConfettiPending = false) }
     }
 
     private fun loadLeaderboard() {

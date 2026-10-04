@@ -19,8 +19,8 @@ import com.kaanf.game.data.dto.MatchStartedPayloadDto
 import com.kaanf.game.data.dto.SocketEnvelopeDto
 import com.kaanf.game.data.dto.TaskFinishedPayloadDto
 import com.kaanf.game.data.dto.TaskOfferedPayloadDto
+import com.kaanf.game.data.dto.TaskPhotoUploadedPayloadDto
 import com.kaanf.game.data.dto.TaskRejectedPayloadDto
-import com.kaanf.game.data.dto.TaskStartedPayloadDto
 import com.kaanf.game.data.dto.ViewerStatsDto
 import com.kaanf.game.domain.model.AddressBookTitle
 import com.kaanf.game.domain.model.AnnouncementCocktail
@@ -126,7 +126,7 @@ fun SocketEnvelopeDto.toDomain(json: Json): GameSocketMessage = when (type) {
                 cancelledByUserId = it.cancelledByUserId,
                 winnerUserId = it.winnerUserId,
                 winnerTotalScore = it.winnerTotalScore,
-                winnerPointsAwarded = it.winnerPointsAwarded,
+                winnerPointsAwarded = it.winnerPointsAwarded ?: 0,
             )
         }
         ?: GameSocketMessage.Unknown(type)
@@ -191,17 +191,6 @@ fun SocketEnvelopeDto.toDomain(json: Json): GameSocketMessage = when (type) {
         }
         ?: GameSocketMessage.Unknown(type)
 
-    "TASK_STARTED" -> json.decodePayloadOrNull<TaskStartedPayloadDto>(payload)
-        ?.let {
-            GameSocketMessage.TaskStarted(
-                matchId = it.matchId,
-                eventId = it.eventId,
-                state = it.state,
-                taskId = it.taskId,
-            )
-        }
-        ?: GameSocketMessage.Unknown(type)
-
     "TASK_FINISHED" -> json.decodePayloadOrNull<TaskFinishedPayloadDto>(payload)
         ?.let {
             GameSocketMessage.TaskFinished(
@@ -232,6 +221,16 @@ fun SocketEnvelopeDto.toDomain(json: Json): GameSocketMessage = when (type) {
                 rejectedByUserId = it.rejectedByUserId,
                 rejectPoints = it.rejectPoints,
                 rejectedByTotalScore = it.rejectedByTotalScore,
+            )
+        }
+        ?: GameSocketMessage.Unknown(type)
+
+    "TASK_PHOTO_UPLOADED" -> json.decodePayloadOrNull<TaskPhotoUploadedPayloadDto>(payload)
+        ?.let {
+            GameSocketMessage.TaskPhotoUploaded(
+                matchId = it.matchId,
+                eventId = it.eventId,
+                photo = it.memory.toDomain(),
             )
         }
         ?: GameSocketMessage.Unknown(type)

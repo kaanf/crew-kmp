@@ -19,8 +19,6 @@ import com.kaanf.game.presentation.model.GameResultOptionUi
 import com.kaanf.game.presentation.model.WhoWonAvatarUi
 import com.kaanf.game.presentation.session.component.WhoWonRow
 import crew.feature.game.presentation.generated.resources.Res
-import crew.feature.game.presentation.generated.resources.match_phase_who_won_description
-import crew.feature.game.presentation.generated.resources.match_phase_who_won_eyebrow
 import crew.feature.game.presentation.generated.resources.match_phase_who_won_lost_description
 import crew.feature.game.presentation.generated.resources.match_phase_who_won_lost_emoji
 import crew.feature.game.presentation.generated.resources.match_phase_who_won_lost_points
@@ -81,15 +79,7 @@ fun WhoWonPhase(
         ),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        SectionHeader(
-            eyebrow = stringResource(Res.string.match_phase_who_won_eyebrow),
-            title = stringResource(Res.string.match_phase_who_won_title),
-            description = stringResource(
-                Res.string.match_phase_who_won_description,
-                opponentInitial,
-            ),
-            verticalSpacing = 12.dp,
-        )
+        SectionHeader(title = stringResource(Res.string.match_phase_who_won_title))
 
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -124,11 +114,9 @@ fun WhoWonPhase(
             onClick = { onResult(false) },
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
-
         if (isReporting) {
             WaitingIndicatorRow(
-                text = stringResource(Res.string.match_phase_who_won_waiting, opponentInitial),
+                text = stringResource(Res.string.match_phase_who_won_waiting, opponentName),
             )
         }
         // Dispute butonu kaldırıldı: onClick boştu, geçen etkinlikte kafa karıştırdı.

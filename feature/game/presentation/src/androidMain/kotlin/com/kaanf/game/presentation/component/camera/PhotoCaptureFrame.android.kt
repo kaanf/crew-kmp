@@ -1,4 +1,4 @@
-package com.kaanf.game.presentation.quests
+package com.kaanf.game.presentation.component.camera
 
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector

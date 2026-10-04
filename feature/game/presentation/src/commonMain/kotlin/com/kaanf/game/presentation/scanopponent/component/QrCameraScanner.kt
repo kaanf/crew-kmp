@@ -15,4 +15,6 @@ import androidx.compose.ui.Modifier
 expect fun QrCameraScanner(
     modifier: Modifier = Modifier,
     onResult: (String) -> Unit,
+    /** Kamera/decoder hatası; her karede tekrar edebilir, tekilleştirmek çağıranın işi. */
+    onError: (String) -> Unit = {},
 )

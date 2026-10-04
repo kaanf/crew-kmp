@@ -17,6 +17,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination.Companion.hasRoute
@@ -26,6 +27,7 @@ import androidx.navigation.compose.rememberNavController
 import com.kaanf.auth.presentation.navigation.AuthGraphRoutes
 import com.kaanf.core.designsystem.component.layout.CrewSnackbarHost
 import com.kaanf.core.designsystem.component.layout.showSnackbar
+import com.kaanf.core.designsystem.component.sheet.ForceUpdateBottomSheet
 import com.kaanf.core.presentation.snackbar.SnackbarController
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.CrewTheme
@@ -131,6 +133,11 @@ fun App(
                         .statusBarsPadding()
                         .padding(top = 12.dp, start = 15.dp, end = 15.dp),
             )
+
+            state.updateStoreUrl?.let { storeUrl ->
+                val uriHandler = LocalUriHandler.current
+                ForceUpdateBottomSheet(onUpdateClick = { uriHandler.openUri(storeUrl) })
+            }
         }
     }
 }

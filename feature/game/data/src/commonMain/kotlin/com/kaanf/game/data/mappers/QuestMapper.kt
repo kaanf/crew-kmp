@@ -9,7 +9,6 @@ fun QuestDto.toDomain(): Quest = Quest(
     description = description,
     points = points,
     target = target,
-    requiredTags = requiredTags,
     progress = progress,
     completed = completed,
     claimed = claimed,

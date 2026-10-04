@@ -14,8 +14,6 @@ import com.kaanf.core.designsystem.component.header.SectionHeader
 import com.kaanf.core.designsystem.component.progressbar.WaitingIndicatorRow
 import com.kaanf.core.designsystem.theme.CrewTheme
 import crew.feature.game.presentation.generated.resources.Res
-import crew.feature.game.presentation.generated.resources.match_phase_loser_waits_description
-import crew.feature.game.presentation.generated.resources.match_phase_loser_waits_eyebrow
 import crew.feature.game.presentation.generated.resources.match_phase_loser_waits_status
 import crew.feature.game.presentation.generated.resources.match_phase_loser_waits_title
 import org.jetbrains.compose.resources.stringResource
@@ -37,13 +35,7 @@ fun LoserWaitsPhase(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         SectionHeader(
-            eyebrow = stringResource(Res.string.match_phase_loser_waits_eyebrow),
             title = stringResource(Res.string.match_phase_loser_waits_title, opponentName),
-            description = stringResource(
-                Res.string.match_phase_loser_waits_description,
-                opponentName,
-            ),
-            verticalSpacing = 12.dp,
         )
 
         Spacer(modifier = Modifier.width(1.dp))

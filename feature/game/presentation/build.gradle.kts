@@ -10,6 +10,7 @@ kotlin {
                 implementation(libs.kotlinx.datetime)
 
                 implementation(libs.chaintechQrKit)
+                implementation(libs.confettikit)
 
                 implementation(projects.feature.game.domain)
                 implementation(projects.core.domain)

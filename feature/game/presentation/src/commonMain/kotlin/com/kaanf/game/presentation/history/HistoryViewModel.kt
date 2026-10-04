@@ -43,24 +43,29 @@ class HistoryViewModel(
             initialValue = _state.value,
         )
 
-    init {
-        loadNextPage()
-    }
+    // init'te değil tab her açıldığında çağrılır (HistoryTab): VM Game entry'sine scope'lu, init tek sefer koşar.
+    fun refresh() = loadPage(page = 0)
 
     fun loadNextPage() {
-        if (isLoadingPage || _state.value.endReached) return
+        if (_state.value.endReached) return
+        loadPage(page = nextPage)
+    }
+
+    private fun loadPage(page: Int) {
+        if (isLoadingPage) return
         isLoadingPage = true
         viewModelScope.launch {
-            matchRepository.getMatchHistory(eventId, page = nextPage, size = PAGE_SIZE)
-                .onSuccess { page ->
-                    nextPage++
+            matchRepository.getMatchHistory(eventId, page = page, size = PAGE_SIZE)
+                .onSuccess { entries ->
+                    nextPage = page + 1
                     _state.update { current ->
                         // Sayfalar arası kayma bir kaydı iki sayfada gösterebilir; matchId'ye göre tekilleştir.
-                        val merged = (current.entries + page).distinctBy { it.matchId }
+                        // İlk sayfa listeyi baştan kurar: yeni biten maçlar en üste gelir.
+                        val base = if (page == 0) emptyList() else current.entries
                         current.copy(
                             isLoading = false,
-                            entries = merged,
-                            endReached = page.size < PAGE_SIZE,
+                            entries = (base + entries).distinctBy { it.matchId },
+                            endReached = entries.size < PAGE_SIZE,
                         )
                     }
                 }

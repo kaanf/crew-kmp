@@ -13,7 +13,6 @@ import com.kaanf.game.data.dto.AddressBookDto
 import com.kaanf.game.data.dto.ConfirmTaskRequest
 import com.kaanf.game.data.dto.CreateMatchInviteRequest
 import com.kaanf.game.data.dto.EventMemoryDto
-import com.kaanf.game.data.dto.EventParticipantDto
 import com.kaanf.game.data.dto.LeaderboardEntryDto
 import com.kaanf.game.data.dto.MatchCancelDto
 import com.kaanf.game.data.dto.MatchDto
@@ -29,13 +28,11 @@ import com.kaanf.game.data.dto.MatchTaskStateDto
 import com.kaanf.game.data.dto.MyParticipantDto
 import com.kaanf.game.data.dto.OfferTaskRequest
 import com.kaanf.game.data.dto.QuestDto
-import com.kaanf.game.data.dto.QuestPhotoTagRequest
 import com.kaanf.game.data.dto.ReportResultRequest
 import com.kaanf.game.data.dto.TaskDto
 import com.kaanf.game.data.mappers.toDomain
 import com.kaanf.game.domain.model.AddressBook
 import com.kaanf.game.domain.model.EventMemory
-import com.kaanf.game.domain.model.EventParticipant
 import com.kaanf.game.domain.model.GameTask
 import com.kaanf.game.domain.model.LeaderboardEntry
 import com.kaanf.game.domain.model.MatchHistoryEntry
@@ -44,14 +41,12 @@ import com.kaanf.game.domain.model.MatchParticipant
 import com.kaanf.game.domain.model.MatchScoreboard
 import com.kaanf.game.domain.model.MatchSnapshot
 import com.kaanf.game.domain.model.Quest
-import com.kaanf.game.domain.model.QuestPhotoTag
 import com.kaanf.game.domain.repository.MatchRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
-import kotlinx.serialization.json.Json
 
 class MatchRepositoryImpl(
     private val httpClient: HttpClient,
@@ -126,19 +121,10 @@ class MatchRepositoryImpl(
     override suspend fun offerTask(
         eventId: String, matchId: String, taskId: String,
     ): EmptyResult<DataError.Remote> {
-        // Yanıt gövdesi (taskId vb.) okunur ama kaybedenin geçişi soketle sürüldüğü için atılır.
+        // Yanıt gövdesi (taskId vb.) okunur ama görev zaten elimizde; çağıran başarıda onay ekranına geçer.
         return httpClient.post<OfferTaskRequest, MatchTaskOfferDto>(
             route = "/events/$eventId/matches/$matchId/task/offer",
             body = OfferTaskRequest(taskId = taskId),
-        ).asEmptyResult()
-    }
-
-    override suspend fun acceptTask(
-        eventId: String, matchId: String,
-    ): EmptyResult<DataError.Remote> {
-        // Geçiş (TASK_STARTED) soketle sürüldüğü için yanıt gövdesi okunup atılır.
-        return httpClient.post<MatchTaskStateDto>(
-            route = "/events/$eventId/matches/$matchId/task/accept",
         ).asEmptyResult()
     }
 
@@ -202,11 +188,11 @@ class MatchRepositoryImpl(
 
     override suspend fun cancelMatch(
         eventId: String, matchId: String,
-    ): EmptyResult<DataError.Remote> {
-        // Çağırana giden push yok; rakibe MATCH_CANCELLED gider. Yanıt gövdesi okunup atılır.
+    ): Result<Boolean, DataError.Remote> {
+        // Çağırana giden push yok; rakibe MATCH_CANCELLED gider.
         return httpClient.post<MatchCancelDto>(
             route = "/events/$eventId/matches/$matchId/cancel",
-        ).asEmptyResult()
+        ).map { it.state != "Rejected" }
     }
 
     override suspend fun finishMatch(
@@ -227,21 +213,15 @@ class MatchRepositoryImpl(
         ).mapCatching { memories -> memories.map { it.toDomain() } }
     }
 
-    override suspend fun uploadQuestPhoto(
+    override suspend fun uploadTaskPhoto(
         eventId: String,
-        questKey: String,
-        tags: List<QuestPhotoTag>,
+        matchId: String,
         imageBytes: ByteArray,
         mimeType: String,
     ): Result<EventMemory, DataError.Remote> {
-        // Etiketler dosyayla aynı multipart gövdesinde, düz metin bir "tags" alanında JSON
-        // dizisi olarak gider (sunucu böyle bekliyor: part'a ayrı Content-Type gerekmesin).
         // setBody, OutgoingContent'i serialize etmeden geçirir.
-        val tagsJson = Json.encodeToString(
-            tags.map { QuestPhotoTagRequest(it.participantId, it.pinX, it.pinY) },
-        )
         return httpClient.post<MultiPartFormDataContent, EventMemoryDto>(
-            route = "/events/$eventId/quests/$questKey/photo",
+            route = "/events/$eventId/matches/$matchId/task/photo",
             body = MultiPartFormDataContent(
                 formData {
                     append(
@@ -249,21 +229,12 @@ class MatchRepositoryImpl(
                         value = imageBytes,
                         headers = Headers.build {
                             append(HttpHeaders.ContentType, mimeType)
-                            append(HttpHeaders.ContentDisposition, "filename=\"quest-photo.jpg\"")
+                            append(HttpHeaders.ContentDisposition, "filename=\"task-photo.jpg\"")
                         },
                     )
-                    append("tags", tagsJson)
                 },
             ),
         ).mapCatching { it.toDomain() }
-    }
-
-    override suspend fun getEventParticipants(
-        eventId: String,
-    ): Result<List<EventParticipant>, DataError.Remote> {
-        return httpClient.get<List<EventParticipantDto>>(
-            route = "/events/$eventId/participants",
-        ).map { participants -> participants.map { it.toDomain() } }
     }
 
     override suspend fun getQuests(

@@ -99,13 +99,6 @@ sealed interface GameSocketMessage {
         val taskCategory: TaskCategory,
     ) : GameSocketMessage
 
-    data class TaskStarted(
-        val matchId: String,
-        val eventId: String,
-        val state: String,
-        val taskId: String,
-    ) : GameSocketMessage
-
     data class TaskRejected(
         val matchId: String,
         val eventId: String,
@@ -130,6 +123,13 @@ sealed interface GameSocketMessage {
         val winnerMatchesCount: Int,
         val loserWinCount: Int,
         val loserMatchesCount: Int,
+    ) : GameSocketMessage
+
+    /** PHOTO görevinde kaybeden fotoğrafı yükledi; yalnız kazanana gelir. */
+    data class TaskPhotoUploaded(
+        val matchId: String,
+        val eventId: String,
+        val photo: EventMemory,
     ) : GameSocketMessage
 
     /**

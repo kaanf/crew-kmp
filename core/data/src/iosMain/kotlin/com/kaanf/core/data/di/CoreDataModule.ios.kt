@@ -8,7 +8,9 @@ import com.kaanf.core.data.BuildEnvironment
 import com.kaanf.core.data.device.IosDeviceIdProvider
 import com.kaanf.core.data.networking.ConnectivityObserver
 import com.kaanf.core.data.storage.createDataStore
+import com.kaanf.core.data.update.AppStoreUpdateChecker
 import com.kaanf.core.domain.provider.DeviceIdProvider
+import com.kaanf.core.domain.update.AppUpdateChecker
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.engine.darwin.Darwin
 import kotlin.experimental.ExperimentalNativeApi
@@ -22,4 +24,5 @@ actual val platformCoreDataModule =
         single { ConnectivityObserver() }
         single<HttpClientEngine> { Darwin.create() }
         single<DataStore<Preferences>> { createDataStore() }
+        single<AppUpdateChecker> { AppStoreUpdateChecker(get()) }
     }

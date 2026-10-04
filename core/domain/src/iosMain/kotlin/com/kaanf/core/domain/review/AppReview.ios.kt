@@ -12,3 +12,6 @@ actual fun requestAppReview() {
 
     SKStoreReviewController.requestReviewInScene(scene)
 }
+
+// action=write-review App Store'u doğrudan "Değerlendirme Yaz" ekranında açar.
+actual val appReviewUrl = "https://apps.apple.com/app/id6778055243?action=write-review"

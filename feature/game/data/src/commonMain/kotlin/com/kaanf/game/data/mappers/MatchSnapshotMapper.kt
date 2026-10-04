@@ -27,6 +27,7 @@ fun MatchSnapshotDto.toDomain(): MatchSnapshot = MatchSnapshot(
             category = it.category.toTaskCategory(),
         )
     },
+    taskPhotoUploaded = task?.photoUploaded == true,
     completed = completed,
 )
 
@@ -42,7 +43,6 @@ private fun String.toMatchSnapshotState(): MatchSnapshotState = when (this) {
     "ResultConfirmation" -> MatchSnapshotState.ResultConfirmation
     "Disputed" -> MatchSnapshotState.Disputed
     "TaskPickPending" -> MatchSnapshotState.TaskPickPending
-    "TaskOfferPending" -> MatchSnapshotState.TaskOfferPending
     "TaskActive" -> MatchSnapshotState.TaskActive
     "TaskConfirmPending" -> MatchSnapshotState.TaskConfirmPending
     "Completed" -> MatchSnapshotState.Completed

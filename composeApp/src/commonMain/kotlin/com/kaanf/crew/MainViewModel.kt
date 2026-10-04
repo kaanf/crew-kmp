@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kaanf.core.data.networking.ConnectivityObserver
 import com.kaanf.core.domain.repository.SessionStorage
+import com.kaanf.core.domain.update.AppUpdateChecker
 import com.kaanf.core.domain.util.DataError
 import com.kaanf.core.presentation.snackbar.SnackbarController
 import com.kaanf.core.presentation.snackbar.toSnackbarMessage
@@ -22,12 +23,14 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 
 class MainViewModel(
     private val sessionStorage: SessionStorage,
     private val snackbarController: SnackbarController,
     private val connectivityObserver: ConnectivityObserver,
+    private val appUpdateChecker: AppUpdateChecker,
 ) : ViewModel() {
     private val eventChannel = Channel<MainEvent>()
     val events = eventChannel.receiveAsFlow()
@@ -65,6 +68,7 @@ class MainViewModel(
             .launchIn(viewModelScope)
 
         observeConnectivity()
+        checkForUpdate()
     }
 
     /** Game grafiği görünürken bu bayrak açık; oradaki soket zaten kendi uyarısını gösteriyor. */
@@ -72,6 +76,15 @@ class MainViewModel(
 
     fun onGameGraphVisibilityChanged(visible: Boolean) {
         isGameGraphVisible.value = visible
+    }
+
+    // ponytail: yalnız soğuk açılışta bakılır; arka planda günlerce kalan oturumlar için
+    // gerekirse ON_RESUME'da tekrar çağrılabilir.
+    private fun checkForUpdate() {
+        viewModelScope.launch {
+            val storeUrl = appUpdateChecker.storeUrlIfOutdated() ?: return@launch
+            _state.update { it.copy(updateStoreUrl = storeUrl) }
+        }
     }
 
     /**

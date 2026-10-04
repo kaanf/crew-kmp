@@ -2,7 +2,7 @@ package com.kaanf.game.data.dto
 
 import kotlinx.serialization.Serializable
 
-/** `POST .../cancel` yanıtı; geçiş için kullanılmaz, gövde okunup atılır. */
+/** `POST .../cancel` yanıtı; `state` forfeit (Cancelled) ile vazgeçmeyi (Rejected) ayırır. */
 @Serializable
 data class MatchCancelDto(
     val matchId: String,

@@ -27,16 +27,13 @@ internal fun MatchSnapshot.toMatchPhase(): MatchPhase {
         MatchSnapshotState.TaskPickPending ->
             if (amIWinner) MatchPhase.WinnerPicks(isLoading = true) else MatchPhase.LoserWaits
 
-        MatchSnapshotState.TaskOfferPending ->
-            if (amIWinner) {
-                MatchPhase.WinnerPicks(isLoading = true, isOffering = true, selectedTaskId = task?.id)
-            } else {
-                task?.let { MatchPhase.LoserAccepts(task = it) } ?: MatchPhase.LoserWaits
-            }
-
         MatchSnapshotState.TaskActive,
         MatchSnapshotState.TaskConfirmPending,
-        -> if (amIWinner) MatchPhase.WinnerConfirms() else MatchPhase.TaskActive
+        -> if (amIWinner) {
+            MatchPhase.WinnerConfirms(photoUploaded = taskPhotoUploaded)
+        } else {
+            MatchPhase.TaskActive(photoUploaded = taskPhotoUploaded)
+        }
 
         MatchSnapshotState.Completed -> MatchPhase.Scoreboard(completed = completed)
 

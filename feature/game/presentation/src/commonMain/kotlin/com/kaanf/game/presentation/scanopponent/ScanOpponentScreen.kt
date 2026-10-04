@@ -1,5 +1,12 @@
 package com.kaanf.game.presentation.scanopponent
 
+import com.kaanf.core.presentation.snackbar.SnackbarController
+import com.kaanf.core.presentation.snackbar.SnackbarMessage
+import com.kaanf.core.presentation.snackbar.SnackbarVariant
+import com.kaanf.core.presentation.util.UIText
+import crew.feature.game.presentation.generated.resources.scan_error_title
+import org.koin.compose.koinInject
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -63,6 +70,9 @@ fun ScanOpponentRoot(
     onClose: () -> Unit,
 ) {
     val sessionState by viewModel.state.collectAsStateWithLifecycle()
+    // ponytail: teşhis amaçlı, hata metni olduğu gibi gösterilir; sorun bulununca lokalize edilir.
+    val snackbarController = koinInject<SnackbarController>()
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(sessionState.phase) {
         if (sessionState.phase is MatchPhase.RpsReady) onClose()
@@ -96,6 +106,16 @@ fun ScanOpponentRoot(
                     ScanOpponentAction.OnCloseClicked -> onClose()
                     is ScanOpponentAction.OnScanResult ->
                         viewModel.onAction(MatchSessionAction.OnScanResult(action.scannedMatchQrToken))
+
+                    is ScanOpponentAction.OnScannerError -> scope.launch {
+                        snackbarController.show(
+                            SnackbarMessage(
+                                title = UIText.Resource(Res.string.scan_error_title),
+                                description = UIText.DynamicString(action.message),
+                                variant = SnackbarVariant.Error,
+                            ),
+                        )
+                    }
                 }
             },
         )
@@ -148,6 +168,8 @@ fun ScanOpponentScreen(
     // hata/redde idle'a döner → mandal sıfırlanır, kamera tekrar taramaya hazır.
     val inviteInFlight = state.isLoading || state.showGameRequestSheet
     var handled by remember { mutableStateOf(false) }
+    // Tarayıcı hataları her karede tekrar edebilir; her farklı mesaj bir kez gösterilir.
+    val reportedErrors = remember { mutableSetOf<String>() }
     LaunchedEffect(inviteInFlight) {
         if (!inviteInFlight) handled = false
     }
@@ -166,6 +188,9 @@ fun ScanOpponentScreen(
                             handled = true
                             onAction(ScanOpponentAction.OnScanResult(scannedMatchQrToken = result))
                         }
+                    },
+                    onError = { message ->
+                        if (reportedErrors.add(message)) onAction(ScanOpponentAction.OnScannerError(message))
                     },
                 )
 

@@ -1,5 +1,7 @@
 package com.kaanf.game.presentation.session
 
+import androidx.compose.ui.graphics.ImageBitmap
+
 sealed interface MatchSessionAction {
     data object OnBackClick : MatchSessionAction
     data object OnExitConfirmed : MatchSessionAction
@@ -26,10 +28,18 @@ sealed interface MatchSessionAction {
     data class OnTaskSelected(val taskId: String) : MatchSessionAction
     data object OnSendTaskClick : MatchSessionAction
 
-    data object OnAcceptTask : MatchSessionAction
     data object OnRejectTask : MatchSessionAction
+    data object OnRejectTaskDismissed : MatchSessionAction
+    data object OnRejectTaskConfirmed : MatchSessionAction
 
-    data class OnConfirmTask(val completed: Boolean) : MatchSessionAction
+    data class OnTaskPhotoCaptured(val image: ImageBitmap) : MatchSessionAction
+
+    /** [skipPhotoCheck]: kazanan "fotoğraf yok" uyarısını görüp yine de onayladı. */
+    data class OnConfirmTask(
+        val completed: Boolean,
+        val skipPhotoCheck: Boolean = false,
+    ) : MatchSessionAction
+    data object OnNoPhotoWarningDismissed : MatchSessionAction
 
     data object OnFinishMatch : MatchSessionAction
 

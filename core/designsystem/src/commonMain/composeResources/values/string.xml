@@ -22,13 +22,13 @@
     <string name="game_qr_home_title">Your Match QR</string>
     <string name="scan_opponent_title">Point at their code</string>
     <string name="rps_ready_title">Match</string>
-    <string name="who_won_title">Match</string>
-    <string name="winner_picks_title">You won</string>
+    <string name="who_won_title">Who won?</string>
+    <string name="winner_picks_title">Pick a task</string>
     <string name="winner_confirms_title">Did they do it?</string>
     <string name="loser_waits_title">You lost</string>
-    <string name="loser_accepts_title">You lost</string>
     <string name="loser_active_task_title">Task active</string>
     <string name="loser_active_task_skip">Skip</string>
+    <string name="loser_active_task_reject">Reject</string>
     <string name="match_scoreboard_title">Match scoreboard</string>
 
     <string name="coachmark_skip">Skip</string>
@@ -40,4 +40,8 @@
     <string name="snackbar_access_denied">Access Denied</string>
     <string name="snackbar_uplink_failure">Uplink Failure</string>
     <string name="go_back">GO BACK</string>
+
+    <string name="force_update_title">This version of Crew is out of date</string>
+    <string name="force_update_description">Matches, scoring and check-in run on the latest version. Update to keep playing. Your points, tickets and passport stay put.</string>
+    <string name="force_update_button">Update app</string>
 </resources>

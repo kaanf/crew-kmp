@@ -4,7 +4,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kaanf.core.designsystem.component.avatar.avatarPaletteColor
+import androidx.compose.ui.graphics.ImageBitmap
 import com.kaanf.core.domain.util.DataError
+import com.kaanf.core.presentation.util.mediapicker.encodeJpeg
 import com.kaanf.core.domain.util.EmptyResult
 import com.kaanf.core.domain.util.Result
 import com.kaanf.core.domain.logging.CrewLogger
@@ -23,6 +25,7 @@ import com.kaanf.core.presentation.util.UIText
 import com.kaanf.game.domain.model.GameConnectionState
 import com.kaanf.game.domain.model.GameSocketMessage
 import com.kaanf.game.domain.model.GameTask
+import com.kaanf.game.domain.model.TaskCategory
 import com.kaanf.game.domain.model.MatchSnapshot
 import com.kaanf.game.domain.event.EventConnectionClient
 import com.kaanf.game.domain.repository.MatchRepository
@@ -53,12 +56,16 @@ import crew.feature.game.presentation.generated.resources.match_invite_declined_
 import crew.feature.game.presentation.generated.resources.match_invite_declined_title
 import crew.feature.game.presentation.generated.resources.match_opponent_disconnected_description
 import crew.feature.game.presentation.generated.resources.match_opponent_disconnected_title
+import crew.feature.game.presentation.generated.resources.match_opponent_left_description
+import crew.feature.game.presentation.generated.resources.match_opponent_left_title
 import crew.feature.game.presentation.generated.resources.match_opponent_reconnected_description
 import crew.feature.game.presentation.generated.resources.match_opponent_reconnected_title
 import crew.feature.game.presentation.generated.resources.match_points_earned_description
 import crew.feature.game.presentation.generated.resources.first_meeting_snackbar_description
 import crew.feature.game.presentation.generated.resources.first_meeting_snackbar_title
 import crew.feature.game.presentation.generated.resources.match_points_earned_title
+import crew.feature.game.presentation.generated.resources.match_opponent_rejected_task_description
+import crew.feature.game.presentation.generated.resources.match_opponent_rejected_task_title
 import crew.feature.game.presentation.generated.resources.match_task_rejected_points_description
 import crew.feature.game.presentation.generated.resources.match_task_rejected_points_title
 import crew.feature.game.presentation.generated.resources.match_reconnecting_description
@@ -115,6 +122,7 @@ class MatchSessionViewModel(
 
     // region Socket
     private var socketEpoch = 0
+    private var reconnectingSnackbarJob: Job? = null
 
     private fun observeConnectionState() {
         eventConnectionClient
@@ -128,6 +136,7 @@ class MatchSessionViewModel(
                 }
 
                 if (connectionState is GameConnectionState.Connected) {
+                    reconnectingSnackbarJob?.cancel()
                     reconcileFromSnapshot()
                 }
 
@@ -141,8 +150,14 @@ class MatchSessionViewModel(
                 // Banner yerine snackbar: yalnız bağlıyken kopup retry'a düşünce bir kez göster.
                 val isRetrying = connectionState is GameConnectionState.Reconnecting ||
                     (connectionState is GameConnectionState.Disconnected && !connectionState.isError)
+                // Sunucu token dolunca soketi bilerek kapatır (prod'da ~15 dk'da bir), client ~1-2 sn'de
+                // sessizce döner. Yalnız toparlanma uzun sürerse uyar; anlık kopuşlarda "Weak connection" basmasın.
                 if (isRetrying && previous is GameConnectionState.Connected) {
-                    snackbarController.show(reconnectingSnackbar())
+                    reconnectingSnackbarJob?.cancel()
+                    reconnectingSnackbarJob = viewModelScope.launch {
+                        delay(RECONNECTING_SNACKBAR_GRACE_MS)
+                        snackbarController.show(reconnectingSnackbar())
+                    }
                 }
             }
             .launchIn(viewModelScope)
@@ -179,6 +194,13 @@ class MatchSessionViewModel(
     private fun matchEndedSnackbar() = SnackbarMessage(
         title = UIText.Resource(Res.string.match_ended_title),
         description = UIText.Resource(Res.string.match_ended_description),
+        variant = SnackbarVariant.Info,
+        icon = SnackbarIcon.Match,
+    )
+
+    private fun opponentLeftSnackbar() = SnackbarMessage(
+        title = UIText.Resource(Res.string.match_opponent_left_title),
+        description = UIText.Resource(Res.string.match_opponent_left_description),
         variant = SnackbarVariant.Info,
         icon = SnackbarIcon.Match,
     )
@@ -231,6 +253,13 @@ class MatchSessionViewModel(
         description = UIText.Resource(Res.string.match_task_rejected_points_description),
         variant = SnackbarVariant.Warn,
         icon = SnackbarIcon.Warning,
+    )
+
+    private fun opponentRejectedTaskSnackbar(opponentName: String) = SnackbarMessage(
+        title = UIText.Resource(Res.string.match_opponent_rejected_task_title, arrayOf(opponentName)),
+        description = UIText.Resource(Res.string.match_opponent_rejected_task_description),
+        variant = SnackbarVariant.Info,
+        icon = SnackbarIcon.Person,
     )
 
     private fun pointsEarnedSnackbar(points: Int) = SnackbarMessage(
@@ -516,19 +545,28 @@ class MatchSessionViewModel(
             }
 
             is GameSocketMessage.TaskOffered -> {
+                // Ayrı kabul adımı yok: teklif gelir gelmez görev aktiftir, kaybeden
+                // isterse görev ekranındaki "başka görev iste" ile reddeder.
                 _state.update {
                     it.copy(
-                        phase = LoserAccepts(
-                            task = GameTask(
-                                id = message.taskId,
-                                title = message.taskTitle,
-                                points = message.taskPoints,
-                                rejectPoints = message.taskRejectPoints,
-                                category = message.taskCategory,
-                            ),
+                        activeTask = GameTask(
+                            id = message.taskId,
+                            title = message.taskTitle,
+                            points = message.taskPoints,
+                            rejectPoints = message.taskRejectPoints,
+                            category = message.taskCategory,
                         ),
+                        phase = TaskActive(),
                     )
                 }
+            }
+
+            is GameSocketMessage.TaskPhotoUploaded -> _state.update { state ->
+                val phase = state.phase as? WinnerConfirms
+                if (phase == null || state.matchId != message.matchId) return@update state
+                state.copy(
+                    phase = phase.copy(photoUploaded = true, photo = message.photo, showNoPhotoWarning = false),
+                )
             }
 
             is GameSocketMessage.TaskRejected -> {
@@ -536,29 +574,21 @@ class MatchSessionViewModel(
                 if (_state.value.currentUserId == message.rejectedByUserId && message.rejectPoints != 0) {
                     snackbarController.show(taskRejectedSnackbar(message.rejectPoints))
                 }
+                val amIWinner = _state.value.amIWinner == true
                 _state.update { state ->
-                    // Reddeden tarafsak cezalı güncel skoru işle; kazanan tarafsak seçim ekranını sıfırla.
+                    // Reddeden tarafsak cezalı güncel skoru işle; kazanan tarafsak onay
+                    // ekranından seçim ekranına dön (liste yeniden çekilir).
                     val withScore = if (state.currentUserId == message.rejectedByUserId && rejectedTotal != null) {
                         state.copy(currentUserScore = rejectedTotal)
                     } else {
                         state
                     }
-                    val phase = withScore.phase as? WinnerPicks ?: return@update withScore
-                    withScore.copy(phase = phase.copy(isOffering = false, selectedTaskId = null))
+                    if (!amIWinner) return@update withScore
+                    withScore.copy(phase = WinnerPicks(isLoading = true), activeTask = null)
                 }
-            }
-
-            is GameSocketMessage.TaskStarted -> {
-                _state.update { state ->
-                    val activeTask = when (val phase = state.phase) {
-                        is WinnerPicks -> phase.tasks.firstOrNull { it.id == phase.selectedTaskId }
-                        is LoserAccepts -> phase.task
-                        else -> state.activeTask
-                    }
-                    state.copy(
-                        activeTask = activeTask,
-                        phase = if (state.amIWinner == true) WinnerConfirms() else TaskActive,
-                    )
+                if (amIWinner) {
+                    snackbarController.show(opponentRejectedTaskSnackbar(_state.value.formattedOpponentName))
+                    loadTasks()
                 }
             }
 
@@ -614,6 +644,12 @@ class MatchSessionViewModel(
             }
 
             is GameSocketMessage.MatchCancelled -> {
+                // Ready'de vazgeçme (Rejected): maç oynanmadı, kazanan/skor yok → doğrudan QR home.
+                if (message.winnerUserId == null) {
+                    resetToIdle()
+                    snackbarController.show(opponentLeftSnackbar())
+                    return
+                }
                 // Yalnızca ayrılmayan tarafa gelir: rakip forfeit etti (ayrıldı ya da bağlantısı
                 // kalıcı koptu), sunucu beni kazanan sayıp scoreboard'u (winner=5, loser=0)
                 // doldurdu. Ayrılanın puanına dokunulmaz; kazanan bonusu payload'dan işlenir.
@@ -707,6 +743,8 @@ class MatchSessionViewModel(
         gameEndJob = viewModelScope.launch {
             val remaining = endEpochMillis - Clock.System.now().toEpochMilliseconds()
             delay(remaining.coerceAtLeast(0L))
+            // Reconnect'te bu iş yeniden kurulur ama bayrak taşındığı için tekrar sorulmaz.
+            val justEnded = !_state.value.isGameEnded
             _state.update {
                 it.copy(
                     isGameEnded = true,
@@ -715,6 +753,7 @@ class MatchSessionViewModel(
                     incomingInvite = null,
                 )
             }
+            if (justEnded) maybeRequestAppReview()
         }
     }
 
@@ -791,18 +830,32 @@ class MatchSessionViewModel(
             is MatchSessionAction.OnReportResult -> reportResult(action.won)
             is MatchSessionAction.OnTaskSelected -> onTaskSelected(action.taskId)
             MatchSessionAction.OnSendTaskClick -> offerTask()
-            MatchSessionAction.OnAcceptTask -> respondToTaskOffer(accept = true)
-            MatchSessionAction.OnRejectTask -> respondToTaskOffer(accept = false)
-            is MatchSessionAction.OnConfirmTask -> confirmTask(action.completed)
+            MatchSessionAction.OnRejectTask -> _state.update { it.copy(showTaskRejectConfirm = true) }
+            MatchSessionAction.OnRejectTaskDismissed -> _state.update { it.copy(showTaskRejectConfirm = false) }
+            MatchSessionAction.OnRejectTaskConfirmed -> rejectTask()
+            is MatchSessionAction.OnTaskPhotoCaptured -> uploadTaskPhoto(action.image)
+            is MatchSessionAction.OnConfirmTask -> confirmTask(action.completed, action.skipPhotoCheck)
+            MatchSessionAction.OnNoPhotoWarningDismissed -> _state.update { state ->
+                val phase = state.phase as? WinnerConfirms ?: return@update state
+                state.copy(phase = phase.copy(showNoPhotoWarning = false))
+            }
             MatchSessionAction.OnFinishMatch -> finishMatch()
         }
     }
 
-    private fun confirmTask(completed: Boolean) {
+    private fun confirmTask(completed: Boolean, skipPhotoCheck: Boolean) {
         val matchId = _state.value.matchId ?: return
         val phase = _state.value.phase as? WinnerConfirms ?: return
         if (phase.isConfirming) return
-        _state.update { it.copy(phase = phase.copy(isConfirming = true), errorMessage = null) }
+        // Sunucu fotoğrafsız onayı kabul eder; uyarı yalnız istemcide.
+        val missingPhoto = _state.value.activeTask?.category == TaskCategory.Photo && !phase.photoUploaded
+        if (completed && missingPhoto && !skipPhotoCheck) {
+            _state.update { it.copy(phase = phase.copy(showNoPhotoWarning = true)) }
+            return
+        }
+        _state.update {
+            it.copy(phase = phase.copy(isConfirming = true, showNoPhotoWarning = false), errorMessage = null)
+        }
 
         viewModelScope.launch {
             matchRepository.confirmTask(eventId = eventId, matchId = matchId, completed = completed)
@@ -885,31 +938,59 @@ class MatchSessionViewModel(
         }
     }
 
-    private fun respondToTaskOffer(accept: Boolean) {
+    /** JPEG, çünkü sunucunun mime whitelist'i jpeg/png. */
+    private fun uploadTaskPhoto(image: ImageBitmap) {
         val matchId = _state.value.matchId ?: return
-        val phase = _state.value.phase as? LoserAccepts ?: return
-        if (phase.isResponding) return
-        _state.update { it.copy(phase = phase.copy(isResponding = true), errorMessage = null) }
+        val phase = _state.value.phase as? TaskActive ?: return
+        if (phase.isUploadingPhoto || phase.photoUploaded) return
+        _state.update { it.copy(phase = phase.copy(isUploadingPhoto = true)) }
 
         viewModelScope.launch {
-            val result = if (accept) {
-                matchRepository.acceptTask(eventId = eventId, matchId = matchId)
-            } else {
-                matchRepository.rejectTask(eventId = eventId, matchId = matchId)
-            }
-            result
+            matchRepository.uploadTaskPhoto(
+                eventId = eventId,
+                matchId = matchId,
+                imageBytes = encodeJpeg(image),
+                mimeType = "image/jpeg",
+            )
                 .onSuccess {
-                    // Reddetmede kaybeden beklemeye döner (kazanan tekrar seçer); kabulde ise
-                    // geçişi TASK_STARTED soketi sürer, o yüzden buton loading'de bırakılır.
-                    if (!accept) {
-                        _state.update { it.copy(phase = LoserWaits) }
+                    _state.update { state ->
+                        val current = state.phase as? TaskActive ?: return@update state
+                        state.copy(phase = current.copy(isUploadingPhoto = false, photoUploaded = true))
                     }
                 }
                 .onFailure { error ->
+                    // 409: fotoğraf zaten yüklü (ör. çift dokunma / reconnect öncesi gönderilmiş).
+                    val alreadyUploaded = (error as? DataError.Remote.Business)?.code == "TASK_PHOTO_ALREADY_SUBMITTED"
                     _state.update { state ->
-                        val current = state.phase as? LoserAccepts ?: return@update state
+                        val current = state.phase as? TaskActive ?: return@update state
+                        state.copy(phase = current.copy(isUploadingPhoto = false, photoUploaded = alreadyUploaded))
+                    }
+                    if (!alreadyUploaded) snackbarController.show(error.toSnackbarMessage())
+                }
+        }
+    }
+
+    private fun rejectTask() {
+        val matchId = _state.value.matchId ?: return
+        val phase = _state.value.phase as? TaskActive ?: return
+        if (phase.isRejecting) return
+        _state.update {
+            it.copy(phase = phase.copy(isRejecting = true), showTaskRejectConfirm = false, errorMessage = null)
+        }
+
+        viewModelScope.launch {
+            matchRepository.rejectTask(eventId = eventId, matchId = matchId)
+                .onSuccess {
+                    // Kaybeden beklemeye döner; kazanan yeni bir görev seçecek.
+                    _state.update { it.copy(phase = LoserWaits, activeTask = null) }
+                }
+                .onFailure { error ->
+                    // Kazanan reddetmeden önce onayladıysa sunucu 409 döner; TASK_FINISHED
+                    // zaten puan tablosuna götürür, burada yalnız butonu serbest bırakırız.
+                    _state.update { state ->
+                        val current = state.phase as? TaskActive ?: return@update state
                         state.copy(
-                            phase = current.copy(isResponding = false),
+                            phase = current.copy(isRejecting = false),
                             errorMessage = error.toString(),
                         )
                     }
@@ -958,8 +1039,14 @@ class MatchSessionViewModel(
         viewModelScope.launch {
             matchRepository.offerTask(eventId = eventId, matchId = matchId, taskId = taskId)
                 .onSuccess {
-                    // Görev sunuldu; kazanan WinnerPicks'te kalır, buton loading'de kalarak
-                    // kaybedenin yanıtını bekler. Geçiş TASK_STARTED / TASK_REJECTED soketiyle sürülür.
+                    // Görev anında aktif olur: kazanan onay ekranına geçer. Kaybeden
+                    // reddederse TASK_REJECTED bizi seçim ekranına geri götürür.
+                    _state.update { state ->
+                        state.copy(
+                            activeTask = phase.tasks.firstOrNull { it.id == taskId },
+                            phase = WinnerConfirms(),
+                        )
+                    }
                 }
                 .onFailure { error ->
                     _state.update { state ->
@@ -1075,10 +1162,6 @@ class MatchSessionViewModel(
         }
     }
 
-    /**
-     * 🎯/📘 kırmızı noktaları: claim edilecek quest ya da tanışma puanı var mı.
-     * Best-effort — hata sessizce yutulur, bir sonraki tetikte tazelenir.
-     */
     private fun refreshBadges() {
         viewModelScope.launch {
             matchRepository.getQuests(eventId).onSuccess { quests ->
@@ -1095,13 +1178,8 @@ class MatchSessionViewModel(
     }
 
     private fun loadMyParticipant(attempt: Int = 0) {
-        // Ekrandan her dönüşte (OnStatsRefreshRequested) ve init'te badge'ler de tazelenir:
-        // quest/pasaport ekranında claim yapıldıysa nokta burada söner. Retry'larda değil.
         if (attempt == 0) refreshBadges()
-        // App-bar stats'ının HTTP'den tazelenme sebebi: soketin replay'lediği CONNECTED
-        // snapshot'ı bağlantı anına ait — ekrandan çıkıp soket ölmeden (5 sn) dönen VM'e
-        // bayat skor gelir. Bu istek DB gerçeğini getirir; epoch guard, yanıt uçuştayken
-        // TASK_FINISHED ile artan skorun geri ezilmesini önler.
+
         val epochAtStart = socketEpoch
         viewModelScope.launch {
             matchRepository.getMyParticipant(eventId)
@@ -1132,20 +1210,8 @@ class MatchSessionViewModel(
         }
     }
 
-    /**
-     * Oyun bitip skor tablosu görüldükten SONRA ayrılmak, puan istemek için en iyi an:
-     * kullanıcı beklediği içeriği tüketmiş ve yarıda kalan bir işi yok. Leaderboard'a
-     * girerken sormuyoruz — tam da görmek istediği ekranın önünü kesmiş olurduk ve
-     * sıralamanın alt yarısındaki kişiye sonucu sindirmeden sormuş olurduk.
-     *
-     * Hiç oynamamış birine sormanın anlamı yok; en az iki maç şartı onu eliyor.
-     * "Bir kez sor" sayacı tutmuyoruz: iOS zaten yılda 3 gösterimle kendisi sınırlıyor,
-     * aynı işi ikinci kez yapmak boşuna. Fazla tetiklendiği görülürse buraya lokal bir
-     * flag eklenir.
-     */
     private fun maybeRequestAppReview() {
         val state = _state.value
-        // TODO(geçici): prompt gelmezse hangi koşulun elediğini görmek için. Doğrulanınca sil.
         logger.info(
             "review-check: ended=${state.isGameEnded} matches=${state.currentUserMatchesCount}",
         )
@@ -1161,21 +1227,24 @@ class MatchSessionViewModel(
         val shouldForfeit =
             matchId != null && phase != MatchPhase.Idle && phase !is MatchPhase.Scoreboard
         if (!shouldForfeit) {
-            maybeRequestAppReview()
             sendEvent(MatchSessionEvent.NavigateToDashboard)
             return
         }
-        // Maçtan ayrılmak = forfeit. Etkinlikten çıkmıyoruz; rakiple aynı sonuç (scoreboard)
-        // ekranına düşüp oradan QR home'a dönüyoruz. Backend cancel() ikisini de Available yapar.
+
         viewModelScope.launch {
             matchRepository.cancelMatch(eventId = eventId, matchId = matchId)
-                .onSuccess {
+                .onSuccess { isForfeit ->
+                    if (!isForfeit) {
+                        resetToIdle()
+                        return@onSuccess
+                    }
                     _state.update { it.copy(phase = Scoreboard(completed = false, forfeit = true)) }
                     loadScoreboard()
                 }
                 .onFailure { error ->
                     _state.update { it.copy(errorMessage = error.toString()) }
                     snackbarController.show(error.toSnackbarMessage())
+                    reconcileFromSnapshot()
                 }
         }
     }
@@ -1212,6 +1281,7 @@ class MatchSessionViewModel(
         const val RESULT_REPORT_DELAY_MS = 100L
         const val RESULT_CONFIRM_REVEAL_DELAY_MS = 900L
         const val RECONCILE_MAX_ATTEMPTS = 3
+        const val RECONNECTING_SNACKBAR_GRACE_MS = 4_000L
         const val RECONCILE_RETRY_BASE_DELAY_MS = 1_000L
         const val MAX_LOBBY_AVATARS = 13
     }

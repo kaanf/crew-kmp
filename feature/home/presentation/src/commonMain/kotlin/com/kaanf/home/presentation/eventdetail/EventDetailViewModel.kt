@@ -70,7 +70,12 @@ class EventDetailViewModel(
 
         when (val result = createTicketUseCase(eventId)) {
             is Result.Success -> {
-                _state.update { it.copy(isCheckingOut = false) }
+                _state.update {
+                    it.copy(
+                        isCheckingOut = false,
+                        event = it.event?.copy(hasMyTicket = true),
+                    )
+                }
                 navigate()
             }
 

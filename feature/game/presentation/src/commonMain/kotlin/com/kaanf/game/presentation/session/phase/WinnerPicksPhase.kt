@@ -1,45 +1,49 @@
 package com.kaanf.game.presentation.session.phase
 
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.kaanf.core.designsystem.component.button.BaseButton
-import com.kaanf.core.designsystem.component.header.SectionHeader
+import com.kaanf.core.designsystem.component.card.GradientChallengeCard
 import com.kaanf.core.designsystem.component.progressbar.ThreeDotsAnimatedCard
-import com.kaanf.core.designsystem.theme.AccessShapes
+import com.kaanf.core.designsystem.modifier.carouselPage
+import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.CrewTheme
 import com.kaanf.game.domain.model.GameTask
 import com.kaanf.game.domain.model.TaskCategory
-import com.kaanf.game.presentation.component.GameTaskCard
-import com.kaanf.game.presentation.component.taskAccentColor
 import crew.feature.game.presentation.generated.resources.Res
 import crew.feature.game.presentation.generated.resources.match_phase_winner_picks_description
-import crew.feature.game.presentation.generated.resources.match_phase_winner_picks_eyebrow
 import crew.feature.game.presentation.generated.resources.match_phase_winner_picks_loading
 import crew.feature.game.presentation.generated.resources.match_phase_winner_picks_send_action
-import crew.feature.game.presentation.generated.resources.match_phase_winner_picks_title
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+
+private val TaskCardShape = RoundedCornerShape(28.dp)
 
 @Composable
 fun WinnerPicksPhase(
@@ -61,130 +65,96 @@ fun WinnerPicksPhase(
         return
     }
 
+    // Seçim = ortadaki kart; ayrı bir "seç" dokunuşu yok.
+    val pagerState = rememberPagerState { tasks.size }
+    val currentOnTaskSelected by rememberUpdatedState(onTaskSelected)
+    LaunchedEffect(pagerState, tasks) {
+        snapshotFlow { pagerState.currentPage }.collect { page ->
+            tasks.getOrNull(page)?.let { currentOnTaskSelected(it.id) }
+        }
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(horizontal = 16.dp)
-            .padding(bottom = 16.dp),
+            .padding(top = 16.dp, bottom = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        SectionHeader(
-            eyebrow = stringResource(Res.string.match_phase_winner_picks_eyebrow, opponentUppercase),
-            title = stringResource(Res.string.match_phase_winner_picks_title, tasks.size),
-            description = stringResource(
-                Res.string.match_phase_winner_picks_description,
-                opponentName,
-            ),
-        )
+        BoxWithConstraints(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth(),
+            contentAlignment = Alignment.Center,
+        ) {
+            val sidePadding = ((maxWidth - TaskCardSize) / 2).coerceAtLeast(0.dp)
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        tasks.forEach { task ->
-            WinnerPickTaskCard(
-                task = task,
-                selectedTaskId = selectedTaskId,
-                onTaskSelected = onTaskSelected,
-            )
+            HorizontalPager(
+                state = pagerState,
+                contentPadding = PaddingValues(horizontal = sidePadding),
+                userScrollEnabled = !isOffering,
+                modifier = Modifier.fillMaxWidth(),
+            ) { page ->
+                GradientChallengeCard(
+                    card = tasks[page].toUiModel(),
+                    cardSize = TaskCardSize,
+                    emphasized = true,
+                    modifier = Modifier
+                        .zIndex(if (page == pagerState.currentPage) 1f else 0f)
+                        .carouselPage(pagerState = pagerState, page = page, shape = TaskCardShape),
+                )
+            }
         }
 
-        Spacer(modifier = Modifier.weight(1f))
+        PagerDots(pageCount = tasks.size, currentPage = pagerState.currentPage)
 
-        BaseButton(
-            text = stringResource(Res.string.match_phase_winner_picks_send_action, opponentName),
-            filled = true,
-            enabled = selectedTaskId != null && !isOffering,
-            isLoading = isOffering,
-            loadingText = stringResource(Res.string.match_phase_winner_picks_loading, opponentUppercase),
-            onClick = onSendClick,
-        )
+        Column(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            Text(
+                text = stringResource(Res.string.match_phase_winner_picks_description, opponentName),
+                style = MaterialTheme.typography.titleSmall.copy(
+                    color = AccessDefaults.TextSecondary,
+                    fontWeight = FontWeight.Medium,
+                    textAlign = TextAlign.Center,
+                ),
+            )
+
+            BaseButton(
+                text = stringResource(Res.string.match_phase_winner_picks_send_action, opponentName),
+                filled = true,
+                enabled = selectedTaskId != null && !isOffering,
+                isLoading = isOffering,
+                loadingText = stringResource(Res.string.match_phase_winner_picks_loading, opponentUppercase),
+                onClick = onSendClick,
+            )
+        }
     }
 }
 
 @Composable
-private fun WinnerPickTaskCard(
-    task: GameTask,
-    selectedTaskId: String?,
-    onTaskSelected: (String) -> Unit,
+private fun PagerDots(
+    pageCount: Int,
+    currentPage: Int,
+    modifier: Modifier = Modifier,
 ) {
-    val isSelectionActive = selectedTaskId != null
-    val selected = task.id == selectedTaskId
-    val card = task.toUiModel()
-    val accentColor = card.variant.taskAccentColor()
-
-    val scale by animateFloatAsState(
-        targetValue = when {
-            selected -> 1.035f
-            isSelectionActive -> 0.98f
-            else -> 1f
-        },
-        animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
-        label = "winner_pick_task_scale",
-    )
-    val dimAlpha by animateFloatAsState(
-        targetValue = if (isSelectionActive && !selected) 0.48f else 0f,
-        animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
-        label = "winner_pick_task_dim",
-    )
-    val glowAlpha by animateFloatAsState(
-        targetValue = if (selected) 1f else 0f,
-        animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
-        label = "winner_pick_task_glow",
-    )
-    val shadowElevation by animateFloatAsState(
-        targetValue = if (selected) 18f else 0f,
-        animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
-        label = "winner_pick_task_shadow_elevation",
-    )
-
-    GameTaskCard(
-        modifier = Modifier
-            .zIndex(if (selected) 1f else 0f)
-            .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-                this.shadowElevation = shadowElevation.dp.toPx()
-                shape = AccessShapes.Large
-                clip = false
-                ambientShadowColor = accentColor.copy(alpha = 0.48f * glowAlpha)
-                spotShadowColor = accentColor.copy(alpha = 0.72f * glowAlpha)
-            }
-            .drawWithContent {
-                drawContent()
-                if (glowAlpha > 0f) {
-                    val corner = 16.dp.toPx()
-                    drawRoundRect(
-                        color = accentColor.copy(alpha = 0.28f * glowAlpha),
-                        topLeft = Offset(2.dp.toPx(), 2.dp.toPx()),
-                        size = Size(
-                            width = size.width - 4.dp.toPx(),
-                            height = size.height - 4.dp.toPx(),
-                        ),
-                        cornerRadius = CornerRadius(corner, corner),
-                        style = Stroke(width = 8.dp.toPx()),
-                    )
-                    drawRoundRect(
-                        color = accentColor.copy(alpha = 0.42f * glowAlpha),
-                        topLeft = Offset(1.dp.toPx(), 1.dp.toPx()),
-                        size = Size(
-                            width = size.width - 2.dp.toPx(),
-                            height = size.height - 2.dp.toPx(),
-                        ),
-                        cornerRadius = CornerRadius(corner, corner),
-                        style = Stroke(width = 2.dp.toPx()),
-                    )
-                }
-                if (dimAlpha > 0f) {
-                    drawRoundRect(
-                        color = Color.Black.copy(alpha = dimAlpha),
-                        cornerRadius = CornerRadius(16.dp.toPx(), 16.dp.toPx()),
-                    )
-                }
-            },
-        card = card,
-        selected = selected,
-        onClick = { onTaskSelected(task.id) },
-    )
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        repeat(pageCount) { index ->
+            Box(
+                modifier = Modifier
+                    .size(6.dp)
+                    .background(
+                        color = if (index == currentPage) AccessDefaults.Accent else AccessDefaults.Border,
+                        shape = CircleShape,
+                    ),
+            )
+        }
+    }
 }
 
 @Composable

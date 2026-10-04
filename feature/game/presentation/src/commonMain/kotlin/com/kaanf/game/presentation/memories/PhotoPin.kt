@@ -1,4 +1,4 @@
-package com.kaanf.game.presentation.quests
+package com.kaanf.game.presentation.memories
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

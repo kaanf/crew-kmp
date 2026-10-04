@@ -64,13 +64,10 @@ fun MatchScoreboardCard(
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            // ponytail: kart zemini nötr; kazananı yalnız avatar halkası + accent puan ayırır.
             .surfaceCard(
-                backgroundColor = if (isYou) {
-                    AccessDefaults.Accent.copy(0.1f)
-                } else {
-                    AccessDefaults.Surface
-                },
-                borderColor = if (isYou) AccessDefaults.Accent else AccessDefaults.Border,
+                backgroundColor = AccessDefaults.Surface,
+                borderColor = AccessDefaults.Border,
             )
             .padding(
                 all = 16.dp,
@@ -215,6 +212,7 @@ fun MatchScoreboardRow(
                 },
                 avatarSize = 56,
                 borderSize = 2,
+                borderColor = if (entry.isWinner) AccessDefaults.Accent else AccessDefaults.AvatarBorder,
             )
 
             Column(
@@ -222,7 +220,7 @@ fun MatchScoreboardRow(
                 horizontalAlignment = Alignment.Start,
             ) {
                 Text(
-                    text = displayName,
+                    text = if (entry.isWinner) "$displayName 👑" else displayName,
                     style = MaterialTheme.typography.displaySmall.copy(
                         color = AccessDefaults.TextPrimary,
                         fontSize = 20.sp,
@@ -245,9 +243,9 @@ fun MatchScoreboardRow(
 
         Text(
             text = stringResource(Res.string.match_points_format, entry.points),
-            style = MaterialTheme.typography.labelSmall.copy(
+            style = MaterialTheme.typography.headlineSmall.copy(
                 color = if (entry.points > 0) AccessDefaults.Accent else AccessDefaults.TextMuted,
-                fontSize = 16.sp,
+                fontSize = 20.sp,
             ),
         )
     }

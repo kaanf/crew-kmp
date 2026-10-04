@@ -1,4 +1,4 @@
-package com.kaanf.game.presentation.quests
+package com.kaanf.game.presentation.component.camera
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,7 +20,7 @@ import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessIcons
 import com.kaanf.core.presentation.util.mediapicker.rememberCameraLauncher
 import crew.feature.game.presentation.generated.resources.Res
-import crew.feature.game.presentation.generated.resources.quests_photo_open_camera_action
+import crew.feature.game.presentation.generated.resources.match_photo_open_camera_action
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -57,7 +57,7 @@ actual fun PhotoCaptureFrame(
             )
         }
         Text(
-            text = stringResource(Res.string.quests_photo_open_camera_action),
+            text = stringResource(Res.string.match_photo_open_camera_action),
             style = MaterialTheme.typography.titleSmall.copy(
                 color = AccessDefaults.TextPrimary,
                 fontWeight = FontWeight.SemiBold,

@@ -41,6 +41,8 @@ room = "2.7.2"
 sqlite = "2.5.2"
 datastore = "1.1.7"
 firebase-bom = "34.0.0"
+play-app-update = "2.1.0"
+play-review = "2.0.2"
 adaptive = "1.2.0-alpha04"
 compose-material3 = "1.9.0"
 jetbrains-savedstate = "1.3.1"
@@ -66,11 +68,11 @@ androidx-browser = "1.8.0"
 #wiretap = "1.0.0-RC14"
 
 projectApplicationId = "com.kaanf.crew"
-projectVersionName = "1.1"
+projectVersionName = "1.2"
 projectMinSdkVersion = "26"
 projectTargetSdkVersion = "36"
 projectCompileSdkVersion = "36"
-projectVersionCode = "19"
+projectVersionCode = "22"
 
 # Desktop Version
 desktopPackageName = "Crew"
@@ -157,6 +159,8 @@ sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sql
 # Firebase
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase-bom" }
 firebase-messaging = { module = "com.google.firebase:firebase-messaging" }
+play-app-update-ktx = { module = "com.google.android.play:app-update-ktx", version.ref = "play-app-update" }
+play-review = { module = "com.google.android.play:review", version.ref = "play-review" }
 
 # Coil
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }

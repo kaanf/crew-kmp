@@ -14,6 +14,8 @@ data class EventMemoryDto(
     val isMine: Boolean,
     /** Ait olduğu foto questi; serbest çekim döneminden kalan fotoğraflarda null. */
     val questKey: String? = null,
+    /** Fotoğrafın çekildiği görevin metni; görevsiz (eski) fotoğraflarda null. */
+    val taskTitle: String? = null,
     val tagged: List<MemoryTagDto> = emptyList(),
     val createdAt: String,
 )
@@ -24,14 +26,6 @@ data class MemoryTagDto(
     val fullName: String,
     val profilePictureUrl: String? = null,
     /** Sol üstten itibaren 0-1 oranı; piksele çevirmek istemcinin işi. */
-    val pinX: Float,
-    val pinY: Float,
-)
-
-/** Yükleme isteğinin `tags` alanı: bu listenin JSON'u tek bir form alanı olarak gider. */
-@Serializable
-data class QuestPhotoTagRequest(
-    val participantId: String,
     val pinX: Float,
     val pinY: Float,
 )

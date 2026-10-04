@@ -5,4 +5,6 @@ sealed interface ScanOpponentAction {
 
     // Okunan QR'ın çözümlenmiş metni = karşı tarafın maç token'ı.
     data class OnScanResult(val scannedMatchQrToken: String) : ScanOpponentAction
+
+    data class OnScannerError(val message: String) : ScanOpponentAction
 }

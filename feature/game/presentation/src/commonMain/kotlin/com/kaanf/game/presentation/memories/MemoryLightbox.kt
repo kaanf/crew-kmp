@@ -45,7 +45,6 @@ import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessIcons
 import com.kaanf.core.designsystem.theme.AccessShapes
 import com.kaanf.game.domain.model.EventMemory
-import com.kaanf.game.presentation.quests.PhotoPin
 import crew.feature.game.presentation.generated.resources.Res
 import crew.feature.game.presentation.generated.resources.memories_shared_by_format
 import crew.feature.game.presentation.generated.resources.memories_shared_by_you

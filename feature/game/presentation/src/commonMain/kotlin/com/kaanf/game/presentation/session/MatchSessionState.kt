@@ -3,6 +3,7 @@ package com.kaanf.game.presentation.session
 import androidx.compose.runtime.Immutable
 import com.kaanf.core.presentation.model.LobbyMember
 import com.kaanf.game.domain.model.AnnouncementCocktail
+import com.kaanf.game.domain.model.EventMemory
 import com.kaanf.game.domain.model.GameConnectionState
 import com.kaanf.game.domain.model.GameSocketMessage
 import com.kaanf.game.domain.model.GameTask
@@ -52,6 +53,8 @@ data class MatchSessionState(
     /** Giden davette, MATCH_STARTED'a kadar tutulan rakip fotosu (sendInvite yanıtından). */
     val outgoingOpponentPhotoUrl: String? = null,
     val showExitConfirmDialog: Boolean = false,
+    /** Görev reddi onayı; tetik görev ekranının sağ üstündeki Reject. */
+    val showTaskRejectConfirm: Boolean = false,
     /** Etkinlik süresi doldu: Play kilitli, yalnız leaderboard/history açık. */
     val isGameEnded: Boolean = false,
     // Mekân duyurusu (ör. barda indirimli içki). Yalnız süreli duyurular chip'e düşer;
@@ -112,19 +115,22 @@ sealed interface MatchPhase {
         override val key = "loser_waits"
     }
 
-    data class LoserAccepts(
-        val task: GameTask,
-        val isResponding: Boolean = false,
+    data class TaskActive(
+        val isRejecting: Boolean = false,
+        val isUploadingPhoto: Boolean = false,
+        /** PHOTO görevinde fotoğraf gönderildi mi; maç başına tek fotoğraf. */
+        val photoUploaded: Boolean = false,
     ) : MatchPhase {
-        override val key = "loser_accepts"
-    }
-
-    data object TaskActive : MatchPhase {
         override val key = "task_active"
     }
 
     data class WinnerConfirms(
         val isConfirming: Boolean = false,
+        val photoUploaded: Boolean = false,
+        /** TASK_PHOTO_UPLOADED ile gelir; reconnect snapshot'ı yalnız [photoUploaded] taşır. */
+        val photo: EventMemory? = null,
+        /** PHOTO görevi fotoğrafsız onaylanmak üzere: kazanana uyarı. */
+        val showNoPhotoWarning: Boolean = false,
     ) : MatchPhase {
         override val key = "winner_confirms"
     }

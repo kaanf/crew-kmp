@@ -51,10 +51,10 @@ import crew.core.designsystem.generated.resources.event_detail_title
 import crew.core.designsystem.generated.resources.game_how_to_play
 import crew.core.designsystem.generated.resources.game_qr_home_title
 import crew.core.designsystem.generated.resources.image_crop_title
-import crew.core.designsystem.generated.resources.loser_accepts_title
 import crew.core.designsystem.generated.resources.loser_active_task_title
 import crew.core.designsystem.generated.resources.loser_waits_title
 import crew.core.designsystem.generated.resources.login_text
+import crew.core.designsystem.generated.resources.loser_active_task_reject
 import crew.core.designsystem.generated.resources.loser_active_task_skip
 import crew.core.designsystem.generated.resources.profile_cancel
 import crew.core.designsystem.generated.resources.profile_save_changes
@@ -98,6 +98,7 @@ fun AppTopBar(
     )
     val title = when (state) {
         is AppTopBarState.GameLobby -> state.title
+        is AppTopBarState.Leaderboard -> state.title
         is AppTopBarState.Game -> state.title ?: stringResource(state.titleResource)
         else -> stringResource(state.titleResource)
     }
@@ -288,6 +289,32 @@ fun AppTopBar(
                 }
             }
 
+            if (state is AppTopBarState.Leaderboard && state.showRollAction) {
+                // Vurgulu: rulo leaderboard'un içinde gizli kalmasın, göze çarpsın.
+                IconButton(
+                    onClick = onRightClick,
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .clip(CircleShape)
+                        .background(AccessDefaults.Coral.copy(alpha = 0.16f))
+                        .border(
+                            width = 1.dp,
+                            color = AccessDefaults.Coral.copy(alpha = 0.45f),
+                            shape = CircleShape,
+                        )
+                        .size(32.dp),
+                ) {
+                    Icon(
+                        painter = painterResource(
+                            if (state.isRollOpen) AccessIcons.Trophy else AccessIcons.Memories,
+                        ),
+                        contentDescription = null,
+                        tint = AccessDefaults.Coral,
+                        modifier = Modifier.size(18.dp),
+                    )
+                }
+            }
+
             if (state is AppTopBarState.Profile && state.isSaving) {
                 // Saving replaces the action label with an accent spinner until it settles.
                 CircularProgressIndicator(
@@ -336,9 +363,9 @@ fun AppTopBar(
                                     AppTopBarState.Register -> Res.string.login_text
                                     AppTopBarState.Login -> Res.string.register_text
                                     is AppTopBarState.Profile -> Res.string.profile_sign_out
-                                    AppTopBarState.ProfilePicture,
+                                    AppTopBarState.ProfilePicture -> Res.string.loser_active_task_skip
                                     AppTopBarState.LoserActiveTask,
-                                        -> Res.string.loser_active_task_skip
+                                        -> Res.string.loser_active_task_reject
 
                                     else -> Res.string.empty
                                 },
@@ -400,6 +427,7 @@ private val AppTopBarState.titleResource: StringResource
         AppTopBarState.ProfilePicture,
         is AppTopBarState.Dashboard,
         is AppTopBarState.GameLobby,
+        is AppTopBarState.Leaderboard,
             -> Res.string.empty
 
         is AppTopBarState.Game -> Res.string.game_qr_home_title
@@ -416,7 +444,6 @@ private val AppTopBarState.titleResource: StringResource
         AppTopBarState.WinnerPicks -> Res.string.winner_picks_title
         AppTopBarState.WinnerConfirms -> Res.string.winner_confirms_title
         AppTopBarState.LoserWaits -> Res.string.loser_waits_title
-        AppTopBarState.LoserAccepts -> Res.string.loser_accepts_title
         AppTopBarState.LoserActiveTask -> Res.string.loser_active_task_title
     }
 
@@ -445,9 +472,11 @@ private val AppTopBarState.navigationIcon: DrawableResource?
         AppTopBarState.WinnerPicks,
         AppTopBarState.WinnerConfirms,
         AppTopBarState.LoserWaits,
-        AppTopBarState.LoserAccepts,
         AppTopBarState.LoserActiveTask,
             -> AccessIcons.Close
+
+        // Çıkış yalnız leaderboard'da; rulodan dönüş sağdaki kupa ikonuyla.
+        is AppTopBarState.Leaderboard -> if (isRollOpen) null else AccessIcons.Close
     }
 
 @Composable

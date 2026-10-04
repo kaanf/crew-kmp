@@ -3,8 +3,9 @@ package com.kaanf.game.domain.model
 import kotlin.time.Instant
 
 /**
- * Bir foto questine gönderilmiş fotoğraf. Oyun sürerken liste yalnız kullanıcının
- * yüklediklerini ve etiketlendiklerini içerir; etkinlik bitince tüm odanınki döner.
+ * Etkinlik fotoğrafı: PHOTO görevinde kaybedenin çektiği kare (eskiden foto questleri).
+ * Oyun sürerken liste yalnız kullanıcının dahil olduklarını içerir; etkinlik bitince
+ * tüm odanınki döner.
  */
 data class EventMemory(
     val id: String,
@@ -13,8 +14,10 @@ data class EventMemory(
     val ownerName: String,
     val ownerProfilePictureUrl: String?,
     val isMine: Boolean,
-    /** Ait olduğu foto questi; serbest çekim döneminden kalan fotoğraflarda null. */
+    /** Kaldırılmış foto questlerinden kalan fotoğraflarda dolu; yenilerde null. */
     val questKey: String?,
+    /** Fotoğrafın çekildiği görevin metni; görevsiz (eski) fotoğraflarda null. */
+    val taskTitle: String?,
     val tagged: List<MemoryTag>,
     val capturedAt: Instant,
 )
@@ -27,13 +30,6 @@ data class MemoryTag(
     val participantId: String,
     val fullName: String,
     val profilePictureUrl: String?,
-    val pinX: Float,
-    val pinY: Float,
-)
-
-/** Yüklerken gönderilen etiket: kim, fotoğrafın neresinde. */
-data class QuestPhotoTag(
-    val participantId: String,
     val pinX: Float,
     val pinY: Float,
 )
