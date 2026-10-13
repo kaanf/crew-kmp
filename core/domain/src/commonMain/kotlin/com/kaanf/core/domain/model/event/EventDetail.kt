@@ -24,4 +24,6 @@ data class EventDetail(
     val createdAt: Instant,
     val updatedAt: Instant,
     val imageUrls: List<String>,
+    /** Opaque ARGB cover colours in backdrop role order; empty = flat background. */
+    val coverColors: List<Int> = emptyList(),
 )

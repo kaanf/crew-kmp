@@ -5,6 +5,7 @@ data class EventLocationUiModel(
     val name: String,
     val address: String,
     val district: String,
+    val city: String,
     val latitude: Double,
     val longitude: Double,
 )

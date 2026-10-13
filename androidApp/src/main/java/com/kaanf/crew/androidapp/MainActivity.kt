@@ -9,6 +9,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.kaanf.auth.presentation.social.AppleSignInBridge
 import com.kaanf.core.domain.review.attachAppReviewActivity
 import com.kaanf.crew.App
+import com.kaanf.crew.navigation.ExternalUriHandler
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,6 +21,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         dispatchAppleSignInIntent(intent)
+        if (savedInstanceState == null) dispatchPushLink(intent)
         attachAppReviewActivity(this)
 
         setContent {
@@ -35,6 +37,17 @@ class MainActivity : ComponentActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         dispatchAppleSignInIntent(intent)
+        dispatchPushLink(intent)
+    }
+
+    /**
+     * Bildirime tıklanınca FCM data'sı intent extras olarak gelir: arka plandayken
+     * FCM'in kendi gösterdiği bildirimde de, MyFirebaseMessagingService'inkinde de.
+     */
+    private fun dispatchPushLink(intent: Intent) {
+        val link = intent.getStringExtra(PUSH_LINK_KEY) ?: return
+        intent.removeExtra(PUSH_LINK_KEY)
+        ExternalUriHandler.onNewUri(link)
     }
 
     private fun dispatchAppleSignInIntent(intent: Intent?) {

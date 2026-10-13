@@ -6,6 +6,8 @@ plugins {
     alias(libs.plugins.androidx.baselineprofile)
 }
 
+android.defaultConfig.testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
 android.buildTypes.getByName("release") {
     firebaseAppDistribution {
         appId = "1:508051238075:android:9993908c62d66337498d9e"
@@ -42,6 +44,8 @@ dependencies {
     implementation(libs.core.splashscreen)
     implementation(libs.material)
     testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
+    // debugImplementation(ui-tooling) puts androidx.test (via compose ui-test) on the app's runtime
+    // classpath and AGP pins androidTest to exactly those versions, so the catalog's newer
+    // junit/runner/espresso can't resolve. ui-test-junit4 from the same BOM brings matching ones.
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4.android)
 }

@@ -1,15 +1,16 @@
 package com.kaanf.home.presentation.model
 
 import com.kaanf.core.domain.model.event.EventId
-import kotlin.time.Instant
+import com.kaanf.core.palette.BackdropPalette
 
 data class EventDetailUiModel(
     val id: EventId,
     val title: String,
     val description: String?,
     val heroDate: String,
+    /** "01:00" */
+    val doorsTime: String,
     val hasMyTicket: Boolean,
-    val doorsOpenAt: Instant,
     val formattedPrice: String,
     val isFree: Boolean,
     /** Sunucunun yükleme anındaki fazı: Gameplay → başladı, Finished → bitti; CTA kilitlenir. */
@@ -18,4 +19,6 @@ data class EventDetailUiModel(
     val imageUrls: List<String>,
     /** Mekânın koordinatı yoksa null; harita bölümü tamamen gizlenir. */
     val location: EventLocationUiModel?,
+    /** Null = no cover colours from the backend; the screen keeps its flat background. */
+    val backdropPalette: BackdropPalette? = null,
 )

@@ -47,7 +47,6 @@ import com.kaanf.core.presentation.model.AppTopBarState
 import crew.core.designsystem.generated.resources.Res
 import crew.core.designsystem.generated.resources.empty
 import crew.core.designsystem.generated.resources.event_code_title
-import crew.core.designsystem.generated.resources.event_detail_title
 import crew.core.designsystem.generated.resources.game_how_to_play
 import crew.core.designsystem.generated.resources.game_qr_home_title
 import crew.core.designsystem.generated.resources.image_crop_title
@@ -425,6 +424,7 @@ private val AppTopBarState.titleResource: StringResource
         AppTopBarState.Login,
         AppTopBarState.Register,
         AppTopBarState.ProfilePicture,
+        AppTopBarState.EventDetail,
         is AppTopBarState.Dashboard,
         is AppTopBarState.GameLobby,
         is AppTopBarState.Leaderboard,
@@ -434,7 +434,6 @@ private val AppTopBarState.titleResource: StringResource
 
         is AppTopBarState.Profile -> Res.string.profile_title
         AppTopBarState.SignInMethods -> Res.string.sign_in_methods_title
-        AppTopBarState.EventDetail -> Res.string.event_detail_title
         AppTopBarState.ImageCrop -> Res.string.image_crop_title
         AppTopBarState.TicketQr -> Res.string.ticket_qr_title
         AppTopBarState.EventCode -> Res.string.event_code_title

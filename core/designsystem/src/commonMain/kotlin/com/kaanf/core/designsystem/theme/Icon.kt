@@ -23,6 +23,7 @@ import crew.core.designsystem.generated.resources.ic_lightning
 import crew.core.designsystem.generated.resources.ic_link
 import crew.core.designsystem.generated.resources.ic_mail
 import crew.core.designsystem.generated.resources.ic_more
+import crew.core.designsystem.generated.resources.ic_arrow_up_right
 import crew.core.designsystem.generated.resources.ic_pin
 import crew.core.designsystem.generated.resources.ic_qr
 import crew.core.designsystem.generated.resources.ic_refresh
@@ -42,6 +43,7 @@ object AccessIcons {
     val Shield = Res.drawable.ic_safety
     val More = Res.drawable.ic_more
     val Pin = Res.drawable.ic_pin
+    val ArrowUpRight = Res.drawable.ic_arrow_up_right
     val Info = Res.drawable.ic_info
     val QR = Res.drawable.ic_qr
     val Sparkle = Res.drawable.ic_sparkle

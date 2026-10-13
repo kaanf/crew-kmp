@@ -2,11 +2,14 @@ package com.kaanf.home.presentation.eventdetail
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,6 +21,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,13 +31,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -44,20 +47,21 @@ import com.kaanf.core.designsystem.component.layout.AppTopBar
 import com.kaanf.core.designsystem.component.layout.FullScreenLoader
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.SpaceGrotesk
+import com.kaanf.core.palette.CoverBackdrop
 import com.kaanf.core.presentation.model.AppTopBarState
 import com.kaanf.core.presentation.util.ObserveAsEvents
-import com.kaanf.core.designsystem.modifier.verticalGradientScrim
 import com.kaanf.home.presentation.eventdetail.component.EventDetailInfoSection
+import com.kaanf.home.presentation.eventdetail.component.EventLocationRow
 import com.kaanf.home.presentation.eventdetail.component.EventImageViewer
 import com.kaanf.home.presentation.eventdetail.component.EventOnboardingCard
 import com.kaanf.home.presentation.eventdetail.component.PagerDots
 import com.kaanf.home.presentation.eventdetail.component.SafetyBadge
 import com.kaanf.home.presentation.model.EventDetailUiModel
-import com.kaanf.home.presentation.util.toClockText
 import crew.feature.home.presentation.generated.resources.Res
 import crew.feature.home.presentation.generated.resources.event_detail_free_ticket_cta
 import crew.feature.home.presentation.generated.resources.event_detail_ended_cta
 import crew.feature.home.presentation.generated.resources.event_detail_load_error_description
+import crew.feature.home.presentation.generated.resources.event_detail_doors_open_at
 import crew.feature.home.presentation.generated.resources.event_detail_load_error_title
 import crew.feature.home.presentation.generated.resources.event_detail_my_ticket_cta
 import crew.feature.home.presentation.generated.resources.event_detail_ticket_cta
@@ -84,23 +88,34 @@ fun EventDetailRoot(
         }
     }
 
-    AppScaffold(
-        topBar = {
-            AppTopBar(
-                state = AppTopBarState.EventDetail,
-                elevated = { listState.canScrollBackward },
-                onBackClick = { onBackClick() },
-            )
-        },
-    ) { innerPadding ->
-        EventDetailScreen(
-            modifier = Modifier
-                .padding(innerPadding)
-                .consumeWindowInsets(innerPadding),
-            listState = listState,
-            state = state,
-            onAction = viewModel::onAction,
+    Box(modifier = Modifier.fillMaxSize().background(AccessDefaults.Background)) {
+        CoverBackdrop(
+            palette = state.event?.backdropPalette,
+            overlayColor = AccessDefaults.Background,
+            legibleTextColor = AccessDefaults.TextSecondary,
+            modifier = Modifier.matchParentSize(),
         )
+
+        AppScaffold(
+            containerColor = Color.Transparent,
+            topBar = {
+                AppTopBar(
+                    state = AppTopBarState.EventDetail,
+                    transparentAtRest = true,
+                    onBackClick = { onBackClick() },
+                )
+            },
+        ) { innerPadding ->
+            EventDetailScreen(
+                modifier = Modifier
+                    .padding(bottom = innerPadding.calculateBottomPadding())
+                    .consumeWindowInsets(innerPadding),
+                contentTopPadding = innerPadding.calculateTopPadding(),
+                listState = listState,
+                state = state,
+                onAction = viewModel::onAction,
+            )
+        }
     }
 }
 
@@ -109,6 +124,7 @@ fun EventDetailScreen(
     modifier: Modifier,
     listState: LazyListState,
     state: EventDetailState,
+    contentTopPadding: Dp = 0.dp,
     onAction: (EventDetailAction) -> Unit,
 ) {
     val typography = MaterialTheme.typography
@@ -118,11 +134,13 @@ fun EventDetailScreen(
         ),
     ) {
         Crossfade(
-            targetState = state.event,
+            targetState = state.event != null,
             modifier = modifier.fillMaxSize(),
             animationSpec = tween(durationMillis = 250),
-        ) { event ->
-            if (event == null) {
+        ) { hasEvent ->
+            val event = state.event
+
+            if (!hasEvent || event == null) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center,
@@ -138,6 +156,7 @@ fun EventDetailScreen(
             } else {
                 EventDetailContent(
                     listState = listState,
+                    contentTopPadding = contentTopPadding,
                     event = event,
                     isCheckingOut = state.isCheckingOut,
                     onAction = onAction,
@@ -179,11 +198,11 @@ private fun EventDetailLoadErrorContent(
 @Composable
 private fun EventDetailContent(
     listState: LazyListState,
+    contentTopPadding: Dp,
     event: EventDetailUiModel,
     isCheckingOut: Boolean,
     onAction: (EventDetailAction) -> Unit,
 ) {
-    // null = kapalı; saf UI durumu olduğu için ViewModel'e taşınmaz.
     var viewerPage by rememberSaveable { mutableStateOf<Int?>(null) }
 
     Box(
@@ -193,33 +212,59 @@ private fun EventDetailContent(
             state = listState,
             modifier = Modifier
                 .fillMaxSize(),
+            contentPadding = PaddingValues(top = contentTopPadding),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             item(contentType = "hero") {
                 EventDetailHero(
                     imageUrls = event.imageUrls,
-                    title = event.title,
-                    meta = listOfNotNull(
-                        event.heroDate,
-                        event.doorsOpenAt.toClockText(),
-                        event.location?.name,
-                    ).joinToString(META_SEPARATOR),
-                    // Draw fazında okunur; parallax scroll'da recomposition tetiklemez.
-                    scrollOffset = {
-                        if (listState.firstVisibleItemIndex == 0) {
-                            listState.firstVisibleItemScrollOffset.toFloat()
-                        } else {
-                            Float.MAX_VALUE
-                        }
-                    },
                     onImageClick = { page -> viewerPage = page },
                 )
+            }
+
+            item(contentType = "title-date") {
+                Column(
+                    modifier = Modifier.padding(horizontal = BodyPadding),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    Text(
+                        text = event.title,
+                        style = MaterialTheme.typography.displaySmall.copy(
+                            fontWeight = FontWeight.ExtraBold,
+                            fontSize = 34.sp,
+                            lineHeight = 34.sp,
+                            letterSpacing = (-1.4).sp,
+                        ),
+                    )
+
+                    Text(
+                        text = event.heroDate,
+                        style = MaterialTheme.typography.titleSmall.copy(
+                            color = AccessDefaults.TextSecondary,
+                        ),
+                    )
+
+                    Text(
+                        text = stringResource(Res.string.event_detail_doors_open_at, event.doorsTime),
+                        style = MaterialTheme.typography.titleSmall.copy(
+                            color = AccessDefaults.TextSecondary,
+                        ),
+                    )
+                }
+            }
+
+            event.location?.let { location ->
+                item(contentType = "location") {
+                    EventLocationRow(
+                        location = location,
+                        modifier = Modifier.padding(horizontal = BodyPadding),
+                    )
+                }
             }
 
             item(contentType = "event-info") {
                 EventDetailInfoSection(
                     description = event.description,
-                    location = event.location,
                     modifier = Modifier.padding(horizontal = BodyPadding),
                 )
             }
@@ -260,14 +305,17 @@ private fun EventDetailContent(
             },
             modifier =
                 Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
                     .padding(bottom = 20.dp)
-                    .align(Alignment.BottomCenter),
+                    .align(Alignment.BottomCenter)
+                    // Outer size modifier wins over BaseButton's default 52.dp height.
+                    .height(44.dp),
             isLoading = isCheckingOut,
             enabled = !isCheckingOut && !ctaLocked,
-            filled = false,
-            animatedBorder = !ctaLocked,
+            backgroundColor = Color.White,
+            borderColor = Color.White,
+            contentColor = AccessDefaults.Background,
+            fillMaxWidth = false,
+            pill = true,
         )
     }
 
@@ -281,15 +329,11 @@ private fun EventDetailContent(
 }
 
 /**
- * Kenardan kenara hero: görsel scroll'da yavaşça kayar, üstündeki başlık sönerek gider.
- * Alttaki scrim görseli arka plan rengine bağlar, böylece gövde metni hero'nun devamı gibi okunur.
+ * Kenarlardan içeride, ortalanmış hero kartı: gölge ve üst kenar ışığı ile arka plandan ayrışır.
  */
 @Composable
 private fun EventDetailHero(
     imageUrls: List<String>,
-    title: String,
-    meta: String,
-    scrollOffset: () -> Float,
     onImageClick: (Int) -> Unit,
 ) {
     val pagerState = rememberPagerState(pageCount = { imageUrls.size })
@@ -298,40 +342,37 @@ private fun EventDetailHero(
         modifier = Modifier
             .fillMaxWidth()
             .height(HeroHeight)
-            .clipToBounds(),
+            .padding(horizontal = HeroInset, vertical = 12.dp)
+            .shadow(
+                elevation = 28.dp,
+                shape = HeroShape,
+                ambientColor = Color.Black,
+                spotColor = Color.Black,
+            )
+            .border(1.dp, HeroEdgeLight, HeroShape),
     ) {
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .graphicsLayer {
-                    translationY = scrollOffset().coerceIn(0f, size.height) * 0.35f
-                },
-        ) {
-            if (imageUrls.size > 1) {
-                HorizontalPager(
-                    state = pagerState,
-                    modifier = Modifier.matchParentSize(),
-                ) { page ->
-                    BaseImage(
-                        imageUrl = imageUrls[page],
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clickable { onImageClick(page) },
-                        contentScale = ContentScale.Crop,
-                    )
-                }
-            } else {
+        if (imageUrls.size > 1) {
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.matchParentSize(),
+            ) { page ->
                 BaseImage(
-                    imageUrl = imageUrls.first(),
+                    imageUrl = imageUrls[page],
                     modifier = Modifier
-                        .matchParentSize()
-                        .clickable { onImageClick(0) },
+                        .fillMaxSize()
+                        .clickable { onImageClick(page) },
                     contentScale = ContentScale.Crop,
                 )
             }
+        } else {
+            BaseImage(
+                imageUrl = imageUrls.first(),
+                modifier = Modifier
+                    .matchParentSize()
+                    .clickable { onImageClick(0) },
+                contentScale = ContentScale.Crop,
+            )
         }
-
-        Box(modifier = Modifier.matchParentSize().verticalGradientScrim(HeroScrim))
 
         if (imageUrls.size > 1) {
             PagerDots(
@@ -343,53 +384,19 @@ private fun EventDetailHero(
                     .padding(top = 12.dp),
             )
         }
-
-        Column(
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .graphicsLayer {
-                    val offset = scrollOffset()
-                    alpha = (1f - offset / HeroTitleFadeDistance.toPx()).coerceIn(0f, 1f)
-                    translationY = -offset * 0.12f
-                }
-                .padding(horizontal = BodyPadding)
-                .padding(bottom = 22.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.displaySmall.copy(
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 34.sp,
-                    lineHeight = 34.sp,
-                    letterSpacing = (-1.4).sp,
-                ),
-            )
-
-            Text(
-                text = meta,
-                style = MaterialTheme.typography.bodySmall.copy(
-                    color = AccessDefaults.TextSecondary,
-                ),
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-            )
-        }
     }
 }
 
-private const val META_SEPARATOR = " · "
-
 private val HeroHeight = 396.dp
-private val HeroTitleFadeDistance = 260.dp
+private val HeroInset = 16.dp
 private val BodyPadding = 22.dp
 
-private val HeroScrim = Brush.verticalGradient(
-    0f to AccessDefaults.Background.copy(alpha = 0.55f),
-    0.22f to Color.Transparent,
-    0.46f to Color.Transparent,
-    0.74f to AccessDefaults.Background.copy(alpha = 0.42f),
-    0.99f to AccessDefaults.Background,
+private val HeroShape = RoundedCornerShape(28.dp)
+
+// Üstten gelen ışık hissi: kenar çizgisi yukarıda parlak, aşağıda kaybolur.
+private val HeroEdgeLight = Brush.verticalGradient(
+    0f to Color.White.copy(alpha = 0.18f),
+    0.5f to Color.Transparent,
 )
 
 

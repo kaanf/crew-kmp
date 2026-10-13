@@ -2,6 +2,7 @@ package com.kaanf.crew.androidapp
 
 import android.Manifest
 import android.app.PendingIntent
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
@@ -12,6 +13,7 @@ import com.kaanf.crew.R
 import org.koin.android.ext.android.inject
 
 const val DEFAULT_NOTIFICATION_CHANNEL_ID = "default"
+const val PUSH_LINK_KEY = "link"
 
 class MyFirebaseMessagingService : FirebaseMessagingService() {
     private val pushTokenSync: PushTokenSync by inject()
@@ -26,14 +28,18 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
         ) return
 
+        // Arka plandaki FCM davranışıyla aynı: data, açılan intent'in extras'ına gider.
+        val launchIntent = Intent(this, MainActivity::class.java).apply {
+            message.data.forEach { (key, value) -> putExtra(key, value) }
+        }
         val contentIntent = PendingIntent.getActivity(
             this,
-            0,
-            packageManager.getLaunchIntentForPackage(packageName),
-            PendingIntent.FLAG_IMMUTABLE,
+            message.messageId.hashCode(),
+            launchIntent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
         val built = NotificationCompat.Builder(this, DEFAULT_NOTIFICATION_CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(notification.title)
             .setContentText(notification.body)
             .setAutoCancel(true)

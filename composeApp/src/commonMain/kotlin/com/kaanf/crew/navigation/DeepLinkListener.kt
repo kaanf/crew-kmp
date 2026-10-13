@@ -9,7 +9,11 @@ import androidx.navigation.NavUri
 fun DeepLinkListener(navController: NavController) {
     DisposableEffect(Unit) {
         ExternalUriHandler.listener = { uri ->
-            navController.navigate(NavUri(uri))
+            val navUri = NavUri(uri)
+            // Eşleşmeyen link (ör. eski sürüme gelen yeni bir link) navigate'te crash ettirir.
+            if (navController.graph.hasDeepLink(navUri)) {
+                navController.navigate(navUri)
+            }
         }
 
         onDispose {

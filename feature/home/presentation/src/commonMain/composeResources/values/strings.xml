@@ -12,6 +12,7 @@
     <string name="dashboard_game_preview_cta">120+ DECK</string>
     <string name="dashboard_your_events_title">🎟️ Your Events</string>
     <string name="dashboard_your_events_count">%1$d events</string>
+    <string name="event_detail_doors_open_at">Doors open at %1$s</string>
     <string name="dashboard_doors_open_events_title">🚪 Doors Open</string>
     <string name="dashboard_doors_open_events_count">%1$d events</string>
     <string name="dashboard_upcoming_events_title">📅 Upcoming Events</string>
@@ -25,8 +26,8 @@
     <string name="dashboard_empty_waiting_highlight">in Prague</string>
     <string name="dashboard_empty_waiting_rest">waiting on the next drop</string>
     <string name="event_detail_ticket_cta">Get my ticket - %1$s</string>
-    <string name="event_detail_free_ticket_cta">Get your free ticket</string>
-    <string name="event_detail_my_ticket_cta">Go to ticket detail</string>
+    <string name="event_detail_free_ticket_cta">🎉 Join event</string>
+    <string name="event_detail_my_ticket_cta">🤩 Go to ticket detail</string>
     <string name="event_detail_ended_cta">Event has ended</string>
     <string name="event_detail_hero_date">SATURDAY - MAY 30</string>
     <string name="event_detail_hero_title">One night.\nOne bar.\n80 strangers.</string>

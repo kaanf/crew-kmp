@@ -12,7 +12,9 @@ import com.kaanf.core.presentation.util.UIText
 import com.kaanf.home.domain.usecase.CreateTicketUseCase
 import com.kaanf.home.domain.usecase.GetEventDetailUseCase
 import com.kaanf.home.presentation.mapper.toUiModel
+import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -68,7 +70,12 @@ class EventDetailViewModel(
 
         _state.update { it.copy(isCheckingOut = true) }
 
-        when (val result = createTicketUseCase(eventId)) {
+        // Keep the loader visible a beat so the button's shrink/grow animation reads well.
+        val minLoading = async { delay(MIN_CHECKOUT_LOADING_MS) }
+        val result = createTicketUseCase(eventId)
+        minLoading.await()
+
+        when (result) {
             is Result.Success -> {
                 _state.update {
                     it.copy(
@@ -76,7 +83,6 @@ class EventDetailViewModel(
                         event = it.event?.copy(hasMyTicket = true),
                     )
                 }
-                navigate()
             }
 
             is Result.Failure -> {
@@ -103,5 +109,9 @@ class EventDetailViewModel(
                 _state.update { it.copy(isLoading = false, loadFailed = true) }
             }
         }
+    }
+
+    private companion object {
+        const val MIN_CHECKOUT_LOADING_MS = 1_000L
     }
 }

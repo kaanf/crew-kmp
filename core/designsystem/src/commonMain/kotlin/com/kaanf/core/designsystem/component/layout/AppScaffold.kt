@@ -8,18 +8,20 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import com.kaanf.core.designsystem.theme.AccessDefaults
 
 @Composable
 fun AppScaffold(
     modifier: Modifier = Modifier,
     topBar: @Composable () -> Unit = {},
+    containerColor: Color = AccessDefaults.Background,
     content: @Composable (PaddingValues) -> Unit,
 ) {
     Scaffold(
         modifier = modifier,
         topBar = topBar,
-        containerColor = AccessDefaults.Background,
+        containerColor = containerColor,
         contentWindowInsets = WindowInsets.safeDrawing
             .exclude(WindowInsets.ime),
     ) { innerPadding ->

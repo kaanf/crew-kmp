@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Status bar ikonu: launcher monochrome'daki "C" glifinin 24dp'yi dolduran silueti.
+     Android small icon'u sadece alfa kanalından çizer, renk yok sayılır. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="206"
+    android:viewportHeight="206">
+    <group
+        android:translateX="-113"
+        android:translateY="-113">
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M200,130 L268,130 L268,168 L212,168 L212,262 L268,262 L268,302 L164,302 L164,168 Z" />
+    </group>
+</vector>

@@ -30,16 +30,14 @@ internal fun Instant.toDayOfMonthText(
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
 ): String = toLocalDateTime(timeZone).date.day.toString()
 
+/** "Tuesday, 27 Oct 2026" */
 internal fun Instant.toEventDetailDateText(
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
 ): String {
     val date = toLocalDateTime(timeZone).date
-    val day = date.day.toString().padStart(2, '0')
-    val month = date.month.number.toString().padStart(2, '0')
-    val dayName = date.dayOfWeek.name
-        .lowercase()
-        .replaceFirstChar { it.uppercase() }
-    return "$day.$month.${date.year}, $dayName"
+    val dayName = date.dayOfWeek.name.lowercase().replaceFirstChar { it.uppercase() }
+    val monthName = date.month.name.take(3).lowercase().replaceFirstChar { it.uppercase() }
+    return "$dayName, ${date.day} $monthName ${date.year}"
 }
 
 internal fun Instant.toClockText(

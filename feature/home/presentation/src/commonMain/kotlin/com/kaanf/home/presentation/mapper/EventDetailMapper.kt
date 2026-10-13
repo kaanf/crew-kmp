@@ -2,8 +2,10 @@ package com.kaanf.home.presentation.mapper
 
 import com.kaanf.core.domain.model.event.EventDetail
 import com.kaanf.core.domain.model.venue.Venue
+import com.kaanf.core.palette.BackdropPalette
 import com.kaanf.home.presentation.model.EventDetailUiModel
 import com.kaanf.home.presentation.model.EventLocationUiModel
+import com.kaanf.home.presentation.util.toClockText
 import com.kaanf.home.presentation.util.toEventDetailDateText
 
 fun EventDetail.toUiModel(): EventDetailUiModel {
@@ -12,7 +14,7 @@ fun EventDetail.toUiModel(): EventDetailUiModel {
         title = title,
         description = description,
         heroDate = startsAt.toEventDetailDateText(),
-        doorsOpenAt = doorsOpenAt,
+        doorsTime = doorsOpenAt.toClockText(),
         hasMyTicket = hasMyTicket,
         formattedPrice = price.format(),
         isFree = price.amount == 0L,
@@ -21,6 +23,7 @@ fun EventDetail.toUiModel(): EventDetailUiModel {
         // ponytail: backend görsel dönmezse eski sabit hero görseline düşülür; backend dolunca ölü kod olur
         imageUrls = imageUrls.ifEmpty { listOf(FALLBACK_HERO_IMAGE_URL) },
         location = venue?.toLocationUiModel(),
+        backdropPalette = BackdropPalette.fromRoleOrder(coverColors),
     )
 }
 
@@ -32,6 +35,7 @@ internal fun Venue.toLocationUiModel(): EventLocationUiModel? {
         name = name,
         address = "$address, $district / $city",
         district = district,
+        city = city,
         latitude = latitude,
         longitude = longitude,
     )
