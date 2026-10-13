@@ -6,33 +6,34 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <uses-permission android:name="android.permission.CAMERA" />
+
     <uses-feature android:name="android.hardware.camera" />
-    <uses-feature android:name="android.hardware.camera.flash"
+    <uses-feature
+        android:name="android.hardware.camera.flash"
         android:required="false" />
-    <uses-feature android:name="android.hardware.camera.autofocus"
+    <uses-feature
+        android:name="android.hardware.camera.autofocus"
         android:required="false" />
 
     <application
         android:name=".androidapp.CrewApplication"
-        tools:replace="android:name"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
-        android:theme="@style/Theme.App.Starting">
+        android:theme="@style/Theme.App.Starting"
+        tools:replace="android:name">
         <activity
-            android:exported="true"
             android:name=".androidapp.MainActivity"
+            android:exported="true"
             android:launchMode="singleTask"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <!-- Apple web (form_post) akışının backend'den dönüş deep link'i: crew://auth/apple -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -40,8 +41,8 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:scheme="crew"
-                    android:host="auth" />
+                    android:host="auth"
+                    android:scheme="crew" />
             </intent-filter>
         </activity>
 
@@ -53,13 +54,10 @@
             </intent-filter>
         </service>
 
-        <!-- Background'da gelen notification mesajları bu kanala düşer (kanal CrewApplication'da yaratılır). -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="default" />
 
-        <!-- Exposes the cached camera capture file to the camera app via a content:// URI.
-             Authority matches ComposeFileProvider's "${packageName}.fileprovider". -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
@@ -70,5 +68,4 @@
                 android:resource="@xml/file_paths" />
         </provider>
     </application>
-
 </manifest>

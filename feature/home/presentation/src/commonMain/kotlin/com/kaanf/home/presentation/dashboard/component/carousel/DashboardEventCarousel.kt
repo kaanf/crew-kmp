@@ -141,7 +141,7 @@ private fun CarouselEventCard(
             Text(
                 text = event.date,
                 style = MaterialTheme.typography.labelMedium.copy(
-                    color = AccessDefaults.Accent,
+                    color = AccessDefaults.TextSecondary,
                     fontWeight = FontWeight.Bold,
                     fontSize = 11.sp,
                 ),
@@ -156,11 +156,6 @@ private fun CarouselEventCard(
                 maxLines = 1,
             )
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
                 Text(
                     text = event.formattedPrice,
                     style = MaterialTheme.typography.labelMedium.copy(
@@ -168,11 +163,6 @@ private fun CarouselEventCard(
                         fontSize = 14.sp,
                     ),
                 )
-
-                RoundedBadge(
-                    text = if (event.hasMyTicket) "TICKET" else "%${event.percentage} Full",
-                )
-            }
         }
     }
 }

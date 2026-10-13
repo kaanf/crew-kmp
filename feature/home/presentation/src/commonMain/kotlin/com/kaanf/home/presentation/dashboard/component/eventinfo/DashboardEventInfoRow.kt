@@ -37,10 +37,9 @@ fun DashboardEventInfoRow(
         ) {
             Text(
                 text = leftText,
-                style = MaterialTheme.typography.labelSmall.copy(
-                    color = AccessDefaults.TextSecondary,
+                style = MaterialTheme.typography.headlineSmall.copy(
+                    color = AccessDefaults.TextPrimary,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 13.sp,
                     letterSpacing = 0.sp
                 ),
             )
@@ -60,7 +59,7 @@ fun DashboardEventInfoRow(
         Text(
             text = rightText,
             style = MaterialTheme.typography.titleMedium.copy(
-                color = AccessDefaults.TextMuted,
+                color = AccessDefaults.TextPrimary,
                 fontSize = 12.sp,
                 letterSpacing = -(0.1).sp,
             ),

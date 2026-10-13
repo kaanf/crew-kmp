@@ -28,6 +28,7 @@ import crew.core.designsystem.generated.resources.geist_regular
 import crew.core.designsystem.generated.resources.geist_semibold
 import crew.core.designsystem.generated.resources.inter_variable
 import crew.core.designsystem.generated.resources.special_elite_regular
+import crew.core.designsystem.generated.resources.space_grotesk_variable
 import org.jetbrains.compose.resources.Font
 
 /**
@@ -90,6 +91,20 @@ val SpecialElite: FontFamily
                 weight = FontWeight.Normal,
             ),
         )
+        return remember(fonts) { FontFamily(fonts) }
+    }
+
+val SpaceGrotesk: FontFamily
+    @Composable get() {
+        val fonts = listOf(
+            FontWeight.Light,
+            FontWeight.Normal,
+            FontWeight.Medium,
+            FontWeight.SemiBold,
+            FontWeight.Bold,
+        ).map { weight ->
+            Font(resource = Res.font.space_grotesk_variable, weight = weight)
+        }
         return remember(fonts) { FontFamily(fonts) }
     }
 

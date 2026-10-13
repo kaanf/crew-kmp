@@ -11,7 +11,6 @@ import com.kaanf.core.domain.review.attachAppReviewActivity
 import com.kaanf.crew.App
 
 class MainActivity : ComponentActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         var isSplashScreenNeeded = true
         installSplashScreen().setKeepOnScreenCondition {

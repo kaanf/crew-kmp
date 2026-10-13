@@ -14,7 +14,6 @@ import org.koin.android.ext.android.inject
 const val DEFAULT_NOTIFICATION_CHANNEL_ID = "default"
 
 class MyFirebaseMessagingService : FirebaseMessagingService() {
-
     private val pushTokenSync: PushTokenSync by inject()
 
     override fun onNewToken(token: String) {
@@ -22,7 +21,6 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     }
 
     override fun onMessageReceived(message: RemoteMessage) {
-        // App background'dayken notification mesajlarını sistem gösterir; burası foreground yolu.
         val notification = message.notification ?: return
         if (Build.VERSION.SDK_INT >= 33 &&
             checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED

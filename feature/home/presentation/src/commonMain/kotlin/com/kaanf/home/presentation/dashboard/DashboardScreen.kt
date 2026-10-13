@@ -33,12 +33,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kaanf.core.designsystem.component.layout.AppScaffold
 import com.kaanf.core.designsystem.component.layout.AppTopBar
 import com.kaanf.core.designsystem.component.layout.FullScreenLoader
 import com.kaanf.core.designsystem.theme.AccessDefaults
+import com.kaanf.core.designsystem.theme.SpaceGrotesk
 import com.kaanf.core.presentation.model.AppTopBarState
 import com.kaanf.core.presentation.permission.Permission
 import com.kaanf.core.presentation.permission.rememberPermissionController
@@ -140,35 +142,42 @@ fun DashboardScreen(
     onAction: (DashboardAction) -> Unit,
     listState: LazyListState,
 ) {
-    Crossfade(
-        targetState = state.isLoading,
-        modifier = modifier.fillMaxSize(),
-        animationSpec = tween(durationMillis = 250),
-    ) { isLoading ->
-        if (isLoading) {
-            FullScreenLoader()
-        } else {
-            val pullToRefreshState = rememberPullToRefreshState()
+    val typography = MaterialTheme.typography
+    MaterialTheme(
+        typography = typography.copy(
+            labelSmall = typography.labelSmall.copy(fontFamily = SpaceGrotesk),
+        ),
+    ) {
+        Crossfade(
+            targetState = state.isLoading,
+            modifier = modifier.fillMaxSize(),
+            animationSpec = tween(durationMillis = 250),
+        ) { isLoading ->
+            if (isLoading) {
+                FullScreenLoader()
+            } else {
+                val pullToRefreshState = rememberPullToRefreshState()
 
-            PullToRefreshBox(
-                isRefreshing = state.isRefreshing,
-                onRefresh = { onAction(DashboardAction.OnRefresh) },
-                state = pullToRefreshState,
-                indicator = {
-                    PullToRefreshDefaults.Indicator(
-                        modifier = Modifier.align(Alignment.TopCenter),
-                        state = pullToRefreshState,
-                        isRefreshing = state.isRefreshing,
-                        containerColor = AccessDefaults.SurfaceElevated,
-                        color = AccessDefaults.Accent,
+                PullToRefreshBox(
+                    isRefreshing = state.isRefreshing,
+                    onRefresh = { onAction(DashboardAction.OnRefresh) },
+                    state = pullToRefreshState,
+                    indicator = {
+                        PullToRefreshDefaults.Indicator(
+                            modifier = Modifier.align(Alignment.TopCenter),
+                            state = pullToRefreshState,
+                            isRefreshing = state.isRefreshing,
+                            containerColor = AccessDefaults.SurfaceElevated,
+                            color = AccessDefaults.Accent,
+                        )
+                    },
+                ) {
+                    DashboardContent(
+                        listState = listState,
+                        state = state,
+                        onAction = onAction,
                     )
-                },
-            ) {
-                DashboardContent(
-                    listState = listState,
-                    state = state,
-                    onAction = onAction,
-                )
+                }
             }
         }
     }
@@ -208,9 +217,11 @@ private fun DashboardContent(
             return@LazyColumn
         }
 
+        /*
         item(contentType = "header") {
             DashboardHeader()
         }
+         */
 
         item(contentType = "space-after-header") {
             Spacer(modifier = Modifier.height(24.dp))
@@ -220,7 +231,7 @@ private fun DashboardContent(
             item(contentType = "featured-carousel-section") {
                 DashboardSection(
                     title = stringResource(Res.string.dashboard_featured_event_section_title),
-                    description = stringResource(Res.string.dashboard_featured_event_section_description),
+                    description = "",
                     ctaText = "",
                     content = {
                         DashboardEventCarousel(
@@ -249,7 +260,7 @@ private fun DashboardContent(
                     ) {
                         items(
                             items = state.tasks,
-                            key = { it.description }, // key'i task id yap.
+                            key = { it.description },
                             contentType = { "challenge_card" },
                         ) { card ->
                             GradientChallengeCard(card = card)
@@ -365,7 +376,9 @@ private fun DashboardHeader() {
 
         Text(
             text = stringResource(Res.string.dashboard_header_title),
-            style = MaterialTheme.typography.displayMedium,
+            style = MaterialTheme.typography.displayMedium.copy(
+                fontSize = 18.sp
+            ),
         )
 
         Spacer(modifier = Modifier.height(4.dp))

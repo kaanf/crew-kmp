@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <resources>
-    <string name="dashboard_header_title">This week in\nthe city</string>
+    <string name="dashboard_header_title">This week in the city</string>
     <string name="dashboard_header_description">Live bar games. You show up solo, leave with a story.</string>
-    <string name="dashboard_featured_event_section_title">FEATURED EVENT</string>
+    <string name="dashboard_featured_event_section_title">🌟 Featured Events</string>
     <string name="dashboard_featured_event_section_description">The nights we&apos;d go to ourselves &#183; swipe &#8594;</string>
     <string name="dashboard_featured_event_title">Crew - Vol 14.</string>
     <string name="dashboard_featured_event_date">FRI, 12 MAR - DOORS 20:00</string>
     <string name="dashboard_featured_event_price">220 CZK</string>
-    <string name="dashboard_game_preview_section_title">A TASTE OF THE GAME</string>
+    <string name="dashboard_game_preview_section_title">🎮 Taste of the game</string>
     <string name="dashboard_game_preview_section_description">Real cards from past nights &#183; swipe &#8594;</string>
     <string name="dashboard_game_preview_cta">120+ DECK</string>
-    <string name="dashboard_your_events_title">YOUR EVENTS</string>
+    <string name="dashboard_your_events_title">🎟️ Your Events</string>
     <string name="dashboard_your_events_count">%1$d events</string>
-    <string name="dashboard_doors_open_events_title">DOORS OPEN</string>
+    <string name="dashboard_doors_open_events_title">🚪 Doors Open</string>
     <string name="dashboard_doors_open_events_count">%1$d events</string>
-    <string name="dashboard_upcoming_events_title">UPCOMING EVENTS</string>
+    <string name="dashboard_upcoming_events_title">📅 Upcoming Events</string>
     <string name="dashboard_upcoming_events_count">%1$d events</string>
     <string name="dashboard_snackbar_load_failed_title">Couldn't load events</string>
     <string name="dashboard_empty_eyebrow">PRAGUE &#183; NOTHING LIVE</string>
     <string name="dashboard_empty_title">No nights on\nthe board yet.</string>
-    <string name="dashboard_empty_description">Crew runs in waves. The next batch of venues drops soon &#8212; we&apos;ll ping you the second tickets open.</string>
+    <string name="dashboard_empty_description">Crew runs in waves.\nThe next batch of venues drops soon; we&apos;ll ping you the second tickets open.</string>
     <string name="dashboard_empty_notify_cta">Notify me when it&apos;s on</string>
     <string name="dashboard_empty_notified_cta">You&apos;re on the list</string>
     <string name="dashboard_empty_waiting_highlight">in Prague</string>

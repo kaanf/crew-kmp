@@ -43,6 +43,7 @@ import com.kaanf.core.designsystem.component.layout.AppScaffold
 import com.kaanf.core.designsystem.component.layout.AppTopBar
 import com.kaanf.core.designsystem.component.layout.FullScreenLoader
 import com.kaanf.core.designsystem.theme.AccessDefaults
+import com.kaanf.core.designsystem.theme.SpaceGrotesk
 import com.kaanf.core.presentation.model.AppTopBarState
 import com.kaanf.core.presentation.util.ObserveAsEvents
 import com.kaanf.core.designsystem.modifier.verticalGradientScrim
@@ -110,31 +111,38 @@ fun EventDetailScreen(
     state: EventDetailState,
     onAction: (EventDetailAction) -> Unit,
 ) {
-    Crossfade(
-        targetState = state.event,
-        modifier = modifier.fillMaxSize(),
-        animationSpec = tween(durationMillis = 250),
-    ) { event ->
-        if (event == null) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center,
-            ) {
-                if (state.loadFailed) {
-                    EventDetailLoadErrorContent(
-                        onRetry = { onAction(EventDetailAction.OnRetryLoad) },
-                    )
-                } else {
-                    FullScreenLoader()
+    val typography = MaterialTheme.typography
+    MaterialTheme(
+        typography = typography.copy(
+            labelSmall = typography.labelSmall.copy(fontFamily = SpaceGrotesk),
+        ),
+    ) {
+        Crossfade(
+            targetState = state.event,
+            modifier = modifier.fillMaxSize(),
+            animationSpec = tween(durationMillis = 250),
+        ) { event ->
+            if (event == null) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    if (state.loadFailed) {
+                        EventDetailLoadErrorContent(
+                            onRetry = { onAction(EventDetailAction.OnRetryLoad) },
+                        )
+                    } else {
+                        FullScreenLoader()
+                    }
                 }
+            } else {
+                EventDetailContent(
+                    listState = listState,
+                    event = event,
+                    isCheckingOut = state.isCheckingOut,
+                    onAction = onAction,
+                )
             }
-        } else {
-            EventDetailContent(
-                listState = listState,
-                event = event,
-                isCheckingOut = state.isCheckingOut,
-                onAction = onAction,
-            )
         }
     }
 }
