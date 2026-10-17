@@ -15,6 +15,7 @@ data class EventDetailUiModel(
     val isFree: Boolean,
     /** Sunucunun yükleme anındaki fazı: Gameplay → başladı, Finished → bitti; CTA kilitlenir. */
     val isEnded: Boolean,
+    val isLocked: Boolean,
     /** Sıralı hero görselleri; backend boş dönerse mapper tek elemanlı fallback listesi verir. */
     val imageUrls: List<String>,
     /** Mekânın koordinatı yoksa null; harita bölümü tamamen gizlenir. */

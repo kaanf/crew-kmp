@@ -101,3 +101,6 @@ CLAUDE.md
 
 *.ipa
 *.dSYM.zip
+
+# Local design explorations
+/design-concepts/

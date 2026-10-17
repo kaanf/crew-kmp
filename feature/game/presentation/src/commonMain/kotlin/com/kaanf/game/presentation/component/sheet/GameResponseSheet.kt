@@ -92,7 +92,7 @@ fun GameResponseSheet(
         )
 
         Text(
-            text = "Accept to start the round right away. Heads up — leaving mid‑match counts as a loss.",
+            text = "Accept to start the round right away. Heads up: leaving mid-match counts as a loss.",
             style = MaterialTheme.typography.titleSmall.copy(
                 color = AccessDefaults.TextMuted,
                 fontWeight = FontWeight.Medium,

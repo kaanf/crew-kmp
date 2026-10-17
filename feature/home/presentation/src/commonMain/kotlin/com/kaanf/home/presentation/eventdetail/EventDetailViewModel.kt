@@ -11,6 +11,7 @@ import com.kaanf.core.domain.util.Result
 import com.kaanf.core.presentation.util.UIText
 import com.kaanf.home.domain.usecase.CreateTicketUseCase
 import com.kaanf.home.domain.usecase.GetEventDetailUseCase
+import com.kaanf.home.domain.usecase.GetEventGuestsUseCase
 import com.kaanf.home.presentation.mapper.toUiModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
@@ -24,6 +25,7 @@ import kotlinx.coroutines.launch
 
 class EventDetailViewModel(
     private val getEventDetailUseCase: GetEventDetailUseCase,
+    private val getEventGuestsUseCase: GetEventGuestsUseCase,
     private val createTicketUseCase: CreateTicketUseCase,
     private val snackbarController: SnackbarController,
     savedStateHandle: SavedStateHandle,
@@ -66,7 +68,9 @@ class EventDetailViewModel(
     }
 
     private fun checkout() = viewModelScope.launch {
-        if (_state.value.isCheckingOut) return@launch
+        val currentState = _state.value
+        val event = currentState.event ?: return@launch
+        if (currentState.isCheckingOut || event.isLocked || event.isEnded || event.hasMyTicket) return@launch
 
         _state.update { it.copy(isCheckingOut = true) }
 
@@ -81,8 +85,10 @@ class EventDetailViewModel(
                     it.copy(
                         isCheckingOut = false,
                         event = it.event?.copy(hasMyTicket = true),
+                        isGuestsLoading = true,
                     )
                 }
+                loadGuests()
             }
 
             is Result.Failure -> {
@@ -100,14 +106,28 @@ class EventDetailViewModel(
                 _state.update {
                     it.copy(
                         event = result.data.toUiModel(),
+                        isGuestsLoading = result.data.hasMyTicket,
                         isLoading = false,
                     )
                 }
+                if (result.data.hasMyTicket) loadGuests()
             }
 
             is Result.Failure -> {
                 _state.update { it.copy(isLoading = false, loadFailed = true) }
             }
+        }
+    }
+
+    // Guest list is available only to ticket holders.
+    private fun loadGuests() = viewModelScope.launch {
+        _state.update { it.copy(isGuestsLoading = true) }
+        val result = getEventGuestsUseCase(eventId)
+        _state.update {
+            it.copy(
+                guests = if (result is Result.Success) result.data else it.guests,
+                isGuestsLoading = false,
+            )
         }
     }
 

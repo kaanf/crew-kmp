@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.kaanf.core.designsystem.component.button.BaseButton
 import com.kaanf.core.designsystem.component.card.GradientChallengeCard
+import com.kaanf.core.designsystem.component.card.ChallengeCardShape
 import com.kaanf.core.designsystem.component.progressbar.ThreeDotsAnimatedCard
 import com.kaanf.core.designsystem.modifier.carouselPage
 import com.kaanf.core.designsystem.theme.AccessDefaults
@@ -43,7 +43,6 @@ import crew.feature.game.presentation.generated.resources.match_phase_winner_pic
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
-private val TaskCardShape = RoundedCornerShape(28.dp)
 
 @Composable
 fun WinnerPicksPhase(
@@ -87,7 +86,7 @@ fun WinnerPicksPhase(
                 .fillMaxWidth(),
             contentAlignment = Alignment.Center,
         ) {
-            val sidePadding = ((maxWidth - TaskCardSize) / 2).coerceAtLeast(0.dp)
+            val sidePadding = ((maxWidth - TaskCardWidth) / 2).coerceAtLeast(0.dp)
 
             HorizontalPager(
                 state = pagerState,
@@ -97,11 +96,11 @@ fun WinnerPicksPhase(
             ) { page ->
                 GradientChallengeCard(
                     card = tasks[page].toUiModel(),
-                    cardSize = TaskCardSize,
+                    width = TaskCardWidth,
                     emphasized = true,
                     modifier = Modifier
                         .zIndex(if (page == pagerState.currentPage) 1f else 0f)
-                        .carouselPage(pagerState = pagerState, page = page, shape = TaskCardShape),
+                        .carouselPage(pagerState = pagerState, page = page, shape = ChallengeCardShape),
                 )
             }
         }

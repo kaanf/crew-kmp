@@ -9,4 +9,7 @@ data class GameLobbyState(
     val showExitConfirmDialog: Boolean = false,
     val lobbyMembers: List<LobbyMember> = emptyList(),
     val lobbyTotalCount: Int = 0,
+    val currentUserId: String? = null,
+    val currentUserName: String? = null,
+    val currentUserPhotoUrl: String? = null,
 )

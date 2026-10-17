@@ -193,7 +193,7 @@ private fun StoryPage(cocktail: AnnouncementCocktail) {
 
         cocktail.signature?.let {
             Text(
-                text = "— $it",
+                text = "- $it",
                 style = kickerStyle(color = AccessDefaults.TextFaint, letterSpacing = 1.8.sp),
             )
         }
@@ -361,8 +361,8 @@ fun CocktailSheetPreview() {
                 venueName = "Bar Skutek",
                 tagline = "Never on the menu",
                 story = "One winter night in 2019 the bar was closing and one table would not " +
-                    "leave. Vít mixed something for the ones who stayed — bourbon, sour cherry, " +
-                    "a pinch of salt — and called it the night watch.",
+                    "leave. Vít mixed something for the ones who stayed (bourbon, sour cherry, " +
+                    "a pinch of salt) and called it the night watch.",
                 signature = "Vít, bar lead",
                 imageUrl = null,
                 nose = "Sour cherry, warm oak",

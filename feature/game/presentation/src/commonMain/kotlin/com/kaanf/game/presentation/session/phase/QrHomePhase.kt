@@ -1,15 +1,15 @@
 package com.kaanf.game.presentation.session.phase
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -23,11 +23,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.dp
 import com.kaanf.core.designsystem.component.avatar.AvatarCircle
 import com.kaanf.core.designsystem.component.avatar.avatarContentFor
-import com.kaanf.core.designsystem.component.button.BaseMiniButton
+import com.kaanf.core.designsystem.component.button.BaseButton
 import com.kaanf.core.designsystem.component.coachmark.coachmarkTarget
 import com.kaanf.core.designsystem.component.qr.UserQrCard
 import com.kaanf.core.designsystem.theme.AccessDefaults
@@ -44,6 +47,8 @@ import com.kaanf.game.presentation.session.MatchSessionState
 import com.kaanf.game.presentation.session.coachmark.GameCoachmarkKey
 import crew.feature.game.presentation.generated.resources.Res
 import crew.feature.game.presentation.generated.resources.leaderboard_points_format
+import crew.feature.game.presentation.generated.resources.match_phase_qr_home_title
+import crew.feature.game.presentation.generated.resources.match_phase_qr_home_qr_label
 import crew.feature.game.presentation.generated.resources.match_phase_qr_home_description
 import crew.feature.game.presentation.generated.resources.match_phase_qr_home_scan_action
 import crew.feature.game.presentation.generated.resources.match_you_avatar_label
@@ -73,24 +78,60 @@ fun QrHomePhase(
             )
         }
     }
-    // Duyuru chip'i içeriğin üstünde ayrı bir katmanda durur: top bar ile avatar arasına
-    // oturur, gelip gidince aşağıdaki içerik yerinden oynamaz.
-    Box(modifier = modifier.fillMaxSize()) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(scrollState)
+            .padding(horizontal = 22.dp)
+            .padding(top = 12.dp, bottom = 96.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        state.announcementBody?.let { body ->
+            AnnouncementChip(
+                body = body,
+                endsAtEpochMillis = state.announcementEndsAtEpochMillis,
+                onClick = if (state.announcementCocktail != null) {
+                    { onAction(MatchSessionAction.OnAnnouncementClicked) }
+                } else {
+                    null
+                },
+            )
+        }
+
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(scrollState)
-                .padding(start = 16.dp, end = 16.dp, bottom = 72.dp),
-            verticalArrangement = Arrangement.spacedBy(
-                space = 16.dp,
-                alignment = Alignment.CenterVertically
-            ),
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text(
+                text = stringResource(Res.string.match_phase_qr_home_title),
+                modifier = Modifier.semantics { heading() },
+                style = MaterialTheme.typography.displaySmall.copy(
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 32.sp,
+                    lineHeight = 34.sp,
+                    letterSpacing = (-0.8).sp,
+                ),
+                color = AccessDefaults.TextPrimary,
+            )
+            Text(
+                text = stringResource(Res.string.match_phase_qr_home_description),
+                style = MaterialTheme.typography.bodySmall.copy(lineHeight = 20.sp),
+                color = AccessDefaults.TextSecondary,
+            )
+        }
+
+        Column(
+            modifier = Modifier.widthIn(max = 360.dp).fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Column(
-                modifier = Modifier.coachmarkTarget(GameCoachmarkKey.Score),
-                verticalArrangement = Arrangement.spacedBy(2.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .coachmarkTarget(GameCoachmarkKey.Score),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 AvatarCircle(
                     borderSize = 0,
@@ -100,47 +141,49 @@ fun QrHomePhase(
                             .ifEmpty { stringResource(Res.string.match_you_avatar_label) },
                         seed = state.currentUserName.orEmpty(),
                     ),
-                    avatarSize = 64,
-                    textSize = 24.0,
+                    avatarSize = 44,
+                    textSize = 18.0,
                 )
-
                 Text(
                     text = state.currentUserName.orEmpty(),
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        color = AccessDefaults.TextPrimary,
-                        fontWeight = FontWeight.Bold,
-                    ),
+                    modifier = Modifier.weight(1f),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = AccessDefaults.TextPrimary,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
                 )
-
                 Text(
                     text = stringResource(
                         Res.string.leaderboard_points_format,
                         state.currentUserScore,
                     ),
-                    style = MaterialTheme.typography.bodySmall.copy(
-                        color = AccessDefaults.TextMuted,
-                        fontWeight = FontWeight.Bold
-                    ),
+                    modifier = Modifier
+                        .background(AccessDefaults.Accent, RoundedCornerShape(12.dp))
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = AccessDefaults.OnAccent,
                 )
             }
 
-            UserQrCard(
-                inputText = state.matchQrToken.orEmpty(),
+            Box(
                 modifier = Modifier
+                    .widthIn(max = 300.dp)
+                    .fillMaxWidth()
                     .coachmarkTarget(GameCoachmarkKey.Qr)
-                    .fillMaxWidth(0.8f),
-            )
+                    .background(AccessDefaults.Surface, RoundedCornerShape(16.dp))
+                    .padding(20.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                UserQrCard(
+                    inputText = state.matchQrToken.orEmpty(),
+                    qrContentDescription = stringResource(Res.string.match_phase_qr_home_qr_label),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
 
-            Text(
-                text = stringResource(Res.string.match_phase_qr_home_description),
-                style = MaterialTheme.typography.bodySmall.copy(
-                    color = AccessDefaults.TextSecondary,
-                    fontWeight = FontWeight.Medium,
-                    textAlign = TextAlign.Center,
-                ),
-            )
-
-            BaseMiniButton(
+            BaseButton(
                 text = stringResource(Res.string.match_phase_qr_home_scan_action),
                 modifier = Modifier.coachmarkTarget(GameCoachmarkKey.Scan),
                 backgroundColor = AccessDefaults.Surface,
@@ -154,32 +197,26 @@ fun QrHomePhase(
                     }
                 },
                 filled = false,
-                textColor = AccessDefaults.TextPrimary,
+                contentColor = AccessDefaults.TextPrimary,
+                pill = true,
                 leadingIcon = AccessIcons.QR,
             )
         }
 
-        state.announcementBody?.let { body ->
-            AnnouncementChip(
-                body = body,
-                endsAtEpochMillis = state.announcementEndsAtEpochMillis,
-                modifier = Modifier.align(Alignment.TopCenter).padding(top = 8.dp),
-                onClick = if (state.announcementCocktail != null) {
-                    { onAction(MatchSessionAction.OnAnnouncementClicked) }
-                } else {
-                    null
-                },
-            )
-        }
     }
 }
 
 @Composable
-@Preview
+@Preview(name = "QR home · compact", widthDp = 320, heightDp = 640)
+@Preview(name = "QR home · phone", widthDp = 390, heightDp = 780)
 fun QrHomePhasePreview() {
     CrewTheme {
         QrHomePhase(
-            state = MatchSessionState(),
+            state = MatchSessionState(
+                currentUserName = "Kaan",
+                currentUserScore = 120,
+                matchQrToken = "crew-preview-player",
+            ),
             onAction = {}
         )
     }

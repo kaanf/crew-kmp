@@ -9,4 +9,5 @@ package com.kaanf.core.presentation.model
 data class LobbyMember(
     val id: String,
     val avatar: UserAvatar,
+    val fullName: String? = null,
 )

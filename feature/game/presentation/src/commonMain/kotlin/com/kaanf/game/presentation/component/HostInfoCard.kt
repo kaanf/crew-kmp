@@ -62,7 +62,7 @@ fun HostInfoCard() {
                         ),
                     ) {
                         append(
-                            "\tyour host"
+                            " your host"
                         )
                     }
                 },

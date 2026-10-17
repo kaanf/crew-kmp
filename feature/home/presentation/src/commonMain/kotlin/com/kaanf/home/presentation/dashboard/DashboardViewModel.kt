@@ -41,6 +41,7 @@ class DashboardViewModel(
     ) { currentState, currentUser ->
         if (currentUser != null) {
             currentState.copy(
+                showProfilePhotoReminder = currentUser.profilePictureUrl.isNullOrBlank(),
                 profilePictureUrl = currentUser.profilePictureUrl,
                 userName = currentUser.fullName
             )
@@ -59,6 +60,9 @@ class DashboardViewModel(
     fun onAction(action: DashboardAction) {
         when (action) {
             is DashboardAction.OnEventClicked -> navigateToEventDetail(action.id)
+            DashboardAction.OnProfilePhotoReminderClicked -> viewModelScope.launch {
+                eventChannel.send(DashboardEvent.NavigateToProfile)
+            }
             is DashboardAction.OnRefresh -> loadEvents(isRefresh = true)
             // First resume coincides with onStart's initial load; skip it, then
             // silently re-sync on every return to the screen (e.g. after buying a ticket).

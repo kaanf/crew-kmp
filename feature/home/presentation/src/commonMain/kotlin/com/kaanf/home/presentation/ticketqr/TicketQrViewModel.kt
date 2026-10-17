@@ -12,6 +12,7 @@ import com.kaanf.core.presentation.snackbar.SnackbarVariant
 import com.kaanf.core.presentation.snackbar.toSnackbarMessage
 import com.kaanf.core.presentation.util.UIText
 import com.kaanf.home.domain.usecase.CheckInUseCase
+import com.kaanf.home.domain.usecase.GetEventDetailUseCase
 import com.kaanf.home.domain.usecase.GetMyTicketUseCase
 import com.kaanf.home.presentation.eventcode.component.CodeFieldStatus
 import com.kaanf.home.presentation.mapper.toUiModel
@@ -33,6 +34,7 @@ import kotlinx.coroutines.launch
 class TicketQrViewModel(
     private val getMyTicketUseCase: GetMyTicketUseCase,
     private val checkInUseCase: CheckInUseCase,
+    private val getEventDetailUseCase: GetEventDetailUseCase,
     private val snackbarController: SnackbarController,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
@@ -53,6 +55,13 @@ class TicketQrViewModel(
 
     init {
         loadMyTicket()
+        // Event artwork is optional; loading it must never delay access to the door code.
+        viewModelScope.launch {
+            when (val result = getEventDetailUseCase(eventId)) {
+                is Result.Success -> _state.update { it.copy(eventDetail = result.data.toUiModel()) }
+                is Result.Failure -> Unit
+            }
+        }
     }
 
     fun onAction(action: TicketQrAction) {

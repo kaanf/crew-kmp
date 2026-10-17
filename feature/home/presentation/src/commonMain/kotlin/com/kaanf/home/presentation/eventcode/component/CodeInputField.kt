@@ -40,6 +40,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.kaanf.core.designsystem.theme.AccessDefaults
+import com.kaanf.core.designsystem.theme.BricolageGrotesque
 import androidx.compose.ui.unit.sp
 
 enum class CodeFieldStatus { Editing, Success, Error }
@@ -136,8 +138,10 @@ private fun CodeCell(
                     text = char.toString(),
                     style = TextStyle(
                         color = Cream,
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.Medium,
+                        fontSize = 32.sp,
+                        fontFamily = BricolageGrotesque,
+                        fontWeight = FontWeight.ExtraBold,
+                        fontFeatureSettings = "tnum",
                         textAlign = TextAlign.Center,
                     ),
                 )
@@ -175,9 +179,9 @@ private fun BlinkingCursor(
 
 private const val DISABLED_ALPHA = 0.7f
 
-private val Accent = Color(0xFFA4D63C)
-private val Cream = Color(0xFFF2EDE0)
-private val EmptyFill = Color(0xFF211F18)
-private val EmptyBorder = Color(0xFF2E2B22)
-private val SuccessFill = Color(0xFF42420F)
-private val ErrorRed = Color(0xFFE05A5A)
+private val Accent = AccessDefaults.Accent
+private val Cream = AccessDefaults.TextPrimary
+private val EmptyFill = AccessDefaults.SurfaceElevated
+private val EmptyBorder = AccessDefaults.Border
+private val SuccessFill = AccessDefaults.Accent.copy(alpha = 0.12f)
+private val ErrorRed = AccessDefaults.Error

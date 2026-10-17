@@ -115,7 +115,7 @@ fun LoserActiveTaskPhase(
                             val tilt = remember(it.id) { tableTiltFor(it.id) }
                             GradientChallengeCard(
                                 card = it.toUiModel(),
-                                cardSize = TaskCardSize,
+                                width = TaskCardWidth,
                                 emphasized = true,
                                 modifier = Modifier.rotate(tilt),
                             )

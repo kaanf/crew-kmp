@@ -1,5 +1,6 @@
 package com.kaanf.home.presentation.mapper
 
+import com.kaanf.core.domain.model.event.EventStatus
 import com.kaanf.core.domain.model.event.EventDetail
 import com.kaanf.core.domain.model.venue.Venue
 import com.kaanf.core.palette.BackdropPalette
@@ -20,6 +21,7 @@ fun EventDetail.toUiModel(): EventDetailUiModel {
         isFree = price.amount == 0L,
         // Backend EventPhase.name gönderir: NotOpened / EntryOpen / Gameplay / Finished.
         isEnded = phase == "Finished",
+        isLocked = status == EventStatus.Locked,
         // ponytail: backend görsel dönmezse eski sabit hero görseline düşülür; backend dolunca ölü kod olur
         imageUrls = imageUrls.ifEmpty { listOf(FALLBACK_HERO_IMAGE_URL) },
         location = venue?.toLocationUiModel(),

@@ -1,5 +1,6 @@
-package com.kaanf.home.presentation.eventdetail.component
+package com.kaanf.home.presentation.component
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -7,12 +8,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -29,14 +32,17 @@ import org.jetbrains.compose.resources.painterResource
 internal fun EventLocationRow(
     location: EventLocationUiModel,
     modifier: Modifier = Modifier,
+    showFullAddress: Boolean = false,
 ) {
     val uriHandler = LocalUriHandler.current
 
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(AccessDefaults.TextPrimary.copy(alpha = 0.04f))
             .clickable { uriHandler.openUri(location.toDirectionsUri()) }
-            .padding(vertical = 8.dp),
+            .padding(horizontal = 12.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -63,12 +69,12 @@ internal fun EventLocationRow(
             )
 
             Text(
-                text = "${location.district}, ${location.city}",
+                text = if (showFullAddress) location.address else "${location.district}, ${location.city}",
                 style = MaterialTheme.typography.bodySmall.copy(
                     color = AccessDefaults.TextSecondary,
                     fontSize = 12.sp,
                 ),
-                maxLines = 1,
+                maxLines = if (showFullAddress) 2 else 1,
                 overflow = TextOverflow.Ellipsis,
             )
         }

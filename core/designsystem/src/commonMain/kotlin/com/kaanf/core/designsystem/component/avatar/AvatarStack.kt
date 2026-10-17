@@ -35,10 +35,12 @@ fun AvatarStack(
             )
         }
 
-        ExtraAvatarCircle(
-            count = extraCount,
-            avatarSize = avatarSize,
-            modifier = Modifier.offset(x = step * avatars.size)
-        )
+        if (extraCount > 0) {
+            ExtraAvatarCircle(
+                count = extraCount,
+                avatarSize = avatarSize,
+                modifier = Modifier.offset(x = step * avatars.size)
+            )
+        }
     }
 }

@@ -21,7 +21,10 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         dispatchAppleSignInIntent(intent)
-        if (savedInstanceState == null) dispatchPushLink(intent)
+        if (savedInstanceState == null) {
+            dispatchPushLink(intent)
+            dispatchEventLink(intent)
+        }
         attachAppReviewActivity(this)
 
         setContent {
@@ -38,6 +41,7 @@ class MainActivity : ComponentActivity() {
         setIntent(intent)
         dispatchAppleSignInIntent(intent)
         dispatchPushLink(intent)
+        dispatchEventLink(intent)
     }
 
     /**
@@ -48,6 +52,14 @@ class MainActivity : ComponentActivity() {
         val link = intent.getStringExtra(PUSH_LINK_KEY) ?: return
         intent.removeExtra(PUSH_LINK_KEY)
         ExternalUriHandler.onNewUri(link)
+    }
+
+    private fun dispatchEventLink(intent: Intent) {
+        val uri = intent.data ?: return
+        if (uri.scheme == "crew" && uri.host == "event") {
+            ExternalUriHandler.onNewUri(uri.toString())
+            intent.data = null
+        }
     }
 
     private fun dispatchAppleSignInIntent(intent: Intent?) {

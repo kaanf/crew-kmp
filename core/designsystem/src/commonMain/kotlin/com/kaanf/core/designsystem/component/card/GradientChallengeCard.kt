@@ -1,69 +1,60 @@
 package com.kaanf.core.designsystem.component.card
 
 import androidx.compose.animation.core.animateFloatAsState
-import com.kaanf.core.designsystem.markImmutable
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.border
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.FilterQuality
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kaanf.core.designsystem.theme.BricolageGrotesque
-import androidx.compose.ui.unit.TextUnit
-import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.presentation.model.ChallengeCardUiModel
 import com.kaanf.core.presentation.model.ChallengeCardVariant
-import com.kaanf.core.presentation.util.dottedBorder
+import crew.core.designsystem.generated.resources.Res
+import crew.core.designsystem.generated.resources.card_bold
+import crew.core.designsystem.generated.resources.card_challenge
+import crew.core.designsystem.generated.resources.card_flirty
+import crew.core.designsystem.generated.resources.card_icebreaker
+import crew.core.designsystem.generated.resources.card_photo
+import crew.core.designsystem.generated.resources.card_storytime
+import crew.core.designsystem.generated.resources.card_team
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun GradientChallengeCard(
     modifier: Modifier = Modifier,
     card: ChallengeCardUiModel,
-    cardSize: Dp = 200.dp,
+    width: Dp = ChallengeCardDefaultWidth,
     // Oyun ekranlarında kart tek başına sahnede: görev metni büyük ve kalın, okunması tek bakışta.
     emphasized: Boolean = false,
+    showPoints: Boolean = true,
+    descriptionSpacing: Dp = if (emphasized) 8.dp else 6.dp,
 ) {
-    val colors = getChallengeCardColor(card.variant)
-
     var isPressed by remember { mutableStateOf(false) }
 
     val scale by animateFloatAsState(
@@ -74,7 +65,8 @@ fun GradientChallengeCard(
 
     Box(
         modifier = modifier
-            .size(cardSize)
+            .width(width)
+            .aspectRatio(ChallengeCardAspectRatio)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
@@ -88,331 +80,86 @@ fun GradientChallengeCard(
                     }
                 )
             }
-            .clip(RoundedCornerShape(28.dp))
-            .drawWithCache {
-                // Gradient'ler yumuşak olduğu için tam çözünürlükte rasterize etmeye gerek
-                // yok: küçük boyanıp büyütülünce göz ayırt edemiyor ama LazyRow'a her
-                // girişte main thread'de ödenen CPU raster maliyeti ~20 kat düşüyor.
-                val rasterScale = CARD_RASTER_PX / size.width
-                val corner = 28.dp.toPx() * rasterScale
+            .clip(ChallengeCardShape),
+    ) {
+        Image(
+            painter = painterResource(card.variant.paper),
+            contentDescription = null,
+            contentScale = ContentScale.FillBounds,
+            modifier = Modifier.fillMaxSize(),
+        )
 
-                val backgroundBrush = Brush.verticalGradient(
-                    colors = colors.backgroundColors,
-                    startY = 0f,
-                    endY = Float.POSITIVE_INFINITY,
-                )
-
-                val glowBrush = Brush.radialGradient(
-                    colors = colors.glowColors,
-                    center = Offset(0f, 0f),
-                    radius = CARD_RASTER_PX * 1.45f,
-                )
-
-                val rasterHeight = (size.height * rasterScale).toInt().coerceAtLeast(1)
-                val cachedImage = ImageBitmap(CARD_RASTER_PX.toInt(), rasterHeight)
-                CanvasDrawScope().draw(
-                    density = this,
-                    layoutDirection = layoutDirection,
-                    canvas = Canvas(cachedImage),
-                    size = Size(CARD_RASTER_PX, rasterHeight.toFloat()),
-                ) {
-                    drawRect(brush = backgroundBrush)
-                    drawRoundRect(
-                        brush = glowBrush,
-                        cornerRadius = CornerRadius(corner, corner),
-                    )
-                }
-                cachedImage.markImmutable()
-
-                val source = IntSize(CARD_RASTER_PX.toInt(), rasterHeight)
-                val destination = IntSize(
-                    size.width.toInt().coerceAtLeast(1),
-                    size.height.toInt().coerceAtLeast(1),
-                )
-
-                onDrawBehind {
-                    drawImage(
-                        image = cachedImage,
-                        srcOffset = IntOffset.Zero,
-                        srcSize = source,
-                        dstOffset = IntOffset.Zero,
-                        dstSize = destination,
-                        filterQuality = FilterQuality.Low,
-                    )
-                }
-            }
-            .border(
-                width = 1.dp,
-                brush = Brush.verticalGradient(colors.borderColors),
-                shape = RoundedCornerShape(28.dp),
-            )
-            .padding(vertical = 12.dp, horizontal = 16.dp),
-        content = {
-            Column(
-                modifier = Modifier.wrapContentSize(),
-                verticalArrangement = Arrangement.SpaceBetween,
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = width * 0.07f, vertical = width * 0.05f),
+            verticalArrangement = Arrangement.spacedBy(descriptionSpacing),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(
-                    text = "${card.variant.emoji} ${card.variant.name.uppercase()}",
-                    color = card.variant.getColor(),
+                    text = card.variant.name.uppercase(),
+                    color = card.variant.labelColor,
                     fontWeight = FontWeight.Bold,
                     fontSize = if (emphasized) 12.sp else 10.sp,
                     letterSpacing = 2.sp,
                 )
 
-                Text(
-                    text = card.description,
-                    color = Color(0xFFF4EEE8),
-                    fontFamily = if (emphasized) BricolageGrotesque else null,
-                    fontSize = if (emphasized) 19.sp else 14.sp,
-                    minLines = 4,
-                    maxLines = if (emphasized) 6 else 4,
-                    overflow = TextOverflow.Ellipsis,
-                    lineHeight = if (emphasized) 24.sp else 20.sp,
-                    fontWeight = if (emphasized) FontWeight.ExtraBold else FontWeight.SemiBold,
-                    letterSpacing = if (emphasized) (-0.2).sp else TextUnit.Unspecified,
-                    modifier = if (emphasized) Modifier.padding(top = 10.dp) else Modifier,
-                )
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = "+${card.points} PTS",
-                    color = card.variant.getColor(),
-                    fontSize = if (emphasized) 15.sp else 12.sp,
-                    textAlign = TextAlign.End,
-                    fontWeight = FontWeight.ExtraBold,
-                )
+                if (showPoints) {
+                    Text(
+                        text = "+${card.points} PTS",
+                        color = card.variant.labelColor,
+                        fontSize = if (emphasized) 13.sp else 10.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                    )
+                }
             }
-        },
-    )
-}
 
-@Immutable
-private data class ChallengeCardColors(
-    val backgroundColors: List<Color>,
-    val glowColors: List<Color>,
-    val borderColors: List<Color>,
-    val accent: Color,
-    val textPrimary: Color = Color(0xFFF4EEE8),
-    val textSecondary: Color = Color(0xFF6E625B),
-)
-
-private fun getChallengeCardColor(variant: ChallengeCardVariant): ChallengeCardColors {
-    return when (variant) {
-        ChallengeCardVariant.Challenge -> ChallengeCardColors(
-            backgroundColors = listOf(
-                Color(0xFF101923),
-                Color(0xFF0E151D),
-                Color(0xFF0B1118),
-                Color(0xFF090D12),
-                Color(0xFF07090D),
-            ),
-            glowColors = listOf(
-                Color(0x336FB7FF),
-                Color(0x226FB7FF),
-                Color.Transparent,
-            ),
-            borderColors = listOf(
-                Color(0xFF29435E),
-                Color(0xFF172838),
-            ),
-            accent = AccessDefaults.Sky,
-        )
-
-        ChallengeCardVariant.Bold -> ChallengeCardColors(
-            backgroundColors = listOf(
-                Color(0xFF211511),
-                Color(0xFF1C130F),
-                Color(0xFF17100D),
-                Color(0xFF120D0A),
-                Color(0xFF0C0B08),
-            ),
-            glowColors = listOf(
-                Color(0x33FF7A5C),
-                Color(0x22FF7A5C),
-                Color.Transparent,
-            ),
-            borderColors = listOf(
-                Color(0xFF5A2F25),
-                Color(0xFF2E1914),
-            ),
-            accent = AccessDefaults.Coral,
-        )
-
-        ChallengeCardVariant.Icebreaker -> ChallengeCardColors(
-            backgroundColors = listOf(
-                Color(0xFF1B2110),
-                Color(0xFF171C0E),
-                Color(0xFF12170B),
-                Color(0xFF0E1208),
-                Color(0xFF090B06),
-            ),
-            glowColors = listOf(
-                Color(0x33C8FF3D),
-                Color(0x22C8FF3D),
-                Color.Transparent,
-            ),
-            borderColors = listOf(
-                Color(0xFF4B6120),
-                Color(0xFF293511),
-            ),
-            accent = AccessDefaults.Accent,
-        )
-
-        ChallengeCardVariant.Flirty -> ChallengeCardColors(
-            backgroundColors = listOf(
-                Color(0xFF241018),
-                Color(0xFF1E0E14),
-                Color(0xFF180B10),
-                Color(0xFF12080C),
-                Color(0xFF0B0608),
-            ),
-            glowColors = listOf(
-                Color(0x33FF5A7A),
-                Color(0x22FF5A7A),
-                Color.Transparent,
-            ),
-            borderColors = listOf(
-                Color(0xFF5E2433),
-                Color(0xFF35141D),
-            ),
-            accent = AccessDefaults.Rose,
-        )
-
-        ChallengeCardVariant.Team -> ChallengeCardColors(
-            backgroundColors = listOf(
-                Color(0xFF10211D),
-                Color(0xFF0E1B18),
-                Color(0xFF0B1513),
-                Color(0xFF08100E),
-                Color(0xFF050B0A),
-            ),
-            glowColors = listOf(
-                Color(0x335BE0C5),
-                Color(0x225BE0C5),
-                Color.Transparent,
-            ),
-            borderColors = listOf(
-                Color(0xFF24594F),
-                Color(0xFF14332D),
-            ),
-            accent = AccessDefaults.Teal,
-        )
-
-        ChallengeCardVariant.Storytime -> ChallengeCardColors(
-            backgroundColors = listOf(
-                Color(0xFF241A0D),
-                Color(0xFF1E150B),
-                Color(0xFF171008),
-                Color(0xFF120C06),
-                Color(0xFF0B0804),
-            ),
-            glowColors = listOf(
-                Color(0x33FFB341),
-                Color(0x22FFB341),
-                Color.Transparent,
-            ),
-            borderColors = listOf(
-                Color(0xFF60401A),
-                Color(0xFF35230E),
-            ),
-            accent = AccessDefaults.Amber,
-        )
-
-        ChallengeCardVariant.Photo -> ChallengeCardColors(
-            backgroundColors = listOf(
-                Color(0xFF10231B),
-                Color(0xFF0E1D17),
-                Color(0xFF0B1712),
-                Color(0xFF08110D),
-                Color(0xFF050B09),
-            ),
-            glowColors = listOf(
-                Color(0x336BE7A5),
-                Color(0x226BE7A5),
-                Color.Transparent,
-            ),
-            borderColors = listOf(
-                Color(0xFF245C46),
-                Color(0xFF143429),
-            ),
-            accent = AccessDefaults.Mint,
-        )
-
-        ChallengeCardVariant.Confession -> ChallengeCardColors(
-            backgroundColors = listOf(
-                Color(0xFF171023),
-                Color(0xFF130E1D),
-                Color(0xFF0F0B17),
-                Color(0xFF0B0812),
-                Color(0xFF07050C),
-            ),
-            glowColors = listOf(
-                Color(0x339D7AFF),
-                Color(0x229D7AFF),
-                Color.Transparent,
-            ),
-            borderColors = listOf(
-                Color(0xFF3A2A5E),
-                Color(0xFF211838),
-            ),
-            accent = AccessDefaults.Violet,
-        )
+            // Sağ alttaki illüstrasyonun üstüne taşmasın diye metin kartın sol ~%80'inde kalıyor.
+            Text(
+                text = card.description,
+                color = ChallengeCardInk,
+                fontFamily = BricolageGrotesque,
+                fontSize = if (emphasized) 18.sp else 14.sp,
+                maxLines = 4,
+                overflow = TextOverflow.Ellipsis,
+                lineHeight = if (emphasized) 22.sp else 18.sp,
+                fontWeight = FontWeight.ExtraBold,
+                letterSpacing = (-0.2).sp,
+                modifier = Modifier.fillMaxWidth(0.8f),
+            )
+        }
     }
 }
 
-private fun ChallengeCardVariant.getColor(): Color {
-    return when (this) {
-        ChallengeCardVariant.Icebreaker -> AccessDefaults.Accent
-        ChallengeCardVariant.Team -> AccessDefaults.Teal
-        ChallengeCardVariant.Storytime -> AccessDefaults.Amber
-        ChallengeCardVariant.Challenge -> AccessDefaults.Sky
-        ChallengeCardVariant.Photo -> AccessDefaults.Mint
-        ChallengeCardVariant.Bold -> AccessDefaults.Coral
-        ChallengeCardVariant.Confession -> AccessDefaults.Violet
-        ChallengeCardVariant.Flirty -> AccessDefaults.Rose
+// ponytail: Confession'ın kendi kağıdı yok; konuşma balonlu Storytime kağıdı ödünç alındı.
+private val ChallengeCardVariant.paper: DrawableResource
+    get() = when (this) {
+        ChallengeCardVariant.Icebreaker -> Res.drawable.card_icebreaker
+        ChallengeCardVariant.Team -> Res.drawable.card_team
+        ChallengeCardVariant.Storytime, ChallengeCardVariant.Confession -> Res.drawable.card_storytime
+        ChallengeCardVariant.Challenge -> Res.drawable.card_challenge
+        ChallengeCardVariant.Photo -> Res.drawable.card_photo
+        ChallengeCardVariant.Bold -> Res.drawable.card_bold
+        ChallengeCardVariant.Flirty -> Res.drawable.card_flirty
     }
-}
 
-@Composable
-fun MoreDeckCard() {
-    Box(
-        modifier = Modifier
-            .width(120.dp)
-            .height(200.dp)
-            .dottedBorder(
-                color = AccessDefaults.TextMuted,
-                shape = RoundedCornerShape(28.dp),
-                strokeWidth = 1.dp,
-                dotLength = 2.dp,
-                gapLength = 4.dp,
-            ),
-        content = {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text(
-                    text = "+187",
-                    color = AccessDefaults.TextPrimary,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.SemiBold,
-                )
+private val ChallengeCardVariant.labelColor: Color
+    get() = when (this) {
+        ChallengeCardVariant.Icebreaker -> Color(0xFFD0E085)
+        ChallengeCardVariant.Team -> Color(0xFF83CEBA)
+        ChallengeCardVariant.Storytime -> Color(0xFF9CA5FA)
+        ChallengeCardVariant.Challenge -> Color(0xFFEA75C3)
+        ChallengeCardVariant.Photo -> Color(0xFF81A6F9)
+        ChallengeCardVariant.Bold -> Color(0xFFFCA97D)
+        ChallengeCardVariant.Confession -> Color(0xFFB9A2F0)
+        ChallengeCardVariant.Flirty -> Color(0xFFE986AD)
+    }
 
-                Text(
-                    text = "More\nin the\ndeck".uppercase(),
-                    color = AccessDefaults.TextMuted,
-                    fontSize = 11.sp,
-                    textAlign = TextAlign.Center,
-                    lineHeight = 16.sp
-                )
-            }
-        },
-    )
-}
-
-// 200dp kart @3x'te ~600px; yumuşak gradient için 128px raster + upscale yeterli.
-private const val CARD_RASTER_PX = 128f
+/** Kağıt kart görsellerinin (card_*.webp) en/boy oranı. */
+const val ChallengeCardAspectRatio = 1.95f
+val ChallengeCardDefaultWidth = 260.dp
+val ChallengeCardShape = RoundedCornerShape(8)
+private val ChallengeCardInk = Color(0xFFF4EEE6)

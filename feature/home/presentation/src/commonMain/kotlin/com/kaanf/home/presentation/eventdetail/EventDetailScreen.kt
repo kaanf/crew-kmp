@@ -8,6 +8,11 @@ import androidx.compose.foundation.clickable
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.width
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.Spring
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -32,8 +37,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -51,14 +59,19 @@ import com.kaanf.core.palette.CoverBackdrop
 import com.kaanf.core.presentation.model.AppTopBarState
 import com.kaanf.core.presentation.util.ObserveAsEvents
 import com.kaanf.home.presentation.eventdetail.component.EventDetailInfoSection
-import com.kaanf.home.presentation.eventdetail.component.EventLocationRow
+import com.kaanf.home.presentation.component.EventLocationRow
 import com.kaanf.home.presentation.eventdetail.component.EventImageViewer
 import com.kaanf.home.presentation.eventdetail.component.EventOnboardingCard
+import com.kaanf.home.presentation.eventdetail.component.GuestListCard
+import com.kaanf.home.presentation.eventdetail.component.GuestListSheet
+import com.kaanf.home.presentation.eventdetail.component.LockedGuestListCard
 import com.kaanf.home.presentation.eventdetail.component.PagerDots
 import com.kaanf.home.presentation.eventdetail.component.SafetyBadge
+import com.kaanf.home.domain.model.EventGuest
 import com.kaanf.home.presentation.model.EventDetailUiModel
 import crew.feature.home.presentation.generated.resources.Res
 import crew.feature.home.presentation.generated.resources.event_detail_free_ticket_cta
+import crew.feature.home.presentation.generated.resources.event_detail_locked_cta
 import crew.feature.home.presentation.generated.resources.event_detail_ended_cta
 import crew.feature.home.presentation.generated.resources.event_detail_load_error_description
 import crew.feature.home.presentation.generated.resources.event_detail_doors_open_at
@@ -79,6 +92,7 @@ fun EventDetailRoot(
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     val listState: LazyListState = rememberLazyListState()
+    val shareEvent = rememberEventShareLauncher()
 
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
@@ -89,19 +103,29 @@ fun EventDetailRoot(
     }
 
     Box(modifier = Modifier.fillMaxSize().background(AccessDefaults.Background)) {
-        CoverBackdrop(
-            palette = state.event?.backdropPalette,
-            overlayColor = AccessDefaults.Background,
-            legibleTextColor = AccessDefaults.TextSecondary,
-            modifier = Modifier.matchParentSize(),
-        )
-
         AppScaffold(
             containerColor = Color.Transparent,
             topBar = {
                 AppTopBar(
                     state = AppTopBarState.EventDetail,
-                    transparentAtRest = true,
+                    elevated = { listState.canScrollBackward },
+                    transparentAtRest = false,
+                    rightActions = {
+                        EventShareButton(
+                            enabled = state.event != null,
+                            onClick = {
+                                state.event?.let { event ->
+                                    shareEvent(
+                                        listOfNotNull(
+                                            event.title,
+                                            event.heroDate,
+                                            event.location?.name,
+                                        ).joinToString("\n"),
+                                    )
+                                }
+                            },
+                        )
+                    },
                     onBackClick = { onBackClick() },
                 )
             },
@@ -158,6 +182,8 @@ fun EventDetailScreen(
                     listState = listState,
                     contentTopPadding = contentTopPadding,
                     event = event,
+                    guests = state.guests,
+                    isGuestsLoading = state.isGuestsLoading,
                     isCheckingOut = state.isCheckingOut,
                     onAction = onAction,
                 )
@@ -200,20 +226,55 @@ private fun EventDetailContent(
     listState: LazyListState,
     contentTopPadding: Dp,
     event: EventDetailUiModel,
+    guests: List<EventGuest>,
+    isGuestsLoading: Boolean,
     isCheckingOut: Boolean,
     onAction: (EventDetailAction) -> Unit,
 ) {
     var viewerPage by rememberSaveable { mutableStateOf<Int?>(null) }
+    var isGuestListOpen by rememberSaveable { mutableStateOf(false) }
 
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().background(AccessDefaults.Background).clipToBounds(),
     ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(contentTopPadding + HeroHeight + 160.dp)
+                .graphicsLayer {
+                    translationY = if (listState.firstVisibleItemIndex == 0) {
+                        -listState.firstVisibleItemScrollOffset.toFloat()
+                    } else {
+                        -size.height
+                    }
+                }
+                .drawWithCache {
+                    val fade = Brush.verticalGradient(
+                        0f to Color.Transparent,
+                        0.60f to Color.Transparent,
+                        0.85f to AccessDefaults.Background.copy(alpha = 0.85f),
+                        1f to AccessDefaults.Background,
+                    )
+                    onDrawWithContent {
+                        drawContent()
+                        drawRect(fade)
+                    }
+                },
+        ) {
+            CoverBackdrop(
+                palette = event.backdropPalette,
+                overlayColor = AccessDefaults.Background,
+                legibleTextColor = AccessDefaults.TextSecondary,
+                modifier = Modifier.matchParentSize(),
+            )
+        }
+
         LazyColumn(
             state = listState,
             modifier = Modifier
                 .fillMaxSize(),
             contentPadding = PaddingValues(top = contentTopPadding),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(SectionSpacing),
         ) {
             item(contentType = "hero") {
                 EventDetailHero(
@@ -262,12 +323,40 @@ private fun EventDetailContent(
                 }
             }
 
-            item(contentType = "event-info") {
-                EventDetailInfoSection(
-                    description = event.description,
+            if (!event.description.isNullOrBlank()) {
+                item(contentType = "event-info") {
+                    EventDetailInfoSection(
+                        description = event.description,
+                        modifier = Modifier.padding(horizontal = BodyPadding),
+                    )
+                }
+            }
+
+            if (!event.hasMyTicket) {
+                item(contentType = "guest-list-locked") {
+                    LockedGuestListCard(
+                        modifier = Modifier.padding(horizontal = BodyPadding),
+                    )
+                }
+            } else {
+                item(contentType = "guest-list") {
+                    GuestListCard(
+                        guests = guests,
+                        isLoading = isGuestsLoading,
+                        onClick = { if (event.hasMyTicket) isGuestListOpen = true },
+                        modifier = Modifier.padding(horizontal = BodyPadding),
+                    )
+                }
+            }
+
+            /*
+            item(key = "plot-twist", contentType = "plot-twist") {
+                EventPlotTwistCard(
+                    eventId = event.id,
                     modifier = Modifier.padding(horizontal = BodyPadding),
                 )
             }
+             */
 
             item(contentType = "onboarding-card") {
                 Box(modifier = Modifier.padding(horizontal = BodyPadding)) {
@@ -286,37 +375,44 @@ private fun EventDetailContent(
             }
         }
 
-        // Bilet satışı Gameplay boyunca da açık (backend TICKETABLE_PHASES ile aynı kural);
-        // kilit yalnız etkinlik bittiğinde.
-        val ctaLocked = event.isEnded
-        BaseButton(
-            text = when {
-                event.isEnded -> stringResource(Res.string.event_detail_ended_cta)
-                event.hasMyTicket -> stringResource(Res.string.event_detail_my_ticket_cta)
-                event.isFree -> stringResource(Res.string.event_detail_free_ticket_cta)
-                else -> stringResource(Res.string.event_detail_ticket_cta, event.formattedPrice)
-            },
-            onClick = {
-                if (!event.hasMyTicket) {
-                    onAction(EventDetailAction.OnCheckoutClicked)
-                } else {
-                    onAction(EventDetailAction.GoToTicketQr)
-                }
-            },
-            modifier =
-                Modifier
-                    .padding(bottom = 20.dp)
-                    .align(Alignment.BottomCenter)
-                    // Outer size modifier wins over BaseButton's default 52.dp height.
-                    .height(44.dp),
-            isLoading = isCheckingOut,
-            enabled = !isCheckingOut && !ctaLocked,
-            backgroundColor = Color.White,
-            borderColor = Color.White,
-            contentColor = AccessDefaults.Background,
-            fillMaxWidth = false,
-            pill = true,
-        )
+        val ctaLocked = event.isEnded || event.isLocked
+        BoxWithConstraints(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .padding(start = BodyPadding, end = BodyPadding, bottom = 20.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            val ctaWidth by animateDpAsState(
+                targetValue = if (isCheckingOut) 62.dp.coerceAtMost(maxWidth) else maxWidth,
+                animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+                label = "event_cta_width",
+            )
+            BaseButton(
+                text = when {
+                    event.isLocked -> stringResource(Res.string.event_detail_locked_cta)
+                    event.isEnded -> stringResource(Res.string.event_detail_ended_cta)
+                    event.hasMyTicket -> stringResource(Res.string.event_detail_my_ticket_cta)
+                    event.isFree -> stringResource(Res.string.event_detail_free_ticket_cta)
+                    else -> stringResource(Res.string.event_detail_ticket_cta, event.formattedPrice)
+                },
+                onClick = {
+                    if (!event.hasMyTicket) {
+                        onAction(EventDetailAction.OnCheckoutClicked)
+                    } else {
+                        onAction(EventDetailAction.GoToTicketQr)
+                    }
+                },
+                modifier = Modifier.width(ctaWidth),
+                isLoading = isCheckingOut,
+                enabled = !isCheckingOut && !ctaLocked,
+                backgroundColor = Color.White,
+                borderColor = Color.White,
+                contentColor = AccessDefaults.Background,
+                filled = true,
+                pill = true,
+            )
+        }
     }
 
     viewerPage?.let { page ->
@@ -326,11 +422,15 @@ private fun EventDetailContent(
             onDismiss = { viewerPage = null },
         )
     }
+
+    if (isGuestListOpen && event.hasMyTicket) {
+        GuestListSheet(
+            guests = guests,
+            onDismiss = { isGuestListOpen = false },
+        )
+    }
 }
 
-/**
- * Kenarlardan içeride, ortalanmış hero kartı: gölge ve üst kenar ışığı ile arka plandan ayrışır.
- */
 @Composable
 private fun EventDetailHero(
     imageUrls: List<String>,
@@ -342,7 +442,8 @@ private fun EventDetailHero(
         modifier = Modifier
             .fillMaxWidth()
             .height(HeroHeight)
-            .padding(horizontal = HeroInset, vertical = 12.dp)
+            .padding(horizontal = HeroInset)
+            .padding(top = 12.dp)
             .shadow(
                 elevation = 28.dp,
                 shape = HeroShape,
@@ -387,13 +488,13 @@ private fun EventDetailHero(
     }
 }
 
-private val HeroHeight = 396.dp
-private val HeroInset = 16.dp
+private val HeroHeight = 344.dp
+private val HeroInset = 28.dp
 private val BodyPadding = 22.dp
+private val SectionSpacing = 20.dp
 
 private val HeroShape = RoundedCornerShape(28.dp)
 
-// Üstten gelen ışık hissi: kenar çizgisi yukarıda parlak, aşağıda kaybolur.
 private val HeroEdgeLight = Brush.verticalGradient(
     0f to Color.White.copy(alpha = 0.18f),
     0.5f to Color.Transparent,

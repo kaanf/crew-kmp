@@ -107,8 +107,8 @@ fun BaseButton(
             modifier
                 .then(if (fillMaxWidth) Modifier.fillMaxWidth() else Modifier)
                 .height(52.dp)
-                // Loading shares the dimmed "disabled" look: normal background at 0.5 alpha.
-                .alpha(if (isInteractionEnabled) 1f else 0.5f)
+                // Loading stays opaque; only an idle disabled button is dimmed.
+                .alpha(if (isInteractionEnabled || isLoading) 1f else 0.5f)
                 .clip(outerShape),
         contentAlignment = Alignment.Center,
     ) {

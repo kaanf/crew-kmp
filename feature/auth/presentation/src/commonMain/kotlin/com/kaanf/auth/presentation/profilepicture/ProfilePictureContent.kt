@@ -49,7 +49,7 @@ fun ProfilePictureContent(
         )
 
         Text(
-            text = "Crew plays out face-to-face. Your photo helps the stranger you matched with find you across a loud bar — and it sits next to your name on the leaderboard.",
+            text = "Crew plays out face-to-face. Your photo helps the stranger you matched with find you across a loud bar, and it sits next to your name on the leaderboard.",
             style = MaterialTheme.typography.bodySmall.copy(
                 color = AccessDefaults.TextMuted,
                 fontSize = 14.sp,

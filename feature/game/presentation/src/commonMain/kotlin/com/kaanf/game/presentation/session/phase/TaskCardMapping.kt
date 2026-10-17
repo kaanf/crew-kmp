@@ -6,8 +6,8 @@ import com.kaanf.core.presentation.model.ChallengeCardVariant
 import com.kaanf.game.domain.model.GameTask
 import com.kaanf.game.domain.model.TaskCategory
 
-/** Oyun ekranlarındaki gradient görev kartının boyutu (seçim, aktif görev, onay). */
-internal val TaskCardSize = 240.dp
+/** Oyun ekranlarındaki görev kartının genişliği (seçim, aktif görev, onay). */
+internal val TaskCardWidth = 320.dp
 
 internal fun GameTask.toUiModel(): ChallengeCardUiModel = ChallengeCardUiModel(
     description = title,

@@ -69,7 +69,7 @@ fun NoInternetBottomSheet() {
         )
 
         Text(
-            text = "Crew runs live — pairing players and scoring matches needs a connection. We'll drop you straight back in the moment you're online.",
+            text = "Crew runs live. Pairing players and scoring matches needs a connection. We'll drop you straight back in the moment you're online.",
             style = MaterialTheme.typography.bodySmall.copy(
                 color = AccessDefaults.TextSecondary,
                 fontSize = 12.sp,

@@ -89,6 +89,7 @@ fun AppTopBar(
     onRightClick: (() -> Unit) = {},
     onLeftClick: (() -> Unit) = {},
     onPassportClick: (() -> Unit) = {},
+    rightActions: (@Composable () -> Unit)? = null,
 ) {
     val overlayAlpha by animateFloatAsState(
         targetValue = if (elevated()) 1f else 0f,
@@ -176,6 +177,10 @@ fun AppTopBar(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
+
+            if (rightActions != null) {
+                Box(Modifier.align(Alignment.CenterEnd)) { rightActions() }
+            }
 
             val profileEditing = state is AppTopBarState.Profile && state.hasUnsavedChanges
 

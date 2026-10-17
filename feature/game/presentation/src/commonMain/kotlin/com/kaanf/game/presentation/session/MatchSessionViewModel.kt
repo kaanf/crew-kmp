@@ -112,6 +112,7 @@ class MatchSessionViewModel(
             .onEach { user ->
                 _state.update {
                     it.copy(
+                        currentUserId = user?.id ?: it.currentUserId,
                         currentUserPhotoUrl = user?.profilePictureUrl,
                         currentUserName = user?.fullName,
                     )
@@ -151,7 +152,7 @@ class MatchSessionViewModel(
                 val isRetrying = connectionState is GameConnectionState.Reconnecting ||
                     (connectionState is GameConnectionState.Disconnected && !connectionState.isError)
                 // Sunucu token dolunca soketi bilerek kapatır (prod'da ~15 dk'da bir), client ~1-2 sn'de
-                // sessizce döner. Yalnız toparlanma uzun sürerse uyar; anlık kopuşlarda "Weak connection" basmasın.
+                // sessizce döner. Yalnız toparlanma uzun sürerse bilgi ver; anlık kopuşlarda mesaj gösterme.
                 if (isRetrying && previous is GameConnectionState.Connected) {
                     reconnectingSnackbarJob?.cancel()
                     reconnectingSnackbarJob = viewModelScope.launch {
@@ -229,7 +230,7 @@ class MatchSessionViewModel(
     private fun reconnectingSnackbar() = SnackbarMessage(
         title = UIText.Resource(Res.string.match_reconnecting_title),
         description = UIText.Resource(Res.string.match_reconnecting_description),
-        variant = SnackbarVariant.Warn,
+        variant = SnackbarVariant.Info,
         icon = SnackbarIcon.Syncing,
     )
 
@@ -410,7 +411,7 @@ class MatchSessionViewModel(
                 _state.update {
                     it.copy(
                         lobbyTargetEpochMillis = targetEpochMillis,
-                        lobbyMembers = message.members.take(MAX_LOBBY_AVATARS).map { member ->
+                        lobbyMembers = message.members.distinctBy { member -> member.userId }.map { member ->
                             member.toPresentation()
                         },
                         lobbyTotalCount = message.totalCount,
@@ -426,7 +427,7 @@ class MatchSessionViewModel(
             is GameSocketMessage.LobbyUserJoined -> {
                 _state.update { state ->
                     val members = state.lobbyMembers.toMutableList()
-                    if (message.fullName != null && members.size < MAX_LOBBY_AVATARS) {
+                    if (members.none { it.id == message.userId }) {
                         members.add(message.toPresentation())
                     }
                     state.copy(lobbyMembers = members, lobbyTotalCount = message.totalCount)
@@ -1257,6 +1258,7 @@ class MatchSessionViewModel(
     private fun com.kaanf.game.domain.model.LobbyMember.toPresentation(): LobbyMember {
         return LobbyMember(
             id = userId,
+            fullName = fullName,
             avatar = UserAvatar(
                 label = fullName.take(1).uppercase(),
                 color = avatarPaletteColor(userId),
@@ -1269,8 +1271,9 @@ class MatchSessionViewModel(
         val name = fullName.orEmpty()
         return LobbyMember(
             id = userId,
+            fullName = fullName,
             avatar = UserAvatar(
-                label = name.take(1).uppercase(),
+                label = name.take(1).uppercase().ifBlank { "?" },
                 color = avatarPaletteColor(userId),
                 imageUrl = profilePictureUrl,
             ),
@@ -1283,6 +1286,5 @@ class MatchSessionViewModel(
         const val RECONCILE_MAX_ATTEMPTS = 3
         const val RECONNECTING_SNACKBAR_GRACE_MS = 4_000L
         const val RECONCILE_RETRY_BASE_DELAY_MS = 1_000L
-        const val MAX_LOBBY_AVATARS = 13
     }
 }

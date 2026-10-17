@@ -1,39 +1,31 @@
 package com.kaanf.home.presentation.eventcode
 
 import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Icon
+import androidx.compose.material3.TextButton
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import com.kaanf.core.designsystem.component.button.BaseButton
+import com.kaanf.core.designsystem.theme.BricolageGrotesque
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.AnnotatedString
+import com.kaanf.core.designsystem.component.info.InfoRow
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kaanf.core.designsystem.component.info.GlowInfoCard
-import com.kaanf.core.designsystem.component.info.InfoCard
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessIcons
-import com.kaanf.core.designsystem.theme.AccessShapes
 import com.kaanf.core.designsystem.theme.CrewTheme
 import com.kaanf.home.presentation.eventcode.component.CodeFieldStatus
 import com.kaanf.home.presentation.eventcode.component.CodeInputField
@@ -46,9 +38,7 @@ import crew.feature.home.presentation.generated.resources.event_code_info_title
 import crew.feature.home.presentation.generated.resources.event_code_input_hint
 import crew.feature.home.presentation.generated.resources.event_code_show_qr_action
 import crew.feature.home.presentation.generated.resources.ticket_qr_doors_locked_description
-import crew.feature.home.presentation.generated.resources.ticket_qr_doors_locked_icon
 import crew.feature.home.presentation.generated.resources.ticket_qr_doors_locked_title
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -64,140 +54,88 @@ fun EventCodeContent(
     onShowQrClicked: () -> Unit,
     modifier: Modifier = Modifier,
     scrollState: ScrollState = rememberScrollState(),
+    eventHeader: @Composable () -> Unit = {},
 ) {
     Column(
         modifier = modifier
-            .fillMaxSize(),
+            .fillMaxSize()
+            .padding(horizontal = 22.dp)
+            .verticalScroll(scrollState)
+            .padding(bottom = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
-        Box {
-            Column(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .verticalScroll(scrollState),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                horizontalAlignment = Alignment.Start,
+        eventHeader()
+
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                text = stringResource(Res.string.event_code_headline).replace("\n", " "),
+                modifier = Modifier.semantics { heading() },
+                style = MaterialTheme.typography.headlineSmall.copy(
+                    fontFamily = BricolageGrotesque,
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 24.sp,
+                    lineHeight = 28.sp,
+                    letterSpacing = (-0.6).sp,
+                ),
+                color = AccessDefaults.TextPrimary,
+            )
+            Text(
+                text = stringResource(Res.string.event_code_helper_text),
+                style = MaterialTheme.typography.bodySmall.copy(lineHeight = 20.sp),
+                color = AccessDefaults.TextSecondary,
+            )
+        }
+
+        if (doorsLocked) {
+            InfoRow(
+                title = stringResource(Res.string.ticket_qr_doors_locked_title),
+                text = AnnotatedString(stringResource(Res.string.ticket_qr_doors_locked_description, doorTime)),
+            )
+        }
+
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            CodeInputField(
+                value = eventCode,
+                onValueChange = onCodeChanged,
+                status = status,
+                enabled = enabled,
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Text(
-                    text = stringResource(Res.string.event_code_headline),
-                    style = MaterialTheme.typography.displaySmall.copy(
-                        color = AccessDefaults.TextPrimary,
-                    ),
-                )
-
-                Text(
-                    text = stringResource(Res.string.event_code_helper_text),
-                    style = MaterialTheme.typography.titleSmall.copy(
-                        color = AccessDefaults.TextSecondary,
-                        fontWeight = FontWeight.Medium,
-                    ),
-                )
-
-                if (doorsLocked) {
-                    GlowInfoCard(
-                        emoji = stringResource(Res.string.ticket_qr_doors_locked_icon),
-                        title = stringResource(Res.string.ticket_qr_doors_locked_title),
-                        description = stringResource(
-                            Res.string.ticket_qr_doors_locked_description,
-                            doorTime,
-                        ),
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(6.dp))
-
-                val canClear = enabled && eventCode.isNotEmpty()
-                Text(
-                    text = stringResource(Res.string.ticket_qr_clear_code_action),
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        color = AccessDefaults.TextMuted,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.sp,
-                    ),
-                    modifier = Modifier
-                        .align(Alignment.End)
-                        .clip(AccessShapes.Small)
-                        .clickable(enabled = canClear, onClick = onClearClicked)
-                        .alpha(if (canClear) 1f else 0.4f)
-                        .padding(horizontal = 8.dp, vertical = 4.dp),
-                )
-
-                CodeInputField(
-                    value = eventCode,
-                    onValueChange = onCodeChanged,
-                    status = status,
-                    enabled = enabled,
-                )
-
-                Text(
                     text = stringResource(Res.string.event_code_input_hint),
-                    style = MaterialTheme.typography.bodySmall.copy(
-                        color = AccessDefaults.TextMuted,
-                    ),
+                    modifier = Modifier.weight(1f),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = AccessDefaults.TextMuted,
                 )
-
-                Spacer(modifier = Modifier.height(6.dp))
-
-                InfoCard(
-                    text = buildAnnotatedString {
-                        withStyle(
-                            style = SpanStyle(
-                                color = AccessDefaults.TextPrimary,
-                                fontWeight = FontWeight.Bold,
-                            ),
-                        ) {
-                            append(
-                                stringResource(Res.string.event_code_info_title),
-                            )
-                        }
-
-                        append("\n")
-
-                        withStyle(
-                            style = SpanStyle(
-                                color = AccessDefaults.TextMuted,
-                                fontWeight = FontWeight.Normal,
-                            ),
-                        ) {
-                            append(
-                                stringResource(Res.string.event_code_info_description)
-                            )
-                        }
-                    },
-                )
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .border(
-                            width = 1.dp,
-                            color = AccessDefaults.Border,
-                            shape = AccessShapes.Large,
-                        )
-                        .clickable(onClick = onShowQrClicked)
-                        .padding(horizontal = 12.dp, vertical = 20.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(
-                        8.dp,
-                        Alignment.CenterHorizontally,
-                    ),
+                TextButton(
+                    onClick = onClearClicked,
+                    enabled = enabled && eventCode.isNotEmpty(),
                 ) {
-                    Icon(
-                        painter = painterResource(AccessIcons.QR),
-                        contentDescription = null,
-                        tint = AccessDefaults.TextPrimary,
-                        modifier = Modifier.size(16.dp),
-                    )
-
                     Text(
-                        text = stringResource(Res.string.event_code_show_qr_action),
-                        style = MaterialTheme.typography.titleSmall.copy(
-                            color = AccessDefaults.TextPrimary,
-                            fontWeight = FontWeight.Bold,
-                        ),
+                        text = stringResource(Res.string.ticket_qr_clear_code_action),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (enabled && eventCode.isNotEmpty()) AccessDefaults.TextSecondary
+                            else AccessDefaults.TextMuted.copy(alpha = 0.4f),
                     )
                 }
             }
         }
+
+        InfoRow(
+            title = stringResource(Res.string.event_code_info_title),
+            text = AnnotatedString(stringResource(Res.string.event_code_info_description)),
+        )
+
+        BaseButton(
+            text = stringResource(Res.string.event_code_show_qr_action),
+            onClick = onShowQrClicked,
+            leadingIcon = AccessIcons.QR,
+            pill = true,
+        )
     }
 }
 
