@@ -67,8 +67,10 @@ struct iOSApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                // Universal link'ler SwiftUI'da onOpenURL'e dusuyor; onContinueUserActivity
+                // cold start'ta cagrilmiyor. Ikisi birden gelse de DeepLinkListener ayni
+                // link'i tekrar cozmeyi iptal ediyor.
                 .onOpenURL { url in
-                    guard url.scheme != "http", url.scheme != "https" else { return }
                     ExternalUriHandler.shared.onNewUri(uri: url.absoluteString)
                 }
                 .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { userActivity in
