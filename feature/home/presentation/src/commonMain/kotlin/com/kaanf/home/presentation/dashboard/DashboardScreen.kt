@@ -279,6 +279,7 @@ private fun DashboardContent(
                                 card = card,
                                 showPoints = false,
                                 descriptionSpacing = 4.dp,
+                                pressFeedbackEnabled = false,
                             )
                         }
 

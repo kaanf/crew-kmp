@@ -1,0 +1,11 @@
+steps:
+  - launch: com.kaanf.crew.screenshots
+  - tool: open-url
+    args:
+      url: crew-screenshot://leaderboard
+  - await:
+      visible:
+        id: screenshot-ready-leaderboard
+      timeout: 60000
+  - await:
+      idle: true

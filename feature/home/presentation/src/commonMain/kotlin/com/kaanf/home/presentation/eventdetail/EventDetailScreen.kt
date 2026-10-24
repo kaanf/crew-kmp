@@ -65,7 +65,7 @@ import com.kaanf.home.presentation.eventdetail.component.EventOnboardingCard
 import com.kaanf.home.presentation.eventdetail.component.GuestListCard
 import com.kaanf.home.presentation.eventdetail.component.GuestListSheet
 import com.kaanf.home.presentation.eventdetail.component.LockedGuestListCard
-import com.kaanf.home.presentation.eventdetail.component.PagerDots
+import com.kaanf.core.designsystem.component.pager.PagerDots
 import com.kaanf.home.presentation.eventdetail.component.SafetyBadge
 import com.kaanf.home.domain.model.EventGuest
 import com.kaanf.home.presentation.model.EventDetailUiModel
@@ -73,6 +73,7 @@ import crew.feature.home.presentation.generated.resources.Res
 import crew.feature.home.presentation.generated.resources.event_detail_free_ticket_cta
 import crew.feature.home.presentation.generated.resources.event_detail_locked_cta
 import crew.feature.home.presentation.generated.resources.event_detail_ended_cta
+import crew.feature.home.presentation.generated.resources.event_share_invitation
 import crew.feature.home.presentation.generated.resources.event_detail_load_error_description
 import crew.feature.home.presentation.generated.resources.event_detail_doors_open_at
 import crew.feature.home.presentation.generated.resources.event_detail_load_error_title
@@ -93,6 +94,7 @@ fun EventDetailRoot(
 
     val listState: LazyListState = rememberLazyListState()
     val shareEvent = rememberEventShareLauncher()
+    val shareInvitation = stringResource(Res.string.event_share_invitation)
 
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
@@ -100,6 +102,10 @@ fun EventDetailRoot(
                 onCheckoutSuccess(event.eventId)
             }
         }
+    }
+
+    val shareUrl = state.event?.shareUrl?.takeIf {
+        it.matches(Regex("https://share\\.crewishere\\.com/e/[a-z0-9]{10}"))
     }
 
     Box(modifier = Modifier.fillMaxSize().background(AccessDefaults.Background)) {
@@ -112,15 +118,25 @@ fun EventDetailRoot(
                     transparentAtRest = false,
                     rightActions = {
                         EventShareButton(
-                            enabled = state.event != null,
+                            enabled = shareUrl != null,
                             onClick = {
                                 state.event?.let { event ->
+                                    val url = shareUrl ?: return@let
                                     shareEvent(
-                                        listOfNotNull(
-                                            event.title,
-                                            event.heroDate,
-                                            event.location?.name,
-                                        ).joinToString("\n"),
+                                        EventShareContent(
+                                            title = event.title,
+                                            text = listOf(
+                                                shareInvitation,
+                                                listOfNotNull(
+                                                    event.title,
+                                                    event.heroDate,
+                                                    event.location?.name,
+                                                ).joinToString(" · "),
+                                                url,
+                                            ).joinToString("\n\n"),
+                                            url = url,
+                                            imageUrl = event.imageUrls.firstOrNull(),
+                                        ),
                                     )
                                 }
                             },
@@ -477,7 +493,8 @@ private fun EventDetailHero(
 
         if (imageUrls.size > 1) {
             PagerDots(
-                pagerState = pagerState,
+                pageCount = pagerState.pageCount,
+                currentPage = pagerState.currentPage,
                 activeColor = AccessDefaults.Accent,
                 inactiveColor = AccessDefaults.TextMuted.copy(alpha = 0.4f),
                 modifier = Modifier

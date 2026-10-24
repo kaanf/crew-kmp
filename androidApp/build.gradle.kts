@@ -44,6 +44,7 @@ dependencies {
     implementation(libs.core.splashscreen)
     implementation(libs.material)
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
     // debugImplementation(ui-tooling) puts androidx.test (via compose ui-test) on the app's runtime
     // classpath and AGP pins androidTest to exactly those versions, so the catalog's newer
     // junit/runner/espresso can't resolve. ui-test-junit4 from the same BOM brings matching ones.

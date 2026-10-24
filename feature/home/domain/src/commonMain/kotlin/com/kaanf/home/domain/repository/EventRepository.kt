@@ -8,6 +8,8 @@ import com.kaanf.core.domain.util.Result
 import com.kaanf.home.domain.model.EventGuest
 
 interface EventRepository {
+    suspend fun resolveShareCode(code: String): Result<EventId, DataError.Remote>
+
     suspend fun getEvents(): Result<List<EventDashboard>, DataError.Remote>
 
     suspend fun getEventDetail(eventId: EventId): Result<EventDetail, DataError.Remote>

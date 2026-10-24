@@ -8,6 +8,7 @@ kotlin {
             dependencies {
                 implementation(libs.kotlin.stdlib)
                 implementation(libs.kotlinx.datetime)
+                implementation(libs.coil.compose)
 
                 //implementation(libs.confettikit)
 

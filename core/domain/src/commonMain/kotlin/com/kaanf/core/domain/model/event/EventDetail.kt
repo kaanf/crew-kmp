@@ -24,4 +24,5 @@ data class EventDetail(
     val updatedAt: Instant,
     val imageUrls: List<String>,
     val coverColors: List<Int> = emptyList(),
+    val shareUrl: String? = null,
 )

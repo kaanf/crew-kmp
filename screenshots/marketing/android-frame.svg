@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1410" height="2986" viewBox="0 0 1410 2986">
+  <defs>
+    <linearGradient id="metal" x1="0" x2="1" y1="0" y2="0">
+      <stop stop-color="#746F69"/>
+      <stop offset=".025" stop-color="#D4CFC8"/>
+      <stop offset=".07" stop-color="#38332E"/>
+      <stop offset=".93" stop-color="#38332E"/>
+      <stop offset=".975" stop-color="#D4CFC8"/>
+      <stop offset="1" stop-color="#746F69"/>
+    </linearGradient>
+    <mask id="screen">
+      <rect width="1410" height="2986" rx="96" fill="white"/>
+      <rect x="65" y="65" width="1280" height="2856" rx="32" fill="black"/>
+    </mask>
+  </defs>
+  <rect width="1410" height="2986" rx="96" fill="url(#metal)" mask="url(#screen)"/>
+  <rect x="63" y="63" width="1284" height="2860" rx="34" fill="none" stroke="#14100C" stroke-width="4"/>
+</svg>

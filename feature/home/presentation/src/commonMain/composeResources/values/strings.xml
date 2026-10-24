@@ -107,6 +107,7 @@
     <string name="dashboard_game_table_caption">The real game starts when you meet.</string>
     <string name="dashboard_game_table_cta">Find your next night &#8594;</string>
     <string name="event_share_title">Share event</string>
+    <string name="event_share_invitation">Want to come with me?</string>
     <string name="plot_twist_title">Tonight’s plot twist</string>
     <string name="plot_twist_question">What could happen tonight?</string>
     <string name="plot_twist_reveal">Tap to find out</string>

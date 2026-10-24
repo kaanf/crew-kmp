@@ -1,7 +1,6 @@
 package com.kaanf.core.designsystem.component.sheet
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,7 +18,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import com.kaanf.core.designsystem.theme.AccessDefaults
 
@@ -41,27 +39,22 @@ fun ContainerBottomSheet(
     ModalBottomSheet(
         onDismissRequest = { if (dismissible) onDismiss() },
         sheetState = sheetState,
+        sheetGesturesEnabled = dismissible,
         modifier = modifier,
         containerColor = AccessDefaults.Surface,
+        contentColor = AccessDefaults.TextPrimary,
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
         scrimColor = AccessDefaults.LoadingOverlayScrim,
         dragHandle = { if (showDragHandle && dismissible) DragHandle() },
         properties = ModalBottomSheetProperties(shouldDismissOnBackPress = false),
     ) {
+        SheetSystemBarsEffect()
         Column(
             modifier =
                 Modifier
                     .fillMaxWidth()
                     .wrapContentHeight()
-                    .navigationBarsPadding()
-                    .then(
-                        if (dismissible) {
-                            Modifier
-                        } else {
-                            Modifier.pointerInput(Unit) {
-                                detectVerticalDragGestures { _, _ -> }
-                            }
-                        },
-                    ),
+                    .navigationBarsPadding(),
         ) {
             content()
         }

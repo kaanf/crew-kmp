@@ -24,4 +24,5 @@ data class EventDetailDto(
     val imageUrls: List<String> = emptyList(),
     /** Cover backdrop colours "#RRGGBB" in role order (base, bottom, middle, top-end); see crew-api CoverColors.kt. */
     val coverColors: List<String> = emptyList(),
+    val shareUrl: String? = null,
 )

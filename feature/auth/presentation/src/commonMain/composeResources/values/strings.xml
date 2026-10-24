@@ -1,12 +1,21 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <resources>
+    <!-- First-run onboarding -->
+    <string name="onboarding_friends_title">Play with friends or join real-life events.</string>
+    <string name="onboarding_friends_body">Play at a Crew event or with your own friends.</string>
+    <string name="onboarding_play_title">Scan. Play.\nGive a dare.</string>
+    <string name="onboarding_play_body">Scan a QR, play rock-paper-scissors face to face. The winner picks a dare for the loser.</string>
+    <string name="onboarding_winner_title">Complete dares.\nCollect points.</string>
+    <string name="onboarding_winner_body">Every round brings a new dare and another story to share.</string>
+    <string name="onboarding_start">Let’s play 🎉</string>
+    <string name="onboarding_page">Page %1$d of %2$d</string>
+    <string name="onboarding_save_error">Couldn’t save your progress. Please try again.</string>
     <!-- Welcome -->
     <string name="welcome_skip">Skip</string>
-    <string name="welcome_headline_show_up">Show up</string>
-    <string name="welcome_headline_solo">solo.</string>
-    <string name="welcome_headline_leave_with">Leave with</string>
-    <string name="welcome_headline_story">a story.</string>
-    <string name="welcome_body">Live bar games for strangers. Scan, play, rate.\nThe night ends in a leaderboard, not a swipe.</string>
+    <string name="welcome_headline_strangers">Strangers.</string>
+    <string name="welcome_headline_until">Until the first</string>
+    <string name="welcome_headline_game">game.</string>
+    <string name="welcome_body">Meet over a game. Laugh over a drink. See where the night takes you. ✨</string>
     <string name="welcome_continue_with_email">Continue with email</string>
     <string name="welcome_terms_prefix">By continuing you agree to our </string>
     <string name="welcome_terms">Terms</string>

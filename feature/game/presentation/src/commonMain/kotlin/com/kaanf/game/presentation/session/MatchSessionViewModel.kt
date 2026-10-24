@@ -1167,13 +1167,17 @@ class MatchSessionViewModel(
         viewModelScope.launch {
             matchRepository.getQuests(eventId).onSuccess { quests ->
                 _state.update { state ->
-                    state.copy(questsClaimable = quests.any { it.completed && !it.claimed })
+                    state.copy(
+                        questsClaimable = quests.any { it.completed && !it.claimed },
+                        questsCompleted = quests.count { it.completed },
+                        questsTotal = quests.size,
+                    )
                 }
             }
         }
         viewModelScope.launch {
             matchRepository.getAddressBook(eventId).onSuccess { book ->
-                _state.update { it.copy(passportClaimable = book.hasClaimable) }
+                _state.update { it.copy(passportClaimable = book.hasClaimable, passportStampCount = book.entries.size) }
             }
         }
     }

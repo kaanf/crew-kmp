@@ -22,4 +22,5 @@ data class EventDetailUiModel(
     val location: EventLocationUiModel?,
     /** Null = no cover colours from the backend; the screen keeps its flat background. */
     val backdropPalette: BackdropPalette? = null,
+    val shareUrl: String? = null,
 )

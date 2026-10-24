@@ -15,12 +15,18 @@
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="launcher_icon_ios" translatesAutoresizingMaskIntoConstraints="NO" id="o1d-NO-d1K">
-                                <rect key="frame" x="76" y="362" width="240" height="128"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="splash_logo" translatesAutoresizingMaskIntoConstraints="NO" id="o1d-NO-d1K">
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="132" id="wXa-01-aaa"/>
+                                    <constraint firstAttribute="height" constant="132" id="hXa-02-bbb"/>
+                                </constraints>
                             </imageView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="Bcu-3y-fUS"/>
+                        <constraints>
+                            <constraint firstItem="o1d-NO-d1K" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="cXa-03-ccc"/>
+                            <constraint firstItem="o1d-NO-d1K" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="cYa-04-ddd"/>
+                        </constraints>
                         <color key="backgroundColor" red="0.054901960784313725" green="0.043137254901960784" blue="0.031372549019607843" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     </view>
                 </viewController>
@@ -30,6 +36,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="launcher_icon_ios" width="1024" height="1024"/>
+        <image name="splash_logo" width="161.55" height="161.55"/>
     </resources>
 </document>

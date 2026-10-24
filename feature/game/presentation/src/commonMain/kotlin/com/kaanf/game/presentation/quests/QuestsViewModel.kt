@@ -38,7 +38,7 @@ class QuestsViewModel(
             initialValue = _state.value,
         )
 
-    init {
+    fun refresh() {
         loadQuests()
     }
 

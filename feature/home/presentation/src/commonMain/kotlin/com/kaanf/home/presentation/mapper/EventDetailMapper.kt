@@ -26,6 +26,7 @@ fun EventDetail.toUiModel(): EventDetailUiModel {
         imageUrls = imageUrls.ifEmpty { listOf(FALLBACK_HERO_IMAGE_URL) },
         location = venue?.toLocationUiModel(),
         backdropPalette = BackdropPalette.fromRoleOrder(coverColors),
+        shareUrl = shareUrl,
     )
 }
 

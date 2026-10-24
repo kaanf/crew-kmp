@@ -56,7 +56,14 @@ class MainActivity : ComponentActivity() {
 
     private fun dispatchEventLink(intent: Intent) {
         val uri = intent.data ?: return
-        if (uri.scheme == "crew" && uri.host == "event") {
+        val isEventLink = uri.scheme == "crew" && uri.host == "event"
+        val isWebEventLink = uri.scheme == "https" && uri.host == "crewishere.com" &&
+            (uri.path in setOf("/event", "/event/") || uri.path?.startsWith("/e/") == true)
+        val isShareEventLink = uri.scheme == "https" && uri.host in setOf("api.kaanf.com", "api.crewishere.com") &&
+            uri.path?.startsWith("/share/events/") == true
+        val isShortEventLink = uri.scheme == "https" && uri.host == "share.crewishere.com" &&
+            uri.path?.startsWith("/e/") == true
+        if (isEventLink || isWebEventLink || isShareEventLink || isShortEventLink) {
             ExternalUriHandler.onNewUri(uri.toString())
             intent.data = null
         }

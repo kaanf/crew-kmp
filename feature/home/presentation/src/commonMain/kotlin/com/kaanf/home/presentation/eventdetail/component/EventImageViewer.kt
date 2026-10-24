@@ -2,15 +2,12 @@ package com.kaanf.home.presentation.eventdetail.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
@@ -24,6 +21,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.kaanf.core.designsystem.component.dialog.fullscreenDialogProperties
+import com.kaanf.core.designsystem.component.pager.PagerDots
 import com.kaanf.core.designsystem.component.image.BaseImage
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessIcons
@@ -81,7 +79,8 @@ internal fun EventImageViewer(
 
             if (imageUrls.size > 1) {
                 PagerDots(
-                    pagerState = pagerState,
+                    pageCount = pagerState.pageCount,
+                    currentPage = pagerState.currentPage,
                     activeColor = Color.White,
                     inactiveColor = Color.White.copy(alpha = 0.35f),
                     modifier = Modifier
@@ -90,30 +89,6 @@ internal fun EventImageViewer(
                         .padding(bottom = 24.dp),
                 )
             }
-        }
-    }
-}
-
-@Composable
-internal fun PagerDots(
-    pagerState: PagerState,
-    activeColor: Color,
-    inactiveColor: Color,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
-    ) {
-        repeat(pagerState.pageCount) { index ->
-            Box(
-                modifier = Modifier
-                    .size(8.dp)
-                    .clip(CircleShape)
-                    .background(
-                        if (index == pagerState.currentPage) activeColor else inactiveColor,
-                    ),
-            )
         }
     }
 }

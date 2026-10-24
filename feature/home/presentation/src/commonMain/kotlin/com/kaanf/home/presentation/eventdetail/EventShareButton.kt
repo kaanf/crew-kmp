@@ -18,7 +18,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-internal fun EventShareButton(enabled: Boolean, onClick: () -> Unit) {
+fun EventShareButton(enabled: Boolean, onClick: () -> Unit) {
     IconButton(
         onClick = onClick,
         enabled = enabled,
@@ -38,4 +38,4 @@ internal fun EventShareButton(enabled: Boolean, onClick: () -> Unit) {
 }
 
 @Composable
-internal expect fun rememberEventShareLauncher(): (String) -> Unit
+internal expect fun rememberEventShareLauncher(): (EventShareContent) -> Unit

@@ -1,0 +1,18 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
+    <uses-permission android:name="android.permission.INTERNET" tools:node="remove" />
+    <uses-permission android:name="android.permission.CAMERA" tools:node="remove" />
+    <application tools:replace="android:allowBackup,android:name" android:name="android.app.Application" android:label="Crew Screenshots" android:allowBackup="false" android:supportsRtl="true" android:theme="@android:style/Theme.Material.NoActionBar">
+        <activity android:name=".ScreenshotActivity" android:exported="true" android:launchMode="singleTask" android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="crew-screenshot" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

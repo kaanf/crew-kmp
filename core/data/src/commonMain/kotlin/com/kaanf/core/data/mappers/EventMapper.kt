@@ -47,6 +47,7 @@ fun EventDetailDto.toDomain(): EventDetail {
         updatedAt = Instant.parse(updatedAt),
         imageUrls = imageUrls,
         coverColors = coverColors.toArgbColors(),
+        shareUrl = shareUrl,
     )
 }
 

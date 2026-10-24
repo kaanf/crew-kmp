@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import com.kaanf.core.designsystem.theme.AccessShapes
@@ -43,6 +44,7 @@ fun Modifier.carouselPage(
     pagerState: PagerState,
     page: Int,
     shape: Shape = AccessShapes.Large,
+    centerElevation: Dp = CenterElevation,
 ): Modifier {
     val jitter = jitterFor(page)
     return graphicsLayer {
@@ -63,6 +65,6 @@ fun Modifier.carouselPage(
 
         this.shape = shape
         clip = true
-        shadowElevation = lerp(CenterElevation.toPx(), 0f, distance)
+        shadowElevation = lerp(centerElevation.toPx(), 0f, distance)
     }
 }

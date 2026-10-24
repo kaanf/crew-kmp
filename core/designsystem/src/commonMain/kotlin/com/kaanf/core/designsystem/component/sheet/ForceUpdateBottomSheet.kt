@@ -1,29 +1,28 @@
 package com.kaanf.core.designsystem.component.sheet
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Icon
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kaanf.core.designsystem.component.button.BaseButton
 import com.kaanf.core.designsystem.theme.AccessDefaults
-import com.kaanf.core.designsystem.theme.AccessIcons
 import com.kaanf.core.designsystem.theme.CrewTheme
 import crew.core.designsystem.generated.resources.Res
+import crew.core.designsystem.generated.resources.app_icon
 import crew.core.designsystem.generated.resources.force_update_button
 import crew.core.designsystem.generated.resources.force_update_description
 import crew.core.designsystem.generated.resources.force_update_title
@@ -51,19 +50,13 @@ private fun ForceUpdateContent(onUpdateClick: () -> Unit) {
         verticalArrangement = Arrangement.spacedBy(6.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Box(
+        Image(
+            painter = painterResource(Res.drawable.app_icon),
+            contentDescription = null,
             modifier = Modifier
-                .background(color = AccessDefaults.SurfaceElevated, shape = CircleShape)
-                .border(width = 1.dp, color = AccessDefaults.Border, shape = CircleShape)
-                .padding(12.dp),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                painter = painterResource(AccessIcons.Refresh),
-                contentDescription = null,
-                tint = AccessDefaults.TextMuted,
-            )
-        }
+                .size(64.dp)
+                .clip(RoundedCornerShape(18.dp)),
+        )
 
         Spacer(modifier = Modifier.height(4.dp))
 

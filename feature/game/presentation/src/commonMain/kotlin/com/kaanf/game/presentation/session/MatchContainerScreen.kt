@@ -171,6 +171,10 @@ fun MatchContainerScreen(
     onLeaderboardCelebrationDone: () -> Unit = {},
     showCoachmark: Boolean = false,
     onCoachmarkFinish: () -> Unit = {},
+    leaderboardContent: @Composable (Modifier) -> Unit = { contentModifier ->
+        LeaderboardTab(modifier = contentModifier, onCelebrationDone = onLeaderboardCelebrationDone)
+    },
+    memoriesContent: @Composable (Modifier) -> Unit = { MemoriesStackRoot(modifier = it) },
 ) {
     val isIdle = state.phase == MatchPhase.Idle
 
@@ -286,8 +290,8 @@ fun MatchContainerScreen(
 
                     selectedTab == GameBottomTab.Play -> AppTopBar(
                         state = AppTopBarState.Game(
-                            showQuestsAction = true,
-                            showPassportAction = true,
+                            showQuestsAction = false,
+                            showPassportAction = false,
                             questsBadge = state.questsClaimable,
                             passportBadge = state.passportClaimable,
                         ),
@@ -376,21 +380,20 @@ fun MatchContainerScreen(
                                 phase = phase,
                                 state = state,
                                 onAction = onAction,
+                                onQuestsClick = onQuestsClick,
+                                onPassportClick = onPassportClick,
                                 modifier = Modifier.fillMaxSize(),
                             )
                         }
 
                         // Alt tab bar içeriğin üstüne biniyor (leaderboard'daki 84dp ile aynı pay).
-                        ContainerScreen.Memories -> MemoriesStackRoot(
-                            modifier = Modifier
+                        ContainerScreen.Memories -> memoriesContent(
+                            Modifier
                                 .fillMaxSize()
                                 .padding(bottom = 84.dp),
                         )
 
-                        ContainerScreen.Leaderboard -> LeaderboardTab(
-                            onCelebrationDone = onLeaderboardCelebrationDone,
-                            modifier = Modifier.fillMaxSize(),
-                        )
+                        ContainerScreen.Leaderboard -> leaderboardContent(Modifier.fillMaxSize())
                         ContainerScreen.History -> HistoryTab(modifier = Modifier.fillMaxSize())
                     }
                 }
@@ -435,11 +438,15 @@ private fun MatchPhaseContent(
     state: MatchSessionState,
     onAction: (MatchSessionAction) -> Unit,
     modifier: Modifier = Modifier,
+    onQuestsClick: () -> Unit = {},
+    onPassportClick: () -> Unit = {},
 ) {
     when (phase) {
         MatchPhase.Idle -> QrHomePhase(
             state = state,
             onAction = onAction,
+            onQuestsClick = onQuestsClick,
+            onPassportClick = onPassportClick,
             modifier = modifier
         )
 
