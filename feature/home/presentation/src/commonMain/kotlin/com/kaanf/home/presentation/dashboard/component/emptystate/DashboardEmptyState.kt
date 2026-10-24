@@ -109,6 +109,41 @@ fun DashboardEmptyState(
             textAlign = TextAlign.Center,
             modifier = Modifier.widthIn(max = 300.dp),
         )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            AvatarStack(
+                avatars = waitingAvatars,
+                avatarSize = 32,
+                extraCount = 90,
+            )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Text(
+                text = buildAnnotatedString {
+                    withStyle(
+                        SpanStyle(
+                            color = AccessDefaults.TextPrimary,
+                            fontWeight = FontWeight.Bold,
+                        ),
+                    ) {
+                        append(stringResource(Res.string.dashboard_empty_waiting_highlight))
+                    }
+                    append(" ")
+                    append(stringResource(Res.string.dashboard_empty_waiting_rest))
+                },
+                style = MaterialTheme.typography.bodySmall.copy(
+                    color = AccessDefaults.TextMuted,
+                    fontSize = 12.5.sp,
+                ),
+            )
+        }
     }
 }
 

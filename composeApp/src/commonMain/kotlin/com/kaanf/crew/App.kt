@@ -49,7 +49,6 @@ fun App(
 ) {
     val navController = rememberNavController()
     val isDarkTheme = isSystemInDarkTheme()
-    DeepLinkListener(navController)
 
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -123,6 +122,12 @@ fun App(
                     navController = navController,
                     startDestination = startDestination,
                 )
+
+                // Graph kurulmadan navigate crash eder; çıkış yapmışken gelen link ise
+                // ExternalUriHandler'da bekler ve login sonrası açılır.
+                if (state.isLoggedIn) {
+                    DeepLinkListener(navController)
+                }
             }
 
             CrewSnackbarHost(

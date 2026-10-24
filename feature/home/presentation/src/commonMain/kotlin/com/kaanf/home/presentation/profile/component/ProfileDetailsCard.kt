@@ -150,7 +150,7 @@ private fun ProfileDetailRow(
 
         Text(
             modifier = Modifier.weight(1f),
-            text = value.ifBlank { "—" },
+            text = value.ifBlank { "-" },
             textAlign = TextAlign.End,
             style = MaterialTheme.typography.labelSmall.copy(
                 color = if (locked) AccessDefaults.TextSecondary else valueColor,

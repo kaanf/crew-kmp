@@ -3,6 +3,7 @@ package com.kaanf.core.data.di
 import com.kaanf.core.data.BuildEnvironment
 import com.kaanf.core.data.session.DataStoreSessionStorage
 import com.kaanf.core.data.settings.DataStoreLanguageStore
+import com.kaanf.core.data.settings.DataStoreOnboardingStore
 import com.kaanf.core.data.logging.KermitLogger
 import com.kaanf.core.data.logging.applyMinSeverity
 import com.kaanf.core.data.networking.HttpClientFactory
@@ -16,6 +17,7 @@ import com.kaanf.core.domain.repository.AuthSessionRepository
 import com.kaanf.core.domain.repository.SessionStorage
 import com.kaanf.core.domain.logging.CrewLogger
 import com.kaanf.core.domain.repository.LanguageStore
+import com.kaanf.core.domain.repository.OnboardingStore
 import com.kaanf.core.domain.repository.UserRepository
 import com.kaanf.core.domain.repository.UserStore
 import org.koin.core.module.Module
@@ -37,6 +39,7 @@ val coreDataModule =
             DataStoreSessionStorage(get()) { get<HttpClient>().clearBearerToken() }
         }
         singleOf(::DataStoreLanguageStore) bind LanguageStore::class
+        singleOf(::DataStoreOnboardingStore) bind OnboardingStore::class
         singleOf(::AuthSessionRepositoryImpl) bind AuthSessionRepository::class
         singleOf(::UserRepositoryImpl) bind UserRepository::class
         singleOf(::UserStoreImpl) bind UserStore::class

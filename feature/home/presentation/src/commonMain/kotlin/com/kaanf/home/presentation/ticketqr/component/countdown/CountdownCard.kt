@@ -1,10 +1,14 @@
 package com.kaanf.home.presentation.ticketqr.component.countdown
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.text.TextAutoSize
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -15,13 +19,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kaanf.core.designsystem.modifier.surfaceCard
+import com.kaanf.core.designsystem.theme.CrewTheme
 import com.kaanf.core.designsystem.theme.AccessDefaults
-import com.kaanf.core.designsystem.theme.AccessShapes
+import com.kaanf.core.designsystem.theme.BricolageGrotesque
 import crew.feature.home.presentation.generated.resources.Res
 import crew.feature.home.presentation.generated.resources.ticket_qr_countdown_days_label
 import crew.feature.home.presentation.generated.resources.ticket_qr_countdown_hours_label
@@ -57,37 +63,46 @@ fun CountdownCard(
     val minutes = (totalSeconds % 3_600) / 60
     val seconds = totalSeconds % 60
 
+    CountdownDisplay(days, hours, minutes, seconds, modifier)
+}
+
+@Composable
+private fun CountdownDisplay(
+    days: Long,
+    hours: Long,
+    minutes: Long,
+    seconds: Long,
+    modifier: Modifier = Modifier,
+) {
     Row(
         modifier = modifier
-            .surfaceCard(shape = AccessShapes.XXLarge)
-            .padding(horizontal = 18.dp, vertical = 12.dp),
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         CountdownItem(
-            value = days.toString(),
-            label = stringResource(Res.string.ticket_qr_countdown_days_label)
+            value = days.toString().padStart(2, '0'),
+            label = stringResource(Res.string.ticket_qr_countdown_days_label),
+            modifier = Modifier.weight(1f),
         )
-
-        CountdownSeparator()
-
+        CountdownDivider()
         CountdownItem(
             value = hours.toString().padStart(2, '0'),
-            label = stringResource(Res.string.ticket_qr_countdown_hours_label)
+            label = stringResource(Res.string.ticket_qr_countdown_hours_label),
+            modifier = Modifier.weight(1f),
         )
-
-        CountdownSeparator()
-
+        CountdownDivider()
         CountdownItem(
             value = minutes.toString().padStart(2, '0'),
-            label = stringResource(Res.string.ticket_qr_countdown_minutes_label)
+            label = stringResource(Res.string.ticket_qr_countdown_minutes_label),
+            modifier = Modifier.weight(1f),
         )
-
-        CountdownSeparator()
-
+        CountdownDivider()
         CountdownItem(
             value = seconds.toString().padStart(2, '0'),
-            label = stringResource(Res.string.ticket_qr_countdown_seconds_label)
+            label = stringResource(Res.string.ticket_qr_countdown_seconds_label),
+            modifier = Modifier.weight(1f),
+            highlighted = true,
         )
     }
 }
@@ -97,37 +112,63 @@ private fun CountdownItem(
     value: String,
     label: String,
     modifier: Modifier = Modifier,
+    highlighted: Boolean = false,
 ) {
     Column(
-        modifier = modifier.widthIn(min = 32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = modifier.semantics(mergeDescendants = true) {},
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
             text = value,
-            style = MaterialTheme.typography.labelSmall.copy(
-                fontSize = 20.sp,
-                color = AccessDefaults.TextPrimary,
-            )
+            style = MaterialTheme.typography.headlineLarge.copy(
+                fontFamily = BricolageGrotesque,
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 36.sp,
+                lineHeight = 40.sp,
+                letterSpacing = (-1).sp,
+                fontFeatureSettings = "tnum",
+            ),
+            autoSize = TextAutoSize.StepBased(minFontSize = 18.sp, maxFontSize = 36.sp),
+            maxLines = 1,
+            softWrap = false,
+            textAlign = TextAlign.Center,
+            color = if (highlighted) AccessDefaults.Accent else AccessDefaults.TextPrimary,
         )
-
         Text(
             text = label,
-            color = Color(0xFF7F776D),
-            fontSize = 11.sp,
-            letterSpacing = 3.sp,
-            fontWeight = FontWeight.Medium
+            style = MaterialTheme.typography.bodySmall.copy(
+                fontSize = 11.sp,
+                lineHeight = 16.sp,
+                fontWeight = FontWeight.Medium,
+                letterSpacing = 0.4.sp,
+            ),
+            textAlign = TextAlign.Center,
+            color = AccessDefaults.TextSecondary,
         )
     }
 }
 
 @Composable
-private fun CountdownSeparator() {
-    Text(
-        text = ":",
-        style = MaterialTheme.typography.labelSmall.copy(
-            fontSize = 20.sp,
-            color = AccessDefaults.TextMuted,
-        ),
-        modifier = Modifier.padding(bottom = 16.dp)
+private fun CountdownDivider() {
+    Spacer(
+        Modifier
+            .size(width = 1.dp, height = 28.dp)
+            .background(AccessDefaults.TextPrimary.copy(alpha = 0.12f)),
     )
+}
+
+@Preview(name = "Countdown · compact", widthDp = 280)
+@Preview(name = "Countdown · phone", widthDp = 360)
+@Composable
+private fun CountdownPreview() {
+    CrewTheme {
+        Column(
+            modifier = Modifier.background(AccessDefaults.Background).padding(22.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp),
+        ) {
+            CountdownDisplay(days = 8, hours = 7, minutes = 20, seconds = 48)
+            CountdownDisplay(days = 0, hours = 0, minutes = 4, seconds = 9)
+        }
+    }
 }

@@ -23,9 +23,11 @@ import crew.core.designsystem.generated.resources.ic_lightning
 import crew.core.designsystem.generated.resources.ic_link
 import crew.core.designsystem.generated.resources.ic_mail
 import crew.core.designsystem.generated.resources.ic_more
+import crew.core.designsystem.generated.resources.ic_arrow_up_right
 import crew.core.designsystem.generated.resources.ic_pin
 import crew.core.designsystem.generated.resources.ic_qr
 import crew.core.designsystem.generated.resources.ic_refresh
+import crew.core.designsystem.generated.resources.ic_share
 import crew.core.designsystem.generated.resources.ic_safety
 import crew.core.designsystem.generated.resources.ic_sparkle
 import crew.core.designsystem.generated.resources.ic_star
@@ -36,12 +38,14 @@ import crew.core.designsystem.generated.resources.ic_user
 import crew.core.designsystem.generated.resources.ic_wifi_off
 
 object AccessIcons {
+    val Share = Res.drawable.ic_share
     val LeftChevron = Res.drawable.ic_chevron_left_24
     val RightChevron = Res.drawable.ic_chevron_right_24
     val User = Res.drawable.ic_user
     val Shield = Res.drawable.ic_safety
     val More = Res.drawable.ic_more
     val Pin = Res.drawable.ic_pin
+    val ArrowUpRight = Res.drawable.ic_arrow_up_right
     val Info = Res.drawable.ic_info
     val QR = Res.drawable.ic_qr
     val Sparkle = Res.drawable.ic_sparkle

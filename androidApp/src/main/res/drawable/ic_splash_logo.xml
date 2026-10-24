@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Splash icon: Crew "C" mark on transparent canvas, art kept inside the
+     center 2/3 circle the SplashScreen API masks the icon with. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:translateX="35.6"
+        android:translateY="23.48"
+        android:scaleX="0.37785"
+        android:scaleY="0.37785">
+        <path
+            android:fillColor="#C9FF3F"
+            android:pathData="M0.01,34.82l0,126.73l97.4,0l0,-40.39l-52.26,0l0,-80.77l52.26,0l0,-40.39l-63.39,0l-34.01,34.82z" />
+        <path
+            android:fillColor="#0E0B08"
+            android:pathData="M34.21,34.82l-33.33,-0.32l32.83,-33.59l0.5,33.91z" />
+        <path
+            android:fillColor="#C9FF3F"
+            android:pathData="M34.59,35.2l-34.59,-0.33L34.07,0l0.52,35.19ZM1.76,34.13l32.06,0.31 -0.48,-32.62L1.76,34.13Z" />
+    </group>
+</vector>

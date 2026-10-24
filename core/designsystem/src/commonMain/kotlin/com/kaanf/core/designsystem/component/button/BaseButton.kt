@@ -1,5 +1,6 @@
 package com.kaanf.core.designsystem.component.button
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import com.kaanf.core.designsystem.markImmutable
 import androidx.compose.foundation.Image
@@ -10,10 +11,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -73,10 +76,12 @@ fun BaseButton(
     backgroundColor: Color? = null,
     borderColor: Color? = null,
     contentColor: Color? = null,
+    fillMaxWidth: Boolean = true,
+    pill: Boolean = false,
 ) {
-    val outerShape = AccessShapes.Medium
+    val outerShape = if (pill) CircleShape else AccessShapes.Medium
     val borderWidth = 1.5.dp
-    val innerShape = RoundedCornerShape(12.dp - borderWidth)
+    val innerShape = if (pill) CircleShape else RoundedCornerShape(12.dp - borderWidth)
     val interactionSource = remember { MutableInteractionSource() }
     val isInteractionEnabled = enabled && !isLoading
 
@@ -100,10 +105,10 @@ fun BaseButton(
     Box(
         modifier =
             modifier
-                .fillMaxWidth()
+                .then(if (fillMaxWidth) Modifier.fillMaxWidth() else Modifier)
                 .height(52.dp)
-                // Loading shares the dimmed "disabled" look: normal background at 0.5 alpha.
-                .alpha(if (isInteractionEnabled) 1f else 0.5f)
+                // Loading stays opaque; only an idle disabled button is dimmed.
+                .alpha(if (isInteractionEnabled || isLoading) 1f else 0.5f)
                 .clip(outerShape),
         contentAlignment = Alignment.Center,
     ) {
@@ -119,7 +124,8 @@ fun BaseButton(
         Box(
             modifier =
                 Modifier
-                    .matchParentSize()
+                    // Wrap mode: this box sizes the button, the border box above matches it.
+                    .then(if (fillMaxWidth) Modifier.matchParentSize() else Modifier.fillMaxHeight())
                     .padding(borderWidth)
                     .clip(innerShape)
                     .background(resolvedBackgroundColor)
@@ -129,7 +135,10 @@ fun BaseButton(
                         indication = null,
                         onClick = onClick,
                     )
-                    .padding(horizontal = 16.dp),
+                    // Wrap mode: width follows content (text ↔ loader); centered so it shrinks/grows from both sides.
+                    // The outer box wraps this one, so border and background follow the animated width.
+                    .then(if (fillMaxWidth) Modifier else Modifier.animateContentSize(alignment = Alignment.Center))
+                    .padding(horizontal = if (fillMaxWidth) 16.dp else 20.dp),
             contentAlignment = Alignment.Center,
         ) {
             if (isLoading) {

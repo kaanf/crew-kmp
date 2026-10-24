@@ -40,6 +40,19 @@ class AppDelegate: NSObject, UIApplicationDelegate, MessagingDelegate, UNUserNot
     ) {
         completionHandler([.banner, .sound])
     }
+
+    // Bildirime tıklanınca data'daki "link" (ör. crew://event/{id}) ilgili ekranı açar.
+    // Uygulama kapalıyken de çalışır: ExternalUriHandler link'i listener bağlanana kadar bekletir.
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
+        if let link = response.notification.request.content.userInfo["link"] as? String {
+            ExternalUriHandler.shared.onNewUri(uri: link)
+        }
+        completionHandler()
+    }
 }
 
 @main

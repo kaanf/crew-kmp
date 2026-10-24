@@ -24,7 +24,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -33,13 +32,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kaanf.core.designsystem.component.badge.EmojiBadge
 import com.kaanf.core.designsystem.component.badge.RoundedBadge
 import com.kaanf.core.designsystem.modifier.verticalGradientScrim
 import com.kaanf.core.designsystem.component.image.BaseImage
 import com.kaanf.core.designsystem.modifier.carouselPage
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessIcons
-import com.kaanf.core.designsystem.theme.AccessShapes
 import com.kaanf.core.designsystem.theme.CrewTheme
 import com.kaanf.home.presentation.model.EventDashboardUiModel
 import org.jetbrains.compose.resources.painterResource
@@ -90,7 +89,12 @@ fun DashboardEventCarousel(
                 modifier = Modifier
                     .zIndex(if (page == pagerState.currentPage) 1f else 0f)
                     .padding(vertical = 8.dp)
-                    .carouselPage(pagerState = pagerState, page = page),
+                    .carouselPage(
+                        pagerState = pagerState,
+                        page = page,
+                        // Avoid dynamic shadows while this pager moves with the dashboard list.
+                        centerElevation = 0.dp,
+                    ),
             )
         }
     }
@@ -106,7 +110,7 @@ private fun CarouselEventCard(
         modifier = modifier
             .fillMaxWidth()
             .height(CardHeight)
-            .clip(AccessShapes.Large)
+            // Rounded clipping is already applied by carouselPage's graphics layer.
             .background(AccessDefaults.Surface)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
@@ -131,6 +135,15 @@ private fun CarouselEventCard(
 
         Box(modifier = Modifier.matchParentSize().verticalGradientScrim(CardScrim))
 
+        if (event.hasMyTicket) {
+            EmojiBadge(
+                emoji = "🎟️",
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(12.dp),
+            )
+        }
+
         Column(
             modifier = Modifier
                 .align(Alignment.BottomStart)
@@ -141,7 +154,7 @@ private fun CarouselEventCard(
             Text(
                 text = event.date,
                 style = MaterialTheme.typography.labelMedium.copy(
-                    color = AccessDefaults.TextSecondary,
+                    color = AccessDefaults.Accent,
                     fontWeight = FontWeight.Bold,
                     fontSize = 11.sp,
                 ),
@@ -156,6 +169,11 @@ private fun CarouselEventCard(
                 maxLines = 1,
             )
 
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
                 Text(
                     text = event.formattedPrice,
                     style = MaterialTheme.typography.labelMedium.copy(
@@ -163,6 +181,11 @@ private fun CarouselEventCard(
                         fontSize = 14.sp,
                     ),
                 )
+
+                if (!event.hasMyTicket) {
+                    RoundedBadge(text = "%${event.percentage} Full")
+                }
+            }
         }
     }
 }
@@ -180,7 +203,7 @@ private fun DashboardEventCarouselPreview() {
                     formattedPrice = "220 CZK",
                     percentage = 42,
                     isFeatured = false,
-                    hasMyTicket = false,
+                    hasMyTicket = index == 0,
                 )
             },
             onEventClicked = {},

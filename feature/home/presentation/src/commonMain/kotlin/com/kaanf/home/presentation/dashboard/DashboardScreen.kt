@@ -2,6 +2,12 @@ package com.kaanf.home.presentation.dashboard
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.graphics.ColorFilter
+import org.jetbrains.compose.resources.painterResource
+import crew.feature.home.presentation.generated.resources.dashboard_rock_paper_scissors
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,20 +39,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kaanf.core.designsystem.component.layout.AppScaffold
 import com.kaanf.core.designsystem.component.layout.AppTopBar
 import com.kaanf.core.designsystem.component.layout.FullScreenLoader
 import com.kaanf.core.designsystem.theme.AccessDefaults
-import com.kaanf.core.designsystem.theme.SpaceGrotesk
 import com.kaanf.core.presentation.model.AppTopBarState
 import com.kaanf.core.presentation.permission.Permission
 import com.kaanf.core.presentation.permission.rememberPermissionController
 import com.kaanf.core.presentation.util.ObserveAsEvents
 import com.kaanf.core.designsystem.component.card.GradientChallengeCard
-import com.kaanf.core.designsystem.component.card.MoreDeckCard
+import com.kaanf.home.presentation.dashboard.component.profile.DashboardProfilePhotoReminder
 import com.kaanf.home.presentation.dashboard.component.carousel.DashboardEventCarousel
 import com.kaanf.home.presentation.dashboard.component.emptystate.DashboardEmptyState
 import com.kaanf.home.presentation.dashboard.component.eventcard.DashboardEventCard
@@ -55,10 +59,8 @@ import com.kaanf.home.presentation.model.EventDashboardUiModel
 import crew.feature.home.presentation.generated.resources.Res
 import crew.feature.home.presentation.generated.resources.dashboard_featured_event_section_description
 import crew.feature.home.presentation.generated.resources.dashboard_featured_event_section_title
-import crew.feature.home.presentation.generated.resources.dashboard_game_preview_cta
 import crew.feature.home.presentation.generated.resources.dashboard_game_preview_section_description
 import crew.feature.home.presentation.generated.resources.dashboard_game_preview_section_title
-import crew.feature.home.presentation.generated.resources.dashboard_header_description
 import crew.feature.home.presentation.generated.resources.dashboard_header_title
 import crew.feature.home.presentation.generated.resources.dashboard_doors_open_events_count
 import crew.feature.home.presentation.generated.resources.dashboard_doors_open_events_title
@@ -84,6 +86,7 @@ fun DashboardRoot(
 
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
+            DashboardEvent.NavigateToProfile -> onProfileClicked()
             is DashboardEvent.NavigateToEventDetail -> onEventClicked(event.eventId)
         }
     }
@@ -142,42 +145,35 @@ fun DashboardScreen(
     onAction: (DashboardAction) -> Unit,
     listState: LazyListState,
 ) {
-    val typography = MaterialTheme.typography
-    MaterialTheme(
-        typography = typography.copy(
-            labelSmall = typography.labelSmall.copy(fontFamily = SpaceGrotesk),
-        ),
-    ) {
-        Crossfade(
-            targetState = state.isLoading,
-            modifier = modifier.fillMaxSize(),
-            animationSpec = tween(durationMillis = 250),
-        ) { isLoading ->
-            if (isLoading) {
-                FullScreenLoader()
-            } else {
-                val pullToRefreshState = rememberPullToRefreshState()
+    Crossfade(
+        targetState = state.isLoading,
+        modifier = modifier.fillMaxSize(),
+        animationSpec = tween(durationMillis = 250),
+    ) { isLoading ->
+        if (isLoading) {
+            FullScreenLoader()
+        } else {
+            val pullToRefreshState = rememberPullToRefreshState()
 
-                PullToRefreshBox(
-                    isRefreshing = state.isRefreshing,
-                    onRefresh = { onAction(DashboardAction.OnRefresh) },
-                    state = pullToRefreshState,
-                    indicator = {
-                        PullToRefreshDefaults.Indicator(
-                            modifier = Modifier.align(Alignment.TopCenter),
-                            state = pullToRefreshState,
-                            isRefreshing = state.isRefreshing,
-                            containerColor = AccessDefaults.SurfaceElevated,
-                            color = AccessDefaults.Accent,
-                        )
-                    },
-                ) {
-                    DashboardContent(
-                        listState = listState,
-                        state = state,
-                        onAction = onAction,
+            PullToRefreshBox(
+                isRefreshing = state.isRefreshing,
+                onRefresh = { onAction(DashboardAction.OnRefresh) },
+                state = pullToRefreshState,
+                indicator = {
+                    PullToRefreshDefaults.Indicator(
+                        modifier = Modifier.align(Alignment.TopCenter),
+                        state = pullToRefreshState,
+                        isRefreshing = state.isRefreshing,
+                        containerColor = AccessDefaults.SurfaceElevated,
+                        color = AccessDefaults.Accent,
                     )
-                }
+                },
+            ) {
+                DashboardContent(
+                    listState = listState,
+                    state = state,
+                    onAction = onAction,
+                )
             }
         }
     }
@@ -205,6 +201,27 @@ private fun DashboardContent(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(bottom = 24.dp),
     ) {
+        if (!hasNoEvents) {
+            item(contentType = "header") {
+                DashboardHeader()
+            }
+
+            item(contentType = "space-after-header") {
+                Spacer(modifier = Modifier.height(24.dp))
+            }
+        }
+
+        if (state.showProfilePhotoReminder) {
+            item(key = "profile-photo-reminder", contentType = "profile-photo-reminder") {
+                DashboardProfilePhotoReminder(
+                    onClick = { onAction(DashboardAction.OnProfilePhotoReminderClicked) },
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .padding(top = if (hasNoEvents) 16.dp else 0.dp, bottom = 24.dp),
+                )
+            }
+        }
+
         if (hasNoEvents) {
             item(contentType = "empty-state") {
                 Box(
@@ -217,22 +234,18 @@ private fun DashboardContent(
             return@LazyColumn
         }
 
-        /*
-        item(contentType = "header") {
-            DashboardHeader()
-        }
-         */
-
-        item(contentType = "space-after-header") {
-            Spacer(modifier = Modifier.height(24.dp))
-        }
+        eventSection(
+            title = yourEventsTitle,
+            countText = yourEventsCount,
+            events = state.myEvents,
+            onEventClicked = { onAction(DashboardAction.OnEventClicked(it.id)) },
+        )
 
         if (state.featuredEvents.isNotEmpty()) {
             item(contentType = "featured-carousel-section") {
                 DashboardSection(
                     title = stringResource(Res.string.dashboard_featured_event_section_title),
-                    description = "",
-                    ctaText = "",
+                    description = stringResource(Res.string.dashboard_featured_event_section_description),
                     content = {
                         DashboardEventCarousel(
                             events = state.featuredEvents,
@@ -251,7 +264,6 @@ private fun DashboardContent(
             DashboardSection(
                 title = stringResource(Res.string.dashboard_game_preview_section_title),
                 description = stringResource(Res.string.dashboard_game_preview_section_description),
-                ctaText = stringResource(Res.string.dashboard_game_preview_cta),
                 content = {
                     LazyRow(
                         modifier = Modifier.fillMaxWidth(),
@@ -260,17 +272,22 @@ private fun DashboardContent(
                     ) {
                         items(
                             items = state.tasks,
-                            key = { it.description },
+                            key = { it.description }, // key'i task id yap.
                             contentType = { "challenge_card" },
                         ) { card ->
-                            GradientChallengeCard(card = card)
+                            GradientChallengeCard(
+                                card = card,
+                                showPoints = false,
+                                descriptionSpacing = 4.dp,
+                                pressFeedbackEnabled = false,
+                            )
                         }
 
                         item(
                             key = "see_all_challenges",
                             contentType = "see_all_challenges",
                         ) {
-                            MoreDeckCard()
+                            //MoreDeckCard()
                         }
                     }
                 },
@@ -280,13 +297,6 @@ private fun DashboardContent(
         item(contentType = "space-after-deck") {
             Spacer(modifier = Modifier.height(24.dp))
         }
-
-        eventSection(
-            title = yourEventsTitle,
-            countText = yourEventsCount,
-            events = state.myEvents,
-            onEventClicked = { onAction(DashboardAction.OnEventClicked(it.id)) },
-        )
 
         eventSection(
             title = doorsOpenTitle,
@@ -346,7 +356,6 @@ private fun LazyListScope.eventSection(
 @Composable
 private fun DashboardSection(
     title: String,
-    ctaText: String,
     modifier: Modifier = Modifier,
     description: String? = null,
     content: @Composable () -> Unit,
@@ -359,7 +368,7 @@ private fun DashboardSection(
         DashboardEventInfoRow(
             leftText = title,
             description = description,
-            rightText = ctaText,
+            rightText = "",
         )
 
         content()
@@ -368,26 +377,24 @@ private fun DashboardSection(
 
 @Composable
 private fun DashboardHeader() {
-    Column(
+    Row(
         modifier = Modifier
-            .padding(horizontal = 16.dp),
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .padding(top = 2.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Spacer(modifier = Modifier.height(2.dp))
-
         Text(
             text = stringResource(Res.string.dashboard_header_title),
-            style = MaterialTheme.typography.displayMedium.copy(
-                fontSize = 18.sp
-            ),
+            style = MaterialTheme.typography.displayMedium,
+            modifier = Modifier.weight(1f),
         )
-
-        Spacer(modifier = Modifier.height(4.dp))
-
-        Text(
-            text = stringResource(Res.string.dashboard_header_description),
-            style = MaterialTheme.typography.bodySmall.copy(
-                color = AccessDefaults.TextMuted,
-            ),
+        Image(
+            painter = painterResource(Res.drawable.dashboard_rock_paper_scissors),
+            contentDescription = null,
+            colorFilter = ColorFilter.tint(AccessDefaults.TextPrimary),
+            modifier = Modifier.size(96.dp),
         )
     }
 }

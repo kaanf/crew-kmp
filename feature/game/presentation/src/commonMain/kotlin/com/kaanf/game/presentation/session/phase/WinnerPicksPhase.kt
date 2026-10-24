@@ -1,6 +1,5 @@
 package com.kaanf.game.presentation.session.phase
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -10,11 +9,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,8 +24,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import com.kaanf.core.designsystem.component.pager.PagerDots
 import com.kaanf.core.designsystem.component.button.BaseButton
-import com.kaanf.core.designsystem.component.card.GradientChallengeCard
+import com.kaanf.core.designsystem.component.card.ChallengeCardTallShape
 import com.kaanf.core.designsystem.component.progressbar.ThreeDotsAnimatedCard
 import com.kaanf.core.designsystem.modifier.carouselPage
 import com.kaanf.core.designsystem.theme.AccessDefaults
@@ -43,7 +40,6 @@ import crew.feature.game.presentation.generated.resources.match_phase_winner_pic
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
-private val TaskCardShape = RoundedCornerShape(28.dp)
 
 @Composable
 fun WinnerPicksPhase(
@@ -87,7 +83,7 @@ fun WinnerPicksPhase(
                 .fillMaxWidth(),
             contentAlignment = Alignment.Center,
         ) {
-            val sidePadding = ((maxWidth - TaskCardSize) / 2).coerceAtLeast(0.dp)
+            val sidePadding = ((maxWidth - TaskCardWidth) / 2).coerceAtLeast(0.dp)
 
             HorizontalPager(
                 state = pagerState,
@@ -95,18 +91,16 @@ fun WinnerPicksPhase(
                 userScrollEnabled = !isOffering,
                 modifier = Modifier.fillMaxWidth(),
             ) { page ->
-                GradientChallengeCard(
+                TaskCard(
                     card = tasks[page].toUiModel(),
-                    cardSize = TaskCardSize,
-                    emphasized = true,
                     modifier = Modifier
                         .zIndex(if (page == pagerState.currentPage) 1f else 0f)
-                        .carouselPage(pagerState = pagerState, page = page, shape = TaskCardShape),
+                        .carouselPage(pagerState = pagerState, page = page, shape = ChallengeCardTallShape),
                 )
             }
         }
 
-        PagerDots(pageCount = tasks.size, currentPage = pagerState.currentPage)
+        PagerDots(pageCount = tasks.size, currentPage = pagerState.currentPage, dotSize = 6.dp)
 
         Column(
             modifier = Modifier.padding(horizontal = 16.dp),
@@ -129,29 +123,6 @@ fun WinnerPicksPhase(
                 isLoading = isOffering,
                 loadingText = stringResource(Res.string.match_phase_winner_picks_loading, opponentUppercase),
                 onClick = onSendClick,
-            )
-        }
-    }
-}
-
-@Composable
-private fun PagerDots(
-    pageCount: Int,
-    currentPage: Int,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
-    ) {
-        repeat(pageCount) { index ->
-            Box(
-                modifier = Modifier
-                    .size(6.dp)
-                    .background(
-                        color = if (index == currentPage) AccessDefaults.Accent else AccessDefaults.Border,
-                        shape = CircleShape,
-                    ),
             )
         }
     }

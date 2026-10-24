@@ -1,0 +1,11 @@
+steps:
+  - launch: com.kaanf.crew.screenshots
+  - tool: open-url
+    args:
+      url: crew-screenshot://dashboard
+  - await:
+      visible:
+        id: screenshot-ready-dashboard
+      timeout: 60000
+  - await:
+      idle: true

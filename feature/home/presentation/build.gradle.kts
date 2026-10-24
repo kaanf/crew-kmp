@@ -8,6 +8,7 @@ kotlin {
             dependencies {
                 implementation(libs.kotlin.stdlib)
                 implementation(libs.kotlinx.datetime)
+                implementation(libs.coil.compose)
 
                 //implementation(libs.confettikit)
 
@@ -15,6 +16,7 @@ kotlin {
                 implementation(projects.core.domain)
                 implementation(projects.core.designsystem)
                 implementation(projects.core.presentation)
+                implementation(projects.core.palette)
 
                 implementation(compose.components.resources)
                 implementation(compose.components.uiToolingPreview)

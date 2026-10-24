@@ -36,7 +36,6 @@ import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.CrewTheme
 import com.kaanf.game.domain.model.GameTask
 import com.kaanf.game.domain.model.TaskCategory
-import com.kaanf.core.designsystem.component.card.GradientChallengeCard
 import crew.feature.game.presentation.generated.resources.Res
 import crew.feature.game.presentation.generated.resources.match_phase_winner_confirms_completed_action
 import crew.feature.game.presentation.generated.resources.match_phase_winner_confirms_not_done_action
@@ -82,10 +81,8 @@ fun WinnerConfirmsPhase(
         ) {
             task?.let {
                 val tilt = remember(it.id) { tableTiltFor(it.id) }
-                GradientChallengeCard(
+                TaskCard(
                     card = it.toUiModel(),
-                    cardSize = TaskCardSize,
-                    emphasized = true,
                     modifier = Modifier.rotate(tilt),
                 )
             }

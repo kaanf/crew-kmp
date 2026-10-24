@@ -69,6 +69,9 @@ data class MatchSessionState(
     val errorMessage: String? = null,
     // Kırmızı nokta badge'leri: claim edilecek bir şey var mı. Maç bitişlerinde ve
     // ekrandan dönüşteki stats yenilemesinde tazelenir.
+    val questsCompleted: Int? = null,
+    val questsTotal: Int? = null,
+    val passportStampCount: Int? = null,
     val questsClaimable: Boolean = false,
     val passportClaimable: Boolean = false,
 ) {

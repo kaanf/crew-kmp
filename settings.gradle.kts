@@ -39,6 +39,7 @@ include(":core:presentation")
 include(":core:domain")
 include(":core:data")
 include(":core:designsystem")
+include(":core:palette")
 include(":feature:auth:presentation")
 include(":feature:auth:domain")
 include(":feature:auth:data")
@@ -50,3 +51,8 @@ include(":feature:game:data")
 include(":feature:game:presentation")
 include(":androidApp")
 include(":benchmark")
+
+// Screenshot apps are separate binaries and absent from the production project graph.
+if (providers.gradleProperty("crewScreenshots").orNull == "true") {
+    include(":screenshots:shared", ":screenshots:android")
+}

@@ -1,0 +1,273 @@
+package com.kaanf.core.designsystem.component.card
+
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PointMode
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.kaanf.core.designsystem.theme.AccessDefaults
+import com.kaanf.core.designsystem.theme.BricolageGrotesque
+import com.kaanf.core.designsystem.theme.CrewTheme
+import com.kaanf.core.designsystem.theme.SpaceGrotesk
+import androidx.compose.ui.tooling.preview.Preview
+import kotlin.math.PI
+import kotlin.math.sin
+import kotlin.random.Random
+
+private val FlameOrange = Color(0xFFFF790B)
+private val FlameAmber = Color(0xFFFFB524)
+private val FlameYellow = Color(0xFFFFE58B)
+private val PaperInk = Color(0xFF291608)
+private const val FlameLoopMillis = 3200
+private const val Tau = (PI * 2).toFloat()
+
+/**
+ * Isolated visual experiment, intentionally not wired to a category or a production screen.
+ * No images, native code, blur or extra dependencies. Only the flame Canvas reads the clock.
+ * When integrating, the host must stop the clock while offscreen/backgrounded (and for
+ * reduced motion). Passing a static phase makes any point in the loop reproducible in Preview.
+ */
+@Composable
+private fun PartnerInCrimeCard(
+    phase: State<Float>,
+    modifier: Modifier = Modifier,
+    task: String = "Pick your partner.\nCause a little chaos.",
+) {
+    Box(modifier.widthIn(max = 430.dp).fillMaxWidth()) {
+        // Real layout space around the paper: flame tips won't be clipped by its shape.
+        FlameBorder(phase, Modifier.matchParentSize())
+        Column(
+            Modifier
+                .padding(start = 24.dp, end = 24.dp, top = 44.dp, bottom = 20.dp)
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(22.dp))
+                .paperSurface()
+                .heightIn(min = 194.dp)
+                .padding(22.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            Text(
+                "PARTNER IN CRIME",
+                fontFamily = SpaceGrotesk,
+                fontWeight = FontWeight.Bold,
+                fontSize = 11.sp,
+                letterSpacing = 1.5.sp,
+                color = Color(0xFF9B3C09),
+            )
+            Text(
+                task,
+                fontFamily = BricolageGrotesque,
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 26.sp,
+                lineHeight = 28.sp,
+                letterSpacing = (-0.6).sp,
+                color = PaperInk,
+            )
+            ChainMark(Modifier.align(Alignment.End).size(44.dp))
+        }
+    }
+}
+
+/** Static paper grain is seeded and cached by size; never regenerated by the flame clock. */
+private fun Modifier.paperSurface() = drawWithCache {
+    val paper = Brush.linearGradient(
+        listOf(Color(0xFFFFD080), Color(0xFFFFE9AF), Color(0xFFFFD99A)),
+        start = Offset.Zero,
+        end = Offset(size.width, size.height),
+    )
+    val random = Random(71)
+    val flecks = List(420) { Offset(random.nextFloat() * size.width, random.nextFloat() * size.height) }
+    val highlights = List(180) { Offset(random.nextFloat() * size.width, random.nextFloat() * size.height) }
+    val inset = 1.dp.toPx()
+    val edgeSize = Size(size.width - inset * 2, size.height - inset * 2)
+    val radius = CornerRadius(21.dp.toPx())
+    val border = Stroke(1.dp.toPx())
+    onDrawBehind {
+        drawRect(paper)
+        drawPoints(flecks, PointMode.Points, Color(0x1395491E), strokeWidth = 0.7.dp.toPx(), cap = StrokeCap.Round)
+        drawPoints(highlights, PointMode.Points, Color(0x50FFFFFF), strokeWidth = 0.6.dp.toPx(), cap = StrokeCap.Round)
+        drawRoundRect(Color(0xFFFFAF51), Offset(inset, inset), edgeSize, radius, style = border)
+    }
+}
+
+@Composable
+private fun FlameBorder(phase: State<Float>, modifier: Modifier) {
+    // Rewind the same path for every tongue/layer: no per-frame Path/list/brush creation.
+    val path = remember { Path() }
+    Canvas(modifier.graphicsLayer()) {
+        val t = phase.value * Tau // State is read in drawing, not composition or layout.
+        val left = 24.dp.toPx()
+        val right = size.width - left
+        val top = 44.dp.toPx()
+        val bottom = size.height - 20.dp.toPx()
+        val height = bottom - top
+        val unit = minOf((right - left) / 310f, 1.3.dp.toPx())
+
+        // Staggered small silhouettes merge at the edge, curling upward at different rhythms.
+        for (side in 0..1) {
+            val direction = if (side == 0) -1f else 1f
+            val edge = if (side == 0) left else right
+            for (index in 0..5) {
+                val seed = index * 1.73f + side * 2.41f
+                val wave = sin(t * 2f + seed)
+                val baseY = bottom - 5f * unit - index * (height - 20f * unit) / 5f
+                val tongueHeight = (37f + index % 3 * 7f + wave * 7f) * unit
+                val tongueWidth = (22f + sin(t + seed) * 3f) * unit
+                val bend = direction * (7f + sin(t * 3f + seed) * 5f) * unit
+                val x = edge + direction * (sin(t + seed) * 2f - 3f) * unit
+                translate(x, baseY) {
+                    flameTongue(path, tongueWidth, tongueHeight, bend, FlameOrange)
+                    flameTongue(path, tongueWidth * 0.72f, tongueHeight * 0.76f, bend * 0.6f, FlameAmber)
+                    flameTongue(path, tongueWidth * 0.4f, tongueHeight * 0.47f, bend * 0.3f, FlameYellow)
+                }
+            }
+
+            // Four short-lived embers per side. Fade to zero at the wrap, so the loop is seamless.
+            for (index in 0..3) {
+                val life = (phase.value + index * 0.25f + side * 0.13f) % 1f
+                val alpha = sin(life * PI).toFloat().coerceAtLeast(0f) * 0.8f
+                val x = edge + direction * (11f + sin(life * Tau + index) * 5f) * unit
+                val y = bottom - height * (index / 4f) - life * 45f * unit
+                drawOval(
+                    color = FlameAmber.copy(alpha = alpha),
+                    topLeft = Offset(x, y),
+                    size = Size(2.5f * unit, 5f * unit),
+                )
+            }
+        }
+    }
+}
+
+/** A curled tongue, with a concave shoulder instead of a uniformly scaled teardrop. */
+private fun DrawScope.flameTongue(path: Path, width: Float, height: Float, bend: Float, color: Color) {
+    path.rewind()
+    path.moveTo(-width * 0.5f, 0f)
+    path.cubicTo(-width * 0.85f, -height * 0.35f, bend - width * 0.42f, -height * 0.5f, bend - width * 0.3f, -height * 0.69f)
+    path.cubicTo(bend - width * 0.5f, -height * 0.89f, bend - width * 0.18f, -height * 0.96f, bend + width * 0.12f, -height)
+    path.cubicTo(bend - width * 0.04f, -height * 0.76f, bend + width * 0.56f, -height * 0.75f, width * 0.33f, -height * 0.4f)
+    path.cubicTo(width * 0.2f, -height * 0.25f, width * 0.52f, -height * 0.26f, width * 0.47f, -height * 0.42f)
+    path.cubicTo(width * 0.92f, -height * 0.2f, width * 0.74f, -height * 0.04f, width * 0.5f, 0f)
+    path.close()
+    drawPath(path, color)
+}
+
+@Composable
+private fun ChainMark(modifier: Modifier) {
+    Canvas(modifier) {
+        val stroke = Stroke(width = size.width * 0.075f, cap = StrokeCap.Round)
+        rotate(38f) {
+            drawRoundRect(
+                PaperInk, Offset(size.width * 0.31f, size.height * 0.02f),
+                Size(size.width * 0.38f, size.height * 0.57f),
+                CornerRadius(size.width * 0.19f), style = stroke,
+            )
+            drawRoundRect(
+                PaperInk, Offset(size.width * 0.31f, size.height * 0.42f),
+                Size(size.width * 0.38f, size.height * 0.57f),
+                CornerRadius(size.width * 0.19f), style = stroke,
+            )
+        }
+    }
+}
+
+/** Open Interactive Preview (or Run Preview) to play/pause and scrub the flame cycle. */
+@Preview(name = "Partner in Crime · animated", widthDp = 390, heightDp = 480)
+@Composable
+private fun PartnerInCrimeAnimatedPreview() {
+    CrewTheme(isDarkTheme = true) {
+        var playing by remember { mutableStateOf(true) }
+        var frozenPhase by remember { mutableFloatStateOf(0.18f) }
+        // The transition leaves composition when paused: no hidden animation keeps running.
+        // Restart from the inspected frame. Integer harmonics make phase 0 and 1 identical.
+        val phase: State<Float> = if (playing) {
+            rememberInfiniteTransition(label = "partner-flames").animateFloat(
+                initialValue = frozenPhase,
+                targetValue = frozenPhase + 1f,
+                animationSpec = infiniteRepeatable(tween(FlameLoopMillis, easing = LinearEasing)),
+                label = "flame-phase",
+            )
+        } else {
+            rememberUpdatedState(frozenPhase)
+        }
+        Column(
+            Modifier.background(AccessDefaults.Background).verticalScroll(rememberScrollState()).padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            PartnerInCrimeCard(phase = phase)
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Text("Flame study", Modifier.weight(1f), style = MaterialTheme.typography.titleMedium)
+                TextButton(onClick = {
+                    if (playing) frozenPhase = phase.value % 1f
+                    playing = !playing
+                }) {
+                    Text(if (playing) "Pause" else "Play", color = FlameAmber)
+                }
+            }
+            Slider(
+                value = frozenPhase,
+                onValueChange = { playing = false; frozenPhase = it },
+            )
+            Text(
+                "Drag to inspect a frame · example task",
+                style = MaterialTheme.typography.bodySmall,
+                color = AccessDefaults.TextSecondary,
+            )
+        }
+    }
+}
+
+@Preview(name = "Partner in Crime · still", widthDp = 390, heightDp = 320)
+@Composable
+private fun PartnerInCrimeStillPreview() {
+    CrewTheme(isDarkTheme = true) {
+        Box(Modifier.background(AccessDefaults.Background).padding(18.dp), contentAlignment = Alignment.Center) {
+            PartnerInCrimeCard(phase = rememberUpdatedState(0.18f))
+        }
+    }
+}

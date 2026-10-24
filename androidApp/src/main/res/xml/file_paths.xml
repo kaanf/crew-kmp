@@ -3,4 +3,6 @@
     <cache-path
         name="camera_captures"
         path="camera_captures/" />
+    <cache-path name="lobby_posters" path="lobby_posters/" />
+    <cache-path name="event_share_previews" path="event_share_previews/" />
 </paths>

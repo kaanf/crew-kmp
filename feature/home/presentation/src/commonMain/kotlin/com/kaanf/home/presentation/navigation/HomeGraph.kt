@@ -4,6 +4,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
+import androidx.navigation.navDeepLink
 import androidx.navigation.toRoute
 import com.kaanf.home.presentation.dashboard.DashboardRoot
 import com.kaanf.home.presentation.eventdetail.EventDetailRoot
@@ -44,7 +45,16 @@ fun NavGraphBuilder.homeGraph(
             )
         }
 
-        composable<HomeGraphRoutes.EventDetail> {
+        composable<HomeGraphRoutes.EventDetail>(
+            // Push bildirimi data'sındaki "link" (crew://event/{eventId}) buraya düşer.
+            deepLinks = listOf(
+                navDeepLink<HomeGraphRoutes.EventDetail>(basePath = "crew://event"),
+                navDeepLink<HomeGraphRoutes.EventDetail>(basePath = "https://api.kaanf.com/share/events"),
+                navDeepLink<HomeGraphRoutes.EventDetail>(basePath = "https://api.crewishere.com/share/events"),
+                navDeepLink { uriPattern = "https://crewishere.com/event/?id={eventId}" },
+                navDeepLink { uriPattern = "https://crewishere.com/event?id={eventId}" },
+            ),
+        ) {
             EventDetailRoot(
                 onBackClick = {
                     navController.popBackStack()

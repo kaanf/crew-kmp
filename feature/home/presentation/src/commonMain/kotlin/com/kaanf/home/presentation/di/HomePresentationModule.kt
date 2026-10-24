@@ -3,6 +3,7 @@ package com.kaanf.home.presentation.di
 import com.kaanf.home.domain.usecase.CheckInUseCase
 import com.kaanf.home.domain.usecase.CreateTicketUseCase
 import com.kaanf.home.domain.usecase.GetEventDetailUseCase
+import com.kaanf.home.domain.usecase.GetEventGuestsUseCase
 import com.kaanf.home.domain.usecase.GetEventsUseCase
 import com.kaanf.home.domain.usecase.GetMyTicketUseCase
 import com.kaanf.home.presentation.dashboard.DashboardViewModel
@@ -17,6 +18,7 @@ val homePresentationModule =
     module {
         factoryOf(::GetEventsUseCase)
         factoryOf(::GetEventDetailUseCase)
+        factoryOf(::GetEventGuestsUseCase)
         factoryOf(::CreateTicketUseCase)
         factoryOf(::GetMyTicketUseCase)
         factoryOf(::CheckInUseCase)

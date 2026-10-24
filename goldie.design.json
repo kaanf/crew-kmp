@@ -1,0 +1,10 @@
+{
+  "background": "linear-gradient(160deg, #F97316 0%, #DC2626 100%)",
+  "frames": {
+    "iphone-6.9": "17-pro-silver"
+  },
+  "fontFamily": "\"Bricolage Grotesque\", sans-serif",
+  "template": "showcase",
+  "layout": "classic",
+  "screenOnly": true
+}

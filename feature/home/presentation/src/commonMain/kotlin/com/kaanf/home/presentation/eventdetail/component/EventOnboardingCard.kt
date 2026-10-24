@@ -1,63 +1,77 @@
 package com.kaanf.home.presentation.eventdetail.component
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kaanf.core.designsystem.theme.AccessDefaults
+import com.kaanf.core.designsystem.theme.BricolageGrotesque
 import com.kaanf.core.designsystem.theme.CrewTheme
+import crew.feature.home.presentation.generated.resources.Res
+import crew.feature.home.presentation.generated.resources.how_it_works_task_cards
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun EventOnboardingCard() {
-    Column(modifier = Modifier.fillMaxWidth().padding(top = 14.dp)) {
-        // About / Where bloklarıyla aynı ayırıcı; liste aralığıyla birlikte 26.dp üst boşluk verir.
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(1.dp)
-                .background(AccessDefaults.BorderSoft),
-        )
-
-        Column(
-            modifier = Modifier
-                .padding(4.dp)
-                .padding(top = 11.dp)
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(20.dp),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
-                text = "HOW IT WORKS",
-                style = MaterialTheme.typography.labelSmall.copy(
-                    color = AccessDefaults.TextMuted,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Medium
-                )
+            Image(
+                painter = painterResource(Res.drawable.how_it_works_task_cards),
+                contentDescription = null,
+                colorFilter = ColorFilter.tint(Color.White),
+                modifier = Modifier.size(36.dp),
             )
+            Text(
+                text = "How it works",
+                modifier = Modifier.weight(1f).semantics { heading() },
+                style = MaterialTheme.typography.headlineSmall.copy(
+                    fontFamily = BricolageGrotesque,
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 24.sp,
+                    lineHeight = 28.sp,
+                    letterSpacing = (-0.6).sp,
+                    color = AccessDefaults.TextPrimary,
+                ),
+            )
+        }
 
-            Spacer(modifier = Modifier.height(12.dp))
-
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
             eventOnboardingItems.forEachIndexed { index, item ->
-                EventOnboardingRow(
-                    count = index + 1,
-                    title = item.title,
-                    description = item.description
-                )
-
+                EventOnboardingRow(item = item, index = index)
                 if (index != eventOnboardingItems.lastIndex) {
-                    Spacer(modifier = Modifier.height(20.dp))
+                    HorizontalDivider(
+                        modifier = Modifier.padding(start = 56.dp),
+                        color = AccessDefaults.TextPrimary.copy(alpha = 0.12f),
+                    )
                 }
             }
         }
@@ -65,94 +79,92 @@ fun EventOnboardingCard() {
 }
 
 @Composable
-private fun EventOnboardingRow(
-    count: Int,
-    title: String,
-    description: String
-) {
+private fun EventOnboardingRow(item: EventOnboardingItem, index: Int) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        modifier = Modifier.fillMaxWidth().semantics(mergeDescendants = true) {},
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalAlignment = Alignment.Top,
     ) {
-        EventOnboardingCountSquare(count)
-
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-            horizontalAlignment = Alignment.Start
+        Box(
+            modifier = Modifier
+                .padding(top = 3.dp)
+                .rotate(if (index % 2 == 0) -8f else 7f)
+                .size(40.dp)
+                .background(item.color, RoundedCornerShape(12.dp))
+                .clearAndSetSemantics {},
+            contentAlignment = Alignment.Center,
         ) {
             Text(
-                text = title,
-                style = MaterialTheme.typography.titleSmall.copy(
-                    color = AccessDefaults.TextPrimary,
-                    fontSize = 14.sp
-                )
+                text = "${index + 1}",
+                fontFamily = BricolageGrotesque,
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 28.sp,
+                lineHeight = 32.sp,
+                color = AccessDefaults.OnAccent,
             )
+        }
 
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(5.dp),
+        ) {
             Text(
-                text = description,
+                text = item.title,
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontFamily = BricolageGrotesque,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    lineHeight = 22.sp,
+                    color = AccessDefaults.TextPrimary,
+                ),
+            )
+            Text(
+                text = item.description,
                 style = MaterialTheme.typography.bodyMedium.copy(
-                    color = AccessDefaults.TextMuted,
-                    fontSize = 12.sp,
-                    lineHeight = 18.sp
-                )
+                    color = AccessDefaults.TextSecondary,
+                    fontSize = 14.sp,
+                    lineHeight = 20.sp,
+                ),
             )
         }
     }
 }
 
-@Composable
-private fun EventOnboardingCountSquare(count: Int) {
-    Box(
-        modifier = Modifier
-            .background(
-                color = AccessDefaults.SurfaceElevated,
-                shape = RoundedCornerShape(6.dp)
-            )
-            .padding(
-                horizontal = 6.dp, vertical = 4.dp
-            ),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = count.toString(),
-            style = MaterialTheme.typography.labelSmall.copy(
-                color = AccessDefaults.TextPrimary,
-                fontWeight = FontWeight.ExtraBold,
-                fontSize = 13.sp,
-            )
-        )
-    }
-}
-
 private data class EventOnboardingItem(
+    val color: Color,
     val title: String,
-    val description: String
+    val description: String,
 )
 
 private val eventOnboardingItems = listOf(
     EventOnboardingItem(
+        color = AccessDefaults.Accent,
         title = "Show up solo",
-        description = "Tickets are one per person. Friends come too — but you play on your own."
+        description = "Tickets are one per person. Friends come too, but you play on your own.",
     ),
     EventOnboardingItem(
+        color = AccessDefaults.Blush,
         title = "Scan to play",
-        description = "Walk up to someone. Scan their match QR. Play physical rock-paper-scissors."
+        description = "Walk up to someone. Scan their match QR. Play physical rock-paper-scissors.",
     ),
     EventOnboardingItem(
+        color = AccessDefaults.Sky,
         title = "Pick a task",
-        description = "Winner picks from 3 tasks. Loser does it. Both earn points."
+        description = "Winner picks from 3 tasks. Loser does it. Both earn points.",
     ),
     EventOnboardingItem(
+        color = AccessDefaults.Gold,
         title = "Crown the leader",
-        description = "The night ends at 23:00. Leaderboard reveals. Hugs, then drinks."
-    )
+        description = "The night ends at 23:00. Leaderboard reveals. Hugs, then drinks.",
+    ),
 )
 
 @Composable
 @Preview
 fun EventOnboardingRowPreview() {
     CrewTheme {
-        EventOnboardingCard()
+        Column(Modifier.background(AccessDefaults.Background).padding(20.dp)) {
+            EventOnboardingCard()
+        }
     }
 }

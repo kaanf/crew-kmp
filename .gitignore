@@ -101,3 +101,9 @@ CLAUDE.md
 
 *.ipa
 *.dSYM.zip
+
+# Local design explorations
+/design-concepts/
+
+# Goldie generated captures and marketing compositions
+/out/

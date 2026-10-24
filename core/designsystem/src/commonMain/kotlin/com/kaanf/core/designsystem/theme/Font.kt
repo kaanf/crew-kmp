@@ -27,6 +27,7 @@ import crew.core.designsystem.generated.resources.geist_medium
 import crew.core.designsystem.generated.resources.geist_regular
 import crew.core.designsystem.generated.resources.geist_semibold
 import crew.core.designsystem.generated.resources.inter_variable
+import crew.core.designsystem.generated.resources.nunito_variable
 import crew.core.designsystem.generated.resources.special_elite_regular
 import crew.core.designsystem.generated.resources.space_grotesk_variable
 import org.jetbrains.compose.resources.Font
@@ -105,6 +106,15 @@ val SpaceGrotesk: FontFamily
         ).map { weight ->
             Font(resource = Res.font.space_grotesk_variable, weight = weight)
         }
+        return remember(fonts) { FontFamily(fonts) }
+    }
+
+// Yuvarlak, çok kalın başlık fontu; şimdilik yalnız dashboard'daki oyun masası başlığında deneniyor.
+val Nunito: FontFamily
+    @Composable get() {
+        val fonts = listOf(
+            Font(resource = Res.font.nunito_variable, weight = FontWeight.Black),
+        )
         return remember(fonts) { FontFamily(fonts) }
     }
 

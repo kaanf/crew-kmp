@@ -31,22 +31,26 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kaanf.core.designsystem.component.button.BaseButton
-import com.kaanf.core.designsystem.component.info.InfoCard
+import com.kaanf.core.designsystem.component.info.InfoRow
 import com.kaanf.core.designsystem.component.layout.AppScaffold
 import com.kaanf.core.designsystem.component.layout.AppTopBar
 import com.kaanf.core.designsystem.component.layout.FullScreenLoader
 import com.kaanf.core.designsystem.theme.AccessDefaults
+import com.kaanf.core.designsystem.theme.BricolageGrotesque
 import com.kaanf.core.presentation.model.AppTopBarState
 import com.kaanf.core.presentation.util.KeepScreenOn
 import com.kaanf.core.presentation.util.ObserveAsEvents
 import com.kaanf.home.presentation.eventcode.EventCodeContent
 import com.kaanf.home.presentation.ticketqr.component.qr.TicketQrInfoCard
-import com.kaanf.home.presentation.ticketqr.component.successcard.TicketSuccessCard
-import com.kaanf.home.presentation.component.EventVenueLine
+import com.kaanf.home.presentation.ticketqr.component.countdown.CountdownCard
+import com.kaanf.home.presentation.ticketqr.component.TicketEventHeader
+import com.kaanf.home.presentation.component.EventLocationRow
 import crew.feature.home.presentation.generated.resources.Res
 import crew.feature.home.presentation.generated.resources.ticket_qr_getting_there
+import crew.feature.home.presentation.generated.resources.ticket_qr_doors_open_in
 import crew.feature.home.presentation.generated.resources.ticket_qr_info_action
 import crew.feature.home.presentation.generated.resources.ticket_qr_info_prefix
 import crew.feature.home.presentation.generated.resources.ticket_qr_info_suffix
@@ -150,6 +154,15 @@ fun TicketContainerScreen(
                 )
 
                 TicketPhase.EventCode -> EventCodeContent(
+                    eventHeader = {
+                        state.ticket?.let { ticket ->
+                            TicketEventHeader(
+                                ticket = ticket,
+                                eventDetail = state.eventDetail,
+                                compact = true,
+                            )
+                        }
+                    },
                     eventCode = state.eventCode,
                     status = state.codeStatus,
                     enabled = !state.isCheckingIn && !doorsLocked,
@@ -195,56 +208,74 @@ private fun TicketQrContent(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = 22.dp)
                     .verticalScroll(scrollState),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp),
             ) {
-                TicketSuccessCard(
-                    doorsAtEpochMillis = ticket.doorsOpenAt,
-                    serverClockOffsetMillis = ticket.serverClockOffsetMillis,
+                TicketEventHeader(
+                    ticket = ticket,
+                    eventDetail = state.eventDetail,
                 )
 
-                InfoCard(
+                TicketQrInfoCard(
+                    entryCode = ticket.entryCode,
+                    onEventCodeClicked = {
+                        onAction(TicketQrAction.OnEventCodeClicked)
+                    },
+                )
+
+                InfoRow(
                     text = buildAnnotatedString {
                         append(stringResource(Res.string.ticket_qr_info_prefix))
-
                         withStyle(
-                            style = SpanStyle(
+                            SpanStyle(
                                 fontWeight = FontWeight.Bold,
                                 color = AccessDefaults.TextPrimary,
                             ),
                         ) {
                             append(stringResource(Res.string.ticket_qr_info_action))
                         }
-
                         append(stringResource(Res.string.ticket_qr_info_suffix))
                     },
                 )
 
-                TicketQrInfoCard(
-                    eventTitle = ticket.eventTitle,
-                    entryCode = ticket.entryCode,
-                    formattedDoorTime = ticket.formattedDoorTime,
-                    formattedVenueAddress = ticket.formattedVenueAddress,
-                    onEventCodeClicked = {
-                        onAction(TicketQrAction.OnEventCodeClicked)
-                    },
-                )
+                if (rememberDoorsLocked(ticket.doorsOpenAt, ticket.serverClockOffsetMillis)) {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        TicketSectionTitle(stringResource(Res.string.ticket_qr_doors_open_in))
+                        CountdownCard(
+                            targetEpochMillis = ticket.doorsOpenAt,
+                            serverClockOffsetMillis = ticket.serverClockOffsetMillis,
+                        )
+                    }
+                }
 
                 ticket.location?.let { location ->
-                    Text(
-                        text = stringResource(Res.string.ticket_qr_getting_there),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = AccessDefaults.TextMuted,
-                        modifier = Modifier.padding(top = 8.dp),
-                    )
-                    EventVenueLine(location = location)
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        TicketSectionTitle(stringResource(Res.string.ticket_qr_getting_there))
+                        EventLocationRow(location = location, showFullAddress = true)
+                    }
                 }
 
                 Spacer(Modifier.height(8.dp))
             }
         }
     }
+}
+
+@Composable
+private fun TicketSectionTitle(text: String) {
+    Text(
+        text = text,
+        modifier = Modifier.padding(top = 8.dp),
+        style = MaterialTheme.typography.headlineSmall.copy(
+            fontFamily = BricolageGrotesque,
+            fontWeight = FontWeight.ExtraBold,
+            fontSize = 24.sp,
+            lineHeight = 28.sp,
+            letterSpacing = (-0.6).sp,
+        ),
+        color = AccessDefaults.TextPrimary,
+    )
 }
 
 @Composable

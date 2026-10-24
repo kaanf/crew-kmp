@@ -1,51 +1,52 @@
 package com.kaanf.game.presentation.gamelobby
 
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.sp
+import com.kaanf.core.designsystem.theme.BricolageGrotesque
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
+import com.kaanf.game.presentation.gamelobby.component.custom.LobbyWave
+import com.kaanf.game.presentation.gamelobby.component.custom.LobbyCountdown
+import crew.feature.game.presentation.generated.resources.*
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.*
+import androidx.compose.ui.Alignment
+import com.kaanf.core.presentation.model.LobbyMember
+import com.kaanf.core.presentation.model.UserAvatar
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.AnnotatedString
+import com.kaanf.core.designsystem.component.info.InfoRow
 import androidx.compose.ui.backhandler.BackHandler
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.kaanf.core.designsystem.component.badge.RoundedBadge
 import com.kaanf.core.designsystem.component.button.BaseButton
 import com.kaanf.core.designsystem.component.dialog.BaseDialog
-import com.kaanf.core.designsystem.component.info.InfoCard
 import com.kaanf.core.designsystem.component.layout.AppScaffold
 import com.kaanf.core.designsystem.component.layout.AppTopBar
 import com.kaanf.core.designsystem.component.layout.FullScreenLoader
-import com.kaanf.core.designsystem.component.sheet.ContainerBottomSheet
 import com.kaanf.core.designsystem.component.sheet.TwoOptionBottomSheet
 import com.kaanf.core.designsystem.theme.AccessDefaults
-import com.kaanf.core.designsystem.theme.AccessIcons
 import com.kaanf.core.designsystem.theme.CrewTheme
 import com.kaanf.core.presentation.model.AppTopBarState
 import com.kaanf.core.presentation.util.ObserveAsEvents
 import com.kaanf.game.presentation.component.EmojiStackCard
-import com.kaanf.game.presentation.component.OnboardingInfoCard
-import com.kaanf.game.presentation.gamelobby.component.custom.BeforeTheBell
-import com.kaanf.game.presentation.gamelobby.component.custom.LobbyPresenceCluster
-import com.kaanf.game.presentation.gamelobby.component.custom.MinuteSecondCountdownCard
-import com.kaanf.game.presentation.gamelobby.component.custom.TonightFlowCard
-import com.kaanf.game.presentation.gamelobby.component.custom.WhoIsInTonightCard
 import com.kaanf.game.presentation.gamelobby.component.dialog.LeaveEventDialog
 import com.kaanf.game.presentation.session.MatchSessionAction
 import com.kaanf.game.presentation.session.MatchSessionEvent
@@ -77,6 +78,9 @@ fun GameLobbyRoot(
         showExitConfirmDialog = sessionState.showExitConfirmDialog,
         lobbyMembers = sessionState.lobbyMembers,
         lobbyTotalCount = sessionState.lobbyTotalCount,
+        currentUserId = sessionState.currentUserId,
+        currentUserName = sessionState.currentUserName,
+        currentUserPhotoUrl = sessionState.currentUserPhotoUrl,
     )
 
     AppScaffold(
@@ -125,6 +129,8 @@ fun GameLobbyScreen(
     scrollState: ScrollState,
     state: GameLobbyState,
     onAction: (GameLobbyAction) -> Unit,
+    incomingWaves: Flow<LobbyWave> = emptyFlow(),
+    onSayHi: (() -> Unit)? = null,
 ) {
     BackHandler(enabled = !state.showExitConfirmDialog) {
         onAction(GameLobbyAction.OnBackClick)
@@ -179,6 +185,8 @@ fun GameLobbyScreen(
                 scrollState = scrollState,
                 state = state,
                 onAction = onAction,
+                incomingWaves = incomingWaves,
+                onSayHi = onSayHi,
             )
         }
     }
@@ -189,94 +197,71 @@ private fun GameLobbyContent(
     scrollState: ScrollState,
     state: GameLobbyState,
     onAction: (GameLobbyAction) -> Unit,
+    incomingWaves: Flow<LobbyWave> = emptyFlow(),
+    onSayHi: (() -> Unit)? = null,
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(scrollState)
-            .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxSize()
+            .padding(horizontal = 22.dp)
+            .padding(bottom = 20.dp),
     ) {
-        /*
-        RoundedBadge(
-            text = "Lobby - Doors Open",
-            backgroundColor = AccessDefaults.OnAccent,
-            borderColor = AccessDefaults.AccentGlow,
-            textColor = AccessDefaults.Accent,
-        )
-         */
-
-        LobbyPresenceCluster(
-            members = state.lobbyMembers,
-            totalCount = state.lobbyTotalCount,
-        )
-
-        Spacer(modifier = Modifier.height(1.dp))
-
-        MinuteSecondCountdownCard(
-            targetEpochMillis = state.targetEpochMillis,
-            isLive = state.showGameStartSheet,
-            onFinished = { onAction(GameLobbyAction.OnCountdownFinished) },
-        )
-
-        if (state.showGameStartSheet) {
-            BaseButton(
-                text = "Enter the game",
-                filled = true,
-                onClick = { onAction(GameLobbyAction.OnEnterGameClick) },
+        Column(
+            modifier = Modifier.weight(1f)
+                .fillMaxWidth()
+                .verticalScroll(scrollState),
+        ) {
+            Box(
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 32.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                LobbyCountdown(
+                    targetEpochMillis = state.targetEpochMillis,
+                    isLive = state.showGameStartSheet,
+                    onFinished = { onAction(GameLobbyAction.OnCountdownFinished) },
+                    compact = true,
+                )
+            }
+            InfoRow(
+                title = stringResource(Res.string.lobby_before_game_tip_title),
+                text = AnnotatedString(stringResource(Res.string.lobby_before_game_tip_description)),
+                modifier = Modifier.padding(bottom = 20.dp),
             )
         }
-
-        Spacer(modifier = Modifier.height(1.dp))
-
-        //OnboardingInfoCard()
-
-        //WhoIsInTonightCard()
-
-        //TonightFlowCard()
-
-        //BeforeTheBell()
-
-        InfoCard(
-            icon = AccessIcons.Sparkle,
-            iconTint = AccessDefaults.Accent,
-            text = buildAnnotatedString {
-                withStyle(
-                    style = SpanStyle(
-                        color = AccessDefaults.TextPrimary,
-                        fontWeight = FontWeight.Bold,
-                    ),
-                ) {
-                    append(
-                        "Warm up",
-                    )
-                }
-
-                append("\n")
-
-                withStyle(
-                    style = SpanStyle(
-                        color = AccessDefaults.TextMuted,
-                        fontWeight = FontWeight.Normal,
-                    ),
-                ) {
-                    append(
-                        "Order a drink, find one person you've never met, ask them what their last good Saturday was.",
-                    )
-                }
-            },
+        BaseButton(
+            text = stringResource(Res.string.lobby_crowd_enter),
+            modifier = Modifier.padding(top = 16.dp),
+            enabled = state.showGameStartSheet,
+            filled = true,
+            pill = true,
+            onClick = { onAction(GameLobbyAction.OnEnterGameClick) },
         )
     }
 }
 
 @Composable
-@Preview
+@Preview(name = "Lobby · compact", widthDp = 320, heightDp = 640)
+@Preview(name = "Lobby · phone", widthDp = 390, heightDp = 780)
 fun GameLobbyScreenPreview() {
     CrewTheme {
         GameLobbyScreen(
             scrollState = rememberScrollState(),
-            state = GameLobbyState(isLoading = false),
+            state = GameLobbyState(
+                isLoading = false,
+                targetEpochMillis = kotlin.time.Clock.System.now().toEpochMilliseconds() + 183_000,
+                lobbyTotalCount = 70,
+                currentUserId = "self",
+                currentUserName = "Kaan",
+                lobbyMembers = List(70) { index ->
+                    LobbyMember(
+                        id = if (index == 0) "self" else "guest-$index",
+                        avatar = UserAvatar(
+                            label = ('A' + index % 26).toString(),
+                            color = listOf(AccessDefaults.Blush, AccessDefaults.Sky,
+                                AccessDefaults.Accent, AccessDefaults.Gold)[index % 4],
+                        ),
+                    )
+                },
+            ),
             onAction = {},
         )
     }

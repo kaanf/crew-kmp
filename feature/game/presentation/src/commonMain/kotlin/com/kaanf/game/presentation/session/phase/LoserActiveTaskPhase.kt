@@ -51,7 +51,6 @@ import com.kaanf.core.designsystem.theme.CrewTheme
 import com.kaanf.core.presentation.util.dottedBorder
 import com.kaanf.game.domain.model.GameTask
 import com.kaanf.game.domain.model.TaskCategory
-import com.kaanf.core.designsystem.component.card.GradientChallengeCard
 import crew.feature.game.presentation.generated.resources.Res
 import crew.feature.game.presentation.generated.resources.match_onboarding_info_text
 import crew.feature.game.presentation.generated.resources.match_phase_loser_active_subtitle
@@ -113,10 +112,8 @@ fun LoserActiveTaskPhase(
                         task?.let {
                             // Masaya atılmış oyun kartı hissi: göreve özel, okunurluğu bozmayan hafif eğim.
                             val tilt = remember(it.id) { tableTiltFor(it.id) }
-                            GradientChallengeCard(
+                            TaskCard(
                                 card = it.toUiModel(),
-                                cardSize = TaskCardSize,
-                                emphasized = true,
                                 modifier = Modifier.rotate(tilt),
                             )
                         }

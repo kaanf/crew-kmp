@@ -1,12 +1,21 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <resources>
+    <!-- First-run onboarding -->
+    <string name="onboarding_friends_title">Play with friends or join real-life events.</string>
+    <string name="onboarding_friends_body">Play at a Crew event or with your own friends.</string>
+    <string name="onboarding_play_title">Scan. Play.\nGive a dare.</string>
+    <string name="onboarding_play_body">Scan a QR, play rock-paper-scissors face to face. The winner picks a dare for the loser.</string>
+    <string name="onboarding_winner_title">Complete dares.\nCollect points.</string>
+    <string name="onboarding_winner_body">Every round brings a new dare and another story to share.</string>
+    <string name="onboarding_start">Let’s play 🎉</string>
+    <string name="onboarding_page">Page %1$d of %2$d</string>
+    <string name="onboarding_save_error">Couldn’t save your progress. Please try again.</string>
     <!-- Welcome -->
     <string name="welcome_skip">Skip</string>
-    <string name="welcome_headline_show_up">Show up</string>
-    <string name="welcome_headline_solo">solo.</string>
-    <string name="welcome_headline_leave_with">Leave with</string>
-    <string name="welcome_headline_story">a story.</string>
-    <string name="welcome_body">Live bar games for strangers. Scan, play, rate.\nThe night ends in a leaderboard, not a swipe.</string>
+    <string name="welcome_headline_strangers">Strangers.</string>
+    <string name="welcome_headline_until">Until the first</string>
+    <string name="welcome_headline_game">game.</string>
+    <string name="welcome_body">Meet over a game. Laugh over a drink. See where the night takes you. ✨</string>
     <string name="welcome_continue_with_email">Continue with email</string>
     <string name="welcome_terms_prefix">By continuing you agree to our </string>
     <string name="welcome_terms">Terms</string>
@@ -89,7 +98,7 @@
 
     <!-- Sign-in methods -->
     <string name="sign_in_methods_headline">Ways into your Crew account</string>
-    <string name="sign_in_methods_description">Link more than one and any of them opens this same profile — same points, same badges, same memories. Nothing is duplicated.</string>
+    <string name="sign_in_methods_description">Link more than one and any of them opens this same profile: same points, same badges, same memories. Nothing is duplicated.</string>
     <string name="sign_in_methods_section">YOUR METHODS</string>
     <string name="sign_in_methods_count">%1$d OF 3 LINKED</string>
     <string name="sign_in_methods_email">Email</string>
@@ -100,7 +109,7 @@
     <string name="sign_in_methods_unlink">Unlink</string>
     <string name="sign_in_methods_locked">Locked</string>
     <string name="sign_in_methods_change_password">Change password</string>
-    <string name="sign_in_methods_last_warning">One method left. Link a second one — if you lose access to %1$s, that\'s the only thing standing between you and your account.</string>
+    <string name="sign_in_methods_last_warning">One method left. Link a second one. If you lose access to %1$s, that\'s the only thing standing between you and your account.</string>
     <string name="sign_in_methods_footer">Crew never posts anywhere and never reads your contacts. Linking only proves it\'s you.</string>
 
     <string name="sign_in_methods_unlink_title">Stop signing in with %1$s?</string>
@@ -109,7 +118,7 @@
     <string name="sign_in_methods_unlink_cancel">Keep it</string>
 
     <string name="sign_in_methods_conflict_title">That %1$s account belongs to another player</string>
-    <string name="sign_in_methods_conflict_description">It already opens a different Crew profile. We won\'t merge two histories on our own — sign in with that account instead, or ask the door team for help.</string>
+    <string name="sign_in_methods_conflict_description">It already opens a different Crew profile. We won\'t merge two histories on our own. Sign in with that account instead, or ask the door team for help.</string>
     <string name="sign_in_methods_conflict_confirm">Got it</string>
 
     <string name="sign_in_methods_password_set_title">Set a password</string>

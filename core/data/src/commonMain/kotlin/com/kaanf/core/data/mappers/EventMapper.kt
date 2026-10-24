@@ -46,7 +46,17 @@ fun EventDetailDto.toDomain(): EventDetail {
         createdAt = Instant.parse(createdAt),
         updatedAt = Instant.parse(updatedAt),
         imageUrls = imageUrls,
+        coverColors = coverColors.toArgbColors(),
+        shareUrl = shareUrl,
     )
+}
+
+// All-or-nothing: dropping one bad entry would shift every later colour into the wrong role.
+internal fun List<String>.toArgbColors(): List<Int> = map { hex ->
+    val digits = hex.removePrefix("#")
+    if (digits.length != 6 || !digits.all { it in '0'..'9' || it.lowercaseChar() in 'a'..'f' }) return emptyList()
+    val rgb = digits.toInt(16)
+    rgb or (0xFF shl 24)
 }
 
 fun PriceSerializable.toDomain(): Price {

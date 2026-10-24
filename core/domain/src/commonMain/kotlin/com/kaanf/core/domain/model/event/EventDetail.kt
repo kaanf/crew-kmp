@@ -9,7 +9,6 @@ data class EventDetail(
     val title: String,
     val description: String?,
     val venueId: VenueId,
-    /** Backend mekânı henüz döndürmüyorsa veya koordinat girilmediyse null; harita bölümü gizlenir. */
     val venue: Venue?,
     val price: Price,
     val capacity: Int,
@@ -24,4 +23,6 @@ data class EventDetail(
     val createdAt: Instant,
     val updatedAt: Instant,
     val imageUrls: List<String>,
+    val coverColors: List<Int> = emptyList(),
+    val shareUrl: String? = null,
 )

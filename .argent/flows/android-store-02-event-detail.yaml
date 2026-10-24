@@ -1,0 +1,11 @@
+steps:
+  - launch: com.kaanf.crew.screenshots
+  - tool: open-url
+    args:
+      url: crew-screenshot://event-detail
+  - await:
+      visible:
+        id: screenshot-ready-event-detail
+      timeout: 60000
+  - await:
+      idle: true

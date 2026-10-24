@@ -1,16 +1,15 @@
 package com.kaanf.home.presentation.component
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,62 +21,69 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kaanf.core.designsystem.theme.AccessDefaults
+import com.kaanf.core.designsystem.theme.AccessIcons
 import com.kaanf.core.designsystem.theme.BricolageGrotesque
 import com.kaanf.home.presentation.model.EventLocationUiModel
 import com.kaanf.home.presentation.model.toDirectionsUri
+import org.jetbrains.compose.resources.painterResource
 
-/** Adres satırı: dokunulunca telefonun harita uygulamasında yol tarifi açılır. */
+/** Konum ikonu, mekân adı + ilçe/şehir; sağdaki ok ikonu Google Maps'i açar. */
 @Composable
-internal fun EventVenueLine(
+internal fun EventLocationRow(
     location: EventLocationUiModel,
     modifier: Modifier = Modifier,
+    showFullAddress: Boolean = false,
 ) {
     val uriHandler = LocalUriHandler.current
-    val shape = RoundedCornerShape(14.dp)
 
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(shape)
-            .background(AccessDefaults.Surface)
-            .border(1.dp, AccessDefaults.BorderSoft, shape)
+            .clip(RoundedCornerShape(12.dp))
+            .background(AccessDefaults.TextPrimary.copy(alpha = 0.04f))
             .clickable { uriHandler.openUri(location.toDirectionsUri()) }
-            .padding(horizontal = 12.dp, vertical = 11.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(
-            modifier = Modifier
-                .size(28.dp)
-                .clip(RoundedCornerShape(9.dp))
-                .background(AccessDefaults.SurfaceElevated)
-                .border(1.dp, AccessDefaults.BorderSoft, RoundedCornerShape(9.dp)),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(text = "📍", fontSize = 15.sp)
-        }
+        Icon(
+            painter = painterResource(AccessIcons.Pin),
+            contentDescription = null,
+            tint = AccessDefaults.TextPrimary,
+            modifier = Modifier.size(22.dp),
+        )
 
-        Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
             Text(
                 text = location.name,
                 style = MaterialTheme.typography.titleSmall.copy(
                     fontFamily = BricolageGrotesque,
                     color = AccessDefaults.TextPrimary,
-                    fontSize = 14.sp,
+                    fontSize = 15.sp,
                 ),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
 
             Text(
-                text = location.address,
+                text = if (showFullAddress) location.address else "${location.district}, ${location.city}",
                 style = MaterialTheme.typography.bodySmall.copy(
-                    color = AccessDefaults.TextMuted,
+                    color = AccessDefaults.TextSecondary,
                     fontSize = 12.sp,
                 ),
-                maxLines = 2,
+                maxLines = if (showFullAddress) 2 else 1,
                 overflow = TextOverflow.Ellipsis,
             )
         }
+
+        Icon(
+            painter = painterResource(AccessIcons.ArrowUpRight),
+            contentDescription = null,
+            tint = AccessDefaults.TextPrimary,
+            modifier = Modifier.size(22.dp),
+        )
     }
 }

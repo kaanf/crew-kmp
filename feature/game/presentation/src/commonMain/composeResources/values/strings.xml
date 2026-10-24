@@ -5,14 +5,14 @@
     <string name="match_points_format">+%1$d PTS</string>
     <string name="match_points_signed_format">%1$d PTS</string>
 
-    <string name="match_onboarding_info_text">&#10024;\t\tNew here? See how a night plays out</string>
+    <string name="match_onboarding_info_text">&#10024; New here? See how a night plays out</string>
 
     <string name="how_to_play_step_1_title">Find someone.\nScan them.</string>
     <string name="how_to_play_step_1_subtitle">Walk up to a player you don't know. Open your match QR, or scan theirs. The app pairs the two of you.</string>
-    <string name="how_to_play_step_2_title">Real-world\nRock paper scissors.</string>
+    <string name="how_to_play_step_2_title">Real-world\nrock paper scissors.</string>
     <string name="how_to_play_step_2_subtitle">Throw on three, in real life. Winner gets +3 pts and picks a task. Loser does it.</string>
     <string name="how_to_play_step_3_title">Do the task.\nThey confirm.</string>
-    <string name="how_to_play_step_3_subtitle">Tasks are short &#8212; say hi to a stranger, swap a story. The other player confirms you actually did it.</string>
+    <string name="how_to_play_step_3_subtitle">Tasks are short: say hi to a stranger, swap a story. The other player confirms you actually did it.</string>
 
     <string name="coachmark_intro_title">&#10024; Three beats, all night.</string>
     <string name="coachmark_intro_body">Meet someone &#8594; rock paper scissors &#8594; loser does a small task. That's the whole game, about two minutes a round.</string>
@@ -36,16 +36,50 @@
     <string name="match_task_card_variant_confession">Confession</string>
     <string name="match_task_card_variant_flirty">Flirty</string>
 
-    <string name="match_phase_qr_home_description">Walk up to someone. Ask if they want to play.\nLet them scan you.</string>
+    <string name="quests_map_subtitle">Find your next milestone.</string>
+    <string name="quests_map_count">%1$d paths · %2$d milestones</string>
+    <string name="quests_category_all">All</string>
+    <string name="quests_category_meet">Meet</string>
+    <string name="quests_category_wins">Wins</string>
+    <string name="quests_category_rematch">Rematch</string>
+    <string name="quests_node_wins">%1$d win</string>
+    <string name="quests_node_target">%1$d total</string>
+    <string name="quests_node_meet">%1$d people</string>
+    <string name="quests_node_streak">%1$d in a row</string>
+    <string name="quests_node_beat">%1$d opponents</string>
+    <string name="quests_collected_count">%1$d of %2$d rewards collected</string>
+    <string name="quests_family_meet">Meet people</string>
+    <string name="quests_family_streak">Win streak</string>
+    <string name="quests_family_beat">New rivals</string>
+    <string name="quests_family_rematch">Rematch master</string>
+    <string name="quests_family_revenge">Comeback</string>
+    <string name="quests_ready">Collect reward</string>
+    <string name="quests_collecting">Collecting…</string>
+    <string name="quests_empty">No quests for this event yet.</string>
+    <string name="quests_progress_short">%1$d / %2$d</string>
+    <string name="quests_level_progress">%1$d / %2$d · +%3$d points</string>
+    <string name="quests_close">Close quests</string>
+    <string name="qr_home_how_to_play">How to play</string>
+    <string name="qr_home_got_it">Got it</string>
+    <string name="qr_home_quests_title">Quests</string>
+    <string name="qr_home_passport_title">Passport</string>
+    <string name="qr_home_quests_progress">%1$d / %2$d done</string>
+    <string name="qr_home_passport_progress">%1$d people met</string>
+    <string name="qr_home_quests_hint">Bonus points</string>
+    <string name="qr_home_passport_hint">Your stamps</string>
+    <string name="qr_home_claim_ready">Points ready!</string>
+    <string name="match_phase_qr_home_title">Find your next opponent.</string>
+    <string name="match_phase_qr_home_qr_label">Your player QR code. Let another player scan it to start a match.</string>
+    <string name="match_phase_qr_home_description">Find someone to play with. Scan their QR code or let them scan yours.\n\nPlay rock paper scissors face to face, then both select who won in the app.\n\nThe winner picks a task. The loser does it, and the winner confirms.</string>
     <string name="match_phase_qr_home_scan_action">Or Scan Them Instead</string>
     <string name="match_phase_lost_throw_icon">&#x1F525;</string>
     <string name="match_phase_lost_throw_title">Lost the throw? Still worth it.</string>
-    <string name="match_phase_lost_throw_description">You bank points just for playing &#8212; win or lose. Keep the night moving.</string>
+    <string name="match_phase_lost_throw_description">You bank points just for playing, win or lose. Keep the night moving.</string>
 
     <string name="match_phase_rps_ready_vs_label">VS.</string>
     <string name="match_phase_rps_ready_title">Play\nrock paper scissors\nand press ready.</string>
     <string name="match_phase_rps_ready_action">I'm ready</string>
-    <string name="match_phase_rps_ready_loading">Waiting on %1$s...</string>
+    <string name="match_phase_rps_ready_loading">Waiting on %1$s…</string>
 
     <string name="match_phase_who_won_title">Tell us honestly.</string>
     <string name="match_phase_who_won_won_title">I won</string>
@@ -55,10 +89,10 @@
     <string name="match_phase_who_won_lost_points">NO BONUS</string>
     <string name="match_phase_who_won_lost_description">%1$s picks a task for you</string>
     <string name="match_phase_who_won_lost_emoji">&#x1F605;</string>
-    <string name="match_phase_who_won_waiting">%1$s is calling it...</string>
+    <string name="match_phase_who_won_waiting">%1$s is calling it…</string>
     <string name="match_phase_who_won_dispute_action">Dispute &#183; ask the host</string>
     <string name="match_disputed_title">You both said &#8220;I won&#8221;</string>
-    <string name="match_disputed_description">Pick again &#8212; honestly this time.</string>
+    <string name="match_disputed_description">Pick again, honestly this time.</string>
     <string name="match_ended_title">Match ended</string>
     <string name="match_ended_description">Your match wrapped up while you were away.</string>
     <string name="match_opponent_left_title">Opponent left</string>
@@ -72,7 +106,7 @@
 
     <string name="match_phase_winner_picks_description">%1$s can decline (with a penalty).</string>
     <string name="match_phase_winner_picks_send_action">Send to %1$s</string>
-    <string name="match_phase_winner_picks_loading">Waiting for %1$s...</string>
+    <string name="match_phase_winner_picks_loading">Waiting for %1$s…</string>
 
     <string name="match_phase_loser_waits_title">Wait,\n%1$s is choosing\nyour task.</string>
     <string name="match_phase_loser_waits_status">Waiting for response</string>
@@ -85,7 +119,7 @@
     <string name="match_phase_winner_confirms_subtitle">Watch closely, then confirm if they nailed it.</string>
     <string name="match_phase_winner_confirms_not_done_action">Not done</string>
     <string name="match_phase_winner_confirms_completed_action">Completed</string>
-    <string name="match_phase_winner_confirms_loading">Saving...</string>
+    <string name="match_phase_winner_confirms_loading">Saving…</string>
 
     <string name="match_photo_open_camera_action">Open the camera</string>
     <string name="match_task_photo_take_action">Take photo</string>
@@ -103,7 +137,7 @@
 
     <string name="match_phase_scoreboard_top_bar_title">Scoreboard</string>
     <string name="match_phase_scoreboard_finish_action">Finish</string>
-    <string name="match_phase_scoreboard_finish_loading">Finishing...</string>
+    <string name="match_phase_scoreboard_finish_loading">Finishing…</string>
 
     <string name="match_scoreboard_you_label">You</string>
     <string name="match_scoreboard_won_throw_label">WON THE THROW</string>
@@ -118,12 +152,12 @@
 
     <string name="match_connection_lost_title">Connection lost</string>
     <string name="match_connection_lost_description">You've been disconnected from the match. Please rejoin.</string>
-    <string name="match_reconnecting_title">Weak connection</string>
-    <string name="match_reconnecting_description">Reconnecting to the live match…</string>
+    <string name="match_reconnecting_title">Reconnecting…</string>
+    <string name="match_reconnecting_description">Getting you back to the live match.</string>
     <string name="match_opponent_disconnected_title">Opponent disconnected</string>
-    <string name="match_opponent_disconnected_description">They have a minute to reconnect — hang tight.</string>
+    <string name="match_opponent_disconnected_description">They have a minute to reconnect. Hang tight.</string>
     <string name="match_opponent_reconnected_title">Opponent is back</string>
-    <string name="match_opponent_reconnected_description">Back in sync — game on.</string>
+    <string name="match_opponent_reconnected_description">Back in sync. Game on.</string>
     <string name="match_points_earned_title">+%1$d pts</string>
     <string name="match_points_earned_description">Added to your score.</string>
     <string name="match_task_rejected_points_title">%1$d pts</string>
@@ -131,14 +165,14 @@
     <string name="match_opponent_rejected_task_title">%1$s rejected the task</string>
     <string name="match_opponent_rejected_task_description">Pick another one for them.</string>
     <string name="match_task_reject_confirm_title">Reject this task?</string>
-    <string name="match_task_reject_confirm_subtitle">You'll lose %1$d pts — your opponent picks another task.</string>
+    <string name="match_task_reject_confirm_subtitle">You'll lose %1$d pts and your opponent picks another task.</string>
     <string name="match_task_reject_confirm_stay">Keep the task</string>
     <string name="match_task_reject_confirm_reject">Reject anyway</string>
 
     <string name="phase_bold_started_title">The night heats up</string>
     <string name="phase_bold_started_description">More personal and daring tasks just entered the deck.</string>
     <string name="phase_final_started_title">Final phase!</string>
-    <string name="phase_final_started_description">Last stretch — the boldest and flirtiest tasks are in play.</string>
+    <string name="phase_final_started_description">Last stretch: the boldest and flirtiest tasks are in play.</string>
 
     <string name="match_invite_declined_title">Invite declined</string>
     <string name="match_invite_declined_description">Your opponent didn't accept the match.</string>
@@ -171,9 +205,11 @@
     <string name="quests_eyebrow">TONIGHT'S QUESTS</string>
     <string name="quests_title_prefix">Earn </string>
     <string name="quests_title_highlight">bonus points</string>
+    <string name="quests_points_unit">pts</string>
     <string name="quests_reward_format">+%1$d</string>
     <string name="quests_progress_format">%1$d of %2$d done</string>
     <string name="quests_claim_format">Claim +%1$d</string>
+    <string name="quests_claim_action">Claim</string>
     <string name="quests_claimed_label">Claimed</string>
 
     <string name="history_top_bar_title">Your night</string>
@@ -187,7 +223,7 @@
 
     <string name="passport_top_bar_title">Stamp Passport</string>
     <string name="passport_eyebrow">TRACE OF THE NIGHT</string>
-    <string name="passport_subtitle">Every new person leaves their own stamp — and meeting points waiting to be claimed.</string>
+    <string name="passport_subtitle">Every new person leaves their own stamp, plus meeting points waiting to be claimed.</string>
     <string name="passport_page_head">CREW · TONIGHT</string>
     <string name="passport_page_number">PAGE 01</string>
     <string name="passport_filled_format">%1$d / %2$d filled</string>
@@ -218,4 +254,52 @@
     <string name="cocktail_note_finish">Finish</string>
     <string name="cocktail_offer_hint">Show this screen to order</string>
     <string name="cocktail_photo_placeholder">cocktail photo</string>
+    <string name="lobby_crowd_title">Good company.
+Great night ahead.</string>
+    <string name="lobby_crowd_count">In the room · %1$d</string>
+    <string name="lobby_crowd_you">You</string>
+    <string name="lobby_crowd_react_hint">Set the mood.</string>
+    <string name="lobby_reaction_wave">Wave reaction</string>
+    <string name="lobby_reaction_fire">Fire reaction</string>
+    <string name="lobby_reaction_disco">Disco reaction</string>
+    <string name="lobby_reaction_heart">Heart reaction</string>
+    <string name="lobby_crowd_countdown">Game starts in</string>
+    <string name="lobby_crowd_live_label">The game is</string>
+    <string name="lobby_crowd_live">LIVE</string>
+    <string name="lobby_crowd_waiting">Get comfortable. We’re starting soon.</string>
+    <string name="lobby_crowd_enter">Enter the game</string>
+    <string name="lobby_crowd_close">Close</string>
+    <string name="lobby_crowd_available">Showing %1$d of %2$d participants. More profiles will appear as they become available.</string>
+    <string name="lobby_waiting_headline">A good night is
+about to begin.</string>
+    <string name="lobby_ready_headline">Let’s break the ice.</string>
+    <string name="lobby_social_ready">You’re ready, too.</string>
+    <string name="lobby_deck_title">Tonight’s people</string>
+    <string name="lobby_deck_count">%1$d here</string>
+    <string name="lobby_deck_say_hi">SAY HI</string>
+    <string name="lobby_deck_here_tonight">Here tonight</string>
+    <string name="lobby_deck_swipe">Swipe to meet the room</string>
+    <string name="lobby_reaction_previous">Previous reaction</string>
+    <string name="lobby_reaction_next">Next reaction</string>
+    <string name="lobby_reaction_hold_hint">Tap to react · hold for more</string>
+    <string name="lobby_poster_title">Tonight’s cover</string>
+    <string name="lobby_poster_headline">TONIGHT
+TOGETHER.</string>
+    <string name="lobby_poster_open">Open poster</string>
+    <string name="lobby_poster_paper">Paper composition</string>
+    <string name="lobby_poster_pop">Pink composition</string>
+    <string name="lobby_poster_acid">Lime composition</string>
+    <string name="lobby_poster_share">Share poster</string>
+    <string name="lobby_poster_export_error">Couldn’t share the poster. Please try again.</string>
+    <string name="lobby_people_title">The people</string>
+    <string name="lobby_people_previous">Previous</string>
+    <string name="lobby_people_next">Next</string>
+    <string name="lobby_people_page">%1$d / %2$d</string>
+    <string name="lobby_hello_action">Say hi</string>
+    <string name="lobby_hello_hint">A little hello to the room</string>
+    <string name="lobby_hello_preview_hint">Try a hello · preview only</string>
+    <string name="lobby_hello_cooldown">Wave again in %1$ds</string>
+    <string name="lobby_hello_from">%1$s says hi</string>
+    <string name="lobby_before_game_tip_title">A little tip before you jump in</string>
+    <string name="lobby_before_game_tip_description">Start with a smile and a simple hello. You don’t need the perfect opening line. Just be yourself and let the game break the ice. 🧊</string>
 </resources>

@@ -38,6 +38,7 @@ data class DashboardState(
     ),
     val isLoading: Boolean = true,
     val isRefreshing: Boolean = false,
+    val showProfilePhotoReminder: Boolean = false,
     val profilePictureUrl: String? = null,
     val userName: String? = null
 )

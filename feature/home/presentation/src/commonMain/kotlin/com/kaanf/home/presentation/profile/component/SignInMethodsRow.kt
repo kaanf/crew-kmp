@@ -85,7 +85,7 @@ fun SignInMethodsRow(
             )
 
             Text(
-                text = "Apple, Google or a password — all one account",
+                text = "Apple, Google or a password, all one account",
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 style = MaterialTheme.typography.bodySmall.copy(

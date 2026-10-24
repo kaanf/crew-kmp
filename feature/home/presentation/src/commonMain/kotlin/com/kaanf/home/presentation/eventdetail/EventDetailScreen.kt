@@ -2,11 +2,19 @@ package com.kaanf.home.presentation.eventdetail
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.width
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.Spring
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,6 +26,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,13 +36,15 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -44,20 +55,27 @@ import com.kaanf.core.designsystem.component.layout.AppTopBar
 import com.kaanf.core.designsystem.component.layout.FullScreenLoader
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.SpaceGrotesk
+import com.kaanf.core.palette.CoverBackdrop
 import com.kaanf.core.presentation.model.AppTopBarState
 import com.kaanf.core.presentation.util.ObserveAsEvents
-import com.kaanf.core.designsystem.modifier.verticalGradientScrim
 import com.kaanf.home.presentation.eventdetail.component.EventDetailInfoSection
+import com.kaanf.home.presentation.component.EventLocationRow
 import com.kaanf.home.presentation.eventdetail.component.EventImageViewer
 import com.kaanf.home.presentation.eventdetail.component.EventOnboardingCard
-import com.kaanf.home.presentation.eventdetail.component.PagerDots
+import com.kaanf.home.presentation.eventdetail.component.GuestListCard
+import com.kaanf.home.presentation.eventdetail.component.GuestListSheet
+import com.kaanf.home.presentation.eventdetail.component.LockedGuestListCard
+import com.kaanf.core.designsystem.component.pager.PagerDots
 import com.kaanf.home.presentation.eventdetail.component.SafetyBadge
+import com.kaanf.home.domain.model.EventGuest
 import com.kaanf.home.presentation.model.EventDetailUiModel
-import com.kaanf.home.presentation.util.toClockText
 import crew.feature.home.presentation.generated.resources.Res
 import crew.feature.home.presentation.generated.resources.event_detail_free_ticket_cta
+import crew.feature.home.presentation.generated.resources.event_detail_locked_cta
 import crew.feature.home.presentation.generated.resources.event_detail_ended_cta
+import crew.feature.home.presentation.generated.resources.event_share_invitation
 import crew.feature.home.presentation.generated.resources.event_detail_load_error_description
+import crew.feature.home.presentation.generated.resources.event_detail_doors_open_at
 import crew.feature.home.presentation.generated.resources.event_detail_load_error_title
 import crew.feature.home.presentation.generated.resources.event_detail_my_ticket_cta
 import crew.feature.home.presentation.generated.resources.event_detail_ticket_cta
@@ -75,6 +93,8 @@ fun EventDetailRoot(
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     val listState: LazyListState = rememberLazyListState()
+    val shareEvent = rememberEventShareLauncher()
+    val shareInvitation = stringResource(Res.string.event_share_invitation)
 
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
@@ -84,23 +104,58 @@ fun EventDetailRoot(
         }
     }
 
-    AppScaffold(
-        topBar = {
-            AppTopBar(
-                state = AppTopBarState.EventDetail,
-                elevated = { listState.canScrollBackward },
-                onBackClick = { onBackClick() },
+    val shareUrl = state.event?.shareUrl?.takeIf {
+        it.matches(Regex("https://share\\.crewishere\\.com/e/[a-z0-9]{10}"))
+    }
+
+    Box(modifier = Modifier.fillMaxSize().background(AccessDefaults.Background)) {
+        AppScaffold(
+            containerColor = Color.Transparent,
+            topBar = {
+                AppTopBar(
+                    state = AppTopBarState.EventDetail,
+                    elevated = { listState.canScrollBackward },
+                    transparentAtRest = false,
+                    rightActions = {
+                        EventShareButton(
+                            enabled = shareUrl != null,
+                            onClick = {
+                                state.event?.let { event ->
+                                    val url = shareUrl ?: return@let
+                                    shareEvent(
+                                        EventShareContent(
+                                            title = event.title,
+                                            text = listOf(
+                                                shareInvitation,
+                                                listOfNotNull(
+                                                    event.title,
+                                                    event.heroDate,
+                                                    event.location?.name,
+                                                ).joinToString(" · "),
+                                                url,
+                                            ).joinToString("\n\n"),
+                                            url = url,
+                                            imageUrl = event.imageUrls.firstOrNull(),
+                                        ),
+                                    )
+                                }
+                            },
+                        )
+                    },
+                    onBackClick = { onBackClick() },
+                )
+            },
+        ) { innerPadding ->
+            EventDetailScreen(
+                modifier = Modifier
+                    .padding(bottom = innerPadding.calculateBottomPadding())
+                    .consumeWindowInsets(innerPadding),
+                contentTopPadding = innerPadding.calculateTopPadding(),
+                listState = listState,
+                state = state,
+                onAction = viewModel::onAction,
             )
-        },
-    ) { innerPadding ->
-        EventDetailScreen(
-            modifier = Modifier
-                .padding(innerPadding)
-                .consumeWindowInsets(innerPadding),
-            listState = listState,
-            state = state,
-            onAction = viewModel::onAction,
-        )
+        }
     }
 }
 
@@ -109,6 +164,7 @@ fun EventDetailScreen(
     modifier: Modifier,
     listState: LazyListState,
     state: EventDetailState,
+    contentTopPadding: Dp = 0.dp,
     onAction: (EventDetailAction) -> Unit,
 ) {
     val typography = MaterialTheme.typography
@@ -118,11 +174,13 @@ fun EventDetailScreen(
         ),
     ) {
         Crossfade(
-            targetState = state.event,
+            targetState = state.event != null,
             modifier = modifier.fillMaxSize(),
             animationSpec = tween(durationMillis = 250),
-        ) { event ->
-            if (event == null) {
+        ) { hasEvent ->
+            val event = state.event
+
+            if (!hasEvent || event == null) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center,
@@ -138,7 +196,10 @@ fun EventDetailScreen(
             } else {
                 EventDetailContent(
                     listState = listState,
+                    contentTopPadding = contentTopPadding,
                     event = event,
+                    guests = state.guests,
+                    isGuestsLoading = state.isGuestsLoading,
                     isCheckingOut = state.isCheckingOut,
                     onAction = onAction,
                 )
@@ -179,50 +240,139 @@ private fun EventDetailLoadErrorContent(
 @Composable
 private fun EventDetailContent(
     listState: LazyListState,
+    contentTopPadding: Dp,
     event: EventDetailUiModel,
+    guests: List<EventGuest>,
+    isGuestsLoading: Boolean,
     isCheckingOut: Boolean,
     onAction: (EventDetailAction) -> Unit,
 ) {
-    // null = kapalı; saf UI durumu olduğu için ViewModel'e taşınmaz.
     var viewerPage by rememberSaveable { mutableStateOf<Int?>(null) }
+    var isGuestListOpen by rememberSaveable { mutableStateOf(false) }
 
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().background(AccessDefaults.Background).clipToBounds(),
     ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(contentTopPadding + HeroHeight + 160.dp)
+                .graphicsLayer {
+                    translationY = if (listState.firstVisibleItemIndex == 0) {
+                        -listState.firstVisibleItemScrollOffset.toFloat()
+                    } else {
+                        -size.height
+                    }
+                }
+                .drawWithCache {
+                    val fade = Brush.verticalGradient(
+                        0f to Color.Transparent,
+                        0.60f to Color.Transparent,
+                        0.85f to AccessDefaults.Background.copy(alpha = 0.85f),
+                        1f to AccessDefaults.Background,
+                    )
+                    onDrawWithContent {
+                        drawContent()
+                        drawRect(fade)
+                    }
+                },
+        ) {
+            CoverBackdrop(
+                palette = event.backdropPalette,
+                overlayColor = AccessDefaults.Background,
+                legibleTextColor = AccessDefaults.TextSecondary,
+                modifier = Modifier.matchParentSize(),
+            )
+        }
+
         LazyColumn(
             state = listState,
             modifier = Modifier
                 .fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(top = contentTopPadding),
+            verticalArrangement = Arrangement.spacedBy(SectionSpacing),
         ) {
             item(contentType = "hero") {
                 EventDetailHero(
                     imageUrls = event.imageUrls,
-                    title = event.title,
-                    meta = listOfNotNull(
-                        event.heroDate,
-                        event.doorsOpenAt.toClockText(),
-                        event.location?.name,
-                    ).joinToString(META_SEPARATOR),
-                    // Draw fazında okunur; parallax scroll'da recomposition tetiklemez.
-                    scrollOffset = {
-                        if (listState.firstVisibleItemIndex == 0) {
-                            listState.firstVisibleItemScrollOffset.toFloat()
-                        } else {
-                            Float.MAX_VALUE
-                        }
-                    },
                     onImageClick = { page -> viewerPage = page },
                 )
             }
 
-            item(contentType = "event-info") {
-                EventDetailInfoSection(
-                    description = event.description,
-                    location = event.location,
+            item(contentType = "title-date") {
+                Column(
+                    modifier = Modifier.padding(horizontal = BodyPadding),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    Text(
+                        text = event.title,
+                        style = MaterialTheme.typography.displaySmall.copy(
+                            fontWeight = FontWeight.ExtraBold,
+                            fontSize = 34.sp,
+                            lineHeight = 34.sp,
+                            letterSpacing = (-1.4).sp,
+                        ),
+                    )
+
+                    Text(
+                        text = event.heroDate,
+                        style = MaterialTheme.typography.titleSmall.copy(
+                            color = AccessDefaults.TextSecondary,
+                        ),
+                    )
+
+                    Text(
+                        text = stringResource(Res.string.event_detail_doors_open_at, event.doorsTime),
+                        style = MaterialTheme.typography.titleSmall.copy(
+                            color = AccessDefaults.TextSecondary,
+                        ),
+                    )
+                }
+            }
+
+            event.location?.let { location ->
+                item(contentType = "location") {
+                    EventLocationRow(
+                        location = location,
+                        modifier = Modifier.padding(horizontal = BodyPadding),
+                    )
+                }
+            }
+
+            if (!event.description.isNullOrBlank()) {
+                item(contentType = "event-info") {
+                    EventDetailInfoSection(
+                        description = event.description,
+                        modifier = Modifier.padding(horizontal = BodyPadding),
+                    )
+                }
+            }
+
+            if (!event.hasMyTicket) {
+                item(contentType = "guest-list-locked") {
+                    LockedGuestListCard(
+                        modifier = Modifier.padding(horizontal = BodyPadding),
+                    )
+                }
+            } else {
+                item(contentType = "guest-list") {
+                    GuestListCard(
+                        guests = guests,
+                        isLoading = isGuestsLoading,
+                        onClick = { if (event.hasMyTicket) isGuestListOpen = true },
+                        modifier = Modifier.padding(horizontal = BodyPadding),
+                    )
+                }
+            }
+
+            /*
+            item(key = "plot-twist", contentType = "plot-twist") {
+                EventPlotTwistCard(
+                    eventId = event.id,
                     modifier = Modifier.padding(horizontal = BodyPadding),
                 )
             }
+             */
 
             item(contentType = "onboarding-card") {
                 Box(modifier = Modifier.padding(horizontal = BodyPadding)) {
@@ -241,34 +391,44 @@ private fun EventDetailContent(
             }
         }
 
-        // Bilet satışı Gameplay boyunca da açık (backend TICKETABLE_PHASES ile aynı kural);
-        // kilit yalnız etkinlik bittiğinde.
-        val ctaLocked = event.isEnded
-        BaseButton(
-            text = when {
-                event.isEnded -> stringResource(Res.string.event_detail_ended_cta)
-                event.hasMyTicket -> stringResource(Res.string.event_detail_my_ticket_cta)
-                event.isFree -> stringResource(Res.string.event_detail_free_ticket_cta)
-                else -> stringResource(Res.string.event_detail_ticket_cta, event.formattedPrice)
-            },
-            onClick = {
-                if (!event.hasMyTicket) {
-                    onAction(EventDetailAction.OnCheckoutClicked)
-                } else {
-                    onAction(EventDetailAction.GoToTicketQr)
-                }
-            },
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .padding(bottom = 20.dp)
-                    .align(Alignment.BottomCenter),
-            isLoading = isCheckingOut,
-            enabled = !isCheckingOut && !ctaLocked,
-            filled = false,
-            animatedBorder = !ctaLocked,
-        )
+        val ctaLocked = event.isEnded || event.isLocked
+        BoxWithConstraints(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .padding(start = BodyPadding, end = BodyPadding, bottom = 20.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            val ctaWidth by animateDpAsState(
+                targetValue = if (isCheckingOut) 62.dp.coerceAtMost(maxWidth) else maxWidth,
+                animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+                label = "event_cta_width",
+            )
+            BaseButton(
+                text = when {
+                    event.isLocked -> stringResource(Res.string.event_detail_locked_cta)
+                    event.isEnded -> stringResource(Res.string.event_detail_ended_cta)
+                    event.hasMyTicket -> stringResource(Res.string.event_detail_my_ticket_cta)
+                    event.isFree -> stringResource(Res.string.event_detail_free_ticket_cta)
+                    else -> stringResource(Res.string.event_detail_ticket_cta, event.formattedPrice)
+                },
+                onClick = {
+                    if (!event.hasMyTicket) {
+                        onAction(EventDetailAction.OnCheckoutClicked)
+                    } else {
+                        onAction(EventDetailAction.GoToTicketQr)
+                    }
+                },
+                modifier = Modifier.width(ctaWidth),
+                isLoading = isCheckingOut,
+                enabled = !isCheckingOut && !ctaLocked,
+                backgroundColor = Color.White,
+                borderColor = Color.White,
+                contentColor = AccessDefaults.Background,
+                filled = true,
+                pill = true,
+            )
+        }
     }
 
     viewerPage?.let { page ->
@@ -278,18 +438,18 @@ private fun EventDetailContent(
             onDismiss = { viewerPage = null },
         )
     }
+
+    if (isGuestListOpen && event.hasMyTicket) {
+        GuestListSheet(
+            guests = guests,
+            onDismiss = { isGuestListOpen = false },
+        )
+    }
 }
 
-/**
- * Kenardan kenara hero: görsel scroll'da yavaşça kayar, üstündeki başlık sönerek gider.
- * Alttaki scrim görseli arka plan rengine bağlar, böylece gövde metni hero'nun devamı gibi okunur.
- */
 @Composable
 private fun EventDetailHero(
     imageUrls: List<String>,
-    title: String,
-    meta: String,
-    scrollOffset: () -> Float,
     onImageClick: (Int) -> Unit,
 ) {
     val pagerState = rememberPagerState(pageCount = { imageUrls.size })
@@ -298,44 +458,43 @@ private fun EventDetailHero(
         modifier = Modifier
             .fillMaxWidth()
             .height(HeroHeight)
-            .clipToBounds(),
+            .padding(horizontal = HeroInset)
+            .padding(top = 12.dp)
+            .shadow(
+                elevation = 28.dp,
+                shape = HeroShape,
+                ambientColor = Color.Black,
+                spotColor = Color.Black,
+            )
+            .border(1.dp, HeroEdgeLight, HeroShape),
     ) {
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .graphicsLayer {
-                    translationY = scrollOffset().coerceIn(0f, size.height) * 0.35f
-                },
-        ) {
-            if (imageUrls.size > 1) {
-                HorizontalPager(
-                    state = pagerState,
-                    modifier = Modifier.matchParentSize(),
-                ) { page ->
-                    BaseImage(
-                        imageUrl = imageUrls[page],
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clickable { onImageClick(page) },
-                        contentScale = ContentScale.Crop,
-                    )
-                }
-            } else {
+        if (imageUrls.size > 1) {
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.matchParentSize(),
+            ) { page ->
                 BaseImage(
-                    imageUrl = imageUrls.first(),
+                    imageUrl = imageUrls[page],
                     modifier = Modifier
-                        .matchParentSize()
-                        .clickable { onImageClick(0) },
+                        .fillMaxSize()
+                        .clickable { onImageClick(page) },
                     contentScale = ContentScale.Crop,
                 )
             }
+        } else {
+            BaseImage(
+                imageUrl = imageUrls.first(),
+                modifier = Modifier
+                    .matchParentSize()
+                    .clickable { onImageClick(0) },
+                contentScale = ContentScale.Crop,
+            )
         }
-
-        Box(modifier = Modifier.matchParentSize().verticalGradientScrim(HeroScrim))
 
         if (imageUrls.size > 1) {
             PagerDots(
-                pagerState = pagerState,
+                pageCount = pagerState.pageCount,
+                currentPage = pagerState.currentPage,
                 activeColor = AccessDefaults.Accent,
                 inactiveColor = AccessDefaults.TextMuted.copy(alpha = 0.4f),
                 modifier = Modifier
@@ -343,53 +502,19 @@ private fun EventDetailHero(
                     .padding(top = 12.dp),
             )
         }
-
-        Column(
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .graphicsLayer {
-                    val offset = scrollOffset()
-                    alpha = (1f - offset / HeroTitleFadeDistance.toPx()).coerceIn(0f, 1f)
-                    translationY = -offset * 0.12f
-                }
-                .padding(horizontal = BodyPadding)
-                .padding(bottom = 22.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.displaySmall.copy(
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 34.sp,
-                    lineHeight = 34.sp,
-                    letterSpacing = (-1.4).sp,
-                ),
-            )
-
-            Text(
-                text = meta,
-                style = MaterialTheme.typography.bodySmall.copy(
-                    color = AccessDefaults.TextSecondary,
-                ),
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-            )
-        }
     }
 }
 
-private const val META_SEPARATOR = " · "
-
-private val HeroHeight = 396.dp
-private val HeroTitleFadeDistance = 260.dp
+private val HeroHeight = 344.dp
+private val HeroInset = 28.dp
 private val BodyPadding = 22.dp
+private val SectionSpacing = 20.dp
 
-private val HeroScrim = Brush.verticalGradient(
-    0f to AccessDefaults.Background.copy(alpha = 0.55f),
-    0.22f to Color.Transparent,
-    0.46f to Color.Transparent,
-    0.74f to AccessDefaults.Background.copy(alpha = 0.42f),
-    0.99f to AccessDefaults.Background,
+private val HeroShape = RoundedCornerShape(28.dp)
+
+private val HeroEdgeLight = Brush.verticalGradient(
+    0f to Color.White.copy(alpha = 0.18f),
+    0.5f to Color.Transparent,
 )
 
 
