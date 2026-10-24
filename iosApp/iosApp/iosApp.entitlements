@@ -5,7 +5,6 @@
 	<key>com.apple.developer.associated-domains</key>
 	<array>
 		<string>applinks:crewishere.com</string>
-		<string>applinks:api.kaanf.com</string>
 		<string>applinks:share.crewishere.com</string>
 		<string>applinks:api.crewishere.com</string>
 	</array>

@@ -59,7 +59,7 @@ class MainActivity : ComponentActivity() {
         val isEventLink = uri.scheme == "crew" && uri.host == "event"
         val isWebEventLink = uri.scheme == "https" && uri.host == "crewishere.com" &&
             (uri.path in setOf("/event", "/event/") || uri.path?.startsWith("/e/") == true)
-        val isShareEventLink = uri.scheme == "https" && uri.host in setOf("api.kaanf.com", "api.crewishere.com") &&
+        val isShareEventLink = uri.scheme == "https" && uri.host == "api.crewishere.com" &&
             uri.path?.startsWith("/share/events/") == true
         val isShortEventLink = uri.scheme == "https" && uri.host == "share.crewishere.com" &&
             uri.path?.startsWith("/e/") == true

@@ -50,8 +50,7 @@ fun DeepLinkListener(navController: NavController) {
                     val eventId = when {
                         uri.startsWith("crew://event/", ignoreCase = true) ->
                             navUri.getPathSegments().singleOrNull()
-                        uri.startsWith("https://api.kaanf.com/share/events/", ignoreCase = true) ||
-                            uri.startsWith("https://api.crewishere.com/share/events/", ignoreCase = true) ->
+                        uri.startsWith("https://api.crewishere.com/share/events/", ignoreCase = true) ->
                             navUri.getPathSegments().lastOrNull()
                         uri.startsWith("https://crewishere.com/", ignoreCase = true) ->
                             navUri.getQueryParameters("id").singleOrNull()
