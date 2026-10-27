@@ -34,10 +34,6 @@ import crew.feature.auth.presentation.generated.resources.register_terms_separat
 import crew.feature.auth.presentation.generated.resources.register_terms_suffix
 import org.jetbrains.compose.resources.stringResource
 
-/**
- * Sosyal girişte, provider akışı tetiklenmeden ÖNCE gösterilen onay sheet'i (PRD §5).
- * Kapatmak = vazgeçmek; hesap oluşturulmaz. İki kutu da işaretlenmeden devam edilemez.
- */
 @Composable
 fun ConsentBottomSheet(
     onDismiss: () -> Unit,

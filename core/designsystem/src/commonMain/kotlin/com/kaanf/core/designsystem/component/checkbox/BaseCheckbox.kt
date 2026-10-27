@@ -3,7 +3,7 @@ package com.kaanf.core.designsystem.component.checkbox
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -66,11 +67,15 @@ fun BaseCheckbox(
     val textColor = if (enabled) AccessDefaults.TextPrimary else AccessDefaults.TextFaint
 
     Row(
-        modifier = modifier.clickable(
+        // toggleable, clickable'ın aksine Role.Checkbox ve checked durumunu semantics'e
+        // yazar: ekran okuyucu rolü ve işaretli/işaretsiz geçişini duyurabilsin.
+        modifier = modifier.toggleable(
+            value = checked,
             enabled = enabled,
+            role = Role.Checkbox,
             interactionSource = interactionSource,
             indication = null,
-            onClick = { onCheckedChange(!checked) },
+            onValueChange = onCheckedChange,
         ),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -117,7 +122,7 @@ fun BaseCheckbox(
             text = label,
             color = textColor,
             style = MaterialTheme.typography.titleSmall.copy(
-                fontSize = 12.sp
+                fontSize = 13.sp
             ),
         )
     }

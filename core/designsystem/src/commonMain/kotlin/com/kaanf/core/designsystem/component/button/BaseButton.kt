@@ -1,9 +1,8 @@
 package com.kaanf.core.designsystem.component.button
 
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.background
-import com.kaanf.core.designsystem.markImmutable
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -11,13 +10,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -26,41 +23,32 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessIcons
-import com.kaanf.core.designsystem.theme.CrewTheme
-import org.jetbrains.compose.ui.tooling.preview.Preview
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Canvas
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
-import androidx.compose.ui.graphics.drawscope.rotate
-import androidx.compose.ui.graphics.FilterQuality
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.IntSize
 import com.kaanf.core.designsystem.theme.AccessShapes
-import com.kaanf.core.presentation.util.rememberIsResumed
+import com.kaanf.core.designsystem.theme.CrewTheme
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
-import kotlin.math.hypot
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
-private const val GLOW_RASTER_PX = 256
+private const val DISABLED_BLEND = 0.5f
+
+/**
+ * Pasif görünümü [androidx.compose.ui.draw.alpha] ile değil, rengi zemine karıştırarak verir.
+ * Alpha butonun arka planını da saydamlaştırdığı için, içeriğin üzerinde duran CTA'larda
+ * (ör. etkinlik detayı) altta akan metin butonun içinden okunuyordu.
+ *
+ * ponytail: karışım zemini sabit [AccessDefaults.Background]. Surface üzerinde duran
+ * yüzeylerde fark gözle ayırt edilmiyor; gerekirse zemin bir CompositionLocal'dan gelir.
+ */
+private fun Color.blendedIntoBackground(): Color =
+    copy(alpha = DISABLED_BLEND).compositeOver(AccessDefaults.Background)
+
 @Composable
 fun BaseButton(
     text: String,
@@ -70,7 +58,6 @@ fun BaseButton(
     isLoading: Boolean = false,
     loadingText: String = "AUTHENTICATING...",
     filled: Boolean = false,
-    animatedBorder: Boolean = false,
     leadingIcon: DrawableResource? = null,
     tintLeadingIcon: Boolean = true,
     backgroundColor: Color? = null,
@@ -79,176 +66,85 @@ fun BaseButton(
     fillMaxWidth: Boolean = true,
     pill: Boolean = false,
 ) {
-    val outerShape = if (pill) CircleShape else AccessShapes.Medium
+    val shape = if (pill) CircleShape else AccessShapes.Medium
     val borderWidth = 1.5.dp
-    val innerShape = if (pill) CircleShape else RoundedCornerShape(12.dp - borderWidth)
     val interactionSource = remember { MutableInteractionSource() }
     val isInteractionEnabled = enabled && !isLoading
 
-    val resolvedBorderColor = borderColor
-        ?: if (filled) AccessDefaults.Accent else AccessDefaults.Border
-    val resolvedBackgroundColor = backgroundColor
-        ?: when {
-            filled -> AccessDefaults.Accent
-            else -> AccessDefaults.Surface
-        }
+    // Yükleme sırasında buton tam renkte kalır; yalnızca boştaki pasif buton soluklaşır.
+    val isDimmed = !isInteractionEnabled && !isLoading
+
+    val resolvedBorderColor = (borderColor ?: if (filled) AccessDefaults.Accent else AccessDefaults.Border)
+        .let { if (isDimmed) it.blendedIntoBackground() else it }
+    val resolvedBackgroundColor = (backgroundColor ?: if (filled) AccessDefaults.Accent else AccessDefaults.Surface)
+        .let { if (isDimmed) it.blendedIntoBackground() else it }
     val resolvedContentColor = contentColor
         ?: when {
-            filled && (isInteractionEnabled || isLoading) -> AccessDefaults.OnAccent
-            isInteractionEnabled || isLoading -> AccessDefaults.TextPrimary
-            else -> AccessDefaults.TextFaint
+            filled -> AccessDefaults.OnAccent
+            isDimmed -> AccessDefaults.TextMuted
+            else -> AccessDefaults.TextPrimary
         }
-
-    val isResumed by rememberIsResumed()
-    val borderAnimated = animatedBorder && isInteractionEnabled && isResumed
 
     Box(
         modifier =
             modifier
                 .then(if (fillMaxWidth) Modifier.fillMaxWidth() else Modifier)
                 .height(52.dp)
-                // Loading stays opaque; only an idle disabled button is dimmed.
-                .alpha(if (isInteractionEnabled || isLoading) 1f else 0.5f)
-                .clip(outerShape),
+                // Zemin ve kenarlık tek kutuda: kenarlık eskiden tüm alanı boyayan ayrı bir
+                // Box'tı, arkasındaki zemin kutusuyla birlikte her butonu iki kez dolduruyordu.
+                .clip(shape)
+                .background(resolvedBackgroundColor)
+                .border(borderWidth, resolvedBorderColor, shape)
+                .clickable(
+                    enabled = isInteractionEnabled,
+                    interactionSource = interactionSource,
+                    indication = null,
+                    onClick = onClick,
+                )
+                // Wrap mode: genişlik içeriği takip eder (metin ↔ loader); ortadan büyüyüp küçülür.
+                .then(if (fillMaxWidth) Modifier else Modifier.animateContentSize(alignment = Alignment.Center))
+                .padding(horizontal = if (fillMaxWidth) 16.dp else 20.dp),
         contentAlignment = Alignment.Center,
     ) {
-        if (borderAnimated) {
-            AnimatedBorderPaint(
-                modifier = Modifier.matchParentSize(),
-                color = AccessDefaults.Accent,
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(22.dp),
+                color = resolvedContentColor,
+                strokeWidth = 2.dp,
             )
         } else {
-            Box(Modifier.matchParentSize().background(resolvedBorderColor))
-        }
-
-        Box(
-            modifier =
-                Modifier
-                    // Wrap mode: this box sizes the button, the border box above matches it.
-                    .then(if (fillMaxWidth) Modifier.matchParentSize() else Modifier.fillMaxHeight())
-                    .padding(borderWidth)
-                    .clip(innerShape)
-                    .background(resolvedBackgroundColor)
-                    .clickable(
-                        enabled = isInteractionEnabled,
-                        interactionSource = interactionSource,
-                        indication = null,
-                        onClick = onClick,
-                    )
-                    // Wrap mode: width follows content (text ↔ loader); centered so it shrinks/grows from both sides.
-                    // The outer box wraps this one, so border and background follow the animated width.
-                    .then(if (fillMaxWidth) Modifier else Modifier.animateContentSize(alignment = Alignment.Center))
-                    .padding(horizontal = if (fillMaxWidth) 16.dp else 20.dp),
-            contentAlignment = Alignment.Center,
-        ) {
-            if (isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(22.dp),
-                    color = resolvedContentColor,
-                    strokeWidth = 2.dp,
-                )
-            } else {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    if (leadingIcon != null) {
-                        if (tintLeadingIcon) {
-                            Icon(
-                                painter = painterResource(leadingIcon),
-                                contentDescription = null,
-                                tint = resolvedContentColor,
-                                modifier = Modifier.size(20.dp),
-                            )
-                        } else {
-                            Image(
-                                painter = painterResource(leadingIcon),
-                                contentDescription = null,
-                                modifier = Modifier.size(20.dp),
-                            )
-                        }
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                if (leadingIcon != null) {
+                    if (tintLeadingIcon) {
+                        Icon(
+                            painter = painterResource(leadingIcon),
+                            contentDescription = null,
+                            tint = resolvedContentColor,
+                            modifier = Modifier.size(20.dp),
+                        )
+                    } else {
+                        Image(
+                            painter = painterResource(leadingIcon),
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp),
+                        )
                     }
-                    Text(
-                        text = text,
-                        style = MaterialTheme.typography.titleSmall.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = resolvedContentColor,
-                        ),
-                    )
                 }
+                Text(
+                    text = text,
+                    style = MaterialTheme.typography.titleSmall.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = resolvedContentColor,
+                    ),
+                )
             }
         }
     }
 }
 
-@Composable
-private fun AnimatedBorderPaint(
-    color: Color,
-    modifier: Modifier = Modifier,
-) {
-    val transition = rememberInfiniteTransition(label = "border")
-    val angle by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 360f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 2500, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart,
-        ),
-        label = "borderAngle",
-    )
-
-    Spacer(
-        modifier = modifier.drawWithCache {
-            val side = hypot(size.width, size.height)
-            val sideInt = side.toInt().coerceAtLeast(1)
-            val topLeft = Offset((size.width - side) / 2f, (size.height - side) / 2f)
-
-            // Sweep gradient'i her karede shader olarak değerlendirmek yerine bir kez
-            // bitmap'e rasterize edip dönüşte sadece basıyoruz. Yumuşak bir parlama
-            // olduğu için küçük rasterize edip büyütmek gözle ayırt edilmiyor.
-            val gradientImage = ImageBitmap(GLOW_RASTER_PX, GLOW_RASTER_PX)
-            CanvasDrawScope().draw(
-                density = this,
-                layoutDirection = layoutDirection,
-                canvas = Canvas(gradientImage),
-                size = Size(GLOW_RASTER_PX.toFloat(), GLOW_RASTER_PX.toFloat()),
-            ) {
-                drawRect(
-                    brush = Brush.sweepGradient(
-                        colors = listOf(
-                            Color.Transparent,
-                            color.copy(alpha = 0.3f),
-                            color,
-                            color.copy(alpha = 0.3f),
-                            Color.Transparent,
-                        ),
-                        center = center,
-                    ),
-                )
-            }
-            gradientImage.markImmutable()
-
-            val glowSource = IntSize(GLOW_RASTER_PX, GLOW_RASTER_PX)
-            val glowDestination = IntSize(sideInt, sideInt)
-            val glowOffset = IntOffset(topLeft.x.toInt(), topLeft.y.toInt())
-
-            onDrawBehind {
-                drawRect(color = color.copy(alpha = 0.15f))
-
-                rotate(degrees = angle) {
-                    drawImage(
-                        image = gradientImage,
-                        srcOffset = IntOffset.Zero,
-                        srcSize = glowSource,
-                        dstOffset = glowOffset,
-                        dstSize = glowDestination,
-                        filterQuality = FilterQuality.Low,
-                    )
-                }
-            }
-        },
-    )
-}
 @Preview
 @Composable
 private fun BaseButtonPreview() {
