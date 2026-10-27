@@ -23,6 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.kaanf.core.presentation.util.ReportFullyDrawnWhen
 import com.kaanf.auth.presentation.onboarding.OnboardingScreen
 import com.kaanf.auth.presentation.onboarding.OnboardingViewModel
 import org.koin.compose.viewmodel.koinViewModel
@@ -76,6 +77,11 @@ fun WelcomeRoot(
 ) {
     val onboardingViewModel: OnboardingViewModel = koinViewModel()
     val onboardingState by onboardingViewModel.state.collectAsStateWithLifecycle()
+
+    // Oturum açılmamış cold start burada biter: completed null olduğu sürece ekran hâlâ
+    // boş bir zemin, yani kullanıcı için splash'ın devamı.
+    ReportFullyDrawnWhen { onboardingState.completed != null }
+
     when (onboardingState.completed) {
         null -> {
             Box(Modifier.fillMaxSize().background(AccessDefaults.Background))
