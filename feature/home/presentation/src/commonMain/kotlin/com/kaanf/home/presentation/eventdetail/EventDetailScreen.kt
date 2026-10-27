@@ -1,8 +1,5 @@
 package com.kaanf.home.presentation.eventdetail
 
-import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 
@@ -32,6 +29,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -84,6 +82,9 @@ import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 
+/** Backend'in paylaşım linki beklenen biçimde değilse paylaş butonu kapanır. */
+private val ShareUrlPattern = Regex("https://share\\.crewishere\\.com/e/[a-z0-9]{10}")
+
 @Composable
 fun EventDetailRoot(
     viewModel: EventDetailViewModel = koinViewModel(),
@@ -104,58 +105,55 @@ fun EventDetailRoot(
         }
     }
 
-    val shareUrl = state.event?.shareUrl?.takeIf {
-        it.matches(Regex("https://share\\.crewishere\\.com/e/[a-z0-9]{10}"))
-    }
+    val shareUrl = state.event?.shareUrl?.takeIf { it.matches(ShareUrlPattern) }
 
-    Box(modifier = Modifier.fillMaxSize().background(AccessDefaults.Background)) {
-        AppScaffold(
-            containerColor = Color.Transparent,
-            topBar = {
-                AppTopBar(
-                    state = AppTopBarState.EventDetail,
-                    elevated = { listState.canScrollBackward },
-                    transparentAtRest = false,
-                    rightActions = {
-                        EventShareButton(
-                            enabled = shareUrl != null,
-                            onClick = {
-                                state.event?.let { event ->
-                                    val url = shareUrl ?: return@let
-                                    shareEvent(
-                                        EventShareContent(
-                                            title = event.title,
-                                            text = listOf(
-                                                shareInvitation,
-                                                listOfNotNull(
-                                                    event.title,
-                                                    event.heroDate,
-                                                    event.location?.name,
-                                                ).joinToString(" · "),
-                                                url,
-                                            ).joinToString("\n\n"),
-                                            url = url,
-                                            imageUrl = event.imageUrls.firstOrNull(),
-                                        ),
-                                    )
-                                }
-                            },
-                        )
-                    },
-                    onBackClick = { onBackClick() },
-                )
-            },
-        ) { innerPadding ->
-            EventDetailScreen(
-                modifier = Modifier
-                    .padding(bottom = innerPadding.calculateBottomPadding())
-                    .consumeWindowInsets(innerPadding),
-                contentTopPadding = innerPadding.calculateTopPadding(),
-                listState = listState,
-                state = state,
-                onAction = viewModel::onAction,
+    // Zemin yalnızca AppScaffold'un containerColor'ı: burada ayrıca tam ekran bir Box
+    // boyanıyordu ve ekran iki kez doluyordu.
+    AppScaffold(
+        topBar = {
+            AppTopBar(
+                state = AppTopBarState.EventDetail,
+                elevated = { listState.canScrollBackward },
+                transparentAtRest = false,
+                rightActions = {
+                    EventShareButton(
+                        enabled = shareUrl != null,
+                        onClick = {
+                            state.event?.let { event ->
+                                val url = shareUrl ?: return@let
+                                shareEvent(
+                                    EventShareContent(
+                                        title = event.title,
+                                        text = listOf(
+                                            shareInvitation,
+                                            listOfNotNull(
+                                                event.title,
+                                                event.heroDate,
+                                                event.location?.name,
+                                            ).joinToString(" · "),
+                                            url,
+                                        ).joinToString("\n\n"),
+                                        url = url,
+                                        imageUrl = event.imageUrls.firstOrNull(),
+                                    ),
+                                )
+                            }
+                        },
+                    )
+                },
+                onBackClick = { onBackClick() },
             )
-        }
+        },
+    ) { innerPadding ->
+        EventDetailScreen(
+            modifier = Modifier
+                .padding(bottom = innerPadding.calculateBottomPadding())
+                .consumeWindowInsets(innerPadding),
+            contentTopPadding = innerPadding.calculateTopPadding(),
+            listState = listState,
+            state = state,
+            onAction = viewModel::onAction,
+        )
     }
 }
 
@@ -168,42 +166,44 @@ fun EventDetailScreen(
     onAction: (EventDetailAction) -> Unit,
 ) {
     val typography = MaterialTheme.typography
-    MaterialTheme(
-        typography = typography.copy(
-            labelSmall = typography.labelSmall.copy(fontFamily = SpaceGrotesk),
-        ),
-    ) {
-        Crossfade(
-            targetState = state.event != null,
-            modifier = modifier.fillMaxSize(),
-            animationSpec = tween(durationMillis = 250),
-        ) { hasEvent ->
-            val event = state.event
+    val spaceGrotesk = SpaceGrotesk
+    // copy() her recomposition'da yeni bir Typography üretip LocalTypography'yi baştan
+    // sağlıyordu; altındaki her tüketici boşuna invalidate oluyordu.
+    val eventDetailTypography = remember(typography, spaceGrotesk) {
+        typography.copy(
+            labelSmall = typography.labelSmall.copy(fontFamily = spaceGrotesk),
+        )
+    }
 
-            if (!hasEvent || event == null) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    if (state.loadFailed) {
-                        EventDetailLoadErrorContent(
-                            onRetry = { onAction(EventDetailAction.OnRetryLoad) },
-                        )
-                    } else {
-                        FullScreenLoader()
-                    }
+    MaterialTheme(typography = eventDetailTypography) {
+        val event = state.event
+
+        // Tam ekran Crossfade kaldırıldı: iki durumu da compose edilmiş tutup 1440x3120'lik
+        // alt ağaca alpha katmanı uyguluyordu, yani ekran boyu bir offscreen buffer.
+        if (event == null) {
+            Box(
+                modifier = modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ) {
+                if (state.loadFailed) {
+                    EventDetailLoadErrorContent(
+                        onRetry = { onAction(EventDetailAction.OnRetryLoad) },
+                    )
+                } else {
+                    FullScreenLoader()
                 }
-            } else {
-                EventDetailContent(
-                    listState = listState,
-                    contentTopPadding = contentTopPadding,
-                    event = event,
-                    guests = state.guests,
-                    isGuestsLoading = state.isGuestsLoading,
-                    isCheckingOut = state.isCheckingOut,
-                    onAction = onAction,
-                )
             }
+        } else {
+            EventDetailContent(
+                modifier = modifier,
+                listState = listState,
+                contentTopPadding = contentTopPadding,
+                event = event,
+                guests = state.guests,
+                isGuestsLoading = state.isGuestsLoading,
+                isCheckingOut = state.isCheckingOut,
+                onAction = onAction,
+            )
         }
     }
 }
@@ -239,6 +239,7 @@ private fun EventDetailLoadErrorContent(
 
 @Composable
 private fun EventDetailContent(
+    modifier: Modifier,
     listState: LazyListState,
     contentTopPadding: Dp,
     event: EventDetailUiModel,
@@ -250,8 +251,9 @@ private fun EventDetailContent(
     var viewerPage by rememberSaveable { mutableStateOf<Int?>(null) }
     var isGuestListOpen by rememberSaveable { mutableStateOf(false) }
 
+    // Zemin AppScaffold'dan geliyor; burada tekrar boyanmıyor.
     Box(
-        modifier = Modifier.fillMaxSize().background(AccessDefaults.Background).clipToBounds(),
+        modifier = modifier.fillMaxSize().clipToBounds(),
     ) {
         Box(
             modifier = Modifier

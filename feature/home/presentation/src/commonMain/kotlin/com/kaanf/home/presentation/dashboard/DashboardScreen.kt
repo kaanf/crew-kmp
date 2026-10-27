@@ -1,7 +1,5 @@
 package com.kaanf.home.presentation.dashboard
 
-import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
@@ -49,6 +47,7 @@ import com.kaanf.core.presentation.model.AppTopBarState
 import com.kaanf.core.presentation.permission.Permission
 import com.kaanf.core.presentation.permission.rememberPermissionController
 import com.kaanf.core.presentation.util.ObserveAsEvents
+import com.kaanf.core.presentation.util.ReportFullyDrawnWhen
 import com.kaanf.core.designsystem.component.card.GradientChallengeCard
 import com.kaanf.home.presentation.dashboard.component.profile.DashboardProfilePhotoReminder
 import com.kaanf.home.presentation.dashboard.component.carousel.DashboardEventCarousel
@@ -90,6 +89,11 @@ fun DashboardRoot(
             is DashboardEvent.NavigateToEventDetail -> onEventClicked(event.eventId)
         }
     }
+
+    // Platformun cold start ölçümü ilk karede (splash) duruyor; kullanıcının gerçekten
+    // içerik gördüğü anı ayrıca bildiriyoruz. Koşul "veri geldi" değil "yükleme bitti":
+    // hata durumunda da true olmazsa metrik hiç raporlanmaz.
+    ReportFullyDrawnWhen { !state.isLoading }
 
     RequestNotificationPermissionEffect(
         isReady = !state.isLoading && state.profilePictureUrl != null,
@@ -145,36 +149,34 @@ fun DashboardScreen(
     onAction: (DashboardAction) -> Unit,
     listState: LazyListState,
 ) {
-    Crossfade(
-        targetState = state.isLoading,
-        modifier = modifier.fillMaxSize(),
-        animationSpec = tween(durationMillis = 250),
-    ) { isLoading ->
-        if (isLoading) {
-            FullScreenLoader()
-        } else {
-            val pullToRefreshState = rememberPullToRefreshState()
+    // Tam ekran Crossfade kaldırıldı: iki durumu da compose edilmiş tutup ekran boyu bir
+    // alpha katmanı (offscreen buffer) açıyordu. FullScreenLoader zaten 500 ms geciktiği
+    // için kısa yüklemelerde spinner hiç çizilmiyor, geçiş de göze çarpmıyor.
+    if (state.isLoading) {
+        FullScreenLoader(modifier = modifier.fillMaxSize())
+    } else {
+        val pullToRefreshState = rememberPullToRefreshState()
 
-            PullToRefreshBox(
-                isRefreshing = state.isRefreshing,
-                onRefresh = { onAction(DashboardAction.OnRefresh) },
-                state = pullToRefreshState,
-                indicator = {
-                    PullToRefreshDefaults.Indicator(
-                        modifier = Modifier.align(Alignment.TopCenter),
-                        state = pullToRefreshState,
-                        isRefreshing = state.isRefreshing,
-                        containerColor = AccessDefaults.SurfaceElevated,
-                        color = AccessDefaults.Accent,
-                    )
-                },
-            ) {
-                DashboardContent(
-                    listState = listState,
-                    state = state,
-                    onAction = onAction,
+        PullToRefreshBox(
+            modifier = modifier.fillMaxSize(),
+            isRefreshing = state.isRefreshing,
+            onRefresh = { onAction(DashboardAction.OnRefresh) },
+            state = pullToRefreshState,
+            indicator = {
+                PullToRefreshDefaults.Indicator(
+                    modifier = Modifier.align(Alignment.TopCenter),
+                    state = pullToRefreshState,
+                    isRefreshing = state.isRefreshing,
+                    containerColor = AccessDefaults.SurfaceElevated,
+                    color = AccessDefaults.Accent,
                 )
-            }
+            },
+        ) {
+            DashboardContent(
+                listState = listState,
+                state = state,
+                onAction = onAction,
+            )
         }
     }
 }
