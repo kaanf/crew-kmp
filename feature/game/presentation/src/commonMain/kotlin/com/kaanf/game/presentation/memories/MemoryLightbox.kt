@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -46,6 +47,7 @@ import com.kaanf.core.designsystem.theme.AccessIcons
 import com.kaanf.core.designsystem.theme.AccessShapes
 import com.kaanf.game.domain.model.EventMemory
 import crew.feature.game.presentation.generated.resources.Res
+import crew.feature.game.presentation.generated.resources.memories_close_photo
 import crew.feature.game.presentation.generated.resources.memories_shared_by_format
 import crew.feature.game.presentation.generated.resources.memories_shared_by_you
 import crew.feature.game.presentation.generated.resources.memories_you_badge
@@ -147,12 +149,12 @@ fun MemoryLightbox(
                     .clip(CircleShape)
                     .background(Color.White.copy(alpha = 0.1f))
                     .border(1.dp, Color.White.copy(alpha = 0.16f), CircleShape)
-                    .clickable(onClick = onDismiss),
+                    .clickable(role = Role.Button, onClick = onDismiss),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
                     painter = painterResource(AccessIcons.Close),
-                    contentDescription = null,
+                    contentDescription = stringResource(Res.string.memories_close_photo),
                     tint = Color.White,
                     modifier = Modifier.size(19.dp),
                 )

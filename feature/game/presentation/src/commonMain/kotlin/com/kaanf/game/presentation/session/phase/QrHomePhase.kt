@@ -73,6 +73,7 @@ import com.kaanf.game.presentation.component.dialog.CameraPermissionDialog
 import com.kaanf.game.presentation.session.MatchSessionAction
 import com.kaanf.game.presentation.session.MatchSessionState
 import com.kaanf.game.presentation.session.coachmark.GameCoachmarkKey
+import com.kaanf.game.presentation.session.component.GameBottomBarReservedHeight
 import crew.feature.game.presentation.generated.resources.Res
 import crew.feature.game.presentation.generated.resources.leaderboard_points_format
 import crew.feature.game.presentation.generated.resources.match_phase_qr_home_title
@@ -140,7 +141,7 @@ fun QrHomePhase(
         modifier = modifier
             .fillMaxSize()
             .padding(horizontal = 22.dp)
-            .padding(top = 8.dp, bottom = 84.dp),
+            .padding(top = 8.dp, bottom = GameBottomBarReservedHeight),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {

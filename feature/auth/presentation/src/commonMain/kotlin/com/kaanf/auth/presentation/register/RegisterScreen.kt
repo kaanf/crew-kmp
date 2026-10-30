@@ -15,6 +15,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -27,6 +28,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.kaanf.auth.presentation.component.textfield.NativeAuthFocusRequester
 import com.kaanf.auth.presentation.component.textfield.NativeAuthPasswordTextField
 import com.kaanf.auth.presentation.component.textfield.NativeAuthTextField
 import com.kaanf.auth.presentation.util.PolicyUrls
@@ -167,6 +169,10 @@ fun RegisterScreen(
                     modifier = Modifier.padding(top = 32.dp),
                     verticalArrangement = Arrangement.spacedBy(20.dp),
                 ) {
+                    val passwordFocus = remember { NativeAuthFocusRequester() }
+                    val rePasswordFocus = remember { NativeAuthFocusRequester() }
+                    val fullNameFocus = remember { NativeAuthFocusRequester() }
+
                     val showEmailError = state.emailTextState.text.isNotEmpty() && !state.isEmailValid
                     NativeAuthTextField(
                         state = state.emailTextState,
@@ -175,6 +181,7 @@ fun RegisterScreen(
                         isError = showEmailError,
                         placeholder = stringResource(Res.string.auth_email_placeholder),
                         keyboardType = KeyboardType.Email,
+                        onImeNext = passwordFocus::requestFocus,
                     )
 
                     NativeAuthPasswordTextField(
@@ -183,6 +190,8 @@ fun RegisterScreen(
                         hint = stringResource(Res.string.register_password_requirements_hint),
                         isError = state.passwordTextState.text.isNotEmpty() && !state.isPasswordValid,
                         placeholder = stringResource(Res.string.register_password_placeholder),
+                        focusRequester = passwordFocus,
+                        onImeNext = rePasswordFocus::requestFocus,
                     )
 
                     val showPasswordMismatch =
@@ -193,6 +202,8 @@ fun RegisterScreen(
                         hint = if (showPasswordMismatch) stringResource(Res.string.error_password_mismatch) else null,
                         isError = showPasswordMismatch,
                         placeholder = stringResource(Res.string.register_confirm_password_placeholder),
+                        focusRequester = rePasswordFocus,
+                        onImeNext = fullNameFocus::requestFocus,
                     )
 
                     NativeAuthTextField(
@@ -201,6 +212,7 @@ fun RegisterScreen(
                         hint = stringResource(Res.string.register_full_name_hint),
                         isError = state.fullNameTextState.text.isNotEmpty() && !state.isFullNameValid,
                         placeholder = stringResource(Res.string.register_full_name_placeholder),
+                        focusRequester = fullNameFocus,
                     )
 
                     BaseCheckbox(

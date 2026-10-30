@@ -1,6 +1,7 @@
 package com.kaanf.core.designsystem.theme
 
 import crew.core.designsystem.generated.resources.Res
+import crew.core.designsystem.generated.resources.app_icon
 import crew.core.designsystem.generated.resources.crew_logo_qr
 import crew.core.designsystem.generated.resources.crew_pixel_art
 import crew.core.designsystem.generated.resources.ic_apple_logo
@@ -58,6 +59,7 @@ object AccessIcons {
     val Lightning = Res.drawable.ic_lightning
     val Refresh = Res.drawable.ic_refresh
     val Check = Res.drawable.ic_check
+    val AppIcon = Res.drawable.app_icon
     val Clock = Res.drawable.ic_clock
     val Trophy = Res.drawable.ic_trophy
     val Star = Res.drawable.ic_star

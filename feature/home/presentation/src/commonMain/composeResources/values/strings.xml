@@ -125,4 +125,17 @@
     <string name="vibe_receipt_total">TOTAL</string>
     <string name="vibe_receipt_verdict">Glad I came.</string>
     <string name="vibe_receipt_footer">Keep the stories. — Crew</string>
+    <string name="notification_sheet_preview_title">New event just dropped</string>
+    <string name="notification_sheet_preview_time">now</string>
+    <string name="notification_sheet_preview_body">Quiz Night at Moda Bar, Fri 21:00. Grab your spot.</string>
+    <string name="notification_sheet_title">Don&apos;t miss</string>
+    <string name="notification_sheet_title_accent">the next one.</string>
+    <string name="notification_sheet_description">Crew lets you know when a new event goes live and reminds you before doors open.</string>
+    <string name="notification_sheet_enable">Turn on notifications</string>
+    <string name="notification_sheet_skip">Not now</string>
+    <string name="notification_sheet_on_title">You&apos;re on the list.</string>
+    <string name="notification_sheet_on_description">We&apos;ll ping you when new events go live and before yours start.</string>
+    <string name="notification_sheet_off_title">No pings for now.</string>
+    <string name="notification_sheet_off_description">You can turn notifications on anytime in Settings.</string>
+    <string name="notification_sheet_done">Done</string>
 </resources>

@@ -1,0 +1,27 @@
+appId: com.kaanf.crew
+---
+- scrollUntilVisible:
+    element: "Guest list"
+- extendedWaitUntil:
+    visible: ${GUEST_COUNT + ' going'}
+    timeout: 15000
+- tapOn: "Guest list"
+- assertVisible: "Close guest list"
+- assertVisible: ${GUEST_COUNT + ' going'}
+- runFlow:
+    when:
+      true: ${Number(GUEST_COUNT) > 0}
+    commands:
+      - assertVisible: ${FIRST_GUEST_NAME}
+      - scrollUntilVisible:
+          element: ${LAST_GUEST_NAME}
+      - assertVisible: ${LAST_GUEST_NAME}
+- tapOn: "Close guest list"
+- assertNotVisible: "Close guest list"
+- assertVisible: "Guest list"
+# Opening again must still show the expected fixture count.
+- tapOn: "Guest list"
+- assertVisible: "Close guest list"
+- assertVisible: ${GUEST_COUNT + ' going'}
+- tapOn: "Close guest list"
+- assertNotVisible: "Close guest list"

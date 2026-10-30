@@ -6,6 +6,8 @@ import androidx.datastore.preferences.core.Preferences
 import com.kaanf.core.data.BuildEnvironment
 import com.kaanf.core.data.device.AndroidDeviceIdProvider
 import com.kaanf.core.data.networking.ConnectivityObserver
+import com.kaanf.core.data.session.SecureSessionStore
+import com.kaanf.core.data.session.AndroidSecureSessionStore
 import com.kaanf.core.data.storage.createDataStore
 import com.kaanf.core.data.update.PlayAppUpdateChecker
 import com.kaanf.core.domain.provider.DeviceIdProvider
@@ -24,6 +26,7 @@ actual val platformCoreDataModule =
         }
         single { ConnectivityObserver(androidContext()) }
         single<AppUpdateChecker> { PlayAppUpdateChecker(androidContext()) }
+        single<SecureSessionStore> { AndroidSecureSessionStore(androidContext()) }
         single<HttpClientEngine> { OkHttp.create() }
         single<DataStore<Preferences>> {
             createDataStore(androidContext())

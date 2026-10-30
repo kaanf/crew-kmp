@@ -31,6 +31,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -45,6 +47,10 @@ import com.kaanf.core.designsystem.theme.AccessIcons
 import com.kaanf.core.designsystem.theme.CrewTheme
 import com.kaanf.core.presentation.model.AppTopBarState
 import crew.core.designsystem.generated.resources.Res
+import crew.core.designsystem.generated.resources.accessibility_close
+import crew.core.designsystem.generated.resources.accessibility_navigate_back
+import crew.core.designsystem.generated.resources.accessibility_open_leaderboard
+import crew.core.designsystem.generated.resources.accessibility_open_roll
 import crew.core.designsystem.generated.resources.empty
 import crew.core.designsystem.generated.resources.event_code_title
 import crew.core.designsystem.generated.resources.game_how_to_play
@@ -183,6 +189,7 @@ fun AppTopBar(
             }
 
             val profileEditing = state is AppTopBarState.Profile && state.hasUnsavedChanges
+            val profileLabel = stringResource(Res.string.profile_title)
 
             if (profileEditing) {
                 // In edit mode the back chevron becomes a Cancel action that discards changes.
@@ -218,7 +225,7 @@ fun AppTopBar(
                     ) {
                         Icon(
                             painter = painterResource(icon),
-                            contentDescription = null,
+                            contentDescription = stringResource(Res.string.accessibility_navigate_back),
                             tint = AccessDefaults.TextPrimary,
                             modifier = Modifier.size(24.dp),
                         )
@@ -286,7 +293,7 @@ fun AppTopBar(
                 ) {
                     Icon(
                         painter = painterResource(AccessIcons.Close),
-                        contentDescription = null,
+                        contentDescription = stringResource(Res.string.accessibility_close),
                         tint = AccessDefaults.TextPrimary,
                         modifier = Modifier.size(24.dp),
                     )
@@ -312,7 +319,9 @@ fun AppTopBar(
                         painter = painterResource(
                             if (state.isRollOpen) AccessIcons.Trophy else AccessIcons.Memories,
                         ),
-                        contentDescription = null,
+                        contentDescription = stringResource(
+                            if (state.isRollOpen) Res.string.accessibility_open_leaderboard else Res.string.accessibility_open_roll,
+                        ),
                         tint = AccessDefaults.Coral,
                         modifier = Modifier.size(18.dp),
                     )
@@ -333,7 +342,15 @@ fun AppTopBar(
                     onClick = onRightClick,
                     modifier = Modifier
                         .align(Alignment.CenterEnd)
-                        .widthIn(min = 36.dp),
+                        .widthIn(min = 36.dp)
+                        // Avatar tek başına görsel; ekran okuyucu (ve UI testleri) için butonu adlandırır.
+                        .then(
+                            if (state is AppTopBarState.Dashboard) {
+                                Modifier.semantics { contentDescription = profileLabel }
+                            } else {
+                                Modifier
+                            },
+                        ),
                     contentPadding = PaddingValues(horizontal = 0.dp),
                 ) {
                     if (profileEditing) {

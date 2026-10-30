@@ -1,0 +1,23 @@
+# Starts on profile. Assert identity before the destructive action.
+appId: com.kaanf.crew
+---
+- assertVisible: ${DELETE_ACCOUNT_EMAIL}
+- scrollUntilVisible:
+    element: "Delete my account"
+- tapOn: "Delete my account"
+- assertVisible: "Delete your account?"
+- tapOn:
+    text: "Delete my account"
+    below: "This permanently deletes.*"
+- extendedWaitUntil:
+    visible: "Strangers.*"
+    timeout: 20000
+- assertNotVisible: "Profile"
+- stopApp
+- launchApp:
+    clearState: false
+- extendedWaitUntil:
+    visible: "Strangers.*"
+    timeout: 20000
+- assertNotVisible: "Profile"
+- assertNotVisible: ${DELETE_ACCOUNT_EMAIL}

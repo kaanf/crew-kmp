@@ -166,7 +166,7 @@ class MatchRepositoryImpl(
     override suspend fun getAddressBook(eventId: String): Result<AddressBook, DataError.Remote> {
         return httpClient.get<AddressBookDto>(
             route = "/events/$eventId/address-book",
-        ).map { it.toDomain() }
+        ).mapCatching { it.toDomain() }
     }
 
     override suspend fun getLeaderboard(
@@ -183,7 +183,7 @@ class MatchRepositoryImpl(
         return httpClient.get<List<MatchHistoryEntryDto>>(
             route = "/events/$eventId/matches/history",
             queryParams = mapOf("page" to page, "size" to size),
-        ).map { entries -> entries.map { it.toDomain() } }
+        ).mapCatching { entries -> entries.map { it.toDomain() } }
     }
 
     override suspend fun cancelMatch(
@@ -258,7 +258,7 @@ class MatchRepositoryImpl(
     ): Result<AddressBook, DataError.Remote> {
         return httpClient.post<AddressBookDto>(
             route = "/events/$eventId/address-book/$metUserId/claim",
-        ).map { it.toDomain() }
+        ).mapCatching { it.toDomain() }
     }
 
     override suspend fun claimAllMeetings(
@@ -266,6 +266,6 @@ class MatchRepositoryImpl(
     ): Result<AddressBook, DataError.Remote> {
         return httpClient.post<AddressBookDto>(
             route = "/events/$eventId/address-book/claim-all",
-        ).map { it.toDomain() }
+        ).mapCatching { it.toDomain() }
     }
 }

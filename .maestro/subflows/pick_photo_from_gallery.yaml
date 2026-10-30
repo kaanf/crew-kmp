@@ -1,0 +1,19 @@
+# "Add a photo" / "Change photo" → galeri → en yeni fotoğraf (addMedia ile eklenen) → kırp → "Use photo".
+appId: com.kaanf.crew
+---
+- tapOn: "Add a photo|Change photo"
+- tapOn: "Choose from gallery"
+- extendedWaitUntil:
+    visible: "Photo taken on.*"
+    timeout: 10000
+- tapOn:
+    text: "Photo taken on.*"
+    index: 0
+# Bazı cihazlarda (ör. Samsung) seçici seçimi ayrıca onaylatıyor.
+- tapOn:
+    text: "Done"
+    optional: true
+- extendedWaitUntil:
+    visible: "Use photo"
+    timeout: 10000
+- tapOn: "Use photo"

@@ -1,0 +1,11 @@
+appId: com.kaanf.crew
+---
+- extendedWaitUntil:
+    visible: "Finish"
+    timeout: 20000
+- assertVisible: "LOST THE THROW"
+- takeScreenshot: match-scoreboard
+- tapOn: "Finish"
+- extendedWaitUntil:
+    visible: "Your Match QR"
+    timeout: 20000

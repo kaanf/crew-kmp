@@ -37,6 +37,7 @@ fun User.toSerializable(): UserSerializable {
         role = role,
         status = status,
         hasVerifiedEmail = hasVerifiedEmail,
+        isProfileComplete = isProfileComplete,
     )
 }
 

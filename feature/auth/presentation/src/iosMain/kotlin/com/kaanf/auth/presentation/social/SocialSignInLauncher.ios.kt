@@ -57,10 +57,12 @@ actual fun rememberSocialSignInLauncher(
 
     return remember {
         SocialSignInLauncher { provider ->
-            when (provider) {
-                SocialProvider.Apple -> launchAppleSignIn { currentOnResult(it) }
-                SocialProvider.Google -> launchGoogleSignIn { currentOnResult(it) }
-            }
+            runCatching {
+                when (provider) {
+                    SocialProvider.Apple -> launchAppleSignIn { currentOnResult(it) }
+                    SocialProvider.Google -> launchGoogleSignIn { currentOnResult(it) }
+                }
+            }.onFailure { currentOnResult(SocialSignInResult.Failed) }
         }
     }
 }

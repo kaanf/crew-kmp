@@ -2,7 +2,6 @@ package com.kaanf.auth.presentation.social
 
 import androidx.compose.runtime.Composable
 import com.kaanf.auth.domain.model.SocialProvider
-import kotlin.random.Random
 
 sealed interface SocialSignInResult {
     data class Success(
@@ -35,6 +34,9 @@ expect fun rememberSocialSignInLauncher(
 ): SocialSignInLauncher
 
 internal fun randomNonce(): String =
-    Random.nextBytes(16).joinToString("") { byte ->
+    secureRandomBytes(16).joinToString("") { byte ->
         byte.toUByte().toString(16).padStart(2, '0')
     }
+
+/** Throws on entropy failure; callers must stop authentication rather than fall back to a PRNG. */
+internal expect fun secureRandomBytes(size: Int): ByteArray

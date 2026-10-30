@@ -48,6 +48,7 @@ import com.kaanf.core.designsystem.component.layout.FullScreenLoader
 import com.kaanf.core.designsystem.modifier.verticalGradientScrim
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.game.domain.model.LeaderboardEntry
+import com.kaanf.game.presentation.session.component.GameBottomBarReservedHeight
 import crew.feature.game.presentation.generated.resources.Res
 import crew.feature.game.presentation.generated.resources.leaderboard_column_player
 import crew.feature.game.presentation.generated.resources.leaderboard_column_points
@@ -304,7 +305,7 @@ private fun LeaderboardSheet(
             LazyColumn(
                 state = listState,
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(bottom = 84.dp),
+                contentPadding = PaddingValues(bottom = GameBottomBarReservedHeight),
             ) {
                 items(entries, key = { it.userId }) { entry ->
                     LeaderboardRow(

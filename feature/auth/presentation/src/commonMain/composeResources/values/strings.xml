@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <resources>
+    <string name="show_password">Show Password</string>
+    <string name="hide_password">Hide Password</string>
     <!-- First-run onboarding -->
     <string name="onboarding_friends_title">Play with friends or join real-life events.</string>
     <string name="onboarding_friends_body">Play at a Crew event or with your own friends.</string>

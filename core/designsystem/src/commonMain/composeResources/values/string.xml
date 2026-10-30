@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <resources>
+    <string name="accessibility_navigate_back">Go back</string>
+    <string name="accessibility_close">Close</string>
+    <string name="accessibility_open_leaderboard">Open leaderboard</string>
+    <string name="accessibility_open_roll">Open tonight’s roll</string>
     <string name="hide_password">Hide Password</string>
     <string name="show_password">Show Password</string>
 

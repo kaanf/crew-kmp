@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <resources>
+    <string name="memories_close_photo">Close photo</string>
     <string name="match_you_avatar_label">Y</string>
     <string name="match_unknown_avatar_label">?</string>
     <string name="match_points_format">+%1$d PTS</string>

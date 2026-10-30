@@ -1,0 +1,153 @@
+appId: com.kaanf.crew
+---
+- evalScript: ${output.email = (typeof TEST_EMAIL !== "undefined" && TEST_EMAIL) || ("maestro+" + Date.now() + "@example.com")}
+- addMedia:
+    - ../assets/avatar.jpg
+- launchApp:
+    clearState: true
+    permissions:
+      all: allow
+
+# --- Onboarding ---
+- assertVisible: "Play with friends or join real-life events."
+- swipe:
+    direction: LEFT
+- assertVisible: "Scan. Play.*"
+- swipe:
+    direction: LEFT
+- assertVisible: "Complete dares.*"
+- tapOn: "Let.s play.*"
+
+# --- Welcome ---
+- assertVisible: "Strangers.*"
+- tapOn: "Continue with email"
+
+# --- Kayıt: hatalı girişler ---
+- assertVisible: "Join the Crew."
+- tapOn: "you@somewhere.com"
+- inputText: "not-an-email"
+- assertVisible: "This is not a valid email"
+- eraseText
+- inputText: ${output.email}
+- assertNotVisible: "This is not a valid email"
+
+- tapOn: "At least 9 characters"
+- inputText: "weak"
+- hideKeyboard
+- runFlow: assert_register_disabled.yaml
+- tapOn: "•+"
+- eraseText
+- inputText: ${PASSWORD}
+
+- tapOn: "Repeat your password"
+- inputText: "Maestro124"
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Passwords do not match.*"
+- tapOn:
+    text: "•+"
+    index: 1
+- eraseText
+- inputText: ${PASSWORD}
+- hideKeyboard
+- assertNotVisible: "Passwords do not match.*"
+
+- tapOn: "Full Name"
+- inputText: "Mae"
+- hideKeyboard
+- runFlow: assert_register_disabled.yaml
+- tapOn: "Mae"
+- eraseText
+- inputText: ${FULL_NAME}
+- hideKeyboard
+
+# Onay kutuları işaretlenmeden buton kapalı kalmalı.
+- runFlow: assert_register_disabled.yaml
+- tapOn: "I confirm that I am 18.*"
+- runFlow: assert_register_disabled.yaml
+# Metindeki Terms/House Rules/Privacy linklerine değmemek için soldaki kutuya dokun.
+- tapOn:
+    containsChild: "I agree to the.*"
+    point: "3%,50%"
+
+# --- Kayıt: başarılı ---
+- tapOn: "Create my account"
+
+# --- Giriş: hatalı girişler ---
+- extendedWaitUntil:
+    visible: "Welcome back."
+    timeout: 15000
+- tapOn: "you@somewhere.com"
+- inputText: "wrong@"
+- assertVisible: "This is not a valid email"
+- hideKeyboard
+- assertVisible:
+    containsChild: "Sign in"
+    enabled: false
+- tapOn: "wrong@"
+- eraseText
+- inputText: ${output.email}
+- tapOn: "Password"
+- inputText: "WrongPass123"
+- hideKeyboard
+- tapOn: "Sign in"
+- extendedWaitUntil:
+    visible: "ACCESS DENIED"
+    timeout: 15000
+
+# --- Giriş: başarılı ---
+- tapOn: "•+"
+- eraseText
+- inputText: ${PASSWORD}
+- hideKeyboard
+- tapOn: "Sign in"
+
+# --- Profil fotoğrafı: yükle → sil → tekrar yükle ---
+- extendedWaitUntil:
+    visible: "Put a face to the name."
+    timeout: 15000
+- assertVisible:
+    containsChild: "Add a photo to continue"
+    enabled: false
+- runFlow: pick_photo_from_gallery.yaml
+- assertVisible: "Remove"
+- tapOn: "Remove"
+- assertVisible: "Add a photo to continue"
+- runFlow: pick_photo_from_gallery.yaml
+- tapOn: "Continue"
+
+# --- Dashboard → Profil ---
+# Dashboard bildirim iznini foto yüklendikten sonra ister.
+- extendedWaitUntil:
+    visible: "Not now|Allow|Profile"
+    timeout: 20000
+- tapOn:
+    text: "Not now"
+    optional: true
+- tapOn:
+    text: "Done"
+    optional: true
+- tapOn:
+    text: "Allow"
+    optional: true
+- extendedWaitUntil:
+    visible: "Profile"
+    timeout: 20000
+- tapOn: "Profile"
+- assertVisible: ${output.email}
+- assertVisible: ${FULL_NAME}
+- assertVisible: "Change photo"
+
+# Profilde fotoğrafı kaldırıp kaydet, sonra tekrar ekleyip kaydet.
+- tapOn: "Remove"
+- tapOn: "Save changes"
+- extendedWaitUntil:
+    visible: "Profile updated"
+    timeout: 15000
+- runFlow: pick_photo_from_gallery.yaml
+- tapOn: "Save changes"
+- extendedWaitUntil:
+    visible: "Profile updated"
+    timeout: 15000
+- assertVisible: "Change photo"
+

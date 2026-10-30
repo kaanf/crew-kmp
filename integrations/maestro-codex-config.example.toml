@@ -1,0 +1,4 @@
+# OPTIONAL: merge into your own .codex/config.toml ONLY after Maestro CLI installed.
+[mcp_servers.maestro]
+command = "maestro"
+args = ["mcp"]

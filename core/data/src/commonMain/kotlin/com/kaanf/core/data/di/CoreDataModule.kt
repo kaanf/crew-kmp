@@ -36,7 +36,7 @@ val coreDataModule =
         single<SessionStorage> {
             // clearBearerToken lambda'sı HttpClient'ı tembel çözer: SessionStorage kurulurken
             // client henüz yok, bu yüzden çağrı anına ertelenir (döngüsel bağımlılık olmaz).
-            DataStoreSessionStorage(get()) { get<HttpClient>().clearBearerToken() }
+            DataStoreSessionStorage(get(), get()) { get<HttpClient>().clearBearerToken() }
         }
         singleOf(::DataStoreLanguageStore) bind LanguageStore::class
         singleOf(::DataStoreOnboardingStore) bind OnboardingStore::class

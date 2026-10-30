@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <!-- Legacy preferences once held credentials; secure sessions live in noBackupFilesDir. -->
+    <exclude domain="file" path="prefs.preferences_pb" />
+    <exclude domain="file" path="prefs.preferences_pb.tmp" />
+    <exclude domain="file" path="prefs.preferences_pb.bak" />
+</full-backup-content>

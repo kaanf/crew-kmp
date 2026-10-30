@@ -24,6 +24,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -31,8 +33,11 @@ import androidx.compose.ui.unit.sp
 import com.kaanf.core.designsystem.component.textfield.BaseInputField
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import crew.feature.auth.presentation.generated.resources.Res
+import crew.feature.auth.presentation.generated.resources.hide_password
+import crew.feature.auth.presentation.generated.resources.show_password
 import crew.feature.auth.presentation.generated.resources.ic_eye
 import crew.feature.auth.presentation.generated.resources.ic_eye_off
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 
 private const val DATE_DIGIT_COUNT = 8
@@ -41,6 +46,13 @@ private const val DATE_SEPARATOR = "-"
 internal enum class NativeAuthTextFieldFormat {
     Plain,
     Date,
+}
+
+/** Lets a screen move keyboard focus into a native auth field (e.g. on IME "Next"). */
+internal class NativeAuthFocusRequester {
+    internal var onRequestFocus: () -> Unit = {}
+
+    fun requestFocus() = onRequestFocus()
 }
 
 @Composable
@@ -54,6 +66,8 @@ internal fun NativeAuthTextField(
     trailing: (@Composable () -> Unit)? = null,
     keyboardType: KeyboardType = KeyboardType.Text,
     format: NativeAuthTextFieldFormat = NativeAuthTextFieldFormat.Plain,
+    focusRequester: NativeAuthFocusRequester? = null,
+    onImeNext: (() -> Unit)? = null,
     testTag: String? = null,
 ) {
     NativeAuthFieldLayout(
@@ -69,6 +83,8 @@ internal fun NativeAuthTextField(
             keyboardType = keyboardType,
             format = format,
             isPassword = false,
+            focusRequester = focusRequester,
+            onImeNext = onImeNext,
             testTag = testTag,
         )
     }
@@ -84,6 +100,8 @@ internal fun NativeAuthPasswordTextField(
     isError: Boolean = false,
     trailing: (@Composable () -> Unit)? = null,
     showVisibilityToggle: Boolean = true,
+    focusRequester: NativeAuthFocusRequester? = null,
+    onImeNext: (() -> Unit)? = null,
     testTag: String? = null,
 ) {
     NativeAuthFieldLayout(
@@ -100,6 +118,8 @@ internal fun NativeAuthPasswordTextField(
             format = NativeAuthTextFieldFormat.Plain,
             isPassword = true,
             showVisibilityToggle = showVisibilityToggle,
+            focusRequester = focusRequester,
+            onImeNext = onImeNext,
             testTag = testTag,
         )
     }
@@ -113,10 +133,14 @@ private fun NativeAuthInputSurface(
     format: NativeAuthTextFieldFormat,
     isPassword: Boolean,
     showVisibilityToggle: Boolean = false,
+    focusRequester: NativeAuthFocusRequester? = null,
+    onImeNext: (() -> Unit)? = null,
     testTag: String? = null,
 ) {
     var isFocused by remember { mutableStateOf(false) }
     var isPasswordVisible by remember { mutableStateOf(false) }
+    // Match native Dynamic Type / Android SP scaling without clipping the input line.
+    val fieldHeight = maxOf(52.dp, with(LocalDensity.current) { 20.sp.toDp() } + 32.dp)
 
     // The native interop view does not let BaseInputField's Compose-drawn background show through
     // on iOS (the field area renders white). Mirror BaseInputField's focus-driven surface color
@@ -134,7 +158,7 @@ private fun NativeAuthInputSurface(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .height(52.dp)
+                        .height(fieldHeight)
                         .padding(start = 16.dp, end = 16.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -147,32 +171,18 @@ private fun NativeAuthInputSurface(
                     format = format,
                     onFocusChange = { isFocused = it },
                     containerColor = containerColor,
+                    focusRequester = focusRequester,
+                    onImeNext = onImeNext,
                     testTag = testTag,
                     modifier =
                         Modifier
                             .weight(1f)
-                            .height(52.dp),
+                            .height(fieldHeight),
                 )
 
-                Icon(
-                    imageVector =
-                        vectorResource(
-                            if (isPasswordVisible) {
-                                Res.drawable.ic_eye_off
-                            } else {
-                                Res.drawable.ic_eye
-                            },
-                        ),
-                    contentDescription = null,
-                    tint = AccessDefaults.TextFaint,
-                    modifier =
-                        Modifier
-                            .size(18.dp)
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null,
-                                onClick = { isPasswordVisible = !isPasswordVisible },
-                            ),
+                NativeAuthPasswordVisibilityAction(
+                    isPasswordVisible = isPasswordVisible,
+                    onClick = { isPasswordVisible = !isPasswordVisible },
                 )
             }
         } else {
@@ -180,7 +190,7 @@ private fun NativeAuthInputSurface(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .height(52.dp)
+                        .height(fieldHeight)
                         .padding(horizontal = 16.dp),
                 contentAlignment = Alignment.CenterStart,
             ) {
@@ -192,12 +202,35 @@ private fun NativeAuthInputSurface(
                     format = format,
                     onFocusChange = { isFocused = it },
                     containerColor = containerColor,
+                    focusRequester = focusRequester,
+                    onImeNext = onImeNext,
                     testTag = testTag,
                     modifier = Modifier.fillMaxSize(),
                 )
             }
         }
     }
+}
+
+@Composable
+internal fun NativeAuthPasswordVisibilityAction(
+    isPasswordVisible: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Icon(
+        imageVector = vectorResource(if (isPasswordVisible) Res.drawable.ic_eye_off else Res.drawable.ic_eye),
+        contentDescription = stringResource(if (isPasswordVisible) Res.string.hide_password else Res.string.show_password),
+        tint = AccessDefaults.TextFaint,
+        modifier = modifier
+            .size(18.dp)
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                role = Role.Button,
+                onClick = onClick,
+            ),
+    )
 }
 
 @Composable
@@ -262,6 +295,9 @@ internal expect fun PlatformNativeAuthTextInput(
     onFocusChange: (Boolean) -> Unit,
     containerColor: Color,
     modifier: Modifier = Modifier,
+    focusRequester: NativeAuthFocusRequester? = null,
+    // null keeps the "Done" key; non-null shows "Next" and runs this instead of dismissing.
+    onImeNext: (() -> Unit)? = null,
     testTag: String? = null,
 )
 

@@ -26,12 +26,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import crew.core.designsystem.generated.resources.Res
+import crew.core.designsystem.generated.resources.hide_password
+import crew.core.designsystem.generated.resources.show_password
 import crew.core.designsystem.generated.resources.ic_eye
 import crew.core.designsystem.generated.resources.ic_eye_off
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 
 @Composable
@@ -127,7 +131,7 @@ private fun PasswordFieldSurface(
 
                         Icon(
                             imageVector = vectorResource(if (isPasswordVisible) Res.drawable.ic_eye_off else Res.drawable.ic_eye),
-                            contentDescription = null,
+                            contentDescription = stringResource(if (isPasswordVisible) Res.string.hide_password else Res.string.show_password),
                             tint = AccessDefaults.TextFaint,
                             modifier =
                                 Modifier
@@ -135,6 +139,8 @@ private fun PasswordFieldSurface(
                                     .clickable(
                                         interactionSource = remember { MutableInteractionSource() },
                                         indication = null,
+                                        role = Role.Button,
+                                        enabled = enabled,
                                         onClick = { isPasswordVisible = !isPasswordVisible },
                                     ),
                         )

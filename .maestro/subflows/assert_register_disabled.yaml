@@ -1,0 +1,9 @@
+# "Create my account" butonuna kaydırıp pasif olduğunu doğrular.
+# Not: Android'de klavye kapalıyken hideKeyboard "geri" basar; çağırmadan önce klavyeyi kapat.
+appId: com.kaanf.crew
+---
+- scrollUntilVisible:
+    element: "Create my account"
+- assertVisible:
+    containsChild: "Create my account"
+    enabled: false

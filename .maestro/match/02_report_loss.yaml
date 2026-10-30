@@ -1,0 +1,6 @@
+appId: com.kaanf.crew
+---
+- extendedWaitUntil:
+    visible: "I lost"
+    timeout: 20000
+- tapOn: "I lost"

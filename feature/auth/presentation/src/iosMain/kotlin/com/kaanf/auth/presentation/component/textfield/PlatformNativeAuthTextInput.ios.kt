@@ -25,6 +25,7 @@ import platform.UIKit.UIColor
 import platform.UIKit.UIControlEventEditingChanged
 import platform.UIKit.UIFont
 import platform.UIKit.UIFontWeightSemibold
+import platform.UIKit.UIFontMetrics
 import platform.UIKit.UIKeyboardTypeASCIICapable
 import platform.UIKit.UIKeyboardTypeDefault
 import platform.UIKit.UIKeyboardTypeEmailAddress
@@ -50,6 +51,8 @@ internal actual fun PlatformNativeAuthTextInput(
     onFocusChange: (Boolean) -> Unit,
     containerColor: Color,
     modifier: Modifier,
+    focusRequester: NativeAuthFocusRequester?,
+    onImeNext: (() -> Unit)?,
     testTag: String?,
 ) {
     UIKitView(
@@ -58,12 +61,12 @@ internal actual fun PlatformNativeAuthTextInput(
                 borderStyle = UITextBorderStyle.UITextBorderStyleNone
                 backgroundColor = containerColor.toUIColor()
                 opaque = false
-                font = UIFont.systemFontOfSize(14.0, UIFontWeightSemibold)
+                font = scaledAuthFont()
+                adjustsFontForContentSizeCategory = true
                 textColor = AccessDefaults.TextPrimary.toUIColor()
                 tintColor = AccessDefaults.Accent.toUIColor()
                 autocapitalizationType = UITextAutocapitalizationType.UITextAutocapitalizationTypeNone
                 autocorrectionType = UITextAutocorrectionType.UITextAutocorrectionTypeNo
-                returnKeyType = UIReturnKeyType.UIReturnKeyDone
                 delegate = fieldDelegate
             }
         },
@@ -77,10 +80,14 @@ internal actual fun PlatformNativeAuthTextInput(
             ),
         update = { textField ->
             val displayValue = displayNativeAuthText(format, state.text.toString())
-            val textFont = UIFont.systemFontOfSize(14.0, UIFontWeightSemibold)
+            val textFont = scaledAuthFont()
 
             textField.fieldDelegate.format = format
             textField.fieldDelegate.onFocusChange = onFocusChange
+            textField.fieldDelegate.onImeNext = onImeNext
+            focusRequester?.onRequestFocus = { textField.becomeFirstResponder() }
+            textField.returnKeyType =
+                if (onImeNext != null) UIReturnKeyType.UIReturnKeyNext else UIReturnKeyType.UIReturnKeyDone
             textField.fieldDelegate.onValueChange = { nextValue ->
                 if (state.text.toString() != nextValue) {
                     state.setTextAndPlaceCursorAtEnd(nextValue)
@@ -90,6 +97,7 @@ internal actual fun PlatformNativeAuthTextInput(
             textField.backgroundColor = containerColor.toUIColor()
             textField.opaque = false
             textField.font = textFont
+            textField.adjustsFontForContentSizeCategory = true
             // Match Android's hint color (TextFaint). UITextField's default placeholder is a
             // system gray, so we colour it explicitly via an attributed string.
             textField.attributedPlaceholder =
@@ -150,6 +158,7 @@ private class NativeAuthTextFieldDelegate : NSObject(), UITextFieldDelegateProto
     var format: NativeAuthTextFieldFormat = NativeAuthTextFieldFormat.Plain
     var onValueChange: (String) -> Unit = {}
     var onFocusChange: (Boolean) -> Unit = {}
+    var onImeNext: (() -> Unit)? = null
 
     @ObjCAction
     fun handleEditingChanged(sender: UITextField) {
@@ -175,7 +184,7 @@ private class NativeAuthTextFieldDelegate : NSObject(), UITextFieldDelegateProto
     }
 
     override fun textFieldShouldReturn(textField: UITextField): Boolean {
-        textField.resignFirstResponder()
+        onImeNext?.invoke() ?: textField.resignFirstResponder()
         return true
     }
 }
@@ -203,3 +212,6 @@ private fun Color.toUIColor(): UIColor =
         blue = blue.toDouble(),
         alpha = alpha.toDouble(),
     )
+
+private fun scaledAuthFont(): UIFont =
+    UIFontMetrics.defaultMetrics.scaledFontForFont(UIFont.systemFontOfSize(14.0, UIFontWeightSemibold))

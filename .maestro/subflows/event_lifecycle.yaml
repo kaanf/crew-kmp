@@ -1,0 +1,138 @@
+appId: com.kaanf.crew
+---
+- extendedWaitUntil:
+    visible: "Profile"
+    timeout: 20000
+- scrollUntilVisible:
+    element: ${EVENT_TITLE}
+- tapOn: ${EVENT_TITLE}
+- extendedWaitUntil:
+    visible: "Doors open at .*"
+    timeout: 15000
+- assertVisible: ${EVENT_TITLE}
+# Optional native sheet check: selectors must come from the target device hierarchy.
+- runFlow:
+    when:
+      true: ${CHECK_SHARE == 'true'}
+    commands:
+      - assertVisible:
+          text: "Share event"
+          enabled: true
+      - tapOn: "Share event"
+      - extendedWaitUntil:
+          visible: ${SHARE_SHEET_SELECTOR}
+          timeout: 15000
+      - runFlow:
+          when:
+            platform: Android
+          commands:
+            - back
+      - runFlow:
+          when:
+            platform: iOS
+          commands:
+            - tapOn: ${SHARE_DISMISS_SELECTOR}
+      - assertNotVisible: ${SHARE_SHEET_SELECTOR}
+      - assertVisible: "Share event"
+      - assertVisible: ${EVENT_TITLE}
+# Image controls currently have no accessibility labels. Coordinates are device fixtures.
+- runFlow:
+    when:
+      true: ${CHECK_IMAGES == 'true'}
+    commands:
+      - tapOn:
+          point: ${IMAGE_OPEN_POINT}
+      - assertNotVisible: "Share event"
+      - takeScreenshot: event-image-open
+      - swipe:
+          direction: LEFT
+      - takeScreenshot: event-image-next
+      - swipe:
+          direction: RIGHT
+      - tapOn:
+          point: ${IMAGE_CLOSE_POINT}
+      - assertVisible: "Share event"
+      - assertVisible: ${EVENT_TITLE}
+- runFlow:
+    when:
+      true: ${EVENT_STATE != 'ticket'}
+    commands:
+      - scrollUntilVisible:
+          element: "Join the event to see who’s going."
+      - tapOn: "Guest list"
+      - assertNotVisible: "Close guest list"
+      - assertVisible: "Join the event to see who’s going."
+- runFlow:
+    when:
+      true: ${EVENT_STATE == 'ticket'}
+    file: event_guest_list.yaml
+- runFlow:
+    when:
+      true: ${EVENT_STATE == 'locked'}
+    commands:
+      - assertVisible:
+          containsChild: ".*Registration opens soon"
+          enabled: false
+- runFlow:
+    when:
+      true: ${EVENT_STATE == 'ended'}
+    commands:
+      - assertVisible:
+          containsChild: "Event has ended"
+          enabled: false
+- runFlow:
+    when:
+      true: ${EVENT_STATE == 'free'}
+    commands:
+      - scrollUntilVisible:
+          element: "Join the event to see who’s going."
+      - tapOn: ".*Join event"
+      - extendedWaitUntil:
+          visible: "Your door code"
+          timeout: 20000
+- runFlow:
+    when:
+      true: ${EVENT_STATE == 'paid'}
+    commands:
+      - assertVisible:
+          containsChild: "Get my ticket.*"
+          enabled: true
+- runFlow:
+    when:
+      true: ${EVENT_STATE == 'ticket'}
+    commands:
+      - tapOn: ".*Go to ticket detail"
+      - extendedWaitUntil:
+          visible: "Your door code"
+          timeout: 20000
+- runFlow:
+    when:
+      true: ${EVENT_STATE == 'free' || EVENT_STATE == 'ticket'}
+    commands:
+      - assertVisible: ${EVENT_TITLE}
+      - scrollUntilVisible:
+          element: "Enter event with code"
+      - tapOn: "Enter event with code"
+      - assertVisible: "Type the door code."
+      - assertVisible:
+          containsChild: "CLEAR"
+          enabled: false
+      - tapOn: "Back to my ticket"
+      - assertVisible: "Your door code"
+# Return to detail after ticket checks, then leave the shared flow on dashboard.
+- runFlow:
+    when:
+      true: ${EVENT_STATE == 'free' || EVENT_STATE == 'ticket'}
+    commands:
+      - tapOn: "Go back"
+      - extendedWaitUntil:
+          visible: "Share event"
+          timeout: 15000
+- runFlow:
+    when:
+      true: ${EVENT_STATE == 'free'}
+    file: event_guest_list.yaml
+- tapOn: "Go back"
+- extendedWaitUntil:
+    visible: "Profile"
+    timeout: 15000

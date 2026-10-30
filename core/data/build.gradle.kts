@@ -35,5 +35,11 @@ kotlin {
                 implementation(libs.ktor.client.darwin)
             }
         }
+
+        // Security.framework requires a signed iOS app host; the standalone K/N runner
+        // has no Keychain entitlement. Keep the native roundtrip suite explicit.
+        if (providers.gradleProperty("crewKeychainIntegration").orNull == "true") {
+            getByName("iosTest").kotlin.srcDir("src/iosIntegrationTest/kotlin")
+        }
     }
 }

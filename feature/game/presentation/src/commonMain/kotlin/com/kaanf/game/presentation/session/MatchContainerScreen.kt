@@ -45,6 +45,7 @@ import com.kaanf.game.presentation.leaderboard.LeaderboardTab
 import com.kaanf.game.presentation.memories.MemoriesStackRoot
 import com.kaanf.game.presentation.memories.MemoriesViewModel
 import com.kaanf.game.presentation.session.component.GameBottomBar
+import com.kaanf.game.presentation.session.component.GameBottomBarReservedHeight
 import com.kaanf.game.presentation.session.component.GameBottomTab
 import com.kaanf.game.presentation.session.component.LeaveMatchSheet
 import com.kaanf.game.presentation.session.phase.LoserActiveTaskPhase
@@ -386,11 +387,11 @@ fun MatchContainerScreen(
                             )
                         }
 
-                        // Alt tab bar içeriğin üstüne biniyor (leaderboard'daki 84dp ile aynı pay).
+                        // Alt tab bar içeriğin üstüne biniyor.
                         ContainerScreen.Memories -> memoriesContent(
                             Modifier
                                 .fillMaxSize()
-                                .padding(bottom = 84.dp),
+                                .padding(bottom = GameBottomBarReservedHeight),
                         )
 
                         ContainerScreen.Leaderboard -> leaderboardContent(Modifier.fillMaxSize())

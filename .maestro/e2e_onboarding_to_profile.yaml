@@ -1,0 +1,28 @@
+# Uçtan uca: onboarding → kayıt (hatalı girişlerle) → giriş (hatalı girişlerle) →
+# profil fotoğrafı (yükle / sil / tekrar yükle) → profil → hesabı sil.
+# Event kontrollerini de çalıştırır; her koşuda yeni hesap açar ve sonunda siler.
+# Çalıştır: maestro test .maestro/e2e_onboarding_to_profile.yaml
+appId: com.kaanf.crew
+name: E2E - Onboarding, profile and events
+env:
+  PASSWORD: Maestro123
+  FULL_NAME: Maestro Tester
+  EVENT_STATE: free
+  GUEST_COUNT: "1"
+  FIRST_GUEST_NAME: Maestro Tester
+  LAST_GUEST_NAME: Maestro Tester
+  CHECK_SHARE: "false"
+  CHECK_IMAGES: "false"
+---
+- runFlow: subflows/account_setup.yaml
+# --- Profil → Dashboard → Event → Dashboard → Profil ---
+- tapOn: "Go back"
+- runFlow: subflows/event_lifecycle.yaml
+- tapOn: "Profile"
+- assertVisible: ${output.email}
+
+# --- Temizlik: UI üzerinden sil ve yeniden açılışta oturumu doğrula ---
+- runFlow:
+    file: subflows/delete_account.yaml
+    env:
+      DELETE_ACCOUNT_EMAIL: ${output.email}

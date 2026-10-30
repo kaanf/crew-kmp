@@ -1,0 +1,21 @@
+# Successful match leaves the application on its idle QR screen.
+appId: com.kaanf.crew
+---
+- assertVisible: "Your Match QR"
+- tapOn: "Close"
+- assertVisible: "Leave event"
+- tapOn: "Leave event"
+# Navigation can retain ticket and event detail beneath the game graph.
+- repeat:
+    times: 3
+    commands:
+      - runFlow:
+          when:
+            notVisible: "Profile"
+          commands:
+            - tapOn: "Go back"
+- extendedWaitUntil:
+    visible: "Profile"
+    timeout: 15000
+- tapOn: "Profile"
+- runFlow: ../subflows/delete_account.yaml

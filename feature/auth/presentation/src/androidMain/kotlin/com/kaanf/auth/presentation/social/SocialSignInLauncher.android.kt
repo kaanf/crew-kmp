@@ -13,13 +13,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.GetCredentialCancellationException
-import androidx.credentials.exceptions.GetCredentialException
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.kaanf.auth.domain.model.SocialProvider
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.json.JSONObject
@@ -56,16 +56,17 @@ actual fun rememberSocialSignInLauncher(
         SocialSignInLauncher { provider ->
             when (provider) {
                 SocialProvider.Google -> scope.launch { currentOnResult(signInWithGoogle(context)) }
-                SocialProvider.Apple -> launchAppleWebFlow(context) { currentOnResult(it) }
+                SocialProvider.Apple -> runCatching {
+                    launchAppleWebFlow(context) { currentOnResult(it) }
+                }.onFailure { currentOnResult(SocialSignInResult.Failed) }
             }
         }
     }
 }
 
 private suspend fun signInWithGoogle(context: Context): SocialSignInResult {
-    val nonce = randomNonce()
-
     return try {
+        val nonce = randomNonce()
         val option =
             GetGoogleIdOption.Builder()
                 .setServerClientId(SocialAuthConfig.GOOGLE_SERVER_CLIENT_ID)
@@ -87,9 +88,11 @@ private suspend fun signInWithGoogle(context: Context): SocialSignInResult {
             nonce = nonce,
             fullName = credential.displayName,
         )
+    } catch (e: CancellationException) {
+        throw e
     } catch (e: GetCredentialCancellationException) {
         SocialSignInResult.Cancelled
-    } catch (e: GetCredentialException) {
+    } catch (e: Exception) {
         SocialSignInResult.Failed
     }
 }

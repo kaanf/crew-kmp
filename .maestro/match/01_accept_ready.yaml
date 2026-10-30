@@ -1,0 +1,10 @@
+appId: com.kaanf.crew
+---
+- extendedWaitUntil:
+    visible: "Accept - start match"
+    timeout: 45000
+- tapOn: "Accept - start match"
+- extendedWaitUntil:
+    visible: "I'm ready"
+    timeout: 20000
+- tapOn: "I'm ready"

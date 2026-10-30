@@ -1,0 +1,9 @@
+# Authenticated English session; deterministic event fixture required (see README).
+appId: com.kaanf.crew
+name: Event lifecycle
+env:
+  CHECK_SHARE: "false"
+  CHECK_IMAGES: "false"
+---
+- launchApp
+- runFlow: subflows/event_lifecycle.yaml

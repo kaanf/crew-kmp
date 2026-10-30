@@ -7,6 +7,8 @@ import androidx.datastore.preferences.core.Preferences
 import com.kaanf.core.data.BuildEnvironment
 import com.kaanf.core.data.device.IosDeviceIdProvider
 import com.kaanf.core.data.networking.ConnectivityObserver
+import com.kaanf.core.data.session.SecureSessionStore
+import com.kaanf.core.data.session.IosSecureSessionStore
 import com.kaanf.core.data.storage.createDataStore
 import com.kaanf.core.data.update.AppStoreUpdateChecker
 import com.kaanf.core.domain.provider.DeviceIdProvider
@@ -22,6 +24,7 @@ actual val platformCoreDataModule =
         single { BuildEnvironment(isDebug = Platform.isDebugBinary) }
         single<DeviceIdProvider> { IosDeviceIdProvider() }
         single { ConnectivityObserver() }
+        single<SecureSessionStore> { IosSecureSessionStore() }
         single<HttpClientEngine> { Darwin.create() }
         single<DataStore<Preferences>> { createDataStore() }
         single<AppUpdateChecker> { AppStoreUpdateChecker(get()) }

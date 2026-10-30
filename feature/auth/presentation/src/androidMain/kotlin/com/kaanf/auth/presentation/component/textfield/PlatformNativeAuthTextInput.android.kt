@@ -11,6 +11,7 @@ import android.text.method.PasswordTransformationMethod
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
@@ -33,6 +34,8 @@ internal actual fun PlatformNativeAuthTextInput(
     onFocusChange: (Boolean) -> Unit,
     containerColor: ComposeColor,
     modifier: Modifier,
+    focusRequester: NativeAuthFocusRequester?,
+    onImeNext: (() -> Unit)?,
     testTag: String?,
 ) {
     AndroidView(
@@ -95,6 +98,20 @@ internal actual fun PlatformNativeAuthTextInput(
             if (view.transformationMethod != nextTransformation) {
                 view.transformationMethod = nextTransformation
             }
+
+            val nextImeOptions = if (onImeNext != null) EditorInfo.IME_ACTION_NEXT else EditorInfo.IME_ACTION_DONE
+            if (view.imeOptions != nextImeOptions) {
+                view.imeOptions = nextImeOptions
+            }
+            view.setOnEditorActionListener { _, actionId, _ ->
+                if (actionId == EditorInfo.IME_ACTION_NEXT && onImeNext != null) {
+                    onImeNext()
+                    true
+                } else {
+                    false
+                }
+            }
+            focusRequester?.onRequestFocus = { view.requestFocus() }
 
             view.onFocusChangeListener =
                 View.OnFocusChangeListener { _, hasFocus ->

@@ -2,7 +2,8 @@ package com.kaanf.game.presentation.session.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -17,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -56,7 +58,8 @@ fun GameBottomBar(
             // yerine yüksek alfa'lı düz zemin.
             .background(color = BarBackground, shape = barShape)
             .border(width = 1.dp, color = BarBorder, shape = barShape)
-            .padding(6.dp),
+            .padding(6.dp)
+            .selectableGroup(),
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -69,6 +72,7 @@ fun GameBottomBar(
         )
         PlayItem(
             label = stringResource(Res.string.game_tab_play),
+            isActive = activeTab == GameBottomTab.Play,
             isLocked = isGameEnded,
             onClick = { onTabClick(GameBottomTab.Play) },
         )
@@ -104,7 +108,7 @@ private fun TabItem(
                     Modifier
                 },
             )
-            .clickable(enabled = !isLocked, onClick = onClick)
+            .selectable(selected = isActive, enabled = !isLocked, role = Role.Tab, onClick = onClick)
             .padding(vertical = 12.dp, horizontal = 14.dp),
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -130,6 +134,7 @@ private fun TabItem(
 @Composable
 private fun PlayItem(
     label: String,
+    isActive: Boolean,
     onClick: () -> Unit,
     isLocked: Boolean = false,
 ) {
@@ -138,7 +143,7 @@ private fun PlayItem(
         modifier = Modifier
             .clip(RoundedCornerShape(20.dp))
             .background(if (isLocked) AccessDefaults.SurfaceElevated else AccessDefaults.Accent)
-            .clickable(enabled = !isLocked, onClick = onClick)
+            .selectable(selected = isActive, enabled = !isLocked, role = Role.Tab, onClick = onClick)
             .padding(vertical = 12.dp, horizontal = 18.dp),
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -160,6 +165,9 @@ private fun PlayItem(
         )
     }
 }
+
+/** Bar içeriğin üstünde yüzdüğü için altındaki ekranların bırakması gereken boşluk. */
+val GameBottomBarReservedHeight = 84.dp
 
 private val BarBackground = Color(0xF014100C)
 private val BarBorder = Color(0x0FFFFFFF)

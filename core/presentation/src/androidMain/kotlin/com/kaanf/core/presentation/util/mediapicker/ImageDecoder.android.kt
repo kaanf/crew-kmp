@@ -19,7 +19,7 @@ actual suspend fun decodeImageForCrop(
     if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return@withContext null
 
     val decodeOptions = BitmapFactory.Options().apply {
-        inSampleSize = calculateInSampleSize(bounds.outWidth, bounds.outHeight, maxDimension)
+        inSampleSize = calculateDecodeSampleSize(bounds.outWidth, bounds.outHeight, maxDimension)
     }
     val decoded = BitmapFactory.decodeByteArray(bytes, 0, bytes.size, decodeOptions)
         ?: return@withContext null
@@ -31,18 +31,6 @@ actual suspend fun decodeImageForCrop(
     scaled.setHasMipMap(true)
 
     scaled.asImageBitmap()
-}
-
-private fun calculateInSampleSize(width: Int, height: Int, maxSize: Int): Int {
-    var inSampleSize = 1
-    var w = width
-    var h = height
-    while (w / 2 >= maxSize && h / 2 >= maxSize) {
-        w /= 2
-        h /= 2
-        inSampleSize *= 2
-    }
-    return inSampleSize
 }
 
 private fun scaleToMaxSize(bitmap: Bitmap, maxSize: Int): Bitmap {

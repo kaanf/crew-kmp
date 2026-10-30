@@ -55,25 +55,29 @@ class HistoryViewModel(
         if (isLoadingPage) return
         isLoadingPage = true
         viewModelScope.launch {
-            matchRepository.getMatchHistory(eventId, page = page, size = PAGE_SIZE)
-                .onSuccess { entries ->
-                    nextPage = page + 1
-                    _state.update { current ->
-                        // Sayfalar arası kayma bir kaydı iki sayfada gösterebilir; matchId'ye göre tekilleştir.
-                        // İlk sayfa listeyi baştan kurar: yeni biten maçlar en üste gelir.
-                        val base = if (page == 0) emptyList() else current.entries
-                        current.copy(
-                            isLoading = false,
-                            entries = (base + entries).distinctBy { it.matchId },
-                            endReached = entries.size < PAGE_SIZE,
-                        )
+            try {
+                matchRepository.getMatchHistory(eventId, page = page, size = PAGE_SIZE)
+                    .onSuccess { entries ->
+                        nextPage = page + 1
+                        _state.update { current ->
+                            // Sayfalar arası kayma bir kaydı iki sayfada gösterebilir; matchId'ye göre tekilleştir.
+                            // İlk sayfa listeyi baştan kurar: yeni biten maçlar en üste gelir.
+                            val base = if (page == 0) emptyList() else current.entries
+                            current.copy(
+                                isLoading = false,
+                                entries = (base + entries).distinctBy { it.matchId },
+                                endReached = entries.size < PAGE_SIZE,
+                            )
+                        }
                     }
-                }
-                .onFailure { error ->
-                    _state.update { it.copy(isLoading = false) }
-                    snackbarController.show(error.toSnackbarMessage())
-                }
-            isLoadingPage = false
+                    .onFailure { error ->
+                        _state.update { it.copy(isLoading = false) }
+                        snackbarController.show(error.toSnackbarMessage())
+                    }
+            } finally {
+                isLoadingPage = false
+                _state.update { it.copy(isLoading = false) }
+            }
         }
     }
 }

@@ -10,7 +10,6 @@ import com.kaanf.core.domain.util.onFailure
 import com.kaanf.core.domain.util.onSuccess
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.auth.AuthCircuitBreaker
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -20,9 +19,9 @@ class SessionRefresher(
     private val mutex = Mutex()
 
     suspend fun refresh(client: HttpClient): AuthInfo? = mutex.withLock {
-        val refreshToken = sessionStorage.observeAuthInfo().firstOrNull()?.refreshToken
+        val snapshot = sessionStorage.snapshot()
+        val refreshToken = snapshot.authInfo?.refreshToken
         if (refreshToken.isNullOrBlank()) {
-            sessionStorage.set(null)
             return@withLock null
         }
 
@@ -33,11 +32,12 @@ class SessionRefresher(
             builder = { attributes.put(AuthCircuitBreaker, Unit) },
         ).onSuccess { newAuthInfo ->
             val domain = newAuthInfo.toDomain()
-            sessionStorage.set(domain)
-            refreshed = domain
+            if (sessionStorage.compareAndSet(snapshot, domain)) {
+                refreshed = domain
+            }
         }.onFailure { error ->
             if (error == DataError.Remote.UNAUTHORIZED || error == DataError.Remote.FORBIDDEN) {
-                sessionStorage.set(null)
+                sessionStorage.compareAndSet(snapshot, null)
             }
         }
 

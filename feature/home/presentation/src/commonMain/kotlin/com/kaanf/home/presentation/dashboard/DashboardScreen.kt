@@ -32,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -45,6 +46,7 @@ import com.kaanf.core.designsystem.component.layout.FullScreenLoader
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.presentation.model.AppTopBarState
 import com.kaanf.core.presentation.permission.Permission
+import com.kaanf.core.presentation.permission.PermissionState
 import com.kaanf.core.presentation.permission.rememberPermissionController
 import com.kaanf.core.presentation.util.ObserveAsEvents
 import com.kaanf.core.presentation.util.ReportFullyDrawnWhen
@@ -54,6 +56,8 @@ import com.kaanf.home.presentation.dashboard.component.carousel.DashboardEventCa
 import com.kaanf.home.presentation.dashboard.component.emptystate.DashboardEmptyState
 import com.kaanf.home.presentation.dashboard.component.eventcard.DashboardEventCard
 import com.kaanf.home.presentation.dashboard.component.eventinfo.DashboardEventInfoRow
+import com.kaanf.home.presentation.dashboard.component.notification.NotificationPermissionSheet
+import com.kaanf.home.presentation.dashboard.component.notification.NotificationSheetStep
 import com.kaanf.home.presentation.model.EventDashboardUiModel
 import crew.feature.home.presentation.generated.resources.Res
 import crew.feature.home.presentation.generated.resources.dashboard_featured_event_section_description
@@ -68,6 +72,7 @@ import crew.feature.home.presentation.generated.resources.dashboard_your_events_
 import crew.feature.home.presentation.generated.resources.dashboard_upcoming_events_count
 import crew.feature.home.presentation.generated.resources.dashboard_upcoming_events_title
 import org.jetbrains.compose.resources.stringResource
+import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -95,8 +100,8 @@ fun DashboardRoot(
     // hata durumunda da true olmazsa metrik hiç raporlanmaz.
     ReportFullyDrawnWhen { !state.isLoading }
 
-    RequestNotificationPermissionEffect(
-        isReady = !state.isLoading && state.profilePictureUrl != null,
+    NotificationPermissionPrompt(
+        isReady = !state.isLoading,
     )
 
     val listState = rememberLazyListState()
@@ -122,22 +127,46 @@ fun DashboardRoot(
 }
 
 /**
- * Bildirim iznini açılışta değil, kullanıcı login olup profil fotoğrafını da yükledikten sonra
- * dashboard'da ister. Sistem dialogu sınırlı sayıda gösterilebiliyor (Android'de iki red sonrası
- * bir daha hiç, iOS'ta tek hak), o yüzden kullanıcı uygulamanın ne olduğunu anlamadan harcanmıyor.
+ * Bildirim iznini açılışta değil, dashboard yüklendikten sonra ister. Sistem dialogu sınırlı
+ * sayıda gösterilebiliyor (Android'de iki red sonrası bir daha hiç, iOS'ta tek hak), o yüzden
+ * önce açıklama sheet'i gösterilir; sistem dialogu ancak
+ * kullanıcı "Turn on" derse harcanır.
  *
- * ponytail: kalıcı "soruldu" bayrağı yok — izin verilmiş/reddedilmişse requestPermission zaten
- * dialog göstermeden dönüyor, tek maliyet bir suspend çağrısı.
+ * ponytail: kalıcı "soruldu" bayrağı yok — izin hâlâ sorulabilir durumdaysa her soğuk açılışta
+ * sheet tekrar çıkar. Can sıkarsa "Not now" için DataStore'da bir bayrak tutulur.
  */
 @Composable
-private fun RequestNotificationPermissionEffect(isReady: Boolean) {
+private fun NotificationPermissionPrompt(isReady: Boolean) {
     val permissionController = rememberPermissionController()
-    var requested by rememberSaveable { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    var checked by rememberSaveable { mutableStateOf(false) }
+    var step by rememberSaveable { mutableStateOf<NotificationSheetStep?>(null) }
 
     LaunchedEffect(isReady) {
-        if (requested || !isReady) return@LaunchedEffect
-        requested = true
-        permissionController.requestPermission(Permission.REMOTE_NOTIFICATION)
+        if (checked || !isReady) return@LaunchedEffect
+        checked = true
+        val permissionState = permissionController.checkPermission(Permission.REMOTE_NOTIFICATION)
+        if (permissionState == PermissionState.NOT_DETERMINED || permissionState == PermissionState.DENIED) {
+            step = NotificationSheetStep.Ask
+        }
+    }
+
+    step?.let { currentStep ->
+        NotificationPermissionSheet(
+            step = currentStep,
+            onEnableClick = {
+                scope.launch {
+                    val result = permissionController.requestPermission(Permission.REMOTE_NOTIFICATION)
+                    step = if (result == PermissionState.GRANTED) {
+                        NotificationSheetStep.Enabled
+                    } else {
+                        NotificationSheetStep.Skipped
+                    }
+                }
+            },
+            onSkipClick = { step = NotificationSheetStep.Skipped },
+            onDismiss = { step = null },
+        )
     }
 }
 

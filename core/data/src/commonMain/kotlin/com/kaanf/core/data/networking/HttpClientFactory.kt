@@ -7,6 +7,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.auth.Auth
+import io.ktor.client.plugins.auth.AuthCircuitBreaker
 import io.ktor.client.plugins.auth.providers.BearerTokens
 import io.ktor.client.plugins.auth.providers.bearer
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -17,7 +18,9 @@ import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.client.statement.request
 import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
+import io.ktor.http.encodedPath
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.serialization.json.Json
@@ -50,15 +53,18 @@ class HttpClientFactory(
                             crewLogger.debug(message)
                         }
                     }
-                // LogLevel.ALL her yanıt gövdesini String'e çevirip biriktiriyor (CPU + GC)
-                // ve bearer token'ları logcat'e yazıyor: yalnız debug binary'de açık.
-                level = if (buildEnvironment.isDebug) LogLevel.ALL else LogLevel.NONE
-                // İkili gövdeleri (örn. signed URL'e giden profil fotoğrafı upload'ı) metne
-                // çevirmek, logger'ın StringBuilder'ını megabaytlarca şişirip OOM'a yol açıyor.
-                // Yalnızca JSON ve gövdesiz istekleri logla; binary içerikleri loglama dışı tut.
+                // Never log bodies (passwords, tokens, user data) even in debug builds.
+                level = if (buildEnvironment.isDebug) LogLevel.INFO else LogLevel.NONE
+                sanitizeHeader {
+                    it.equals(HttpHeaders.Authorization, ignoreCase = true) ||
+                        it.equals(HttpHeaders.Cookie, ignoreCase = true) ||
+                        it.equals(HttpHeaders.SetCookie, ignoreCase = true)
+                }
                 filter { request ->
-                    val contentType = request.contentType()
-                    contentType == null || contentType.match(ContentType.Application.Json)
+                    // INFO includes the URL: omit auth and signed/query-bearing URLs entirely.
+                    !request.url.encodedPath.startsWith("/auth/") &&
+                        !request.url.encodedPath.contains("/auth/") &&
+                        request.url.parameters.isEmpty()
                 }
             }
             // Keepalive otoritesi backend'de (server PING/PONG + pong-timeout). Client kendi
@@ -72,6 +78,9 @@ class HttpClientFactory(
             }
             install(Auth) {
                 bearer {
+                    // These requests supply their own credentials and disable automatic retries.
+                    // Ktor 3.3.3 otherwise removes their Authorization header before sending.
+                    sendWithoutRequest { request -> !request.attributes.contains(AuthCircuitBreaker) }
                     loadTokens {
                         sessionStorage
                             .observeAuthInfo()

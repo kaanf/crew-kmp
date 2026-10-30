@@ -225,6 +225,8 @@ inline fun <T, R> Result<T, DataError.Remote>.mapCatching(transform: (T) -> R): 
         is Result.Failure -> this
         is Result.Success -> try {
             Result.Success(transform(data))
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
         } catch (e: Exception) {
             Result.Failure(DataError.Remote.SERIALIZATION)
         }

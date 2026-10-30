@@ -1,0 +1,6 @@
+appId: com.kaanf.crew
+---
+- extendedWaitUntil:
+    visible: "They will confirm when you complete the task."
+    timeout: 20000
+- takeScreenshot: match-task-active

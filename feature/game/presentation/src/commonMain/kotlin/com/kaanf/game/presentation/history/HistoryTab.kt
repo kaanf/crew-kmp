@@ -34,6 +34,7 @@ import com.kaanf.core.designsystem.modifier.surfaceCard
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessIcons
 import com.kaanf.game.domain.model.MatchHistoryEntry
+import com.kaanf.game.presentation.session.component.GameBottomBarReservedHeight
 import crew.feature.game.presentation.generated.resources.Res
 import crew.feature.game.presentation.generated.resources.history_empty_description
 import crew.feature.game.presentation.generated.resources.history_empty_title
@@ -69,7 +70,7 @@ fun HistoryTab(modifier: Modifier = Modifier) {
                 .fillMaxSize()
                 .padding(horizontal = 20.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
-            contentPadding = PaddingValues(bottom = 84.dp),
+            contentPadding = PaddingValues(bottom = GameBottomBarReservedHeight),
         ) {
             item(key = "log_header", contentType = "header") {
                 Text(
