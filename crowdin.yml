@@ -1,0 +1,23 @@
+# Source language: English (en), configured in the Crowdin project.
+# GitHub integration: sync only main; use l10n_crowdin as the service branch.
+preserve_hierarchy: true
+
+files:
+  - source: /core/designsystem/src/commonMain/composeResources/values/strings.xml
+    translation: /core/designsystem/src/commonMain/composeResources/values-%android_code%/strings.xml
+    type: android
+  - source: /core/presentation/src/commonMain/composeResources/values/strings.xml
+    translation: /core/presentation/src/commonMain/composeResources/values-%android_code%/strings.xml
+    type: android
+  - source: /feature/auth/presentation/src/commonMain/composeResources/values/strings.xml
+    translation: /feature/auth/presentation/src/commonMain/composeResources/values-%android_code%/strings.xml
+    type: android
+  - source: /feature/game/presentation/src/commonMain/composeResources/values/strings.xml
+    translation: /feature/game/presentation/src/commonMain/composeResources/values-%android_code%/strings.xml
+    type: android
+  - source: /feature/home/presentation/src/commonMain/composeResources/values/strings.xml
+    translation: /feature/home/presentation/src/commonMain/composeResources/values-%android_code%/strings.xml
+    type: android
+  - source: /androidApp/src/main/res/values/strings.xml
+    translation: /androidApp/src/main/res/values-%android_code%/strings.xml
+    type: android
