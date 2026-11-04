@@ -74,3 +74,63 @@ framework link; complete unsigned Debug iOS simulator Xcode build; 33 core:data 
 simulator tests (including request IDs, cross-host redirects and callback isolation);
 4 focused backend tests (MDC cleanup, input validation, redaction and capture policy).
 Physical-device crashes, live Sentry ingestion and release symbolication were not tested.
+
+## Controlled local verification
+
+The full app keeps its normal API address. A separate, unauthenticated verification
+client uses only a local HTTP origin (localhost, 127.0.0.1, or Android emulator host
+10.0.2.2); redirects are disabled. This avoids sending account tokens to a test server.
+The debug binary flag is checked before creating the client. Its request still runs
+through the same request-ID and native Sentry callbacks as normal API traffic.
+
+In the sibling crew-api checkout run `./gradlew sentryVerificationServer`. This task
+loads only SENTRY_DSN from its ignored .env (or the process environment), uses the
+development Sentry environment, and starts an isolated Spring MVC server on
+127.0.0.1:18096. It imports the real exception handler, request-ID filter and Sentry
+reporter, but no database, Redis, auth/session or other application services.
+The synthetic controller is in test sources outside the app component scan and is
+excluded from production bootJar. Even in test sources it requires the explicit
+sentry-verification profile and rejects the prod profile.
+
+Android emulator:
+
+1. Build `./gradlew :androidApp:assembleDebug`, then install the debug APK on the test
+   emulator with `adb -s emulator-5554 install -r androidApp/build/outputs/apk/debug/androidApp-debug.apk`.
+2. Open `adb -s emulator-5554 shell am start -n com.kaanf.crew/.androidapp.SentryVerificationActivity`.
+3. Tap **Send Sentry verification** once. The screen displays the returned request_id.
+   Search that value in both Sentry projects with environment=development.
+4. For USB Android testing use `adb -s <device> reverse tcp:18096 tcp:18096` and launch
+   the activity with `--es base_url http://127.0.0.1:18096` instead.
+   Add `-S --ez send_verification true` to explicitly send one request at launch without
+   touching the screen. Ordinary launches and restored activities never auto-send.
+   The debug log tag CrewSentryVerification prints only the synthetic request ID.
+
+The Android activity and loopback-only cleartext network config exist only in debug
+sources. The button requires an enabled Sentry SDK. SDK delivery diagnostics are enabled
+only while sending/flushing this synthetic request and the previous setting is restored.
+
+For an installed Debug iOS simulator app use
+`xcrun simctl openurl booted crew://debug/sentry`. The simulator uses 127.0.0.1:18096;
+its console prints the request_id. Debug Info.plist preprocessing enables only loopback
+HTTP; Release strips the exception and the debug URL action returns false. This iOS
+entry is intended for the simulator, not a physical iPhone connecting over Wi-Fi.
+See Apple's [local networking documentation](https://developer.apple.com/documentation/bundleresources/information-property-list/nsapptransportsecurity/nsallowslocalnetworking).
+
+A received HTTP 500 and matching IDs prove correlation, not remote dashboard ingestion.
+Check SDK transport success and the Sentry dashboard separately. Stop the local server
+with Ctrl-C when finished. This test does not intentionally crash either native app.
+
+### Verification evidence (2026-11-04)
+
+Passed Android debug APK build, full Debug iOS simulator Xcode build, 35 core:data
+simulator tests, six focused backend tests, production bootJar exclusion of verification
+classes, and Debug/Release Info.plist preprocessing checks. The built Debug plist contains
+the loopback exception; the Release preprocessed plist does not.
+
+Physical check: Galaxy S24+ (SM-S926B), Android 16. Installed debug update without clearing
+app data, used adb reverse to loopback, and invoked the explicit test action. The device
+received HTTP 500; mobile and backend recorded the same request_id; both Sentry SDK
+transports logged “Envelope sent successfully.” The Sentry dashboard UI was not accessed.
+The debug activity was checked on-device and respects system-bar insets. The temporary
+server and ADB port mapping were removed after testing. No native crash was induced;
+iOS runtime/physical-device delivery and release symbolication remain unverified.

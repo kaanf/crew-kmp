@@ -13,19 +13,26 @@ object HttpDiagnostics {
 
 internal const val REQUEST_ID_HEADER = "X-Request-ID"
 private val requestIdPattern = Regex("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}")
-private val apiHost = io.ktor.http.Url(UrlConstants.BASE_URL_HTTP).host
+internal class RequestDiagnosticsConfig {
+    var apiBaseUrl: String = UrlConstants.BASE_URL_HTTP
+}
 
 @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-internal val RequestDiagnostics = createClientPlugin("CrewRequestDiagnostics") {
+internal val RequestDiagnostics = createClientPlugin("CrewRequestDiagnostics", ::RequestDiagnosticsConfig) {
+    val apiUrl = io.ktor.http.Url(pluginConfig.apiBaseUrl)
+    require(apiUrl.protocol.name == "https" ||
+        (apiUrl.protocol.name == "http" && apiUrl.host in setOf("localhost", "127.0.0.1", "10.0.2.2")))
+    fun isApi(url: io.ktor.http.Url) = url.host == apiUrl.host && url.port == apiUrl.port &&
+        url.protocol == apiUrl.protocol && url.encodedPath.startsWith("${apiUrl.encodedPath.trimEnd('/')}/")
     on(SendingRequest) { request, _ ->
         request.headers.remove(REQUEST_ID_HEADER)
-        if (request.url.host == apiHost && request.url.protocol.name == "https") {
+        if (isApi(request.url.build())) {
             request.headers.append(REQUEST_ID_HEADER, Uuid.random().toString())
         }
     }
     onResponse { response ->
         val request = response.request
-        if (request.url.host == apiHost && request.url.protocol.name == "https") {
+        if (isApi(request.url)) {
             val id = response.headers[REQUEST_ID_HEADER]?.takeIf { requestIdPattern.matches(it) }
                 ?: request.headers[REQUEST_ID_HEADER]
             if (id != null) {

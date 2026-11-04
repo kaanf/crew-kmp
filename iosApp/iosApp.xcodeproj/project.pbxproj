@@ -185,6 +185,7 @@
 			baseConfigurationReferenceAnchor = 72CE8FB73DC578462E306B07 /* Configuration */;
 			baseConfigurationReferenceRelativePath = Config.xcconfig;
 			buildSettings = {
+                INFOPLIST_PREPROCESSOR_DEFINITIONS = "CREW_DEBUG=1";
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;

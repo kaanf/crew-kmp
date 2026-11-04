@@ -55,3 +55,24 @@ func initializeSentry() {
         }
     }
 }
+
+/// Debug URL: crew://debug/sentry. Always uses the simulator's loopback server.
+func handleSentryVerification(_ url: URL) -> Bool {
+    #if DEBUG
+    guard url.scheme == "crew", url.host == "debug", url.path == "/sentry" else { return false }
+    guard SentrySDK.isEnabled else {
+        print("Sentry verification disabled: configure the mobile DSN first")
+        return true
+    }
+    HttpDiagnosticsBridgeKt.verifyLocalSentry(baseUrl: "http://127.0.0.1:18096") { requestId, error in
+        if let requestId {
+            print("Sentry verification HTTP 500; request_id=\(requestId)")
+        } else {
+            print("Sentry verification failed; check the local server")
+        }
+    }
+    return true
+    #else
+    return false
+    #endif
+}

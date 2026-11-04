@@ -9,3 +9,6 @@ MARKETING_VERSION=1.2
 // Optional local Sentry configuration; never commit machine-specific values.
 CREW_SENTRY_MOBILE_DSN =
 #include? "Sentry.local.xcconfig"
+
+// Strip debug-only local-network exceptions from release Info.plist.
+INFOPLIST_PREPROCESS = YES

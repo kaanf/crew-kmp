@@ -32,8 +32,33 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
+import kotlin.test.assertFailsWith
 
 class HttpClientLoggingTest {
+    @Test
+    fun localVerificationIsUnauthenticatedAndCorrelated() = runBlocking {
+        val engine = LoggingFixtureEngine()
+        val observed = mutableListOf<String>()
+        HttpDiagnostics.onResponse = { id, _, status -> if (status == 500) observed += id }
+        try {
+            val id = verifySentryRequest("http://127.0.0.1:18096", BuildEnvironment(true), engine)
+            assertEquals(listOf(id), observed)
+            assertEquals(id, engine.requests.single().headers[REQUEST_ID_HEADER])
+            assertEquals(null, engine.requests.single().headers[HttpHeaders.Authorization])
+            assertEquals(null, engine.requests.single().headers[HttpHeaders.Cookie])
+        } finally { HttpDiagnostics.onResponse = null; engine.close() }
+    }
+
+    @Test
+    fun localVerificationRejectsReleaseAndRemoteTargets() = runBlocking {
+        assertFailsWith<IllegalStateException> {
+            verifySentryRequest("http://127.0.0.1:18096", BuildEnvironment(false))
+        }
+        for (origin in listOf("https://api.crewishere.com", "http://example.invalid", "http://user:secret@localhost", "http://localhost/api", "http://localhost?token=secret")) {
+            assertFailsWith<IllegalArgumentException> { verifySentryRequest(origin, BuildEnvironment(true)) }
+        }
+    }
+
     @Test
     fun requestDiagnosticsOnlyTargetsCrewAndOmitsSensitiveUrlValues() = runBlocking {
         val session = EmptySessionStorage()
@@ -131,6 +156,13 @@ private class LoggingFixtureEngine : HttpClientEngineBase("logging-fixture") {
     val requests = mutableListOf<HttpRequestData>()
     override suspend fun execute(data: HttpRequestData): HttpResponseData {
         requests += data
+        if (data.url.encodedPath == "/api/debug/sentry") {
+            return HttpResponseData(
+                HttpStatusCode.InternalServerError, GMTDate(),
+                headersOf(REQUEST_ID_HEADER, data.headers[REQUEST_ID_HEADER]!!),
+                HttpProtocolVersion.HTTP_1_1, ByteReadChannel(""), callContext(),
+            )
+        }
         if (data.url.encodedPath.endsWith("/redirect")) {
             return HttpResponseData(
                 HttpStatusCode.Found, GMTDate(),
