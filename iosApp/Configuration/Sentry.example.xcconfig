@@ -1,0 +1,3 @@
+// Copy to Sentry.local.xcconfig. Escape URL slashes in xcconfig using $()/.
+// CREW_SENTRY_MOBILE_DSN = https:/$()/PUBLIC_KEY@INGEST_HOST/PROJECT_ID
+CREW_SENTRY_MOBILE_DSN =

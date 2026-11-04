@@ -30,3 +30,7 @@ comparable measurements. Document blockers without fabricating success.
 Summarize resulting behavior, significant tradeoffs, actual checks and coverage limitations.
 Update canonical documentation only where invalidated. Create a concise handoff if the task
 is incomplete; do not leave vague “continue later” notes without state and next action.
+
+When a merge is requested, target `dev` for every change branch, including fixes and
+documentation. Promote changes to `main` only through `dev` → `main`, as required by
+[CONTRIBUTING](../../CONTRIBUTING.md). An unspecified merge target means `dev`.

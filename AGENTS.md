@@ -37,6 +37,9 @@ static `ComposeApp` framework hosted by SwiftUI. See [project map](docs/PROJECT_
   Android success does not verify iOS; static review does not prove runtime performance.
 - When the user says “push”, stage related changes, write a conventional commit,
   commit and push without an additional confirmation, subject to applicable authorization.
+- Always merge change branches into `dev` first, including fixes and documentation.
+  Promote changes to `main` only through `dev` → `main`. When the user requests a merge
+  without naming a target, use `dev`; never merge a change branch directly into `main`.
 
 ## Read on demand (paths relative to repository root)
 

@@ -60,6 +60,7 @@ struct iOSApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     init() {
+        initializeSentry()
         KoinHelperKt.doInitKoin()
         PushTokenBridge.shared.start()
     }
@@ -71,6 +72,7 @@ struct iOSApp: App {
                 // cold start'ta cagrilmiyor. Ikisi birden gelse de DeepLinkListener ayni
                 // link'i tekrar cozmeyi iptal ediyor.
                 .onOpenURL { url in
+                    if handleSentryVerification(url) { return }
                     ExternalUriHandler.shared.onNewUri(uri: url.absoluteString)
                 }
                 .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { userActivity in

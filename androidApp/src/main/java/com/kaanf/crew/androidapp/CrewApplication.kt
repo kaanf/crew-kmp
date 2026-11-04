@@ -16,6 +16,8 @@ class CrewApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
+        initializeSentry()
+
         initKoin {
             androidContext(this@CrewApplication)
             androidLogger()

@@ -1,6 +1,4 @@
 plugins {
-    // AGP build-logic üzerinden zaten classpath'te; versiyon belirtmek çakışıyor.
-    // Kotlin desteği AGP 9'da built-in, ayrı plugin gerekmiyor.
     id("com.android.test")
     alias(libs.plugins.androidx.baselineprofile)
 }

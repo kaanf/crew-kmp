@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+        A12345678901234567890001 /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = A12345678901234567890002 /* Sentry */; };
 		8CB679FD3018503C00616CF2 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 8CB679FC3018503C00616CF2 /* FirebaseMessaging */; };
 /* End PBXBuildFile section */
 
@@ -45,6 +46,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+                A12345678901234567890001 /* Sentry in Frameworks */,
 				8CB679FD3018503C00616CF2 /* FirebaseMessaging in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -90,6 +92,7 @@
 			);
 			name = iosApp;
 			packageProductDependencies = (
+                A12345678901234567890002 /* Sentry */,
 				8CB679FC3018503C00616CF2 /* FirebaseMessaging */,
 			);
 			productName = iosApp;
@@ -121,6 +124,7 @@
 			mainGroup = 415BF81389250C72AFBA57F1;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
+                A12345678901234567890003 /* sentry-cocoa */,
 				8CB679FB3018503C00616CF2 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -181,6 +185,7 @@
 			baseConfigurationReferenceAnchor = 72CE8FB73DC578462E306B07 /* Configuration */;
 			baseConfigurationReferenceRelativePath = Config.xcconfig;
 			buildSettings = {
+                INFOPLIST_PREPROCESSOR_DEFINITIONS = "CREW_DEBUG=1";
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -398,6 +403,11 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+        A12345678901234567890003 /* sentry-cocoa */ = {
+            isa = XCRemoteSwiftPackageReference;
+            repositoryURL = "https://github.com/getsentry/sentry-cocoa";
+            requirement = { kind = exactVersion; version = 9.30.2; };
+        };
 		8CB679FB3018503C00616CF2 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
@@ -409,6 +419,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+        A12345678901234567890002 /* Sentry */ = {
+            isa = XCSwiftPackageProductDependency;
+            package = A12345678901234567890003 /* sentry-cocoa */;
+            productName = Sentry;
+        };
 		8CB679FC3018503C00616CF2 /* FirebaseMessaging */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 8CB679FB3018503C00616CF2 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;

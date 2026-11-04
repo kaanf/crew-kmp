@@ -31,10 +31,16 @@ need comparable device/build/scenario measurements. A task listing is not a pass
 
 Use the [PR template](.github/PULL_REQUEST_TEMPLATE.md). Lead with the concrete problem
 and resulting behavior; include actual checks and migration/release impact where relevant.
+All change branches must merge into `dev` first, including features, fixes, chores and
+documentation. Promote changes to `main` only through `dev` → `main`; do not merge change
+branches directly into `main`. A merge request without an explicit target means `dev`.
+This merge policy was confirmed by the owner on 2026-11-04; enforcement through repository
+settings remains unverified.
+
 The inspected CI runs for PRs from `dev` into `main`, main pushes and manual triggers.
-This does not establish a mandatory branch naming or merge/review policy. The existing
-agent preference uses conventional commits for an explicitly requested push; broader
-repository commit policy remains unconfirmed.
+Branch naming and required reviews remain unconfirmed. The existing agent preference uses
+conventional commits for an explicitly requested push; broader repository commit policy
+remains unconfirmed.
 
 Update the canonical affected document and record significant accepted tradeoffs through
 [ADRs](docs/decisions/README.md). Community policy drafts below require owner adoption;
