@@ -56,7 +56,6 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4.android)
 }
 
-// Optional build-time values. Never store a Sentry auth token in the app.
 android.buildFeatures.buildConfig = true
 android.defaultConfig {
     val localProperties = providers.fileContents(rootProject.layout.projectDirectory.file("local.properties"))

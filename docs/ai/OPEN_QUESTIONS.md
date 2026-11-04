@@ -11,6 +11,7 @@ owner for material decisions source cannot establish. Operational proposals are 
 | --- | --- | --- |
 | Ownership | Project belongs to the owner | GOVERNANCE; no maintainer handle/contact invented |
 | Repository | Remains closed source | README / CONTRIBUTING; no open-source license added |
+| Merge flow | All change branches merge into `dev` first; only `dev` promotes to `main`; unspecified merge target is `dev` | Owner confirmed 2026-11-04; AGENTS / CONTRIBUTING / WORKFLOW updated; repository enforcement unverified |
 | Backend | `../crew-api` (owner location: `~/Projects/crew/crew-api`) | Use current controllers/services/tests; README explicitly outdated |
 | Design | Current application code is authoritative | DESIGN_SYSTEM; Figma connection planned for later |
 | AI tools | Copilot is not used | No Copilot adapter installed |
