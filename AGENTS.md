@@ -35,6 +35,16 @@ static `ComposeApp` framework hosted by SwiftUI. See [project map](docs/PROJECT_
   state. Avoid deep nesting, speculative abstractions and unrelated formatting.
 - Run checks appropriate to the change; distinguish passed, failed, blocked and not run.
   Android success does not verify iOS; static review does not prove runtime performance.
+- Before starting a new feature, check the current branch and working tree. Always
+  create a dedicated branch from `dev` before editing; never implement directly on
+  `dev` or `main`. Use a Conventional Commit type as the branch prefix, for example
+  `feat/posthog-analytics` or `fix/session-refresh`, and write commits as
+  `<type>(<optional scope>): <description>`.
+- If already on a change branch, warn the user and name that branch before editing.
+  Explain whether the task continues that branch's feature or needs a separate branch
+  from `dev`; do not silently reuse it or branch a new feature from it. Preserve existing
+  work and keep unrelated changes on their original branch. This warning alone does not
+  require an extra approval step for work the user has already authorized.
 - When the user says “push”, stage related changes, write a conventional commit,
   commit and push without an additional confirmation, subject to applicable authorization.
 - Always merge change branches into `dev` first, including fixes and documentation.

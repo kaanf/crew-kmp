@@ -9,6 +9,11 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.compose.LifecycleStartEffect
+import com.kaanf.core.domain.analytics.Analytics
+import com.kaanf.core.domain.analytics.AnalyticsEvent
+import com.kaanf.core.domain.analytics.AnalyticsScreen
+import com.kaanf.core.domain.analytics.ForegroundAnalytics
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -65,6 +70,31 @@ fun App(
     }
 
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination
+    val analytics: Analytics = koinInject()
+    val foregroundAnalytics: ForegroundAnalytics = koinInject()
+    LifecycleStartEffect(Unit) {
+        foregroundAnalytics.onForeground()
+        onStopOrDispose { foregroundAnalytics.onBackground() }
+    }
+    LaunchedEffect(navController) {
+        navController.currentBackStackEntryFlow.collect { entry ->
+            val destination = entry.destination
+            val screen = when {
+                destination.hasRoute<HomeGraphRoutes.Dashboard>() -> AnalyticsScreen.Dashboard
+                destination.hasRoute<HomeGraphRoutes.Profile>() -> AnalyticsScreen.Profile
+                destination.hasRoute<HomeGraphRoutes.ProfileBoard>() -> AnalyticsScreen.ProfileBoard
+                destination.hasRoute<HomeGraphRoutes.EventDetail>() -> AnalyticsScreen.EventDetail
+                destination.hasRoute<HomeGraphRoutes.TicketQr>() -> AnalyticsScreen.TicketQr
+                destination.hasRoute<GameGraphRoutes.Game>() -> AnalyticsScreen.Game
+                destination.hasRoute<GameGraphRoutes.Quests>() -> AnalyticsScreen.Quests
+                destination.hasRoute<GameGraphRoutes.Passport>() -> AnalyticsScreen.Passport
+                else -> null
+            }
+            screen?.let { analytics.track(AnalyticsEvent.ScreenViewed(it)) }
+            if (screen == AnalyticsScreen.Quests) analytics.track(AnalyticsEvent.QuestOpened)
+        }
+    }
+
     val isInGameGraph = currentDestination?.hierarchy?.any { destination ->
         destination.hasRoute(GameGraphRoutes.Graph::class)
     } == true

@@ -17,6 +17,7 @@ class CrewApplication : Application() {
         super.onCreate()
 
         initializeSentry()
+        initializePostHog()
 
         initKoin {
             androidContext(this@CrewApplication)

@@ -25,6 +25,7 @@ dependencies {
     implementation(projects.core.domain)
     implementation(projects.core.data)
     implementation(libs.sentry.android)
+    implementation(libs.posthog.android)
     implementation(projects.core.presentation)
     implementation(projects.feature.auth.presentation)
 
@@ -64,4 +65,29 @@ android.defaultConfig {
         .getOrElse(localProperties?.getProperty("sentry.mobile.dsn").orEmpty())
     require(sentryDsn.none { it == '"' || it == '\\' || it.isISOControl() })
     buildConfigField("String", "SENTRY_DSN", "\"$sentryDsn\"")
+}
+
+val postHogLocalProperties = providers.fileContents(rootProject.layout.projectDirectory.file("local.properties"))
+    .asText.orNull?.let { text -> Properties().apply { load(text.reader()) } }
+fun postHogSetting(variable: String, localKey: String): String =
+    providers.environmentVariable(variable).getOrElse(postHogLocalProperties?.getProperty(localKey).orEmpty())
+
+android.defaultConfig {
+    val analyticsValues = mapOf(
+        "POSTHOG_KEY" to postHogSetting("CREW_POSTHOG_KEY", "posthog.key"),
+        "POSTHOG_HOST" to postHogSetting("CREW_POSTHOG_HOST", "posthog.host"),
+    )
+    analyticsValues.forEach { (field, value) ->
+        require(value.none { it == '"' || it == '\\' || it.isISOControl() })
+        buildConfigField("String", field, "\"$value\"")
+    }
+    buildConfigField("boolean", "POSTHOG_ENABLED", (postHogSetting("CREW_POSTHOG_ENABLED", "posthog.enabled") == "true").toString())
+    buildConfigField("boolean", "POSTHOG_DEBUG_ENABLED", (postHogSetting("CREW_POSTHOG_DEBUG_ENABLED", "posthog.debug.enabled") == "true").toString())
+}
+
+// Local verification may enable debug collection without enabling release collection.
+android.buildTypes.getByName("debug") {
+    if (postHogSetting("CREW_POSTHOG_DEBUG_ENABLED", "posthog.debug.enabled") == "true") {
+        buildConfigField("boolean", "POSTHOG_ENABLED", "true")
+    }
 }

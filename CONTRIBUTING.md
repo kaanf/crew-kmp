@@ -15,6 +15,25 @@ criteria and follow a real implementation pattern before adding abstractions.
 Confidential vulnerability details do not belong in public bug reports; see the
 [security reporting draft](SECURITY.md), whose private contact is still unresolved.
 
+## Branches and commits
+
+Before starting a new feature, inspect the current branch and working tree. Create a
+separate feature branch from `dev` before editing; do not implement directly on `dev`
+or `main`. Prefix branch names with the Conventional Commit type and a slash, such as
+`feat/posthog-analytics`, `fix/session-refresh` or `docs/branch-workflow`.
+
+If already on a change branch, warn the owner before editing and name the current branch.
+State whether this is a continuation of its feature or a separate task that needs a new
+branch from `dev`. Do not silently reuse a branch for another feature or base the new
+feature on that change branch. Preserve uncommitted work and keep unrelated changes on
+their original branch; do not discard or carry them into another feature accidentally.
+The warning does not add an approval requirement to already authorized work.
+
+Write commits using Conventional Commits: `<type>(<optional scope>): <description>`,
+for example `feat(analytics): add anonymous PostHog events`. These branch and commit
+rules were confirmed by the owner on 2026-11-04. Creating a branch does not itself
+request a commit or push; follow the owner's requested operation.
+
 ## Changes and verification
 
 Keep one coherent purpose and preserve unrelated work. Use existing KMP/CMP, DI, navigation
@@ -38,9 +57,7 @@ This merge policy was confirmed by the owner on 2026-11-04; enforcement through 
 settings remains unverified.
 
 The inspected CI runs for PRs from `dev` into `main`, main pushes and manual triggers.
-Branch naming and required reviews remain unconfirmed. The existing agent preference uses
-conventional commits for an explicitly requested push; broader repository commit policy
-remains unconfirmed.
+Required reviews and automated enforcement of the branch/commit rules remain unconfirmed.
 
 Update the canonical affected document and record significant accepted tradeoffs through
 [ADRs](docs/decisions/README.md). Community policy drafts below require owner adoption;

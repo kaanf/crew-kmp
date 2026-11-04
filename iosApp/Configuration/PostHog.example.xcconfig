@@ -1,0 +1,6 @@
+// Copy to PostHog.local.xcconfig; choose the project region explicitly.
+CREW_POSTHOG_KEY =
+CREW_POSTHOG_HOST = https:/$()/eu.i.posthog.com
+CREW_POSTHOG_ENABLED = false
+// Enable only with a separate development project.
+CREW_POSTHOG_DEBUG_ENABLED = false

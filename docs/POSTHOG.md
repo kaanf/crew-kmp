@@ -2,9 +2,9 @@
 
 ## Purpose and status
 
-This document is the proposed first, intentionally small PostHog rollout for the
-Crew Android/iOS app. It is a planning document; PostHog has not been added to the
-app, no project key has been configured, and the events below are not yet emitted.
+The first, intentionally small PostHog integration is implemented for Android/iOS.
+Collection remains disabled by default; no project key is committed. Live ingestion
+and reports are not verified. The SDK starts only with explicit build configuration.
 The aim is to learn where users get stuck and which parts of the social match/task
 experience they use, without collecting sensitive content or adding broad tracking.
 
@@ -63,24 +63,20 @@ add a named event for that action and review its payload first.
 
 ## Implementation direction
 
-Crew is Kotlin Multiplatform with shared Compose UI and thin Android/iOS hosts. On
-implementation, first confirm the currently maintained PostHog SDK and its Android,
-iOS, and Kotlin Multiplatform support. Prefer a shared analytics interface and one
-shared event vocabulary, with platform initialization/adapters only where SDK support
-requires them. Keep analytics calls at explicit state/action success boundaries rather
-than in composable rendering. Analytics failures must never interrupt app behavior.
-
-The event mapping should be checked against the current task selection and match state
-transitions in `feature/game/presentation`, plus navigation in `composeApp`, before code
-is changed. The table is a proposed product schema, not a claim that every listed
-transition already has a single authoritative callback.
+Crew uses a shared analytics interface and one bounded event vocabulary in Kotlin.
+Native hosts initialize the official Android/iOS SDKs and install a capture callback.
+Koin supplies the shared implementation to ViewModels. Explicit state/action success
+boundaries emit match events; navigation entry changes emit allowlisted screen views.
+Analytics errors do not interrupt app behavior. Detailed configuration and transition
+semantics are recorded below.
 
 ## First useful PostHog views
 
 After events have arrived, create only these initial reports:
 
 1. **Activation funnel:** `app_opened` → `screen_viewed` for the main screen →
-   `task_selected` → `match_started`.
+   `match_started` → `task_selected`. Task selection follows the match start/RPS result
+   in the current app; the original proposed order did not match implementation.
 2. **Match completion funnel:** `match_started` → `match_completed`, with
    `match_abandoned` as a separate breakdown.
 3. **Task choice trend:** `task_selected` by `task_category` over time.
@@ -111,3 +107,73 @@ user behaved a certain way; pair quantitative findings with usability observatio
 - Any claim that installation, consent requirements, costs, or SDK compatibility have
   been verified; those need checking against current PostHog documentation during
   implementation
+
+## Implemented configuration and boundaries (2026-11-04)
+
+- Android: official `posthog-android` 3.75.3; iOS: official `posthog-ios` 3.59.3
+  through Swift Package Manager. Both are MIT licensed. The current KMP SDK's 0.5+
+  integration requires Kotlin 2.4; this project stays on 2.3.20 using thin native
+  adapters and a shared domain `Analytics` contract. See [ADR-002](decisions/002-posthog-native-adapters.md).
+- Android build environment: `CREW_POSTHOG_KEY` (public `phc_` project token),
+  `CREW_POSTHOG_HOST`, `CREW_POSTHOG_ENABLED=true`. Debug additionally requires
+  `CREW_POSTHOG_DEBUG_ENABLED=true`; use a separate test project.
+  Gitignored `local.properties` also supports `posthog.key`, `posthog.host`,
+  `posthog.enabled` and `posthog.debug.enabled`; environment values take precedence.
+  Explicit debug enablement enables the debug build independently of the release gate.
+  Keep `posthog.enabled=false` for local testing without release collection.
+- iOS: copy `iosApp/Configuration/PostHog.example.xcconfig` to the gitignored
+  `PostHog.local.xcconfig` and set the same four settings. CI may supply them as
+  Xcode build settings. Only the explicit EU/US HTTPS ingestion hosts are accepted;
+  an unset/unsupported host disables initialization. No region is silently selected.
+- Native SDK setup happens before shared UI starts. Replay, automatic screen/lifecycle
+  capture, click capture, surveys, feature flag preloading and exception capture are
+  disabled. Android deep-link and push capture/registration are also disabled.
+- `beforeSend` drops events outside the seven-event vocabulary and strips other
+  properties. Only screen/category, platform/version and SDK library/session metadata
+  are retained; `$geoip_disable=true` disables server-side IP geolocation enrichment.
+  The ingestion server still receives the connection's IP address.
+- Anonymous SDK identity only; no `identify`, account/user IDs or person profiles.
+  No analytics data is passed to Sentry. SDK queueing/networking belongs to native SDKs,
+  independently of the authenticated Crew API client. SDK errors are best effort.
+- `app_opened`: first foreground, then after at least 30 minutes in the background;
+  short background trips and Android Activity recreation do not create new app sessions.
+- `screen_viewed`: typed navigation entry changes for dashboard, profile, profile board,
+  event detail, ticket QR, game, quests and passport. No route arguments are sent.
+  Reopening an area counts again; recomposition does not. Quests also emits `quest_opened`.
+- `task_selected`: a different valid selection in `WinnerPicks`, with only the fixed
+  category enum. `match_started`: authoritative `MatchStarted` socket message.
+  `match_completed`: successful task confirmation, terminal socket message or reconciled
+  completed scoreboard with `completed=true`. Duplicate start/completion messages for
+  the same most recent match are suppressed for the graph ViewModel lifetime. Match IDs
+  stay in memory and are never sent. Process restart can recount a restored completion;
+  historical/reconnected starts are not synthesized.
+- `match_abandoned`: successful explicit cancellation of an active match, once for the
+  most recently cancelled match within the graph lifetime. Backgrounding, process death,
+  opponent exits and failed cancellations are not counted as explicit abandonment.
+- Match events deliberately omit optional category/duration/phase properties until
+  their semantics are needed; no arbitrary strings or task content can enter the API.
+
+Keep production disabled until the owner resolves the disclosure, consent, opt-out,
+retention and hosting decisions above. This change adds no consent/settings UI and does
+not authorize production collection. Remote dashboards require access to the selected
+PostHog project and are not provisioned by the app integration.
+
+Sources checked: [KMP requirements](https://posthog.com/docs/libraries/kmp),
+[Android SDK](https://posthog.com/docs/libraries/android),
+[iOS SDK](https://posthog.com/docs/libraries/ios).
+
+## Validation performed (2026-11-04)
+
+- Passed: `./gradlew --console=plain :androidApp:compileDebugKotlin
+  :composeApp:compileKotlinIosSimulatorArm64 :core:domain:iosSimulatorArm64Test
+  :core:data:iosSimulatorArm64Test`. Domain: 34 tests; data: 37; zero failures/errors/skips.
+  Includes session deduplication, bounded analytics properties and a failing/missing SDK.
+- Passed again after final adapter changes: `./gradlew --console=plain :androidApp:compileDebugKotlin`.
+- Passed native host build: `xcodebuild -project iosApp/iosApp.xcodeproj -scheme iosApp
+  -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator'
+  -derivedDataPath /tmp/crew-posthog-xcode CODE_SIGNING_ALLOWED=NO build`.
+  This compiled Swift setup and linked PostHog into the ARM64 simulator host.
+- Passed: `git diff --check`.
+- Not run: physical-device flows, release archive/R8, live ingestion, remote reports and
+  consent/opt-out UX verification. No production collection was enabled. Build success
+  does not establish device lifecycle behavior or delivery to a PostHog project.
