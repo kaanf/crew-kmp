@@ -134,3 +134,12 @@ transports logged “Envelope sent successfully.” The Sentry dashboard UI was 
 The debug activity was checked on-device and respects system-bar insets. The temporary
 server and ADB port mapping were removed after testing. No native crash was induced;
 iOS runtime/physical-device delivery and release symbolication remain unverified.
+
+### Follow-up: mobile ingestion remains blocked
+
+A subsequent missing-event investigation on 2026-11-04 sent a synthetic JVM control
+using the configured mobile DSN. Sentry returned HTTP 403 with
+`event submission rejected with_reason: ProjectId`. Thus the earlier mobile transport
+success log is not proof of dashboard ingestion. The current mobile DSN/project-key
+association must be rechecked in Sentry Client Keys before end-to-end ingestion can
+be marked verified. Backend-project ingestion was observed in the dashboard by the owner.

@@ -58,6 +58,32 @@ class SentryVerificationActivity : ComponentActivity() {
                 }
             }
         }
+        // Independent control event: distinguish project ingestion from HTTP message handling.
+        if (savedInstanceState == null && intent.getBooleanExtra("send_native_exception", false)) {
+            intent.removeExtra("send_native_exception")
+            if (!Sentry.isEnabled()) {
+                status.text = "Configure the mobile Sentry DSN and rebuild first."
+                return
+            }
+            button.isEnabled = false
+            lifecycleScope.launch {
+                val options = Sentry.getCurrentScopes().options
+                val previousDebug = options.isDebug
+                options.isDebug = true
+                try {
+                    val eventId = Sentry.captureException(NativeSentryVerificationException()) { scope ->
+                        scope.setTag("crew.verification", "native_handled_exception")
+                    }
+                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { Sentry.flush(5_000) }
+                    android.util.Log.i("CrewSentryVerification", "Native verification event_id=$eventId")
+                    status.text = "Handled native verification queued. Search event ID:\n$eventId"
+                } finally {
+                    options.isDebug = previousDebug
+                    button.isEnabled = true
+                }
+            }
+            return
+        }
         // Explicit adb automation; never triggered by ordinary app launches/restoration.
         if (savedInstanceState == null && intent.getBooleanExtra("send_verification", false)) {
             intent.removeExtra("send_verification")
@@ -65,3 +91,6 @@ class SentryVerificationActivity : ComponentActivity() {
         }
     }
 }
+
+/** Synthetic handled exception; no app data and no process crash. */
+private class NativeSentryVerificationException : RuntimeException("Synthetic native Sentry verification")
