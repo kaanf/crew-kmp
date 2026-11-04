@@ -11,7 +11,9 @@ reporting is disabled; networking and request IDs still work. Do not commit actu
 configuration or embed an auth token in a mobile binary.
 
 - Android: provide `CREW_SENTRY_MOBILE_DSN` in the build environment. It becomes an
-  app BuildConfig value. Rebuild after changing it.
+  app BuildConfig value. For local builds, the ignored root `local.properties` can
+  instead contain `sentry.mobile.dsn`; the environment variable takes precedence.
+  Rebuild after changing it.
 - iOS: copy `iosApp/Configuration/Sentry.example.xcconfig` to the ignored
   `Sentry.local.xcconfig` in the same directory and set `CREW_SENTRY_MOBILE_DSN`.
   Config.xcconfig includes it optionally. Use the example's `https:/$()/` escaping

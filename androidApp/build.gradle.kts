@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.convention.android.application)
     alias(libs.plugins.compose.compiler)
@@ -57,7 +59,10 @@ dependencies {
 // Optional build-time values. Never store a Sentry auth token in the app.
 android.buildFeatures.buildConfig = true
 android.defaultConfig {
-    val sentryDsn = providers.environmentVariable("CREW_SENTRY_MOBILE_DSN").getOrElse("")
+    val localProperties = providers.fileContents(rootProject.layout.projectDirectory.file("local.properties"))
+        .asText.orNull?.let { text -> Properties().apply { load(text.reader()) } }
+    val sentryDsn = providers.environmentVariable("CREW_SENTRY_MOBILE_DSN")
+        .getOrElse(localProperties?.getProperty("sentry.mobile.dsn").orEmpty())
     require(sentryDsn.none { it == '"' || it == '\\' || it.isISOControl() })
     buildConfigField("String", "SENTRY_DSN", "\"$sentryDsn\"")
 }
