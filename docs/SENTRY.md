@@ -143,3 +143,17 @@ using the configured mobile DSN. Sentry returned HTTP 403 with
 success log is not proof of dashboard ingestion. The current mobile DSN/project-key
 association must be rechecked in Sentry Client Keys before end-to-end ingestion can
 be marked verified. Backend-project ingestion was observed in the dashboard by the owner.
+
+### Resolution: corrected mobile DSN (2026-11-04)
+
+The owner supplied the current mobile project's Client Keys DSN. Both ignored mobile
+configurations were updated and the Android debug APK rebuilt/reinstalled without
+clearing app data. A host control no longer received the ProjectId rejection. A handled
+native exception was then delivered from the Galaxy S24+ and the owner confirmed it
+appeared in the mobile project's dashboard.
+
+After renewing the temporary ADB tunnel, the HTTP 500 correlation test was repeated:
+mobile and backend shared one request_id and both SDK transports reported successful
+delivery. These results supersede the blocked status above. The owner was given the
+new correlation ID for the final two-project dashboard check. No DSN values are stored
+in this document. Physical iOS ingestion and real native crash tests remain unverified.
