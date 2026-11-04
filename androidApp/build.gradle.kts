@@ -21,6 +21,8 @@ dependencies {
 
     implementation(projects.composeApp)
     implementation(projects.core.domain)
+    implementation(projects.core.data)
+    implementation(libs.sentry.android)
     implementation(projects.core.presentation)
     implementation(projects.feature.auth.presentation)
 
@@ -50,4 +52,12 @@ dependencies {
     // classpath and AGP pins androidTest to exactly those versions, so the catalog's newer
     // junit/runner/espresso can't resolve. ui-test-junit4 from the same BOM brings matching ones.
     androidTestImplementation(libs.androidx.compose.ui.test.junit4.android)
+}
+
+// Optional build-time values. Never store a Sentry auth token in the app.
+android.buildFeatures.buildConfig = true
+android.defaultConfig {
+    val sentryDsn = providers.environmentVariable("CREW_SENTRY_MOBILE_DSN").getOrElse("")
+    require(sentryDsn.none { it == '"' || it == '\\' || it.isISOControl() })
+    buildConfigField("String", "SENTRY_DSN", "\"$sentryDsn\"")
 }

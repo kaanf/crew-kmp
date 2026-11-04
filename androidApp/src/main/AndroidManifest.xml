@@ -26,6 +26,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.App.Starting"
         tools:replace="android:name">
+        <meta-data android:name="io.sentry.auto-init" android:value="false" />
         <activity
             android:name=".androidapp.MainActivity"
             android:exported="true"

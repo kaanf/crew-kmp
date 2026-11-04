@@ -34,6 +34,7 @@ class HttpClientFactory(
     fun create(engine: HttpClientEngine): HttpClient {
         return HttpClient(engine) {
 //            installWiretapHttp()
+            install(RequestDiagnostics)
             install(ContentNegotiation) {
                 json(
                     json =

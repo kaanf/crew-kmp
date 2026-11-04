@@ -60,6 +60,7 @@ struct iOSApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     init() {
+        initializeSentry()
         KoinHelperKt.doInitKoin()
         PushTokenBridge.shared.start()
     }

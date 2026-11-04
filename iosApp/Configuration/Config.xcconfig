@@ -5,3 +5,7 @@ PRODUCT_BUNDLE_IDENTIFIER=com.kaanf.crew
 
 CURRENT_PROJECT_VERSION=22
 MARKETING_VERSION=1.2
+
+// Optional local Sentry configuration; never commit machine-specific values.
+CREW_SENTRY_MOBILE_DSN =
+#include? "Sentry.local.xcconfig"
