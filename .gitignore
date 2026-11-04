@@ -105,5 +105,6 @@ CLAUDE.md
 # Local design explorations
 /design-concepts/
 
-# Goldie generated captures and marketing compositions
-/out/
+# Local QR art tooling
+/tools/qr-art/.venv/
+/tools/qr-art/__pycache__/

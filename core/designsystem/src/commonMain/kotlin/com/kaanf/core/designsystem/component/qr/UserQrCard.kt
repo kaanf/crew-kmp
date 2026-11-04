@@ -45,13 +45,14 @@ fun UserQrCard(
     inputText: String,
     qrContentDescription: String = "Logo QR",
     foregroundColor: Color = AccessDefaults.TextPrimary,
+    styleId: String = "rounded",
 ) {
     // val centerLogo = painterResource(AccessIcons.AppleLogo)
 
-    val painter = rememberQrKitPainter(inputText) {
-        shapes = QrKitShapes(
+    val painter = rememberQrKitPainter(inputText, styleId, foregroundColor) {
+        shapes = if (styleId == "classic") QrKitShapes() else QrKitShapes(
             ballShape = getSelectedQrBall(QrBallType.CircleQrBall()),
-            darkPixelShape = getSelectedPixel(QrPixelType.CirclePixel(size = 0.8f)),
+            darkPixelShape = getSelectedPixel(QrPixelType.CirclePixel(size = if (styleId == "dots") 1f else 0.8f)),
             frameShape = getSelectedFrameShape(QrFrameType.RoundCornersFrame(corner = 0.25f)),
             codeShape = getSelectedPattern(PatternType.SquarePattern),
         )

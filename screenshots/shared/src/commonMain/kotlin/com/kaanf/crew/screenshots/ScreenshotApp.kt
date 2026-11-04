@@ -4,6 +4,15 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.*
+import com.kaanf.core.designsystem.profileboard.ProfileBoardContent
+import com.kaanf.core.designsystem.profileboard.ProfileBoardState
+import com.kaanf.core.designsystem.profileboard.ProfileBoardEditor
+import com.kaanf.core.designsystem.profileboard.ProfileBoardAction
+import com.kaanf.core.domain.model.profileboard.BoardStickerDesign
+import com.kaanf.core.domain.model.profileboard.BoardStickerPlacement
+import com.kaanf.core.designsystem.component.button.BaseButton
+import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
@@ -80,12 +89,61 @@ fun ScreenshotApp() {
 private fun ScreenshotContent(scene: ScreenshotScene, fixtures: ScreenshotFixtures = koinInject()) {
     var settled by remember { mutableStateOf(false) }
     // The longest entrance is the four-card roll (600 ms). Fonts/layout and Coil settle
-    // before the semantic gate; Argent additionally awaits accessibility-tree stability after this marker.
+    // before exposing the semantic readiness marker.
     LaunchedEffect(scene) { delay(1800); settled = true }
     Box(Modifier.fillMaxSize().then(if (settled) Modifier
         .testTag("screenshot-ready-${scene.route}")
         .semantics { contentDescription = "screenshot-ready-${scene.route}" } else Modifier)) {
         when (scene) {
+            ScreenshotScene.ProfileBoardLoading, ScreenshotScene.ProfileQrLoading,
+            ScreenshotScene.ProfileBoard, ScreenshotScene.MatchBoard, ScreenshotScene.BoardEditor -> {
+                val owner = scene != ScreenshotScene.MatchBoard
+                var board by remember { mutableStateOf(ProfileBoardState(
+                    publicCode = "ABC1234567", fullName = if (scene == ScreenshotScene.ProfileBoardLoading) "" else "Kaan Fırat", profilePictureUrl = "fixture://avatar-1.png",
+                    isLoading = scene == ScreenshotScene.ProfileBoardLoading, canEdit = true,
+                    qr = if (scene == ScreenshotScene.BoardEditor) com.kaanf.core.domain.model.profileboard.BoardQrPlacement()
+                        else com.kaanf.core.domain.model.profileboard.BoardQrPlacement(.6f, .5f, .4f),
+                    qrStyleId = when (scene) {
+                        ScreenshotScene.ProfileQrLoading -> com.kaanf.core.domain.model.profileboard.BoardQrTheme.HAMSTER.id
+                        ScreenshotScene.BoardEditor -> "dots"
+                        else -> "rounded"
+                    },
+                    isEditingBoard = scene == ScreenshotScene.BoardEditor,
+                    isEditorSheetOpen = scene == ScreenshotScene.BoardEditor,
+                    stickers = listOf(BoardStickerDesign.HIKING, BoardStickerDesign.GAMING,
+                        BoardStickerDesign.MUSIC, BoardStickerDesign.COFFEE).mapIndexed { slot, design ->
+                        val sticker = BoardStickerPlacement.create(slot, design)
+                        if (scene == ScreenshotScene.MatchBoard && slot < 2) sticker.copy(
+                            position = com.kaanf.core.domain.model.profileboard.BoardPosition(if (slot == 0) .09f else .91f, .6f),
+                            rotation = if (slot == 0) 90f else -90f,
+                        ) else sticker
+                    },
+                )) }
+                AppScaffold { padding ->
+                    if (!owner) com.kaanf.game.presentation.session.phase.QrHomePhase(
+                        state = com.kaanf.game.presentation.session.MatchSessionState(
+                            publicCode = board.publicCode,
+                            currentUserName = board.fullName,
+                            currentUserPhotoUrl = board.profilePictureUrl,
+                            currentUserScore = 120,
+                            profileBoard = com.kaanf.core.domain.model.profileboard.ProfileBoard(
+                                qrStyleId = "classic", stickers = board.stickers, qr = board.qr,
+                            ),
+                        ),
+                        onAction = {}, modifier = Modifier.padding(padding),
+                    ) else ProfileBoardContent(
+                        state = board, modifier = Modifier.padding(padding),
+                        onClose = if (owner) ({}) else null,
+                        onEditProfile = if (owner) ({}) else null,
+                        onAction = { action -> board = if (action == ProfileBoardAction.CancelEditing) {
+                            ProfileBoardEditor.reduce(board, ProfileBoardAction.FinishEditing)
+                        } else ProfileBoardEditor.reduce(board, action) },
+                        footer = {
+                            if (!owner) BaseButton(text = "Scan opponent", onClick = {}, filled = true)
+                        },
+                    )
+                }
+            }
             ScreenshotScene.Dashboard -> {
                 val list = rememberLazyListState()
                 AppScaffold(topBar = {

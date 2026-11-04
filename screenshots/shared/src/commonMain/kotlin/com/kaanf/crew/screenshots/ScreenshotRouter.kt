@@ -5,6 +5,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 
 enum class ScreenshotScene(val route: String) {
+    ProfileBoardLoading("profile-board-loading"), ProfileQrLoading("profile-qr-loading"),
+    ProfileBoard("profile-board"), MatchBoard("match-board"), BoardEditor("board-editor"),
     Dashboard("dashboard"), EventDetail("event-detail"), Rps("rps"), Quest("quest"),
     Leaderboard("leaderboard"), TonightsRoll("tonights-roll");
     companion object {

@@ -138,4 +138,10 @@
     <string name="notification_sheet_off_title">No pings for now.</string>
     <string name="notification_sheet_off_description">You can turn notifications on anytime in Settings.</string>
     <string name="notification_sheet_done">Done</string>
+    <string name="profile_board_notification_title">Profile board</string>
+    <string name="profile_board_load_error">Couldn’t load your board. Try again before editing.</string>
+    <string name="profile_board_save_error">Couldn’t save your board. Your changes are still here; tap Done to retry.</string>
+    <string name="profile_board_conflict">Your board changed on another device. Reload to get the saved version.</string>
+    <string name="profile_board_unsupported">Update the app to edit this board.</string>
+    <string name="profile_board_qr_image_error">Couldn’t load your QR image. Your regular QR is still available.</string>
 </resources>

@@ -10,6 +10,9 @@ sealed interface HomeGraphRoutes {
     data object Dashboard : HomeGraphRoutes
 
     @Serializable
+    data object ProfileBoard : HomeGraphRoutes
+
+    @Serializable
     data object Profile : HomeGraphRoutes
 
     @Serializable

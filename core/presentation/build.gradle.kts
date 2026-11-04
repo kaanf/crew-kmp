@@ -4,6 +4,9 @@ plugins {
 
 kotlin {
     sourceSets {
+        commonTest.dependencies {
+            implementation(libs.kotlinx.coroutines.test)
+        }
         commonMain {
             dependencies {
                 implementation(libs.kotlin.stdlib)
@@ -22,6 +25,7 @@ kotlin {
 
         androidMain {
             dependencies {
+                implementation(libs.play.review)
                 // Media picker (gallery/camera) needs Activity Result APIs, FileProvider/ContextCompat
                 // and EXIF orientation handling for the shared image-decode step.
                 implementation(libs.androidx.activity.compose)

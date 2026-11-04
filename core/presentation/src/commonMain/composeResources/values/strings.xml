@@ -113,4 +113,8 @@
     <string name="err_task_photo_already_submitted_desc">You've already sent a photo for this task.</string>
     <string name="err_event_memory_not_found_title">Memory gone</string>
     <string name="err_event_memory_not_found_desc">That memory no longer exists.</string>
+    <string name="profile_qr_processing_title">QR is being processed</string>
+    <string name="profile_qr_processing_description">Your themed QR is being prepared. Your regular QR still works.</string>
+    <string name="profile_qr_fallback_title">QR theme couldn’t be prepared</string>
+    <string name="profile_qr_fallback_description">Your regular QR is still available. Try saving the theme again.</string>
 </resources>

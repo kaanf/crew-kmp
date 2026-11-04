@@ -4,10 +4,11 @@ package com.kaanf.crew
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kaanf.core.data.networking.ConnectivityObserver
+import com.kaanf.core.domain.networking.ConnectivityObserver
 import com.kaanf.core.domain.repository.SessionStorage
 import com.kaanf.core.domain.update.AppUpdateChecker
 import com.kaanf.core.domain.util.DataError
+import com.kaanf.core.presentation.profileboard.ProfileBoardQrMonitor
 import com.kaanf.core.presentation.snackbar.SnackbarController
 import com.kaanf.core.presentation.snackbar.toSnackbarMessage
 import kotlinx.coroutines.FlowPreview
@@ -31,6 +32,7 @@ class MainViewModel(
     private val snackbarController: SnackbarController,
     private val connectivityObserver: ConnectivityObserver,
     private val appUpdateChecker: AppUpdateChecker,
+    private val profileBoardQrMonitor: ProfileBoardQrMonitor,
 ) : ViewModel() {
     private val eventChannel = Channel<MainEvent>()
     val events = eventChannel.receiveAsFlow()
@@ -67,6 +69,7 @@ class MainViewModel(
             }
             .launchIn(viewModelScope)
 
+        profileBoardQrMonitor.start(viewModelScope)
         observeConnectivity()
         checkForUpdate()
     }

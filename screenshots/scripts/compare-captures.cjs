@@ -1,4 +1,4 @@
-// NODE_PATH="$(npm root -g)/goldie/node_modules" node screenshots/scripts/compare-captures.cjs <baseline> <actual>
+// Requires @napi-rs/canvas. Run: node screenshots/scripts/compare-captures.cjs <baseline> <actual>
 // Compare decoded RGBA, not PNG compression or metadata. Both folders contain raw scene PNGs.
 // Optional --ignore-top=<pixels> explicitly excludes simulator system chrome.
 const { createCanvas, loadImage } = require('@napi-rs/canvas');

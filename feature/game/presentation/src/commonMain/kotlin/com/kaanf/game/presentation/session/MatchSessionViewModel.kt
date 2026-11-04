@@ -13,7 +13,7 @@ import com.kaanf.core.domain.logging.CrewLogger
 import com.kaanf.core.domain.util.onFailure
 import com.kaanf.core.domain.util.onSuccess
 import com.kaanf.core.domain.repository.UserRepository
-import com.kaanf.core.domain.review.requestAppReview
+import com.kaanf.core.presentation.review.requestAppReview
 import com.kaanf.core.presentation.model.LobbyMember
 import com.kaanf.core.presentation.model.UserAvatar
 import com.kaanf.core.presentation.snackbar.SnackbarController
@@ -83,6 +83,7 @@ class MatchSessionViewModel(
     private val eventConnectionClient: EventConnectionClient,
     private val matchRepository: MatchRepository,
     private val userRepository: UserRepository,
+    private val boardRepository: com.kaanf.core.domain.repository.ProfileBoardRepository,
     private val snackbarController: SnackbarController,
     private val logger: CrewLogger,
     savedStateHandle: SavedStateHandle,
@@ -103,6 +104,17 @@ class MatchSessionViewModel(
     init {
         loadMyParticipant()
         observeCurrentUser()
+        boardRepository.observeBoard().onEach { board ->
+            _state.update { it.copy(profileBoard = board ?: com.kaanf.core.domain.model.profileboard.ProfileBoard()) }
+        }.launchIn(viewModelScope)
+        boardRepository.observeQrRender().onEach { render ->
+            _state.update { it.copy(qrRender = render) }
+        }.launchIn(viewModelScope)
+        viewModelScope.launch {
+            boardRepository.refresh()
+            boardRepository.syncQrRender()
+        }
+        viewModelScope.launch { userRepository.getUser() }
         observeConnectionState()
         subscribeToEvents()
     }
@@ -115,6 +127,7 @@ class MatchSessionViewModel(
                         currentUserId = user?.id ?: it.currentUserId,
                         currentUserPhotoUrl = user?.profilePictureUrl,
                         currentUserName = user?.fullName,
+                        publicCode = user?.publicCode.orEmpty(),
                     )
                 }
             }
@@ -359,6 +372,9 @@ class MatchSessionViewModel(
                 lobbyMembers = it.lobbyMembers,
                 lobbyTotalCount = it.lobbyTotalCount,
                 matchQrToken = it.matchQrToken,
+                publicCode = it.publicCode,
+                profileBoard = it.profileBoard,
+                qrRender = it.qrRender,
                 currentUserId = it.currentUserId,
                 currentUserPhotoUrl = it.currentUserPhotoUrl,
                 currentUserName = it.currentUserName,
@@ -818,6 +834,7 @@ class MatchSessionViewModel(
             }
             MatchSessionAction.OnScanClicked -> sendEvent(MatchSessionEvent.NavigateToScanOpponent)
             MatchSessionAction.OnStatsRefreshRequested -> loadMyParticipant()
+            MatchSessionAction.OnUserNotAtEventDismissed -> _state.update { it.copy(showUserNotAtEventSheet = false) }
             is MatchSessionAction.OnScanResult -> onScanResult(action.scannedMatchQrToken)
             MatchSessionAction.OnInviteAccepted -> respondToInvite { inviteId ->
                 matchRepository.acceptInvite(eventId = eventId, inviteId = inviteId)
@@ -1140,7 +1157,7 @@ class MatchSessionViewModel(
     }
 
     private fun onScanResult(scannedMatchQrToken: String) {
-        if (_state.value.isSendingInvite) return
+        if (_state.value.isSendingInvite || _state.value.showUserNotAtEventSheet || _state.value.showOutgoingInviteSheet) return
         _state.update { it.copy(isSendingInvite = true, errorMessage = null) }
 
         viewModelScope.launch {
@@ -1155,10 +1172,11 @@ class MatchSessionViewModel(
                         )
                     }
                 }
-                .onFailure {
-                    // Bayat QR / rakip meşgul / ağ: kullanıcıya bildir, scanner yeniden kurulur.
-                    _state.update { it.copy(isSendingInvite = false) }
-                    snackbarController.show(inviteFailedSnackbar())
+                .onFailure { error ->
+                    val notAtEvent = error is DataError.Remote.Business &&
+                        error.code == "USER_NOT_AT_EVENT"
+                    _state.update { it.copy(isSendingInvite = false, showUserNotAtEventSheet = notAtEvent) }
+                    if (!notAtEvent) snackbarController.show(inviteFailedSnackbar())
                 }
         }
     }

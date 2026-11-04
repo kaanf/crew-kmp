@@ -1,5 +1,5 @@
 // Original, fictional illustration assets. No remote images or real user likenesses.
-// Run with NODE_PATH pointing at Goldie 0.5.0/node_modules.
+// Requires @napi-rs/canvas to be available to Node.
 const { createCanvas, GlobalFonts } = require('@napi-rs/canvas');
 const fs = require('node:fs');
 const path = require('node:path');

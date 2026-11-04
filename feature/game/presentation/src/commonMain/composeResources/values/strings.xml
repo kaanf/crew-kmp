@@ -303,4 +303,7 @@ TOGETHER.</string>
     <string name="lobby_hello_from">%1$s says hi</string>
     <string name="lobby_before_game_tip_title">A little tip before you jump in</string>
     <string name="lobby_before_game_tip_description">Start with a smile and a simple hello. You don’t need the perfect opening line. Just be yourself and let the game break the ice. 🧊</string>
+    <string name="scan_user_not_at_event_title">This person isn’t at this event</string>
+    <string name="scan_user_not_at_event_description">They need to check in to this event before you can play together.</string>
+    <string name="scan_user_not_at_event_action">Got it</string>
 </resources>

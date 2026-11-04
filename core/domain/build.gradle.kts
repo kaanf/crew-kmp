@@ -11,12 +11,6 @@ kotlin {
             }
         }
 
-        androidMain {
-            dependencies {
-                implementation(libs.play.review)
-            }
-        }
-
         iosMain {
             dependencies {
                 // Add iOS-specific dependencies here. This a source set created by Kotlin Gradle

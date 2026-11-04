@@ -19,6 +19,7 @@ fun UserSerializable.toDomain(): User {
     return User(
         id = id,
         email = email,
+        publicCode = publicCode,
         fullName = fullName,
         profilePictureUrl = profilePictureUrl,
         role = role,
@@ -32,6 +33,7 @@ fun User.toSerializable(): UserSerializable {
     return UserSerializable(
         id = id,
         email = email,
+        publicCode = publicCode,
         fullName = fullName,
         profilePictureUrl = profilePictureUrl,
         role = role,

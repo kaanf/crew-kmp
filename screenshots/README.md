@@ -26,54 +26,16 @@ There is no iOS device architecture and no Android release variant. Omitting
 
 ## Capture
 
-The config targets **Goldie 0.5.0**, which bundles **Argent 0.27.0**. A standalone
-Argent executable is not required. Install that pinned Goldie version if needed:
+Launch a scene using the commands below, wait for its entrance animations and
+local images to settle, then capture it with the platform tools:
 
 ```sh
-npm install -g goldie@0.5.0
+adb -s emulator-5554 exec-out screencap -p > screenshots/build/android-scene.png
+xcrun simctl io booted screenshot screenshots/build/ios-scene.png
 ```
 
-Install an iOS Simulator runtime in Xcode Settings → Components and create an
-**iPhone 17 Pro Max** simulator. Goldie requires that exact model for its
-`iphone-6.9` output. Android needs a **Pixel 9 Pro or Pixel 10 Pro** AVD; Goldie
-supports both hardware profiles under `pixel-10-pro`. The local validation AVD
-is named `CrewScreenshots`, running API 34 on ARM64.
-
-```sh
-# Start the dedicated AVD first; use its serial, never a personal device.
-$ANDROID_HOME/emulator/emulator -avd CrewScreenshots -no-snapshot -timezone UTC -gpu swiftshader
-./screenshots/scripts/prepare-android.sh emulator-5554
-
-goldie doctor
-goldie all --config goldie.android.config.ts
-goldie all --device iphone-6.9
-goldie studio --no-open
-```
-
-`goldie all` uses the iOS config; the Android config selects Android-specific
-flows. Run both commands above to generate both platforms. This split is
-intentional: Argent 0.27.0's native wait works on Android Compose, while its raw
-accessibility wait tools work on iOS Compose. `goldie all` runs doctor first.
-Goldie writes `out/raw/`, framed assets, and its store
-manifest under `out/`; these are ignored by Git. No preview video is configured:
-this task captures six stills. A watermark warning concerns video only; it can be
-disabled through the bundled Argent CLI (`argent disable video-watermark`).
-
-The software GPU flag avoids a Metal command-encoder assertion encountered on
-this Mac with the hardware renderer. It changes emulator rendering, not app UI.
-Use the same GPU backend for subsequent visual comparisons.
-Android marketing images use the bundled original neutral SVG frame with explicit
-Goldie geometry; its small screen radius preserves the emulator's status-bar clock.
-Goldie's default Pixel bezel clipped that clock on this runtime. iOS uses Goldie's
-silver iPhone frame. No application pixels are retouched.
-
-Device contract: portrait, English (US), UTC, font scale 1, dark system appearance
-with Crew's existing `CrewTheme(isDarkTheme = false)` (its actual warm dark palette),
-Android 1280×2856 at 480 dpi, iPhone 17 Pro Max native resolution. Goldie pins status
-bar time to 9:41, battery and connectivity. System safe areas and navigation bars
-are preserved. Compose entrance animations finish normally, the leaderboard is
-captured after its confetti, and no timed match or auto-navigation ViewModel runs.
-Fixtures contain fixed dates and already formatted date labels, never wall time.
+The output directory is created by the build steps above. Use a dedicated
+simulator or emulator for these captures.
 
 ## Open a scene directly
 
@@ -85,15 +47,13 @@ xcrun simctl openurl booted crew-screenshot://quest
 xcrun simctl launch booted com.kaanf.crew.screenshots --scene quest
 ```
 
+Additional development fixtures: `profile-board`, `match-board`, `board-editor`, `profile-board-loading`, and `profile-qr-loading`.
+
 Routes, in store order: `dashboard`, `event-detail`, `rps`, `quest`, `leaderboard`,
 `tonights-roll`. Unknown routes fail explicitly. Reopening even the same route
-resets composition state, scroll position and the photo stack. Every Argent flow
-launches the screenshot app and opens its URL. iOS uses `await-ui-element` for
-`screenshot-ready-<scene>`, followed by `await-screen-idle`. Android uses native
-`await: visible` and `await: idle`. Both wait for the scene marker and tree
-stability; the iOS native tree omits Compose semantics, and Android's raw wait
-tools proved unreliable in this installed Argent version. The marker appears only after all local images decode and the
-longest entrance animation has settled. Image decode or unknown image errors fail
+resets composition state, scroll position and the photo stack. The
+`screenshot-ready-<scene>` semantic marker appears after all local images decode
+and the longest entrance animation has settled. Image decode or unknown image errors fail
 the run instead of silently capturing placeholders.
 
 ## Architecture and UI reuse
@@ -144,28 +104,22 @@ capture harness, not an offline game implementation. Native gestures such as rol
 swiping remain available, and a direct scene launch resets them.
 
 Fixture state can be reused by future Compose visual tests without introducing
-Roborazzi/Paparazzi now. See ASSETS.md for artwork provenance and VALIDATION.md
-for executed checks and limitations.
+Roborazzi/Paparazzi now. See ASSETS.md for artwork provenance.
 
 ## Check repeatability and isolation
 
-After a first capture, copy `out/raw/<device>` to a baseline directory outside
-`out/raw`. Run the same capture again on the same device/runtime, then compare
-decoded pixels (using Goldie's installed canvas dependency):
+Capture the same scenes twice on the same platform and runtime, then compare
+folders containing `<scene>.png` files:
 
 ```sh
-NODE_PATH="$(npm root -g)/goldie/node_modules" node screenshots/scripts/compare-captures.cjs \
-  screenshots/build/baseline/iphone-6.9 out/raw/iphone-6.9
+node screenshots/scripts/compare-captures.cjs <baseline-dir> <actual-dir>
 python3 screenshots/scripts/verify-isolation.py androidApp/build/outputs/apk/debug/androidApp-debug.apk
 ```
 
-The comparison fails on any changed pixel or missing scene. Compare within one
-platform/runtime; Android and iOS have different text rasterization and safe areas.
-On iOS 27.0, Goldie's overridden network glyph varies between captures. Full-image
-comparison reports that difference; explicitly adding `--ignore-top=140` compares
-only the app below the system bar. All six iOS app regions matched exactly across
-two independently captured runs. See VALIDATION.md for measured limitations.
-All six Android raw images matched exactly, including system chrome, across two
-independent software-GPU captures.
+The comparison script requires `@napi-rs/canvas` to be available to Node. It fails
+on changed pixels or missing scenes. The optional `--ignore-top=<pixels>` argument
+excludes system chrome explicitly. Keep device settings and rendering backend
+consistent between captures.
+
 The isolation check inspects the merged APK manifest and the production APK's DEX
 and resources. Build the production APK without `-PcrewScreenshots=true` first.

@@ -85,6 +85,7 @@ private data class CustomSnackbarVisuals(
 
 suspend fun SnackbarHostState.showSnackbar(
     snackbarMessage: SnackbarMessage,
+    duration: SnackbarDuration = SnackbarDuration.Short,
 ): SnackbarResult =
     showSnackbar(
         visuals =
@@ -93,7 +94,7 @@ suspend fun SnackbarHostState.showSnackbar(
                 message = snackbarMessage.description.asStringAsync(),
                 variant = snackbarMessage.variant,
                 icon = snackbarMessage.icon,
-                duration = SnackbarDuration.Short,
+                duration = duration,
             ),
     )
 

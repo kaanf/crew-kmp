@@ -5,7 +5,8 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import com.kaanf.core.data.BuildEnvironment
 import com.kaanf.core.data.device.AndroidDeviceIdProvider
-import com.kaanf.core.data.networking.ConnectivityObserver
+import com.kaanf.core.data.networking.AndroidConnectivityObserver
+import com.kaanf.core.domain.networking.ConnectivityObserver
 import com.kaanf.core.data.session.SecureSessionStore
 import com.kaanf.core.data.session.AndroidSecureSessionStore
 import com.kaanf.core.data.storage.createDataStore
@@ -24,7 +25,7 @@ actual val platformCoreDataModule =
             val flags = androidContext().applicationInfo.flags
             BuildEnvironment(isDebug = flags and ApplicationInfo.FLAG_DEBUGGABLE != 0)
         }
-        single { ConnectivityObserver(androidContext()) }
+        single<ConnectivityObserver> { AndroidConnectivityObserver(androidContext()) }
         single<AppUpdateChecker> { PlayAppUpdateChecker(androidContext()) }
         single<SecureSessionStore> { AndroidSecureSessionStore(androidContext()) }
         single<HttpClientEngine> { OkHttp.create() }

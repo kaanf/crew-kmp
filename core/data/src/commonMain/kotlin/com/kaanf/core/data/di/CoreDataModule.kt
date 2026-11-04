@@ -13,6 +13,8 @@ import io.ktor.client.HttpClient
 import com.kaanf.core.data.repository.AuthSessionRepositoryImpl
 import com.kaanf.core.data.repository.UserRepositoryImpl
 import com.kaanf.core.data.repository.UserStoreImpl
+import com.kaanf.core.data.repository.ProfileBoardRepositoryImpl
+import com.kaanf.core.domain.repository.ProfileBoardRepository
 import com.kaanf.core.domain.repository.AuthSessionRepository
 import com.kaanf.core.domain.repository.SessionStorage
 import com.kaanf.core.domain.logging.CrewLogger
@@ -41,6 +43,7 @@ val coreDataModule =
         singleOf(::DataStoreLanguageStore) bind LanguageStore::class
         singleOf(::DataStoreOnboardingStore) bind OnboardingStore::class
         singleOf(::AuthSessionRepositoryImpl) bind AuthSessionRepository::class
+        singleOf(::ProfileBoardRepositoryImpl) bind ProfileBoardRepository::class
         singleOf(::UserRepositoryImpl) bind UserRepository::class
         singleOf(::UserStoreImpl) bind UserStore::class
         singleOf(::SessionRefresher)

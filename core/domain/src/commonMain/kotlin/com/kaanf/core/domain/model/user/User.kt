@@ -8,5 +8,6 @@ data class User(
     val role: String,
     val status: String,
     val isProfileComplete: Boolean,
-    val hasVerifiedEmail: Boolean
+    val hasVerifiedEmail: Boolean,
+    val publicCode: String = "",
 )

@@ -2,7 +2,7 @@
 
 package com.kaanf.game.data.repository
 
-import com.kaanf.core.data.networking.ConnectivityObserver
+import com.kaanf.core.domain.networking.ConnectivityObserver
 import com.kaanf.core.data.networking.JwtTokenInspector
 import com.kaanf.core.data.networking.SessionRefresher
 import com.kaanf.core.data.networking.UrlConstants

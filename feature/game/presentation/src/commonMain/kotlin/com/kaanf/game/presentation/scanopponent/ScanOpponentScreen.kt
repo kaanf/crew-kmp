@@ -5,6 +5,9 @@ import com.kaanf.core.presentation.snackbar.SnackbarMessage
 import com.kaanf.core.presentation.snackbar.SnackbarVariant
 import com.kaanf.core.presentation.util.UIText
 import crew.feature.game.presentation.generated.resources.scan_error_title
+import crew.feature.game.presentation.generated.resources.scan_user_not_at_event_title
+import crew.feature.game.presentation.generated.resources.scan_user_not_at_event_description
+import crew.feature.game.presentation.generated.resources.scan_user_not_at_event_action
 import org.koin.compose.koinInject
 
 import androidx.compose.foundation.background
@@ -81,6 +84,7 @@ fun ScanOpponentRoot(
     // Session state → bu ekranın ihtiyaç duyduğu dilime indir.
     val scanState = ScanOpponentState(
         isLoading = sessionState.isSendingInvite,
+        showUserNotAtEventSheet = sessionState.showUserNotAtEventSheet,
         errorMessage = sessionState.errorMessage,
         showGameRequestSheet = sessionState.showOutgoingInviteSheet,
         opponentName = sessionState.outgoingOpponentName,
@@ -103,6 +107,8 @@ fun ScanOpponentRoot(
             state = scanState,
             onAction = { action ->
                 when (action) {
+                    ScanOpponentAction.OnUserNotAtEventDismissed ->
+                        viewModel.onAction(MatchSessionAction.OnUserNotAtEventDismissed)
                     ScanOpponentAction.OnCloseClicked -> onClose()
                     is ScanOpponentAction.OnScanResult ->
                         viewModel.onAction(MatchSessionAction.OnScanResult(action.scannedMatchQrToken))
@@ -130,7 +136,35 @@ fun ScanOpponentScreen(
     onAction: (ScanOpponentAction) -> Unit,
 ) {
     BackHandler {
-        onAction(ScanOpponentAction.OnCloseClicked)
+        onAction(
+            if (state.showUserNotAtEventSheet) ScanOpponentAction.OnUserNotAtEventDismissed
+            else ScanOpponentAction.OnCloseClicked,
+        )
+    }
+
+    if (state.showUserNotAtEventSheet) {
+        ContainerBottomSheet(
+            onDismiss = { onAction(ScanOpponentAction.OnUserNotAtEventDismissed) },
+        ) {
+            Column(
+                modifier = Modifier.padding(24.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                Text(
+                    text = stringResource(Res.string.scan_user_not_at_event_title),
+                    style = MaterialTheme.typography.titleLarge,
+                )
+                Text(
+                    text = stringResource(Res.string.scan_user_not_at_event_description),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                BaseButton(
+                    text = stringResource(Res.string.scan_user_not_at_event_action),
+                    onClick = { onAction(ScanOpponentAction.OnUserNotAtEventDismissed) },
+                    filled = true,
+                )
+            }
+        }
     }
 
     if (state.showGameRequestSheet) {
@@ -166,7 +200,7 @@ fun ScanOpponentScreen(
     // QrScanner her karede onCompletion çağırır; mandal davet spam'ini önler. Ama davet akışı
     // (gönderim + bekleme sheet'i) bitince yeniden kurulmalı: başarıda ekran RpsReady'e pop'lanır,
     // hata/redde idle'a döner → mandal sıfırlanır, kamera tekrar taramaya hazır.
-    val inviteInFlight = state.isLoading || state.showGameRequestSheet
+    val inviteInFlight = state.isLoading || state.showGameRequestSheet || state.showUserNotAtEventSheet
     var handled by remember { mutableStateOf(false) }
     // Tarayıcı hataları her karede tekrar edebilir; her farklı mesaj bir kez gösterilir.
     val reportedErrors = remember { mutableSetOf<String>() }
@@ -184,7 +218,7 @@ fun ScanOpponentScreen(
                 QrCameraScanner(
                     modifier = Modifier.fillMaxSize(),
                     onResult = { result ->
-                        if (!handled) {
+                        if (!handled && !inviteInFlight) {
                             handled = true
                             onAction(ScanOpponentAction.OnScanResult(scannedMatchQrToken = result))
                         }

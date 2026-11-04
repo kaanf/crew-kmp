@@ -7,7 +7,9 @@ kotlin {
         commonMain {
             dependencies {
                 implementation(libs.kotlin.stdlib)
+                implementation(libs.jetbrains.compose.backhandler)
 
+                implementation(projects.core.domain)
                 implementation(projects.core.presentation)
 
                 implementation(libs.squircle.shape)

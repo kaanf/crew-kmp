@@ -9,6 +9,7 @@ import androidx.navigation.toRoute
 import com.kaanf.home.presentation.dashboard.DashboardRoot
 import com.kaanf.home.presentation.eventdetail.EventDetailRoot
 import com.kaanf.home.presentation.profile.ProfileRoot
+import com.kaanf.home.presentation.profileboard.ProfileBoardRoot
 import com.kaanf.home.presentation.ticketqr.TicketQrRoot
 
 fun NavGraphBuilder.homeGraph(
@@ -28,10 +29,19 @@ fun NavGraphBuilder.homeGraph(
                     }
                 },
                 onProfileClicked = {
-                    navController.navigate(HomeGraphRoutes.Profile) {
+                    navController.navigate(HomeGraphRoutes.ProfileBoard) {
                         restoreState = true
                         launchSingleTop = true
                     }
+                },
+            )
+        }
+
+        composable<HomeGraphRoutes.ProfileBoard> {
+            ProfileBoardRoot(
+                onClose = { navController.popBackStack() },
+                onEditProfile = {
+                    navController.navigate(HomeGraphRoutes.Profile) { launchSingleTop = true }
                 },
             )
         }

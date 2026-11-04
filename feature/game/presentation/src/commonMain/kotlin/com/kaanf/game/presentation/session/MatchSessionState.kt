@@ -20,6 +20,10 @@ data class MatchSessionState(
     val lobbyMembers: List<LobbyMember> = emptyList(),
     val lobbyTotalCount: Int = 0,
     val showGameStartSheet: Boolean = false,
+    val profileBoard: com.kaanf.core.domain.model.profileboard.ProfileBoard = com.kaanf.core.domain.model.profileboard.ProfileBoard(),
+    val qrRender: com.kaanf.core.domain.model.profileboard.BoardQrRender? = null,
+    val publicCode: String = "",
+    val showUserNotAtEventSheet: Boolean = false,
     val matchQrToken: String? = null,
     val currentUserId: String? = null,
     /** Kendi profil fotomuz (kimliğe bağlı, maça özel değil); "ben" avatarlarında kullanılır. */

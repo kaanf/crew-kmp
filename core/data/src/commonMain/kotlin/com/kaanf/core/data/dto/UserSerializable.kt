@@ -12,4 +12,5 @@ data class UserSerializable(
     val status: String = "",
     val hasVerifiedEmail: Boolean = false,
     val isProfileComplete: Boolean = false,
+    val publicCode: String = "",
 )

@@ -56,7 +56,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kaanf.core.designsystem.component.image.BaseImage
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.theme.AccessShapes
-import com.kaanf.core.domain.review.appReviewUrl
+import com.kaanf.core.presentation.review.appReviewUrl
 import com.kaanf.game.domain.model.EventMemory
 import crew.feature.game.presentation.generated.resources.Res
 import crew.feature.game.presentation.generated.resources.memories_you_badge

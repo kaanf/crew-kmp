@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -55,6 +56,13 @@ fun App(
     val snackbarController: SnackbarController = koinInject()
     val snackbarHostState = remember { SnackbarHostState() }
     val snackbarScope = rememberCoroutineScope()
+    val persistentSnackbar by snackbarController.persistent.collectAsStateWithLifecycle()
+    val persistentHostState = remember { SnackbarHostState() }
+    LaunchedEffect(persistentSnackbar) {
+        persistentSnackbar?.let {
+            persistentHostState.showSnackbar(it.message, duration = SnackbarDuration.Indefinite)
+        }
+    }
 
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination
     val isInGameGraph = currentDestination?.hierarchy?.any { destination ->
@@ -131,7 +139,7 @@ fun App(
             }
 
             CrewSnackbarHost(
-                snackbarHostState = snackbarHostState,
+                snackbarHostState = if (snackbarHostState.currentSnackbarData != null) snackbarHostState else persistentHostState,
                 modifier =
                     Modifier
                         .align(Alignment.TopCenter)

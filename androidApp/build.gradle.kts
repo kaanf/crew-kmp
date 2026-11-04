@@ -21,6 +21,7 @@ dependencies {
 
     implementation(projects.composeApp)
     implementation(projects.core.domain)
+    implementation(projects.core.presentation)
     implementation(projects.feature.auth.presentation)
 
     implementation(platform(libs.androidx.compose.bom))

@@ -3,6 +3,9 @@ package com.kaanf.core.presentation.snackbar
 import com.kaanf.core.presentation.util.UIText
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
 /**
  * App geneli snackbar otoritesi. ViewModel'ler bu controller üzerinden mesaj yollar;
@@ -13,10 +16,23 @@ class SnackbarController {
     private val _messages = Channel<SnackbarMessage>(Channel.BUFFERED)
     val messages = _messages.receiveAsFlow()
 
+    private val _persistent = MutableStateFlow<PersistentSnackbar?>(null)
+    val persistent = _persistent.asStateFlow()
+
+    fun showPersistent(id: String, message: SnackbarMessage) {
+        _persistent.value = PersistentSnackbar(id, message)
+    }
+
+    fun dismissPersistent(id: String) {
+        _persistent.update { if (it?.id == id) null else it }
+    }
+
     suspend fun show(message: SnackbarMessage) {
         _messages.send(message)
     }
 }
+
+data class PersistentSnackbar(val id: String, val message: SnackbarMessage)
 
 data class SnackbarMessage(
     val title: UIText,
