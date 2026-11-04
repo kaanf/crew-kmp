@@ -31,10 +31,15 @@ need comparable device/build/scenario measurements. A task listing is not a pass
 
 Use the [PR template](.github/PULL_REQUEST_TEMPLATE.md). Lead with the concrete problem
 and resulting behavior; include actual checks and migration/release impact where relevant.
-The inspected CI runs for PRs from `dev` into `main`, main pushes and manual triggers.
-This does not establish a mandatory branch naming or merge/review policy. The existing
-agent preference uses conventional commits for an explicitly requested push; broader
-repository commit policy remains unconfirmed.
+Follow the accepted [branch strategy](docs/BRANCH_STRATEGY.md): task branches start
+from `dev`, target `dev` and are squash-merged by the owner. Releases use a `dev` → `main`
+PR with a merge commit. Agents complete implementation tasks through commit, push and
+PR creation by default; explicit local-only instructions take precedence. Merge, tagging
+and distribution require separate instructions.
+
+The existing CI only runs PR jobs for `dev` → `main`; expanding coverage to `dev` targets
+and hotfix/synchronization PRs remains necessary. Policy adoption does not configure
+branch protection or create the remote `dev` branch; see the strategy's setup requirements.
 
 Update the canonical affected document and record significant accepted tradeoffs through
 [ADRs](docs/decisions/README.md). Community policy drafts below require owner adoption;

@@ -5,6 +5,7 @@
 | Information | Canonical location |
 | --- | --- |
 | Short AI working rules / task routing | AGENTS.md |
+| Branches, commits, agent push/PR completion and release merges | docs/BRANCH_STRATEGY.md |
 | Project tools / configured versus usable | docs/AI_TOOLS.md |
 | Actual structure / representative paths | docs/PROJECT_MAP.md |
 | Exact setup/build/check commands | docs/COMMANDS.md |

@@ -3,6 +3,9 @@
 Review the diff and enough surrounding code/call sites to understand behavior. Prioritize
 observable regressions, security/data risks and platform failures. Avoid speculative style
 findings already handled by tooling. Do not require your preferred architecture everywhere.
+For PRs, check the base and merge method against [BRANCH_STRATEGY](../BRANCH_STRATEGY.md).
+Task branches target `dev`; release and hotfix PRs target `main`. Required checks must
+actually run; a skipped job is not passing validation. The owner performs merges.
 
 ## Review dimensions
 

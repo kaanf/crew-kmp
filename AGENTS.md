@@ -35,14 +35,18 @@ static `ComposeApp` framework hosted by SwiftUI. See [project map](docs/PROJECT_
   state. Avoid deep nesting, speculative abstractions and unrelated formatting.
 - Run checks appropriate to the change; distinguish passed, failed, blocked and not run.
   Android success does not verify iOS; static review does not prove runtime performance.
-- When the user says “push”, stage related changes, write a conventional commit,
-  commit and push without an additional confirmation, subject to applicable authorization.
+- Follow [BRANCH_STRATEGY](docs/BRANCH_STRATEGY.md) for implementation tasks: branch
+  from `dev`, validate, commit related changes, push and open a PR to `dev` by default.
+  Respect explicit local-only instructions. Do not develop/push directly on `dev` or
+  `main`; the owner merges PRs and separately authorizes releases. If `origin/dev` is
+  missing, report the setup gap instead of silently using `main`.
 
 ## Read on demand (paths relative to repository root)
 
 | Work | Read before implementing |
 | --- | --- |
 | First task / unfamiliar module | [PROJECT_MAP](docs/PROJECT_MAP.md), [COMMANDS](docs/COMMANDS.md) |
+| Any implementation / Git / PR | [BRANCH_STRATEGY](docs/BRANCH_STRATEGY.md), [WORKFLOW](docs/ai/WORKFLOW.md) |
 | Tool selection / automation | [AI_TOOLS](docs/AI_TOOLS.md), [COMMANDS](docs/COMMANDS.md) |
 | Feature / cross-module change | [ARCHITECTURE](docs/ARCHITECTURE.md), [DOMAIN](docs/DOMAIN.md), [WORKFLOW](docs/ai/WORKFLOW.md) |
 | Shared Kotlin / platform boundary | [KMP](docs/KMP.md), [CODING_STANDARDS](docs/CODING_STANDARDS.md) |

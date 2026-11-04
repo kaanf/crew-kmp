@@ -9,6 +9,9 @@ Confirmed by the project owner on 2026-11-04:
 - Current application code is the design reference. Figma may be connected later.
 - The backend is the sibling `../crew-api` repository; its outdated README is not evidence.
 - Copilot is not used. No Copilot adapter is needed.
+- Development uses task branches into `dev`, followed by release PRs into `main`.
+  The owner merges; agents prepare, validate, commit, push and open task PRs by default.
+  See [BRANCH_STRATEGY](docs/BRANCH_STRATEGY.md) for merge methods and setup gaps.
 
 These decisions do not create a release authorization, grant repository permissions,
 select a license or establish external contribution terms. The owner has approved a
