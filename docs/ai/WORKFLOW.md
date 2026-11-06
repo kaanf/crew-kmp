@@ -30,6 +30,10 @@ Do not turn routine reversible work into an unnecessary approval ceremony.
 Use existing patterns and the smallest coherent change. Keep state, lifecycle/cancellation,
 errors and platform boundaries explicit. Avoid incidental framework/toolchain changes.
 Preserve unrelated work. Do not modify tests or instructions solely to conceal a defect.
+When a tool, SDK, service, integration or build workflow changes, update affected existing
+project documents in this same change without waiting for a separate request. Use the
+[documentation routing](CONTEXT_POLICY.md#documentation-updates-required-with-implementation)
+to select inventory, dependency, architecture, command and integration guides.
 
 ## 4. Verify
 
@@ -40,7 +44,7 @@ comparable measurements. Document blockers without fabricating success.
 ## 5. Finish
 
 Summarize resulting behavior, significant tradeoffs, actual checks and coverage limitations.
-Update canonical documentation only where invalidated. Create a concise handoff if the task
+Confirm affected canonical documentation matches the implementation and validate its links/source paths. Create a concise handoff if the task
 is incomplete; do not leave vague “continue later” notes without state and next action.
 
 When a merge is requested, target `dev` for every change branch, including fixes and

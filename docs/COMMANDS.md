@@ -2,7 +2,9 @@
 
 Reviewed 2026-11-04; HEAD and working-tree context: [PROJECT_MAP](PROJECT_MAP.md).
 All commands below run from the repository root unless noted. Tool inventory:
-[AI_TOOLS](AI_TOOLS.md). No application build/test/release success is claimed.
+[AI_TOOLS](AI_TOOLS.md). The original inventory below is dated 2026-11-04.
+Later observability execution evidence is linked below; no commands were rerun for the
+2026-11-06 documentation reconciliation.
 
 ## Prerequisites
 
@@ -62,3 +64,18 @@ operation may be not run with a known prerequisite limitation; that is not a fai
 For documentation-only changes validate links, source references and the diff. Do not
 run broad application tests simply to populate this table. Do not clear global caches
 or upgrade toolchains as an incidental response to configuration failures.
+
+## Observability command evidence (reconciled 2026-11-06)
+
+The following are prior recorded runs, not fresh test results from this documentation change.
+[SENTRY](SENTRY.md) and [POSTHOG](POSTHOG.md) own detailed setup and platform limitations.
+
+| Purpose | Exact command / entry point | Recorded result |
+| --- | --- | --- |
+| PostHog shared/native checks | `./gradlew --console=plain :androidApp:compileDebugKotlin :composeApp:compileKotlinIosSimulatorArm64 :core:domain:iosSimulatorArm64Test :core:data:iosSimulatorArm64Test` | Passed on 2026-11-04; 34 domain and 37 data tests, zero failures/errors/skips. Android compile passed again after local-setting support. |
+| Unsigned Swift host with SDK linkage | `xcodebuild -project iosApp/iosApp.xcodeproj -scheme iosApp -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath /tmp/crew-posthog-xcode CODE_SIGNING_ALLOWED=NO build` | Passed on 2026-11-04 for PostHog, including Swift setup and ARM64 host linkage. Earlier Sentry host success is recorded in its guide. No signed archive/device launch implied. |
+| Controlled Sentry API correlation | In sibling `../crew-api`: `./gradlew sentryVerificationServer`; Android debug verification activity or simulator `crew://debug/sentry` entry | Prior Android HTTP 500 correlation/device delivery evidence and corrected mobile DSN resolution are in [SENTRY](SENTRY.md). Not an automatic crash test; physical iOS delivery and release symbolication remain unverified. |
+
+PostHog screen ranking uses `screen_viewed` broken down by custom `screen_name`; the
+Top events summary groups event names. No remote-report creation or full match-funnel
+verification is claimed. Never put DSNs, project tokens or personal API keys in command examples.

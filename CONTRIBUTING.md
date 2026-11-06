@@ -46,6 +46,12 @@ checks. Report passed, failed, blocked and not run separately, including platfor
 UI work needs appropriate states/accessibility and Android/iOS evidence; performance claims
 need comparable device/build/scenario measurements. A task listing is not a passing build.
 
+Tool, SDK, service, integration and build workflow changes must include updates to the
+affected existing project documentation in the same change. AI contributors do this
+without a separate reminder; see the [documentation routing](docs/ai/CONTEXT_POLICY.md#documentation-updates-required-with-implementation).
+Record safe configuration names, platform limits and actual verification; never commit
+local credentials or claim that an SDK declaration proves live service delivery.
+
 ## Pull requests and decisions
 
 Use the [PR template](.github/PULL_REQUEST_TEMPLATE.md). Lead with the concrete problem

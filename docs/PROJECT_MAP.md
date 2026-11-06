@@ -52,6 +52,23 @@ the current conventions; catalog desktop entries/comments do not create targets.
 | Reusable UI | `core/designsystem/src/commonMain/kotlin/com/kaanf/core/designsystem/theme/CrewTheme.kt`, `core/designsystem/src/commonMain/kotlin/com/kaanf/core/designsystem/component/button/BaseButton.kt` | Theme and shared controls |
 | Representative tests | `core/data/src/commonTest/kotlin/com/kaanf/core/data/networking/SessionRefreshFlowTest.kt`, `core/domain/src/commonTest/kotlin/com/kaanf/core/domain/model/profileboard/BoardStickerPlacementTest.kt` | Session races and pure geometry; source presence is not execution evidence |
 
+## Observability source map (added 2026-11-06)
+
+Sentry integration is in `dev` at `122535a`; PostHog was merged into `dev` at `43453be`.
+These additions supplement the dated module inventory above.
+
+| Need | Repository-relative source | Guide |
+| --- | --- | --- |
+| Native crash/API reporting setup | `androidApp/src/main/java/com/kaanf/crew/androidapp/SentrySetup.kt`, `iosApp/iosApp/SentrySetup.swift` | [SENTRY](SENTRY.md) |
+| Shared request correlation / Swift bridge | `core/data/src/commonMain/kotlin/com/kaanf/core/data/networking/RequestDiagnostics.kt`, `composeApp/src/commonMain/kotlin/com/kaanf/crew/HttpDiagnosticsBridge.kt` | [SENTRY](SENTRY.md) |
+| Product event contract and delivery sink | `core/domain/src/commonMain/kotlin/com/kaanf/core/domain/analytics/`, `core/data/src/commonMain/kotlin/com/kaanf/core/data/analytics/`, `composeApp/src/commonMain/kotlin/com/kaanf/crew/AnalyticsBridge.kt` | [POSTHOG](POSTHOG.md) |
+| Native analytics setup | `androidApp/src/main/java/com/kaanf/crew/androidapp/PostHogSetup.kt`, `iosApp/iosApp/PostHogSetup.swift` | [POSTHOG](POSTHOG.md) |
+
+Native SDK versions are listed in [DEPENDENCIES](DEPENDENCIES.md); configured-versus-verified
+status is in [AI_TOOLS](AI_TOOLS.md). Shared screen events live in
+`composeApp/src/commonMain/kotlin/com/kaanf/crew/App.kt`, and match events in
+`feature/game/presentation/src/commonMain/kotlin/com/kaanf/game/presentation/session/MatchSessionViewModel.kt`.
+
 ## Build and external boundaries
 
 - Wrapper: `gradle/wrapper/gradle-wrapper.properties`; catalog: `gradle/libs.versions.toml`.

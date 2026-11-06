@@ -45,6 +45,11 @@ static `ComposeApp` framework hosted by SwiftUI. See [project map](docs/PROJECT_
   from `dev`; do not silently reuse it or branch a new feature from it. Preserve existing
   work and keep unrelated changes on their original branch. This warning alone does not
   require an extra approval step for work the user has already authorized.
+- When adding, changing or removing a project tool, SDK, service, integration or build
+  workflow, update the affected existing project Markdown files in the same change,
+  without waiting for a separate request. Follow the routing in
+  [CONTEXT_POLICY](docs/ai/CONTEXT_POLICY.md#documentation-updates-required-with-implementation);
+  keep configuration examples safe and record actual verification and platform limits.
 - When the user says “push”, stage related changes, write a conventional commit,
   commit and push without an additional confirmation, subject to applicable authorization.
 - Always merge change branches into `dev` first, including fixes and documentation.
@@ -67,11 +72,12 @@ static `ComposeApp` framework hosted by SwiftUI. See [project map](docs/PROJECT_
 | Dependency / significant tradeoff | [DEPENDENCIES](docs/DEPENDENCIES.md), [decisions](docs/decisions/README.md) |
 | Review / PR | [REVIEW](docs/ai/REVIEW.md), [CONTRIBUTING](CONTRIBUTING.md) |
 | Release | [RELEASING](docs/RELEASING.md) |
+| Crash/API diagnostics or product analytics | [SENTRY](docs/SENTRY.md), [POSTHOG](docs/POSTHOG.md), [AI_TOOLS](docs/AI_TOOLS.md) |
 | Documentation / uncertainty | [CONTEXT_POLICY](docs/ai/CONTEXT_POLICY.md), [OPEN_QUESTIONS](docs/ai/OPEN_QUESTIONS.md) |
 
 ## Finish
 
 Report resulting behavior, relevant files, actual validation and platform limitations.
-Update only documentation invalidated by the change. Do not weaken instructions/tests
+Update affected existing documentation as part of the change; avoid unrelated edits. Do not weaken instructions/tests
 just to make an implementation appear compliant. Use the
 [handoff template](docs/ai/HANDOFF_TEMPLATE.md) only when transferring unfinished work.
