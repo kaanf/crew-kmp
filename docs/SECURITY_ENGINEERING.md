@@ -26,6 +26,24 @@ security audit. Reporting-policy draft: [SECURITY](../SECURITY.md).
   `androidApp/src/main/res/xml/backup_rules.xml`, `androidApp/src/main/res/xml/data_extraction_rules.xml`.
   Runtime backup/restore behavior was not exercised.
 
+## Observability data boundaries (added 2026-11-06)
+
+- [Sentry](SENTRY.md) keeps exception types/stack traces and allowlisted HTTP metadata;
+  request/user/extra data and exception messages are removed by native filters. No bodies,
+  full URLs, QR payloads or account identity are intentionally attached. Replay, screenshots,
+  view hierarchy and tracing are disabled. No DSN means no SDK reporting.
+- [PostHog](POSTHOG.md) sends seven explicit event types with bounded screen/category
+  properties, platform/version and SDK session/library metadata. Native filters drop other
+  event types/properties and disable IP geolocation enrichment; the ingestion service still
+  receives the connection IP. No identify, person profiles, replay or blanket autocapture.
+- DSNs/project tokens belong in ignored local files or build configuration; server personal
+  API keys must never enter the client. Do not copy configured values into documentation.
+  Debug/release analytics activation, region selection and privacy/opt-out decisions are
+  detailed in the integration guides; SDK installation is not production authorization.
+- No user/session correlation is introduced between Sentry and PostHog. Native SDK queues
+  and transports are independent of the authenticated Crew API client. Source configuration
+  and prior checks do not establish complete payload safety on every platform or build.
+
 ## Review checks
 
 Treat decoded QR, links, user fields, backend responses and remote media as untrusted.

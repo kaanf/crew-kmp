@@ -1,8 +1,8 @@
 # AI tools and test inventory
 
-Initial inventory: 2026-11-03. Documentation/configuration update: 2026-11-04. Scope: instructions, skill directories, MCP examples, test tools, and scripts in this repository's working tree only. User-level settings, global skills/plugins, and session tools are excluded. Deleted files are not considered available. Existing user changes were preserved.
+Initial inventory: 2026-11-03. Documentation/configuration update: 2026-11-06 (Sentry/PostHog inventory). Scope: instructions, skill directories, MCP examples, test tools, and scripts in this repository's working tree only. User-level settings, global skills/plugins, and session tools are excluded. Deleted files are not considered available. Existing user changes were preserved.
 
-**Status terminology:** “Present” means a file or executable was found; “verified” means the stated read-only check succeeded. Neither implies passing tests or authorized access to remote services. No application builds, tests, MCP servers, releases, or installations were run. On 2026-11-04, offline Gradle task listing completed successfully; task availability is distinct from build/test success. See [COMMANDS](COMMANDS.md) for current command evidence. Commands below are inventory references. Secret values, account details, and device identifiers are omitted.
+**Status terminology:** “Present” means a file or executable was found; “verified” means the stated read-only check succeeded. Neither implies passing tests or authorized access to remote services. The initial inventory did not run application builds/tests or external services. Later integration checks are dated in [SENTRY](SENTRY.md) and [POSTHOG](POSTHOG.md); they were not rerun for this documentation update. On 2026-11-04, offline Gradle task listing completed successfully; task availability is distinct from build/test success. See [COMMANDS](COMMANDS.md) for current command evidence. Commands below are inventory references. Secret values, account details, and device identifiers are omitted.
 
 ## Agent instructions and local skills
 
@@ -22,7 +22,20 @@ Initial inventory: 2026-11-03. Documentation/configuration update: 2026-11-04. S
 | Maestro MCP example | Mobile screen inspection and UI automation through an agent | `integrations/maestro-codex-config.example.toml`; server command: `maestro mcp` | Example configuration only, not an active setup. No `.codex/config.toml` or `.mcp.json` found in the project. CLI found on PATH; MCP connectivity and device automation unverified. |
 | Claude Maestro notes | Instructions for optionally registering a stdio MCP server in Claude Code | `integrations/maestro-claude-notes.md` | Setup notes, not an active server registration. Recommends checking CLI help for exact registration syntax. |
 
+## Application observability integrations
+
+These are app SDK integrations, not connected AI/MCP tools. Their presence does not grant
+access to the Sentry or PostHog dashboards. Inventory reconciled with source on 2026-11-06.
+
+| Tool | Purpose and implementation | Configuration / guide | Evidence and limits |
+| --- | --- | --- | --- |
+| Sentry | Native Android crash reporting/API 5xx warnings and iOS reporting; shared Ktor `RequestDiagnostics.kt` emits safe callbacks via `HttpDiagnosticsBridge.kt`. Hosts: `androidApp/src/main/java/com/kaanf/crew/androidapp/SentrySetup.kt`, `iosApp/iosApp/SentrySetup.swift` | `CREW_SENTRY_MOBILE_DSN`; ignored Android `local.properties` key `sentry.mobile.dsn`; iOS `Configuration/Sentry.example.xcconfig`. See [SENTRY](SENTRY.md). No DSN disables reporting. | Android 8.62.0; Cocoa 9.30.2. Prior Android/shared iOS builds and unsigned Swift host build passed. Owner confirmed a handled Android exception in the dashboard after DSN correction. Physical iOS ingestion, real native crashes and release symbols remain unverified. Replay/tracing disabled. |
+| PostHog | Anonymous explicit product events via domain `Analytics`, data `ProductAnalytics`, shared `AnalyticsBridge.kt` and native `PostHogSetup` hosts | `CREW_POSTHOG_KEY`, `CREW_POSTHOG_HOST`, `CREW_POSTHOG_ENABLED`, `CREW_POSTHOG_DEBUG_ENABLED`; ignored local files and [POSTHOG](POSTHOG.md) explain debug/release behavior. EU/US HTTPS ingestion hosts are allowlisted; no default region. | Android 3.75.3; iOS 3.59.3. Prior Android/shared iOS and Swift host builds passed; 34 domain + 37 data simulator tests passed. Owner reported `screen_viewed`/`app_opened` in Top events; full payload, match funnel, device/platform coverage and production collection remain unverified. Replay/autocapture/identify disabled. |
+
 ## Testing, quality, and CI
+
+The table retains the initial inventory snapshot. Dated integration results above and in
+[COMMANDS](COMMANDS.md) supplement its original not-run/unverified entries.
 
 | Tool / scope | Task and source | Known command | Status / limitations |
 |---|---|---|---|
@@ -76,4 +89,4 @@ The version/PATH/device/package checks below were recorded on 2026-11-03; they w
 - Ruby, Bundler, and fastlane prerequisites were found on PATH; dependencies and release access remain unverified.
 - The screenshot scripts' required `@napi-rs/canvas` package could not be resolved from the repository root.
 - On 2026-11-04, the owner reported a Galaxy S24+ and iPhone 11 available for physical testing; see [TESTING](TESTING.md). This does not supersede the earlier disconnected-device observation or constitute a fresh connection/test check. OS versions and lower-end Android coverage remain unverified.
-- The normal Gradle task graph was listed successfully on 2026-11-04. SDK packages, emulator images, MCP connections, test fixtures, and CI results remain unverified. No passing test results are claimed.
+- The normal Gradle task graph was listed successfully on 2026-11-04. SDK packages, emulator images, MCP connections, test fixtures, and CI results remain unverified. The original tool-availability inventory claims no passing application tests; later observability results are recorded separately above.

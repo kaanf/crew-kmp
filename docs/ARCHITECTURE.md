@@ -26,6 +26,26 @@ live in `core:presentation`. Some ViewModels call repository interfaces directly
 No active SQLDelight implementation was found; Room catalog/convention entries alone
 are not evidence of a runtime database.
 
+## Observability boundaries (updated 2026-11-06)
+
+Sentry and PostHog are initialized by the Android Application and SwiftUI host before
+shared application flows. Official SDK dependencies live in `androidApp` and the Xcode
+project; domain code has no SDK dependency.
+
+- **Sentry:** the shared Ktor `RequestDiagnostics` plugin in `core:data` creates and
+  propagates opaque Crew API request IDs and calls `HttpDiagnostics.onResponse`.
+  `composeApp/HttpDiagnosticsBridge.kt` exposes the callback to Swift. Native adapters
+  retain safe HTTP breadcrumbs and report 5xx warnings. It does not create distributed
+  traces or join PostHog sessions to Sentry users. [SENTRY](SENTRY.md) documents redaction,
+  backend correlation, configuration and verification gaps.
+- **PostHog:** `core:domain` defines typed `AnalyticsEvent`/`Analytics` and foreground
+  session deduplication. `core:data` binds the best-effort `ProductAnalytics` sink via
+  Koin. Root typed navigation emits screen events and the match ViewModel emits action/
+  success events. `composeApp/AnalyticsBridge.kt` exports the safe sink to Swift. Native
+  adapters own anonymous identity, queueing and event/property filters. Replay, blanket
+  autocapture and identification are disabled. [POSTHOG](POSTHOG.md) defines the vocabulary,
+  activation gates, privacy decisions and counting limitations.
+
 ## Representative feature: dashboard
 
 1. `HomeGraphRoutes.Dashboard` in

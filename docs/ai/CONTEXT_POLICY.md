@@ -14,6 +14,30 @@
 | Unresolved facts/decisions | docs/ai/OPEN_QUESTIONS.md |
 | Community contribution/reporting policies | Root community documents |
 
+## Documentation updates required with implementation
+
+Adding, changing or removing a project tool, SDK, service, integration or build workflow
+includes updating affected existing documentation in the same branch/change, without a
+separate user reminder. This is an AI contributor responsibility, not an installed Git hook
+or an automatic scanner. Do not mark implementation complete while its relevant documents
+still describe the old setup. Confirmed by the owner on 2026-11-06.
+
+| Change affects | Update existing canonical files as applicable |
+| --- | --- |
+| Tool/service availability and purpose | `docs/AI_TOOLS.md` |
+| SDK/dependency versions and target support | `docs/DEPENDENCIES.md` |
+| Module ownership, source locations or platform bridges | `docs/PROJECT_MAP.md`, `docs/ARCHITECTURE.md`, `docs/KMP.md` |
+| Setup, configuration, commands or execution evidence | `docs/COMMANDS.md` and the existing integration guide, such as `docs/SENTRY.md` or `docs/POSTHOG.md` |
+| Privacy, credentials, data collection or release requirements | `docs/SECURITY_ENGINEERING.md`, `docs/RELEASING.md` and the integration guide |
+| Test coverage or verification workflow | `docs/TESTING.md` and dated command evidence |
+
+Select only affected documents; do not copy the full setup into every file. Extend an
+existing guide before creating another. Record purpose, source/configuration locations,
+safe setting names, platform scope and actual validation. Distinguish configured, built,
+locally tested, owner-reported and remotely verified status; do not include tokens, DSNs,
+private account data or live QR payloads. Validate links/source paths and the documentation
+diff before finishing. New commands need evidence, not guesses.
+
 ## Fact status
 
 Use Confirmed (with code/contract/owner evidence), Proposed, UNVERIFIED or Superseded.

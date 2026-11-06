@@ -3,8 +3,9 @@
 ## Purpose and status
 
 The first, intentionally small PostHog integration is implemented for Android/iOS.
-Collection remains disabled by default; no project key is committed. Live ingestion
-and reports are not verified. The SDK starts only with explicit build configuration.
+Collection remains disabled by default; no project key is committed. The owner reported
+`screen_viewed` and `app_opened` in the Top events view during setup. This is owner-reported
+basic ingestion, not an independently verified payload audit or complete funnel/platform test. The SDK starts only with explicit build configuration.
 The aim is to learn where users get stuck and which parts of the social match/task
 experience they use, without collecting sensitive content or adding broad tracking.
 
@@ -104,9 +105,8 @@ user behaved a certain way; pair quantitative findings with usability observatio
 - Experiments/feature flags, surveys, push attribution, and marketing attribution
 - Backend event tracking or user/session correlation with Sentry
 - Sending personal data or gameplay content to analytics
-- Any claim that installation, consent requirements, costs, or SDK compatibility have
-  been verified; those need checking against current PostHog documentation during
-  implementation
+- Legal compliance or current cost guarantees; build checks below cover compilation
+  and linkage, not production consent, billing or complete runtime behavior
 
 ## Implemented configuration and boundaries (2026-11-04)
 
@@ -177,3 +177,18 @@ Sources checked: [KMP requirements](https://posthog.com/docs/libraries/kmp),
 - Not run: physical-device flows, release archive/R8, live ingestion, remote reports and
   consent/opt-out UX verification. No production collection was enabled. Build success
   does not establish device lifecycle behavior or delivery to a PostHog project.
+
+## Reading screen usage (documented 2026-11-06)
+
+`screen_viewed` is one event name shared by all allowlisted destinations. Screen names
+are carried in the custom `screen_name` event property (for example `dashboard` or
+`profile`); automatic `$screen` tracking is disabled. The default URL/Screen field can
+therefore be empty. Top events counts event names and does not rank individual screens.
+For screen ranking, analyze `screen_viewed` with a `screen_name` breakdown. Other events,
+such as `app_opened`, do not include `screen_name`.
+
+For general match completion use `match_started` → `match_completed`. An additional
+`task_selected` step covers the participant who picks the task, so it is not a symmetric
+funnel for both players. Debug traffic and anonymous unique IDs are not production
+account counts. Actual field delivery and completed report configuration still need
+checking in the selected PostHog project.

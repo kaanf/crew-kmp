@@ -3,6 +3,7 @@
 Observed 2026-11-04; canonical versions: `gradle/libs.versions.toml`. Wrapper:
 `gradle/wrapper/gradle-wrapper.properties`; convention plugins: `build-logic/convention/`.
 Version declarations were read locally; no external compatibility certification is implied.
+Observability rows added from current source on 2026-11-06; other inventory dates remain unchanged.
 
 | Concern | Configured version / source | Actual use / limits |
 | --- | --- | --- |
@@ -15,6 +16,8 @@ Version declarations were read locally; no external compatibility certification 
 | Persistence | DataStore 1.1.7 | Settings and board JSON cache; secure sessions use platform APIs |
 | Images | Coil 3.3.0 | Shared image loading with Ktor integration |
 | QR / camera | Chaintech QR Kit 3.1.3; Android CameraX/ML Kit catalog entries | Inspect feature platform source/build dependencies for changes; catalog is not execution proof |
+| Crash/API diagnostics | Sentry Android 8.62.0 (`libs.sentry.android`); Cocoa 9.30.2 (exact SwiftPM pin) | Native hosts plus shared Ktor callbacks; no Sentry dependency in domain. [Setup, data policy and validation](SENTRY.md); release mapping/dSYM uploads remain unconfigured. |
+| Product analytics | PostHog Android 3.75.3 (`libs.posthog.android`); iOS 3.59.3 (exact SwiftPM pin) | Native hosts consume shared bounded events; [setup and validation](POSTHOG.md), [ADR-002](decisions/002-posthog-native-adapters.md). No KMP SDK/toolchain upgrade; replay and autocapture disabled. |
 | Test/performance | kotlin-test; coroutine test; JUnit; AndroidX Macrobenchmark 1.5.0-rc02 | See [TESTING](TESTING.md) and actual module build files |
 | Release | Gemfile/Gemfile.lock, `fastlane/Fastfile`; Firebase host integrations | Bundle/signing/service access unverified |
 
