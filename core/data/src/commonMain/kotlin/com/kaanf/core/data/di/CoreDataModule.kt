@@ -1,6 +1,9 @@
 package com.kaanf.core.data.di
 
 import com.kaanf.core.data.BuildEnvironment
+import com.kaanf.core.data.analytics.ProductAnalytics
+import com.kaanf.core.domain.analytics.Analytics
+import com.kaanf.core.domain.analytics.ForegroundAnalytics
 import com.kaanf.core.data.session.DataStoreSessionStorage
 import com.kaanf.core.data.settings.DataStoreLanguageStore
 import com.kaanf.core.data.settings.DataStoreOnboardingStore
@@ -32,6 +35,8 @@ expect val platformCoreDataModule: Module
 val coreDataModule =
     module {
         includes(platformCoreDataModule)
+        single { ForegroundAnalytics(get()) }
+        single<Analytics> { ProductAnalytics }
         // Sürümde debug/info kayıtları hiç yazılmasın: Kermit'in kendi eşiği,
         // R8 tarafında -assumenosideeffects gerektirmeyen taşınabilir yolu.
         single<CrewLogger> { KermitLogger.applyMinSeverity(get<BuildEnvironment>().isDebug) }

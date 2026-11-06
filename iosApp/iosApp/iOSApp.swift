@@ -61,6 +61,7 @@ struct iOSApp: App {
 
     init() {
         initializeSentry()
+        initializePostHog()
         KoinHelperKt.doInitKoin()
         PushTokenBridge.shared.start()
     }

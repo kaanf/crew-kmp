@@ -14,3 +14,5 @@ No accepted ADRs were found during the 2026-11-04 documentation setup. Current i
 is described in [ARCHITECTURE](../ARCHITECTURE.md); it is not retroactively approved by an ADR.
 
 - [ADR-001: Native Sentry SDKs with shared request correlation](001-sentry-request-correlation.md) — Proposed; implemented for owner review.
+
+- [ADR-002: Native PostHog adapters](002-posthog-native-adapters.md) — Proposed; implemented for owner review.

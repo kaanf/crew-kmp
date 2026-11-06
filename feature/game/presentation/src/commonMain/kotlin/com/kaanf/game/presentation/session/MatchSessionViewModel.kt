@@ -3,6 +3,9 @@ package com.kaanf.game.presentation.session
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kaanf.core.domain.analytics.Analytics
+import com.kaanf.core.domain.analytics.AnalyticsCategory
+import com.kaanf.core.domain.analytics.AnalyticsEvent
 import com.kaanf.core.designsystem.component.avatar.avatarPaletteColor
 import androidx.compose.ui.graphics.ImageBitmap
 import com.kaanf.core.domain.util.DataError
@@ -87,7 +90,18 @@ class MatchSessionViewModel(
     private val snackbarController: SnackbarController,
     private val logger: CrewLogger,
     savedStateHandle: SavedStateHandle,
+    private val analytics: Analytics,
 ) : ViewModel() {
+    private var lastStartedMatchId: String? = null
+    private var lastCompletedMatchId: String? = null
+    private var lastAbandonedMatchId: String? = null
+
+    private fun trackCompletion(completed: Boolean, matchId: String? = _state.value.matchId) {
+        if (!completed || matchId == null || lastCompletedMatchId == matchId) return
+        lastCompletedMatchId = matchId
+        analytics.track(AnalyticsEvent.MatchCompleted)
+    }
+
     private val eventId: String = savedStateHandle.get<String>("eventId").orEmpty()
 
     private val eventChannel = Channel<MatchSessionEvent>()
@@ -322,6 +336,7 @@ class MatchSessionViewModel(
 
     private fun applySnapshot(snapshot: MatchSnapshot) {
         val phase = snapshot.toMatchPhase()
+        if (phase is Scoreboard) trackCompletion(phase.completed, snapshot.matchId)
         _state.update {
             it.copy(
                 phase = phase,
@@ -481,6 +496,10 @@ class MatchSessionViewModel(
             }
 
             is GameSocketMessage.MatchStarted -> {
+                if (lastStartedMatchId != message.matchId) {
+                    lastStartedMatchId = message.matchId
+                    analytics.track(AnalyticsEvent.MatchStarted)
+                }
                 _state.update {
                     val opponentPhotoUrl =
                         it.incomingInvite?.fromProfilePictureUrl ?: it.outgoingOpponentPhotoUrl
@@ -610,6 +629,7 @@ class MatchSessionViewModel(
             }
 
             is GameSocketMessage.TaskFinished -> {
+                trackCompletion(message.completed, message.matchId)
                 val previousScore = _state.value.currentUserScore
                 _state.update { state ->
                     val myId = state.currentUserId
@@ -885,6 +905,7 @@ class MatchSessionViewModel(
                         if (state.phase !is WinnerConfirms) return@update state
                         state.copy(phase = Scoreboard(completed = completed))
                     }
+                    trackCompletion(completed, matchId)
                     loadScoreboard()
                 }
                 .onFailure { error ->
@@ -1040,6 +1061,12 @@ class MatchSessionViewModel(
     }
 
     private fun onTaskSelected(taskId: String) {
+        val current = _state.value.phase as? WinnerPicks ?: return
+        if (current.isOffering || current.selectedTaskId == taskId) return
+        val task = current.tasks.firstOrNull { it.id == taskId } ?: return
+        analytics.track(
+            AnalyticsEvent.TaskSelected(AnalyticsCategory.valueOf(task.category.name)),
+        )
         _state.update { state ->
             val phase = state.phase as? WinnerPicks ?: return@update state
             if (phase.isOffering) return@update state
@@ -1257,6 +1284,10 @@ class MatchSessionViewModel(
         viewModelScope.launch {
             matchRepository.cancelMatch(eventId = eventId, matchId = matchId)
                 .onSuccess { isForfeit ->
+                    if (lastAbandonedMatchId != matchId) {
+                        lastAbandonedMatchId = matchId
+                        analytics.track(AnalyticsEvent.MatchAbandoned)
+                    }
                     if (!isForfeit) {
                         resetToIdle()
                         return@onSuccess
