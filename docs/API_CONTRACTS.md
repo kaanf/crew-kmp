@@ -99,7 +99,7 @@ fixed in both existing Android/iOS platform helpers.
 
 Backend `MusicController`, `FavoriteMusicService` and `SpotifyMusicCatalog` implement
 the routes. `UserRepository.updateFavoriteMusic` updates only the favorite column,
-preserving unrelated concurrent profile edits. Flyway `V33__favorite_music.sql` adds
+preserving unrelated concurrent profile edits. Flyway `V46__favorite_music.sql` adds
 nullable `user_service.users.favorite_spotify_track_id`; existing accounts start empty,
 and deleting the user removes the favorite with that row. Only the ID is persisted;
 reading a nonempty favorite requires Spotify availability. Unavailable/deleted tracks
@@ -141,3 +141,7 @@ Client Credentials token acquisition and a direct Spotify `Duman` search for mar
 credentials and catalog access at that time, not the deployed Crew API, favorite
 persistence, production quotas or usage-policy approval. No private account data was
 requested; no live Crew mutation was performed.
+
+Before first deployment, the unapplied favorite migration was renumbered from V33 to
+V46 during main/dev reconciliation because main already contained migrations V33–V45.
+Existing applied migrations were preserved.
