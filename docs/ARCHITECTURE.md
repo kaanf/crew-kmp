@@ -84,3 +84,13 @@ an audit recommendation is not an accepted ADR.
 :composeApp:compileKotlinIosSimulatorArm64` completed successfully after the domain,
 review adapter and connectivity interface cleanup. Android and iOS simulator sources
 compiled; application launch, device behavior and tests were not exercised.
+
+## Favorite music boundary (2026-11-06)
+
+`core:domain` owns `MusicRepository` and `model/music` metadata/page types;
+`core:data` owns serializable DTOs, cancellation-aware `MusicRepositoryImpl` and Koin
+binding in `CoreDataModule`. Both mobile targets call Crew API using the existing
+session. No UI, navigation or native-host integration was added. The backend alone
+owns Spotify Client Credentials and ID-only favorite persistence. There is no account
+cache, offline write queue, playback or Spotify user authorization in this feature.
+See [API_CONTRACTS](API_CONTRACTS.md#favorite-music-infrastructure-2026-11-06).

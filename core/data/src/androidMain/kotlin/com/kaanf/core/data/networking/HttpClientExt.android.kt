@@ -5,6 +5,7 @@ import com.kaanf.core.domain.util.Result
 import io.ktor.client.plugins.HttpRequestTimeoutException
 import io.ktor.client.statement.HttpResponse
 import io.ktor.util.network.UnresolvedAddressException
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
@@ -35,6 +36,8 @@ actual suspend fun <T> platformSafeCall(
         Result.Failure(DataError.Remote.REQUEST_TIMEOUT)
     } catch (e: SerializationException) {
         Result.Failure(DataError.Remote.SERIALIZATION)
+    } catch (e: CancellationException) {
+        throw e
     } catch (e: Exception) {
         currentCoroutineContext().ensureActive()
         Result.Failure(DataError.Remote.UNKNOWN)

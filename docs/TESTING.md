@@ -77,3 +77,19 @@ performance require separate evidence.
 Record command/scenario, revision/environment, result and meaningful artifacts. Report
 passed, failed, blocked and not run separately. Once relevant checks pass, broaden only
 for a new concern. Never update a screenshot baseline merely to hide an unexplained change.
+
+## Favorite music coverage (2026-11-06)
+
+`core/data/src/commonTest/kotlin/com/kaanf/core/data/MusicRepositoryTest.kt` covers
+encoded search/country/pagination, input rejection, absent favorite, save/delete routes,
+quota/unavailable errors, unsafe metadata links and cancellation. Its cancellation test
+exposed an existing platform helper defect; explicit rethrow was added on Android and
+iOS. All 44 data tests passed on iOS simulator; Android compilation passed, but these
+common tests were not executed on Android.
+
+The backend worktree `../crew-api-favorite-music` contains `SpotifyMusicCatalogTest`,
+`FavoriteMusicServiceTest` and `FavoriteMusicPersistenceTest`: 12 passing mock-provider,
+service and H2/API-security tests. H2 tests verify current-account-only favorite writes,
+preserved profile fields, Crew auth and missing-provider configuration behavior. They
+use Hibernate DDL and do not validate the PostgreSQL Flyway migration. Commands and
+runtime/provider limitations are in [COMMANDS](COMMANDS.md#favorite-music-infrastructure-verification-2026-11-06).

@@ -90,3 +90,14 @@ The version/PATH/device/package checks below were recorded on 2026-11-03; they w
 - The screenshot scripts' required `@napi-rs/canvas` package could not be resolved from the repository root.
 - On 2026-11-04, the owner reported a Galaxy S24+ and iPhone 11 available for physical testing; see [TESTING](TESTING.md). This does not supersede the earlier disconnected-device observation or constitute a fresh connection/test check. OS versions and lower-end Android coverage remain unverified.
 - The normal Gradle task graph was listed successfully on 2026-11-04. SDK packages, emulator images, MCP connections, test fixtures, and CI results remain unverified. The original tool-availability inventory claims no passing application tests; later observability results are recorded separately above.
+
+## Spotify catalog infrastructure (2026-11-06)
+
+Optional external backend integration, not an installed Spotify SDK or connected MCP.
+`SPOTIFY_CLIENT_ID` / `SPOTIFY_CLIENT_SECRET` configure backend Client Credentials.
+Mobile uses its existing Ktor/Koin/domain repository boundaries; Android and iOS hosts
+need no Spotify credentials, user login or SDK. Search and favorite get/save/clear
+contracts, setup, bounded cache/cooldown and publication limits are documented in
+[API_CONTRACTS](API_CONTRACTS.md#favorite-music-infrastructure-2026-11-06).
+Mock-provider tests and shared compilation are verified in [COMMANDS](COMMANDS.md);
+live Spotify access, production entitlement and deployed backend remain unverified.

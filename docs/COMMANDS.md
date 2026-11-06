@@ -79,3 +79,36 @@ The following are prior recorded runs, not fresh test results from this document
 PostHog screen ranking uses `screen_viewed` broken down by custom `screen_name`; the
 Top events summary groups event names. No remote-report creation or full match-funnel
 verification is claimed. Never put DSNs, project tokens or personal API keys in command examples.
+
+## Favorite music infrastructure verification (2026-11-06)
+
+Source branch: `feat/favorite-music` in mobile and the isolated backend worktree
+`../crew-api-favorite-music` (backend base `dev` at `a291f99`). No deploy/commit/push
+or live Spotify call was performed. Contract/setup: [API_CONTRACTS](API_CONTRACTS.md#favorite-music-infrastructure-2026-11-06).
+
+| Command / directory | Actual result |
+| --- | --- |
+| `./gradlew --console=plain compileKotlin` / backend worktree | Passed; server Kotlin compiled. |
+| `./gradlew --console=plain :androidApp:compileDebugKotlin :composeApp:compileKotlinIosSimulatorArm64 :core:data:iosSimulatorArm64Test` / mobile | Passed after explicit Android/iOS cancellation rethrow fix; 44 data tests, zero failures (7 new music tests). Android and shared iOS simulator source compilation passed. |
+| `./gradlew --console=plain test --tests '*SpotifyMusicCatalogTest' --tests '*FavoriteMusicServiceTest' --tests '*FavoriteMusicPersistenceTest'` / backend worktree | Passed; 12 tests covering mock Spotify requests/token expiry/cache/401/429/errors, validation, ID-only persistence/account isolation and authenticated API behavior. |
+
+The first run of the new mobile cancellation test failed because an explicitly thrown
+`CancellationException` was converted to `UNKNOWN` by existing platform HTTP helpers;
+both platform implementations now rethrow cancellation. The same test and entire data
+suite passed on rerun. No test was removed or weakened.
+
+H2 integration uses Hibernate schema generation, not Flyway. PostgreSQL migration
+execution, physical device/runtime UI, Swift framework linking/host build, live provider
+credentials/quota and production entitlement remain **not run/unverified**. Existing
+Compose preview/dependency deprecations and game iOS type-check warnings were observed;
+these were not introduced or changed by the music work.
+
+### Direct Spotify verification (2026-11-07)
+
+A one-off Python standard-library HTTPS check loaded only the two Spotify settings from
+the backend's ignored local environment file without displaying values. Token acquisition
+succeeded; GET `/v1/search` with `q=Duman`, `type=track`, `market=TR`, `limit=10`,
+`offset=0` returned 10 records with required metadata. This is direct-provider evidence,
+not a Crew endpoint/deployment or favorite-write test. No secrets/tokens were persisted
+in test reports or documentation. Production entitlement and quota guarantees remain
+unverified. Prior mock-provider/compile results above were not rerun for this check.

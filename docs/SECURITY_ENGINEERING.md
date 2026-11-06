@@ -64,3 +64,14 @@ hypotheses separate from demonstrated issues.
 
 Server QR expiry/replay/revocation, endpoint authorization and retention guarantees remain
 UNVERIFIED (Q03/Q04). This document makes no privacy, compliance or security guarantee.
+
+## Favorite music (2026-11-06)
+
+Spotify secrets and app tokens stay on the backend; no Spotify account authorization
+or playback is added. Crew authentication protects all new music endpoints. Save
+accepts a track ID/country and verifies metadata server-side, never trusting client
+names or links. Only the favorite ID is persisted on the current user's row; deletion
+of that row removes the selection. No favorite/search analytics events were added.
+Search cache is bounded and holds public metadata only. Do not log search queries,
+profile selections, credentials, tokens or upstream error bodies. Setup, failure
+semantics and unresolved production access/policy limits are in [API_CONTRACTS](API_CONTRACTS.md#favorite-music-infrastructure-2026-11-06).
