@@ -39,12 +39,8 @@ val coreDataModule =
         includes(platformCoreDataModule)
         single { ForegroundAnalytics(get()) }
         single<Analytics> { ProductAnalytics }
-        // Sürümde debug/info kayıtları hiç yazılmasın: Kermit'in kendi eşiği,
-        // R8 tarafında -assumenosideeffects gerektirmeyen taşınabilir yolu.
         single<CrewLogger> { KermitLogger.applyMinSeverity(get<BuildEnvironment>().isDebug) }
         single<SessionStorage> {
-            // clearBearerToken lambda'sı HttpClient'ı tembel çözer: SessionStorage kurulurken
-            // client henüz yok, bu yüzden çağrı anına ertelenir (döngüsel bağımlılık olmaz).
             DataStoreSessionStorage(get(), get()) { get<HttpClient>().clearBearerToken() }
         }
         singleOf(::DataStoreLanguageStore) bind LanguageStore::class
