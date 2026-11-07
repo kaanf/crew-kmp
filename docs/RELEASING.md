@@ -28,6 +28,11 @@ Commands/status: [COMMANDS](COMMANDS.md). No lane or release build ran during th
 
 ## Before an authorized release
 
+Follow [BRANCH_STRATEGY](BRANCH_STRATEGY.md): integrate task PRs into `dev`, prepare
+a `dev` → `main` release PR, and let the owner merge it with a merge commit after
+validation. Synchronize `main` back to `dev` through a merge-commit PR. Merging is not
+store distribution; run upload lanes or create release tags only when explicitly requested.
+
 Confirm intended version/environment and actual owner/approval requirements; collect
 appropriate CI and Android/iOS critical-flow evidence. Verify auth/QR/API compatibility
 and relevant migration behavior. Prepare accurate release notes/store/privacy information

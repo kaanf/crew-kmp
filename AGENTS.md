@@ -55,12 +55,18 @@ static `ComposeApp` framework hosted by SwiftUI. See [project map](docs/PROJECT_
 - Always merge change branches into `dev` first, including fixes and documentation.
   Promote changes to `main` only through `dev` → `main`. When the user requests a merge
   without naming a target, use `dev`; never merge a change branch directly into `main`.
+- Follow [BRANCH_STRATEGY](docs/BRANCH_STRATEGY.md) for implementation tasks: branch
+  from `dev`, validate, commit related changes, push and open a PR to `dev` by default.
+  Respect explicit local-only instructions. Do not develop/push directly on `dev` or
+  `main` without explicit authorization; the owner authorizes merges and releases. If `origin/dev` is
+  missing, report the setup gap instead of silently using `main`.
 
 ## Read on demand (paths relative to repository root)
 
 | Work | Read before implementing |
 | --- | --- |
 | First task / unfamiliar module | [PROJECT_MAP](docs/PROJECT_MAP.md), [COMMANDS](docs/COMMANDS.md) |
+| Any implementation / Git / PR | [BRANCH_STRATEGY](docs/BRANCH_STRATEGY.md), [WORKFLOW](docs/ai/WORKFLOW.md) |
 | Tool selection / automation | [AI_TOOLS](docs/AI_TOOLS.md), [COMMANDS](docs/COMMANDS.md) |
 | Feature / cross-module change | [ARCHITECTURE](docs/ARCHITECTURE.md), [DOMAIN](docs/DOMAIN.md), [WORKFLOW](docs/ai/WORKFLOW.md) |
 | Shared Kotlin / platform boundary | [KMP](docs/KMP.md), [CODING_STANDARDS](docs/CODING_STANDARDS.md) |

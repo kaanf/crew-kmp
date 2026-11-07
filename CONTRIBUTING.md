@@ -56,14 +56,17 @@ local credentials or claim that an SDK declaration proves live service delivery.
 
 Use the [PR template](.github/PULL_REQUEST_TEMPLATE.md). Lead with the concrete problem
 and resulting behavior; include actual checks and migration/release impact where relevant.
-All change branches must merge into `dev` first, including features, fixes, chores and
-documentation. Promote changes to `main` only through `dev` → `main`; do not merge change
-branches directly into `main`. A merge request without an explicit target means `dev`.
-This merge policy was confirmed by the owner on 2026-11-04; enforcement through repository
-settings remains unverified.
+Follow the accepted [branch strategy](docs/BRANCH_STRATEGY.md): task branches start
+from `dev`, target `dev` and are squash-merged by the owner. Releases use a `dev` → `main`
+PR with a merge commit. Agents complete implementation tasks through commit, push and
+PR creation by default; explicit local-only instructions take precedence. Merge, tagging
+and distribution require separate instructions.
 
-The inspected CI runs for PRs from `dev` into `main`, main pushes and manual triggers.
-Required reviews and automated enforcement of the branch/commit rules remain unconfirmed.
+The existing CI only runs PR jobs for `dev` → `main`; expanding coverage to `dev` targets
+and hotfix/synchronization PRs remains necessary. Policy adoption does not configure
+branch protection or create the remote `dev` branch; see the strategy's setup requirements.
+
+An unspecified merge target means `dev`; all changes reach `main` through `dev`.
 
 Update the canonical affected document and record significant accepted tradeoffs through
 [ADRs](docs/decisions/README.md). Community policy drafts below require owner adoption;

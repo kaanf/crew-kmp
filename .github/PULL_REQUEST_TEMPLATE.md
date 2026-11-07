@@ -6,6 +6,9 @@ Describe the trigger and what the user/system does after this change.
 
 Link the issue/spec. Note relevant API, schema, dependency or design changes; omit sections
 that do not apply. Avoid recounting conversation history or abandoned approaches.
+Follow [branch strategy](../docs/BRANCH_STRATEGY.md): task PRs target `dev` (squash);
+release PRs use `dev` → `main` (merge commit). Hotfix PRs target `main`; synchronization
+PRs use `main` → `dev` (merge commit). Use a conventional title for task/hotfix PRs.
 
 ## Validation
 

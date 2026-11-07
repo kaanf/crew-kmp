@@ -114,6 +114,7 @@ Gradle task listing succeeded; see [COMMANDS](docs/COMMANDS.md) for exact eviden
 ## Development documentation
 
 - [AI contributor instructions and task routing](AGENTS.md)
+- [Branch strategy and agent commit/push/PR workflow](docs/BRANCH_STRATEGY.md)
 - [Project/module map](docs/PROJECT_MAP.md), [architecture](docs/ARCHITECTURE.md), [KMP boundaries](docs/KMP.md)
 - [Commands and execution evidence](docs/COMMANDS.md), [testing](docs/TESTING.md), [project tool inventory](docs/AI_TOOLS.md)
 - [Design system](docs/DESIGN_SYSTEM.md), [data](docs/DATA.md), [API integrations](docs/API_CONTRACTS.md)

@@ -10,6 +10,7 @@ owner for material decisions source cannot establish. Operational proposals are 
 | Topic | Decision | Evidence / follow-through |
 | --- | --- | --- |
 | Ownership | Project belongs to the owner | GOVERNANCE; no maintainer handle/contact invented |
+| Branch strategy | Task branches → `dev` via squash; releases `dev` → `main` via merge commit; agents commit/push/open task PRs by default; owner merges | [BRANCH_STRATEGY](../BRANCH_STRATEGY.md); remote `dev`, CI expansion and branch protection setup remain unverified |
 | Repository | Remains closed source | README / CONTRIBUTING; no open-source license added |
 | Merge flow | All change branches merge into `dev` first; only `dev` promotes to `main`; unspecified merge target is `dev` | Owner confirmed 2026-11-04; AGENTS / CONTRIBUTING / WORKFLOW updated; repository enforcement unverified |
 | Backend | `../crew-api` (owner location: `~/Projects/crew/crew-api`) | Use current controllers/services/tests; README explicitly outdated |

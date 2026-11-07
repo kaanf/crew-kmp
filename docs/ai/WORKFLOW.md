@@ -5,6 +5,9 @@
 Read applicable instruction files and route by AGENTS.md. Inspect the touched files,
 representative implementation, callers and relevant tests. Confirm the requested behavior
 and platform impact. Use PROJECT_MAP as an index, not proof that stale paths are correct.
+For implementation, read [BRANCH_STRATEGY](../BRANCH_STRATEGY.md), inspect Git state
+and use a task branch based on current `dev`. Preserve unrelated work, using an isolated
+worktree if needed. Do not substitute `main` when the remote `dev` branch is missing.
 
 Before editing a new feature, inspect the current branch and working tree, then create
 its own branch from `dev`. Never implement directly on `dev` or `main`. Use a
@@ -50,3 +53,10 @@ is incomplete; do not leave vague “continue later” notes without state and n
 When a merge is requested, target `dev` for every change branch, including fixes and
 documentation. Promote changes to `main` only through `dev` → `main`, as required by
 [CONTRIBUTING](../../CONTRIBUTING.md). An unspecified merge target means `dev`.
+
+For completed implementation, follow BRANCH_STRATEGY: commit only related changes,
+push the task branch and open a PR to `dev` without waiting for a separate push request.
+Respect local-only requests; disclose failed/blocked checks and use draft status for
+incomplete work. Report the branch, commit and PR link. The owner merges; store uploads
+and release tags are separate authorized actions. Questions/read-only reviews do not
+trigger this publishing workflow.
