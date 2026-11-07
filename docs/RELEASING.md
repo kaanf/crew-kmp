@@ -39,3 +39,11 @@ Backend compatibility, staged rollout, feature flags, retained artifacts and rev
 migration limits are UNVERIFIED. Do not promise a generic rollback where old clients/data
 may be incompatible. Record version/commit/artifacts, environment, actual check results,
 rollout decision and owner after a real release. The new changelog contains no shipped claims.
+
+## Favorite music infrastructure (2026-11-06, not released)
+
+No user-facing music UI is enabled. Before deploying a consumer UI, deploy the backend
+contract/migration, configure server-only Spotify credentials, verify live provider
+access and resolve production usage/attribution requirements. Mobile compilation and
+mock-provider/H2 tests do not verify Spotify rights, production quota, migration on
+PostgreSQL or a deployed endpoint. See [API_CONTRACTS](API_CONTRACTS.md#favorite-music-infrastructure-2026-11-06).
