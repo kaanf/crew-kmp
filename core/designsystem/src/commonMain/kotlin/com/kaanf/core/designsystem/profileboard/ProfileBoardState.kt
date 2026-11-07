@@ -38,3 +38,6 @@ enum class BoardEditorCategory(val stickerCategory: com.kaanf.core.domain.model.
     SOCIAL(com.kaanf.core.domain.model.profileboard.BoardStickerCategory.SOCIAL),
     CREW(com.kaanf.core.domain.model.profileboard.BoardStickerCategory.CREW),
 }
+
+/** Tools offered by the edit board dock, in display order. */
+enum class BoardTool { QR_SKIN, FILM, SONG, ASK, LOVES }

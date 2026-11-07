@@ -98,6 +98,16 @@ class ProfileBoardRepositoryTest {
         assertNull(repository.observeQrRender().first())
     }
 
+    @Test
+    fun recoveredThemedQrReplacesTheCachedImage() = runBlocking {
+        engine.response = """{"themeId":"vampire_v9","status":"READY","imageUrl":"https://cdn.test/lost.png"}"""
+        repository.syncQrRender()
+        engine.response = """{"themeId":"vampire_v9","status":"READY","imageUrl":"https://cdn.test/new.png"}"""
+        val result = repository.recoverQrRender() as Result.Success
+        assertEquals("https://cdn.test/new.png", result.data.imageUrl)
+        assertEquals("https://cdn.test/new.png", repository.observeQrRender().first()?.imageUrl)
+    }
+
     private fun user(id: String) = User(id, "test@example.invalid", "Test", role = "User", status = "Active", isProfileComplete = true, hasVerifiedEmail = true)
 }
 

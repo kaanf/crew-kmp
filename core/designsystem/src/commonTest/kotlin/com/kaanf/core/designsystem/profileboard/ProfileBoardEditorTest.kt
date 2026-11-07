@@ -24,6 +24,14 @@ class ProfileBoardEditorTest {
         assertEquals(BoardQrTheme.VAMPIRE.id, unknown.qrStyleId)
     }
 
+    @Test
+    fun openingABoardToolKeepsTheBoardAndEditingStateUnchanged() {
+        val editing = ProfileBoardEditor.reduce(ProfileBoardState(canEdit = true, isLoading = false), ProfileBoardAction.EditBoard)
+        BoardTool.entries.forEach { tool ->
+            assertEquals(editing, ProfileBoardEditor.reduce(editing, ProfileBoardAction.OpenBoardTool(tool)))
+        }
+    }
+
     private fun editingState(): ProfileBoardState = ProfileBoardState(
         isEditingBoard = true,
         focusedStickerSlot = 0,

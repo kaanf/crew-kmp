@@ -59,7 +59,7 @@ fun ProfileBoardControls(
                     .clickable(enabled = !isSaving, role = Role.Button, onClick = onClose),
                 contentAlignment = Alignment.Center,
             ) {
-                Icon(painterResource(AccessIcons.Close), stringResource(Res.string.profile_board_close),
+                Icon(painterResource(AccessIcons.LeftChevron), stringResource(Res.string.accessibility_navigate_back),
                     tint = AccessDefaults.TextPrimary, modifier = Modifier.size(18.dp))
             }
         }

@@ -86,6 +86,8 @@ object ProfileBoardEditor {
         ProfileBoardAction.OpenBoardEditor -> if (current.isEditingBoard) settleBoard(current).copy(
             pickerSlot = null, isEditorSheetOpen = true,
         ) else current
+        // Each tool's own sheet is added separately; opening one does not change the board yet.
+        is ProfileBoardAction.OpenBoardTool -> current
         ProfileBoardAction.EditBoard -> settleBoard(current).copy(
             isEditingBoard = true,
             focusedStickerSlot = null,

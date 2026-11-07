@@ -1,6 +1,5 @@
 package com.kaanf.core.designsystem.profileboard.component
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -31,13 +30,11 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.semantics.*
-import coil3.compose.AsyncImage
 import com.kaanf.core.domain.model.profileboard.BoardQrPlacement
 import com.kaanf.core.domain.model.profileboard.BoardQrRender
 import com.kaanf.core.domain.model.profileboard.BoardQrRenderStatus
 import com.kaanf.core.domain.model.profileboard.BoardQrTheme
 import com.kaanf.core.domain.model.profileboard.minQrSize
-import com.kaanf.core.designsystem.component.qr.UserQrCard
 import com.kaanf.core.designsystem.theme.AccessDefaults
 import com.kaanf.core.designsystem.profileboard.ProfileBoardAction
 import com.kaanf.core.designsystem.profileboard.ProfileBoardEditor
@@ -47,7 +44,6 @@ import com.kaanf.core.domain.model.profileboard.BoardSticker
 import com.kaanf.core.domain.model.profileboard.BoardStickerPlacement
 import crew.core.designsystem.generated.resources.*
 import crew.core.designsystem.generated.resources.profile_board_sample_qr
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 /** Keeps sticker guides and QR proportional on compact phones and wider screens. */
@@ -103,8 +99,6 @@ internal fun ProfileBoardCanvas(
             guide.bottom <= area.top - .012f || guide.top >= area.bottom + .012f)
     }
     val qrTheme = BoardQrTheme.find(qrStyleId)
-    val render = qrRender?.takeIf { it.themeId == qrStyleId }
-    val qrImageUrl = render?.takeIf { it.status == BoardQrRenderStatus.READY }?.imageUrl
     val moveLeft = stringResource(Res.string.profile_sticker_move_left)
     val moveRight = stringResource(Res.string.profile_sticker_move_right)
     val moveUp = stringResource(Res.string.profile_sticker_move_up)
@@ -160,34 +154,15 @@ internal fun ProfileBoardCanvas(
                     }
                 },
         ) {
-            val description = stringResource(Res.string.profile_board_sample_qr)
-            var themedImageShown by remember(qrStyleId, qrImageUrl) { mutableStateOf(false) }
-            var imageFailed by remember(qrStyleId, qrImageUrl) { mutableStateOf(false) }
-            val loadingQr = shouldShowQrLoading(qrStyleId, qrRender, isEditing, isSaving,
-                themedImageShown, imageFailed)
-            val previewing = isEditing && !isSaving && qrTheme != null
-            // Failed themes/images fall back to the scannable regular QR, ending the loader.
-            if (!loadingQr && !previewing && publicCode.isNotBlank() && !themedImageShown) UserQrCard(
-                modifier = Modifier.padding(boardWidth * visibleQr.size * (2f / 25f)),
-                inputText = publicCode,
-                styleId = qrStyleId,
-                qrContentDescription = description,
+            ProfileBoardQrArtwork(
+                publicCode = publicCode,
+                qrStyleId = qrStyleId,
+                qrRender = qrRender,
+                isEditing = isEditing,
+                isSaving = isSaving,
+                onQrImageError = onQrImageError,
+                qrPadding = boardWidth * visibleQr.size * (2f / 25f),
             )
-            if (qrImageUrl != null && !imageFailed) AsyncImage(
-                model = qrImageUrl,
-                contentDescription = if (themedImageShown) description else null,
-                onSuccess = { themedImageShown = true },
-                onError = {
-                    imageFailed = true
-                    onQrImageError()
-                },
-                modifier = Modifier.fillMaxSize(),
-            ) else if (previewing) Image(
-                painter = painterResource(qrTheme!!.preview()),
-                contentDescription = description,
-                modifier = Modifier.fillMaxSize(),
-            )
-            if (loadingQr) ProfileBoardQrLoading(Modifier.matchParentSize())
         }
         if (canAddStickers && guideClear(0) && stickers.none { it.slot == 0 }) {
             ProfileBoardStickerSlot(

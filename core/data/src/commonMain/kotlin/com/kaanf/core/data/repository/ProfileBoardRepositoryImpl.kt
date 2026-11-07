@@ -8,6 +8,7 @@ import com.kaanf.core.data.dto.BoardQrRenderDto
 import com.kaanf.core.data.dto.ProfileBoardDto
 import com.kaanf.core.data.dto.toDto
 import com.kaanf.core.data.networking.get
+import com.kaanf.core.data.networking.post
 import com.kaanf.core.data.networking.put
 import com.kaanf.core.domain.model.profileboard.BoardQrRender
 import com.kaanf.core.domain.model.profileboard.BoardQrRenderStatus
@@ -71,6 +72,16 @@ class ProfileBoardRepositoryImpl(
             if (domain.status != BoardQrRenderStatus.PENDING || ++attempt >= MAX_QR_POLLS) return Result.Success(domain)
             delay(QR_POLL_INTERVAL_MS)
         }
+    }
+
+    override suspend fun recoverQrRender(): Result<BoardQrRender, DataError.Remote> {
+        val userId = userStore.observeCurrentUser().first()?.id ?: return Result.Failure(DataError.Remote.UNAUTHORIZED)
+        val result = httpClient.post<BoardQrRenderDto>("/profile/board/qr/recover")
+        if (result is Result.Failure) return result
+        val render = (result as Result.Success).data
+        dataStore.edit { it[qrKey(userId)] = json.encodeToString(render) }
+        val domain = render.toDomain()
+        return if (domain.status == BoardQrRenderStatus.PENDING) syncQrRender() else Result.Success(domain)
     }
 
     override suspend fun refresh(): Result<ProfileBoard, DataError.Remote> = requestMutex.withLock {

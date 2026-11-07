@@ -4,13 +4,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.*
-import com.kaanf.core.designsystem.profileboard.ProfileBoardContent
+import com.kaanf.core.designsystem.profileboard.ProfileBoardTilesContent
 import com.kaanf.core.designsystem.profileboard.ProfileBoardState
 import com.kaanf.core.designsystem.profileboard.ProfileBoardEditor
 import com.kaanf.core.designsystem.profileboard.ProfileBoardAction
 import com.kaanf.core.domain.model.profileboard.BoardStickerDesign
 import com.kaanf.core.domain.model.profileboard.BoardStickerPlacement
-import com.kaanf.core.designsystem.component.button.BaseButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
@@ -131,16 +130,12 @@ private fun ScreenshotContent(scene: ScreenshotScene, fixtures: ScreenshotFixtur
                             ),
                         ),
                         onAction = {}, modifier = Modifier.padding(padding),
-                    ) else ProfileBoardContent(
-                        state = board, modifier = Modifier.padding(padding),
-                        onClose = if (owner) ({}) else null,
-                        onEditProfile = if (owner) ({}) else null,
+                    ) else ProfileBoardTilesContent(
+                        state = board, contentPadding = padding,
+                        onBack = {}, onEditProfile = {},
                         onAction = { action -> board = if (action == ProfileBoardAction.CancelEditing) {
                             ProfileBoardEditor.reduce(board, ProfileBoardAction.FinishEditing)
                         } else ProfileBoardEditor.reduce(board, action) },
-                        footer = {
-                            if (!owner) BaseButton(text = "Scan opponent", onClick = {}, filled = true)
-                        },
                     )
                 }
             }

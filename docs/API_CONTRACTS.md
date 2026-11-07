@@ -20,7 +20,7 @@ Client source paths below are relative to this mobile repository.
 | Tickets / check-in | `feature/home/data/src/commonMain/kotlin/com/kaanf/home/data/repository/TicketRepositoryImpl.kt` | POST event tickets, GET my-ticket and POST check-in with entry code |
 | Match / tasks | `feature/game/data/src/commonMain/kotlin/com/kaanf/game/data/repository/MatchRepositoryImpl.kt` | Participant token, invites, ready/results, task offers/confirmation, snapshots and scoreboard |
 | Real-time events | `feature/game/data/src/commonMain/kotlin/com/kaanf/game/data/repository/EventConnectionClientImpl.kt` | Lifecycle-aware connection/reconnect and shared session refresh; no server protocol guarantee inferred |
-| Board / QR render | `core/data/src/commonMain/kotlin/com/kaanf/core/data/repository/ProfileBoardRepositoryImpl.kt`, `core/data/src/commonMain/kotlin/com/kaanf/core/data/dto/ProfileBoardDto.kt` | GET/PUT `/profile/board`, GET `/profile/board/qr`, revision-aware local caching and bounded render polling |
+| Board / QR render | `core/data/src/commonMain/kotlin/com/kaanf/core/data/repository/ProfileBoardRepositoryImpl.kt`, `core/data/src/commonMain/kotlin/com/kaanf/core/data/dto/ProfileBoardDto.kt` | GET/PUT `/profile/board`, GET `/profile/board/qr`, POST `/profile/board/qr/recover` (re-render when the READY image is missing from storage; called once per failed image URL), revision-aware local caching and bounded render polling |
 
 ## Backend source inspected
 

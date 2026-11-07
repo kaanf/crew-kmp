@@ -24,4 +24,5 @@ sealed interface ProfileBoardAction {
     data class SelectEditorCategory(val category: BoardEditorCategory) : ProfileBoardAction
     data object OpenBoardEditor : ProfileBoardAction
     data object EditBoard : ProfileBoardAction
+    data class OpenBoardTool(val tool: BoardTool) : ProfileBoardAction
 }

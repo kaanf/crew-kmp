@@ -43,6 +43,7 @@ class ProfileBoardViewModel(
     private var draftRevision = 0L
     private var isRefreshing = false
     private var hasLoadedBoard = false
+    private val recoveredQrImages = mutableSetOf<String>()
 
     init {
         userRepository.observeCurrentUser().onEach { user ->
@@ -149,7 +150,15 @@ class ProfileBoardViewModel(
     }
 
     fun onQrImageError() {
-        viewModelScope.launch { notify(Res.string.profile_board_qr_image_error) }
+        val failedUrl = _state.value.qrRender?.imageUrl
+        viewModelScope.launch {
+            // One server-side recovery per image: a re-render replaces the URL and the board reloads it.
+            if (failedUrl != null && recoveredQrImages.add(failedUrl)) {
+                val result = boardRepository.recoverQrRender()
+                if (result is Result.Success && result.data.imageUrl != failedUrl) return@launch
+            }
+            notify(Res.string.profile_board_qr_image_error)
+        }
     }
 
     private suspend fun notify(description: StringResource, variant: SnackbarVariant = SnackbarVariant.Error) {

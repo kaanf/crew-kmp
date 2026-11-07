@@ -17,6 +17,7 @@ file/node mapping is established. Do not replace current UI from an unapproved d
 | Sheets and dialogs | `core/designsystem/src/commonMain/kotlin/com/kaanf/core/designsystem/component/sheet/`, `core/designsystem/src/commonMain/kotlin/com/kaanf/core/designsystem/component/dialog/` |
 | Layout and snackbar | `core/designsystem/src/commonMain/kotlin/com/kaanf/core/designsystem/component/layout/`, `core/presentation/src/commonMain/kotlin/com/kaanf/core/presentation/snackbar/` |
 | Profile board / QR | `core/designsystem/src/commonMain/kotlin/com/kaanf/core/designsystem/profileboard/`, `core/domain/src/commonMain/kotlin/com/kaanf/core/domain/model/profileboard/` |
+| Owner tile board (new-profile layout, bottom edit toolbar) | `core/designsystem/src/commonMain/kotlin/com/kaanf/core/designsystem/profileboard/ProfileBoardTilesContent.kt`; the sticker canvas `ProfileBoardContent.kt` still renders the match QR home board |
 | Cover backdrop | `core/palette/src/commonMain/`, `core/palette/README.md` |
 | Navigation/transition ownership | `composeApp/src/commonMain/kotlin/com/kaanf/crew/navigation/NavigationRoot.kt`, feature graph implementations |
 
@@ -26,6 +27,12 @@ remembered FontFamily/typography objects. Existing `AccessDefaults` and `CrewCol
 coexist; reuse the nearest established component rather than inventing a parallel palette.
 A universal spacing/elevation token scale was not verified; existing components contain
 local values. A token unification would be a separate design decision.
+
+The owner tile board's empty-board reminder uses a 1 dp `AccessDefaults.Border` outline
+with 16 dp corners. Identity bottom spacing is 8 dp, before the board's inner padding.
+Editing tools stay fixed below the scrollable board with safe-area padding, directly
+on the screen backdrop without a bottom sheet surface or drag handle. Tool emoji are 18 sp within 50 dp boxes, and placeholder
+emoji are 16 sp within 40 dp circles; touch areas retain their existing size.
 
 ## Implementation rules
 
