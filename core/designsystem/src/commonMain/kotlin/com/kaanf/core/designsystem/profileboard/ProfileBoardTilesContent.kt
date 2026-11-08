@@ -2,6 +2,7 @@ package com.kaanf.core.designsystem.profileboard
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -28,19 +29,27 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kaanf.core.designsystem.component.info.ReminderCard
+import com.kaanf.core.designsystem.profileboard.component.boardTileClickable
+import com.kaanf.core.designsystem.profileboard.component.BoardAskTile
 import com.kaanf.core.designsystem.profileboard.component.BoardBackdrop
+import com.kaanf.core.designsystem.profileboard.component.BoardLovesRow
+import com.kaanf.core.designsystem.profileboard.component.BoardMovieTile
+import com.kaanf.core.designsystem.profileboard.component.BoardSongTile
+import com.kaanf.core.designsystem.profileboard.component.BoardToolSheet
 import com.kaanf.core.designsystem.profileboard.component.BoardPlaceholderTile
-import com.kaanf.core.designsystem.profileboard.component.BoardToolBar
 import com.kaanf.core.designsystem.profileboard.component.ProfileBoardControls
 import com.kaanf.core.designsystem.profileboard.component.ProfileBoardIdentity
 import com.kaanf.core.designsystem.profileboard.component.ProfileBoardIdentityLoading
@@ -55,8 +64,6 @@ import crew.core.designsystem.generated.resources.Res
 import crew.core.designsystem.generated.resources.profile_board_ask_hint
 import crew.core.designsystem.generated.resources.profile_board_ask_title
 import crew.core.designsystem.generated.resources.profile_board_change_skin
-import crew.core.designsystem.generated.resources.profile_board_empty_body
-import crew.core.designsystem.generated.resources.profile_board_empty_title
 import crew.core.designsystem.generated.resources.profile_board_film_hint
 import crew.core.designsystem.generated.resources.profile_board_film_title
 import crew.core.designsystem.generated.resources.profile_board_loves_hint
@@ -86,11 +93,23 @@ fun ProfileBoardTilesContent(
 ) {
     val canEdit = state.canEdit && !state.isLoading && !state.hasLoadError && !state.hasConflict
     val editing = state.isEditingBoard
-    val interactive = canEdit && !state.isSaving
+    val interactive = canEdit && !state.isSaving && !state.movieSearch.isSaving
+    val editOnLongPress: (() -> Unit)? = if (interactive && !editing) {
+        { onAction(ProfileBoardAction.EditBoard) }
+    } else null
     val openTool: (BoardTool) -> Unit = { tool ->
-        onAction(if (editing) ProfileBoardAction.OpenBoardTool(tool) else ProfileBoardAction.EditBoard)
+        if (!editing) onAction(ProfileBoardAction.EditBoard)
+        onAction(ProfileBoardAction.OpenBoardTool(tool))
     }
     val frameAlpha by animateFloatAsState(if (editing) 1f else 0f, label = "board-frame")
+    val scrollState = rememberScrollState()
+    val isScrolled by remember { derivedStateOf { scrollState.value > 0 } }
+    val dividerAlpha = animateFloatAsState(
+        targetValue = if (isScrolled) 1f else 0f,
+        animationSpec = tween(150),
+        label = "board-controls-divider",
+    )
+    val dividerColor = AccessDefaults.BorderSoft
 
     Box(modifier.fillMaxSize()) {
         BoardBackdrop(Modifier.matchParentSize())
@@ -100,33 +119,29 @@ fun ProfileBoardTilesContent(
                 onClose = onBack,
                 onEditBoard = { onAction(if (editing) ProfileBoardAction.FinishEditing else ProfileBoardAction.EditBoard) },
                 isEditing = editing,
-                isSaving = state.isSaving,
+                isSaving = state.isSaving || state.movieSearch.isSaving,
                 onSettings = onEditProfile,
                 canEdit = canEdit,
                 onCancel = { onAction(ProfileBoardAction.CancelEditing) },
             )
+            Spacer(Modifier.height(12.dp))
             Column(
-                modifier = Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState())
-                    .padding(start = 10.dp, end = 10.dp, top = 12.dp, bottom = (if (editing) 0.dp else contentPadding.calculateBottomPadding()) + 16.dp),
+                modifier = Modifier.weight(1f).fillMaxWidth()
+                    .drawWithContent {
+                        drawContent()
+                        val thickness = 1.dp.toPx()
+                        drawLine(
+                            color = dividerColor,
+                            start = Offset(0f, thickness / 2f),
+                            end = Offset(size.width, thickness / 2f),
+                            strokeWidth = thickness,
+                            alpha = dividerAlpha.value,
+                        )
+                    }
+                    .verticalScroll(scrollState)
+                    .padding(start = 10.dp, end = 10.dp, top = 12.dp, bottom = contentPadding.calculateBottomPadding() + 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                AnimatedVisibility(
-                    visible = !editing && canEdit,
-                    modifier = Modifier.widthIn(max = 420.dp),
-                    enter = fadeIn() + expandVertically(),
-                    exit = fadeOut() + shrinkVertically(),
-                ) {
-                    // Every board is empty until tiles can be saved; the nudge leads into editing.
-                    ReminderCard(
-                        emoji = "✨",
-                        title = stringResource(Res.string.profile_board_empty_title),
-                        description = stringResource(Res.string.profile_board_empty_body),
-                        onClick = { onAction(ProfileBoardAction.EditBoard) },
-                        enabled = interactive,
-                        modifier = Modifier.padding(horizontal = 6.dp).padding(bottom = 20.dp)
-                            .border(1.dp, AccessDefaults.Border, RoundedCornerShape(16.dp)),
-                    )
-                }
                 AnimatedVisibility(
                     visible = !editing,
                     enter = fadeIn() + expandVertically(),
@@ -143,9 +158,17 @@ fun ProfileBoardTilesContent(
                         .padding(horizontal = 12.dp, vertical = 14.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    BoardQr(state, editing, interactive, onQrImageError) { openTool(BoardTool.QR_SKIN) }
+                    BoardQr(state, editing, interactive, onQrImageError, editOnLongPress) { openTool(BoardTool.QR_SKIN) }
                     Spacer(Modifier.height(24.dp))
-                    BoardPlaceholderTile(
+                    val track = state.favoriteTrack
+                    if (track != null) BoardSongTile(
+                        track = track,
+                        onLongClick = editOnLongPress,
+                        onClick = { if (editing && interactive) openTool(BoardTool.SONG) },
+                        onRemove = if (editing && interactive) ({ onAction(ProfileBoardAction.RemoveSong) }) else null,
+                        modifier = Modifier.fillMaxWidth().height(76.dp),
+                    ) else BoardPlaceholderTile(
+                        onLongClick = editOnLongPress,
                         emoji = BoardTool.SONG.emoji,
                         title = stringResource(Res.string.profile_board_song_title),
                         hint = stringResource(Res.string.profile_board_song_hint),
@@ -155,7 +178,15 @@ fun ProfileBoardTilesContent(
                     )
                     Spacer(Modifier.height(22.dp))
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(20.dp)) {
-                        BoardPlaceholderTile(
+                        val movie = state.favoriteMovie
+                        if (movie != null) BoardMovieTile(
+                            movie = movie,
+                            onLongClick = editOnLongPress,
+                            onClick = { if (editing && interactive) openTool(BoardTool.FILM) },
+                            onRemove = if (editing && interactive) ({ onAction(ProfileBoardAction.RemoveMovie) }) else null,
+                            modifier = Modifier.weight(1f).height(160.dp),
+                        ) else BoardPlaceholderTile(
+                            onLongClick = editOnLongPress,
                             emoji = BoardTool.FILM.emoji,
                             title = stringResource(Res.string.profile_board_film_title),
                             hint = stringResource(Res.string.profile_board_film_hint),
@@ -164,7 +195,15 @@ fun ProfileBoardTilesContent(
                             tall = true,
                             modifier = Modifier.weight(1f).height(160.dp),
                         )
-                        BoardPlaceholderTile(
+                        val askMe = state.askMe
+                        if (askMe != null) BoardAskTile(
+                            text = askMe,
+                            onLongClick = editOnLongPress,
+                            onClick = { if (editing) openTool(BoardTool.ASK) },
+                            onRemove = if (editing && interactive) ({ onAction(ProfileBoardAction.RemoveAskMe) }) else null,
+                            modifier = Modifier.weight(1f).height(160.dp),
+                        ) else BoardPlaceholderTile(
+                            onLongClick = editOnLongPress,
                             emoji = BoardTool.ASK.emoji,
                             title = stringResource(Res.string.profile_board_ask_title),
                             hint = stringResource(Res.string.profile_board_ask_hint),
@@ -174,12 +213,21 @@ fun ProfileBoardTilesContent(
                             modifier = Modifier.weight(1f).height(160.dp),
                         )
                     }
+                    if (state.hobbies.isNotEmpty()) BoardLovesRow(
+                        hobbies = state.hobbies,
+                        onLongClick = editOnLongPress,
+                        editing = editing && interactive,
+                        onEdit = { if (editing) openTool(BoardTool.LOVES) },
+                        onRemove = { onAction(ProfileBoardAction.RemoveHobby(it)) },
+                        modifier = Modifier.padding(top = 22.dp).fillMaxWidth(),
+                    )
                     AnimatedVisibility(
-                        visible = editing,
+                        visible = state.hobbies.isEmpty(),
                         enter = fadeIn() + expandVertically(),
                         exit = fadeOut() + shrinkVertically(),
                     ) {
                         BoardPlaceholderTile(
+                            onLongClick = editOnLongPress,
                             emoji = BoardTool.LOVES.emoji,
                             title = stringResource(Res.string.profile_board_loves_title),
                             hint = stringResource(Res.string.profile_board_loves_hint),
@@ -198,22 +246,8 @@ fun ProfileBoardTilesContent(
                     }
                 }
             }
-            AnimatedVisibility(
-                visible = editing,
-                enter = fadeIn() + expandVertically(),
-                exit = fadeOut() + shrinkVertically(),
-            ) {
-                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    BoardToolBar(
-                        onToolClick = { onAction(ProfileBoardAction.OpenBoardTool(it)) },
-                        enabled = interactive,
-                        modifier = Modifier.widthIn(max = 420.dp)
-                            .padding(horizontal = 16.dp)
-                            .padding(top = 12.dp, bottom = contentPadding.calculateBottomPadding() + 16.dp),
-                    )
-                }
-            }
         }
+        BoardToolSheet(state, onAction)
     }
 }
 
@@ -223,19 +257,23 @@ private fun BoardQr(
     editing: Boolean,
     enabled: Boolean,
     onQrImageError: () -> Unit,
+    onLongClick: (() -> Unit)?,
     onChangeSkin: () -> Unit,
 ) {
     Box(contentAlignment = Alignment.BottomCenter) {
         Box(
             modifier = Modifier.size(150.dp).clip(QrShape).background(AccessDefaults.Background)
-                .border(1.dp, AccessDefaults.TextPrimary.copy(alpha = .14f), QrShape),
+                .border(1.dp, AccessDefaults.TextPrimary.copy(alpha = .14f), QrShape)
+                .boardTileClickable(enabled = enabled, onLongClick = onLongClick,
+                    onClick = { if (editing) onChangeSkin() }),
         ) {
             if (state.isLoading) ProfileBoardQrLoading(Modifier.matchParentSize())
             else ProfileBoardQrArtwork(
                 publicCode = state.publicCode,
                 qrStyleId = state.qrStyleId,
                 qrRender = state.qrRender,
-                isEditing = false,
+                // While editing, a newly picked theme shows its preview until the save renders it.
+                isEditing = editing,
                 isSaving = state.isSaving,
                 onQrImageError = onQrImageError,
                 qrPadding = 12.dp,

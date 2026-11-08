@@ -40,6 +40,10 @@ data class ProfileBoardDto(
     val qrStyleId: String = "rounded",
     val stickers: List<BoardStickerDto> = emptyList(),
     val qr: BoardQrPlacementDto = BoardQrPlacementDto(),
+    // Omission means preserve on the server; clearing must explicitly send [].
+    @OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)
+    @kotlinx.serialization.EncodeDefault
+    val hobbies: List<String> = emptyList(),
 ) {
     fun toDomain(): ProfileBoard {
         if (schemaVersion !in 1..3) return ProfileBoard(schemaVersion = schemaVersion, revision = revision,
@@ -50,10 +54,10 @@ data class ProfileBoardDto(
         }
         return ProfileBoard(schemaVersion, revision, qrStyleId, knownStickers,
             canEdit = schemaVersion in 1..3 && knownStickers.size == stickers.size && isKnownQrDesign(qrStyleId),
-            qr = BoardQrPlacement(qr.x, qr.y, qr.size).transform(0f, 0f, 1f, minTop = 0f))
+            qr = BoardQrPlacement(qr.x, qr.y, qr.size).transform(0f, 0f, 1f, minTop = 0f), hobbies = hobbies)
     }
 }
 
 fun ProfileBoard.toDto() = ProfileBoardDto(schemaVersion, revision, qrStyleId, stickers.map {
     BoardStickerDto(it.slot, it.design.id, it.position.x, it.position.y, it.scale, it.rotation)
-}, BoardQrPlacementDto(qr.x, qr.y, qr.size))
+}, BoardQrPlacementDto(qr.x, qr.y, qr.size), hobbies)

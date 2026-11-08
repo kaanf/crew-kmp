@@ -94,3 +94,12 @@ session. No UI, navigation or native-host integration was added. The backend alo
 owns Spotify Client Credentials and ID-only favorite persistence. There is no account
 cache, offline write queue, playback or Spotify user authorization in this feature.
 See [API_CONTRACTS](API_CONTRACTS.md#favorite-music-infrastructure-2026-11-06).
+
+## Favorite film boundary (2026-11-07)
+
+`core:domain` owns `MovieRepository` and movie/page metadata; `core:data` owns DTO
+validation, Ktor requests and Koin binding. `ProfileBoardViewModel` owns debounced
+search, pagination, immediate save/remove and loading/errors. Shared Compose renders
+the sheet and selected movie tile; neither Android nor Swift hosts access TMDB directly.
+Backend alone owns the provider token, provider cache/cooldown and ID persistence.
+No new dependencies or platform adapters are introduced.

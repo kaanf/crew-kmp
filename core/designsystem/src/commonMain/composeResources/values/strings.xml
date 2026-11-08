@@ -85,4 +85,60 @@
     <string name="profile_board_tool_song">Song</string>
     <string name="profile_board_tool_ask">Ask me</string>
     <string name="profile_board_tool_loves">Loves</string>
+    <string name="profile_board_sheet_close">Close</string>
+    <string name="profile_board_qr_sheet_sub">Players scan it to start a match with you.</string>
+    <string name="profile_board_qr_sheet_apply">Use this skin</string>
+    <string name="profile_board_song_sheet_title">On repeat</string>
+    <string name="profile_board_song_sheet_sub">Shows on your board with a link to Spotify.</string>
+    <string name="profile_board_song_search">Search songs</string>
+    <string name="profile_board_song_search_hint">Type at least 2 characters to search Spotify.</string>
+    <string name="profile_board_song_results">RESULTS</string>
+    <string name="profile_board_song_no_results">Nothing matches “%1$s”</string>
+    <string name="profile_board_song_search_error">Couldn’t search songs right now.</string>
+    <string name="profile_board_song_load_more">Show more</string>
+    <string name="profile_board_apply">Put it on my board</string>
+    <string name="profile_board_song_label">ON REPEAT</string>
+    <string name="profile_board_open_spotify">Open in Spotify</string>
+    <string name="profile_board_ask_sheet_sub">One line. Keep it easy to start a chat.</string>
+    <string name="profile_board_ask_placeholder">Something you could talk about for hours</string>
+    <string name="profile_board_ask_counter">%1$d / %2$d</string>
+    <string name="profile_board_ideas">IDEAS</string>
+    <string-array name="profile_board_ask_ideas">
+        <item>My worst chess blunder</item>
+        <item>The best ramen in town</item>
+        <item>Getting lost in a new city</item>
+        <item>The last concert I went to</item>
+    </string-array>
+    <string name="profile_board_ask_label">ASK ME ABOUT</string>
+    <string name="profile_board_loves_sheet_sub">Pick up to 5. Tap again to remove.</string>
+    <string name="profile_board_loves_custom">Add your own</string>
+    <string name="profile_board_loves_add">Add</string>
+    <string name="profile_board_loves_picked">PICKED %1$d / %2$d</string>
+    <string name="profile_board_loves_label">LOVES DOING</string>
+    <string name="profile_board_loves_add_more">Add more things you love</string>
+    <string name="profile_board_tile_remove">Remove %1$s</string>
+    <string-array name="profile_board_loves_options">
+        <item>Bouldering</item>
+        <item>Board games</item>
+        <item>Late-night ramen</item>
+        <item>Vinyl hunting</item>
+        <item>Running</item>
+        <item>Film photography</item>
+        <item>Cooking</item>
+        <item>Chess</item>
+        <item>Cycling</item>
+        <item>Karaoke</item>
+        <item>Pottery</item>
+        <item>Thrifting</item>
+    </string-array>
+    <string name="profile_board_movie_sheet_title">Your favorite film</string>
+    <string name="profile_board_movie_sheet_sub">Search and choose a film for your board.</string>
+    <string name="profile_board_movie_search">Search films</string>
+    <string name="profile_board_movie_search_hint">Type at least 2 characters to search.</string>
+    <string name="profile_board_movie_search_error">Films could not be loaded. Try searching again.</string>
+    <string name="profile_board_movie_no_results">No films found for %1$s.</string>
+    <string name="profile_board_movie_results">FILMS</string>
+    <string name="profile_board_movie_load_more">Load more</string>
+    <string name="profile_board_tmdb_notice">This product uses the TMDB API but is not endorsed or certified by TMDB.</string>
+    <string name="profile_board_credits">Credits</string>
 </resources>

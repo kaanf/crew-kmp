@@ -129,7 +129,6 @@ class ProfileBoardQrMonitorTest {
         override fun observeQrRender() = render
         override suspend fun refresh() = Result.Success(board.value!!)
         override suspend fun save(board: ProfileBoard) = Result.Success(board).also { this.board.value = board }
-        override suspend fun recoverQrRender() = syncQrRender()
         override suspend fun syncQrRender(): Result<BoardQrRender, DataError.Remote> {
             syncCalls++
             delay(1_000)

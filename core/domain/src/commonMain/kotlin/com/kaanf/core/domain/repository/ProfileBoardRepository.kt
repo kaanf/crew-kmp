@@ -14,7 +14,4 @@ interface ProfileBoardRepository {
 
     /** Caches the themed QR state, waiting while the server is still rendering it. */
     suspend fun syncQrRender(): Result<BoardQrRender, DataError.Remote>
-
-    /** Asks the server to re-render a themed QR whose image is missing, then waits like [syncQrRender]. */
-    suspend fun recoverQrRender(): Result<BoardQrRender, DataError.Remote>
 }

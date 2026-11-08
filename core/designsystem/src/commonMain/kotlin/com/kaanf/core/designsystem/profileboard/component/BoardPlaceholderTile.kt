@@ -1,7 +1,6 @@
 package com.kaanf.core.designsystem.profileboard.component
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,7 +14,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -37,12 +35,13 @@ internal fun BoardPlaceholderTile(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     tall: Boolean = false,
+    onLongClick: (() -> Unit)? = null,
 ) {
     val tileModifier = modifier
         .clip(TileShape)
         .background(AccessDefaults.Background.copy(alpha = .32f))
         .dashedBorder(AccessDefaults.TextPrimary.copy(alpha = .6f), cornerRadius = 18.dp)
-        .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
+        .boardTileClickable(enabled = enabled, onLongClick = onLongClick, onClick = onClick)
     if (tall) {
         Column(
             modifier = tileModifier.padding(14.dp),

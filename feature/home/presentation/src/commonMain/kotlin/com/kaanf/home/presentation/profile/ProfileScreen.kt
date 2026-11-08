@@ -8,6 +8,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.saveable.rememberSaveable
+import com.kaanf.core.designsystem.component.dialog.CreditsDialog
+import crew.feature.home.presentation.generated.resources.profile_credits
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -120,6 +125,9 @@ fun ProfileScreen(
     onAction: (ProfileAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    var showCredits by rememberSaveable { mutableStateOf(false) }
+    if (showCredits) CreditsDialog(onDismiss = { showCredits = false })
+
     BackHandler(enabled = state.isCropping) {
         onAction(ProfileAction.OnCropCancelled)
     }
@@ -179,6 +187,10 @@ fun ProfileScreen(
                 SignInMethodsRow(
                     onClick = { onAction(ProfileAction.OnSignInMethodsClick) },
                 )
+
+                TextButton(onClick = { showCredits = true }) {
+                    Text(stringResource(Res.string.profile_credits), color = AccessDefaults.TextSecondary)
+                }
             }
 
             val cropBytes = state.pendingCropBytes

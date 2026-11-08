@@ -8,7 +8,7 @@ import com.kaanf.core.domain.model.profileboard.minQrSize
 object ProfileBoardEditor {
     /** Only persisted artwork matters; focus, panel state and sticker list order do not. */
     fun hasSameContent(first: ProfileBoardState, second: ProfileBoardState): Boolean =
-        first.qrStyleId == second.qrStyleId && first.qr == second.qr &&
+        first.qrStyleId == second.qrStyleId && first.qr == second.qr && first.hobbies == second.hobbies &&
             first.stickers.sortedBy { it.slot } == second.stickers.sortedBy { it.slot }
 
     fun reduce(current: ProfileBoardState, action: ProfileBoardAction): ProfileBoardState = when (action) {
@@ -21,11 +21,13 @@ object ProfileBoardEditor {
         ProfileBoardAction.FinishQrGesture -> if (canEditQr(current)) settleBoard(current) else current
         ProfileBoardAction.CancelEditing, ProfileBoardAction.ReloadBoard -> current.copy(
             isEditingBoard = false, focusedStickerSlot = null, pickerSlot = null, isEditorSheetOpen = false, isQrFocused = false,
+            openTool = null,
         )
         is ProfileBoardAction.SelectEditorCategory -> if (current.isEditingBoard && current.isEditorSheetOpen) {
             current.copy(editorCategory = action.category)
         } else current
-        is ProfileBoardAction.SelectQrStyle -> if (current.isEditingBoard && current.isEditorSheetOpen && isKnownQrDesign(action.id)) {
+        is ProfileBoardAction.SelectQrStyle -> if (current.isEditingBoard &&
+            (current.isEditorSheetOpen || current.openTool == BoardTool.QR_SKIN) && isKnownQrDesign(action.id)) {
             settleBoard(current.copy(qrStyleId = action.id))
                 .copy(isQrFocused = true, focusedStickerSlot = null, pickerSlot = null)
         } else current
@@ -81,18 +83,40 @@ object ProfileBoardEditor {
         }
         ProfileBoardAction.FinishEditing -> settleBoard(current).copy(
             isEditingBoard = false, focusedStickerSlot = null, pickerSlot = null, isEditorSheetOpen = false, isQrFocused = false,
+            openTool = null,
         )
         is ProfileBoardAction.LayoutChanged -> settleBoard(current.copy(boardLayout = action.layout))
         ProfileBoardAction.OpenBoardEditor -> if (current.isEditingBoard) settleBoard(current).copy(
             pickerSlot = null, isEditorSheetOpen = true,
         ) else current
-        // Each tool's own sheet is added separately; opening one does not change the board yet.
-        is ProfileBoardAction.OpenBoardTool -> current
+        // The film sheet is not built yet, so its tool stays inert.
+        is ProfileBoardAction.OpenBoardTool -> if (current.isEditingBoard) {
+            current.copy(openTool = action.tool)
+        } else current
+        ProfileBoardAction.CloseBoardTool -> current.copy(openTool = null)
+        is ProfileBoardAction.ApplyAskMe -> if (current.isEditingBoard) current.copy(
+            askMe = action.text.trim().take(BoardTileLimits.ASK_ME_LENGTH).ifEmpty { null }, openTool = null,
+        ) else current
+        ProfileBoardAction.RemoveAskMe -> if (current.isEditingBoard) current.copy(askMe = null) else current
+        is ProfileBoardAction.ApplyHobbies -> if (current.isEditingBoard) current.copy(
+            hobbies = action.hobbies.map { it.trim().take(BoardTileLimits.HOBBY_LENGTH) }.filter { it.isNotEmpty() && it.none(Char::isISOControl) }
+                .distinctBy { it.lowercase() }.take(BoardTileLimits.MAX_HOBBIES),
+            openTool = null,
+        ) else current
+        is ProfileBoardAction.RemoveHobby -> if (current.isEditingBoard) {
+            current.copy(hobbies = current.hobbies - action.hobby)
+        } else current
+        is ProfileBoardAction.SearchMovies, ProfileBoardAction.LoadMoreMovies,
+        is ProfileBoardAction.ApplyMovie, ProfileBoardAction.RemoveMovie -> current
+        // Song changes go through the music repository in the ViewModel.
+        is ProfileBoardAction.SearchSongs, ProfileBoardAction.LoadMoreSongs,
+        is ProfileBoardAction.ApplySong, ProfileBoardAction.RemoveSong -> current
         ProfileBoardAction.EditBoard -> settleBoard(current).copy(
             isEditingBoard = true,
             focusedStickerSlot = null,
             pickerSlot = null,
-            isEditorSheetOpen = true,
+            isEditorSheetOpen = false,
+            openTool = null,
             isQrFocused = false,
             editorCategory = BoardEditorCategory.QR,
         )

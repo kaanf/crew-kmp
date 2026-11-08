@@ -1,6 +1,9 @@
 package com.kaanf.core.designsystem.profileboard
 
+import com.kaanf.core.domain.model.movie.Movie
+
 import com.kaanf.core.domain.model.profileboard.BoardLayout
+import com.kaanf.core.domain.model.music.MusicTrack
 import com.kaanf.core.domain.model.profileboard.BoardSticker
 
 data class ProfileBoardState(
@@ -24,7 +27,19 @@ data class ProfileBoardState(
     val pickerSlot: Int? = null,
     val isEditorSheetOpen: Boolean = false,
     val editorCategory: BoardEditorCategory = BoardEditorCategory.QR,
+    /** The tile tool sheet open over the board, if any. */
+    val openTool: BoardTool? = null,
+    /** Saved immediately through its own endpoint, independent of the board revision. */
+    val favoriteTrack: MusicTrack? = null,
+    val favoriteMovie: Movie? = null,
+    val movieSearch: MovieSearchState = MovieSearchState(),
+    val songSearch: SongSearchState = SongSearchState(),
+    // Ask-me remains screen-local; hobbies are saved with the board revision.
+    val askMe: String? = null,
+    val hobbies: List<String> = emptyList(),
 ) {
+    val hasTileContent: Boolean get() = favoriteTrack != null || favoriteMovie != null || askMe != null || hobbies.isNotEmpty()
+
     val targetStickerSlot: Int get() = pickerSlot
         ?: (0..3).firstOrNull { slot -> stickers.none { it.slot == slot } }
         ?: focusedStickerSlot ?: 0
@@ -41,3 +56,27 @@ enum class BoardEditorCategory(val stickerCategory: com.kaanf.core.domain.model.
 
 /** Tools offered by the edit board dock, in display order. */
 enum class BoardTool { QR_SKIN, FILM, SONG, ASK, LOVES }
+
+data class SongSearchState(
+    val query: String = "",
+    val tracks: List<MusicTrack> = emptyList(),
+    val nextOffset: Int? = null,
+    val isLoading: Boolean = false,
+    val hasError: Boolean = false,
+    val isSaving: Boolean = false,
+)
+
+object BoardTileLimits {
+    const val ASK_ME_LENGTH = 60
+    const val HOBBY_LENGTH = 24
+    const val MAX_HOBBIES = 5
+}
+
+data class MovieSearchState(
+    val query: String = "",
+    val movies: List<Movie> = emptyList(),
+    val nextPage: Int? = null,
+    val isLoading: Boolean = false,
+    val hasError: Boolean = false,
+    val isSaving: Boolean = false,
+)

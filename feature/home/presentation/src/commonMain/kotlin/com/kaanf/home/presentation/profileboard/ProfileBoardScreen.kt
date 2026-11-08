@@ -1,5 +1,8 @@
 package com.kaanf.home.presentation.profileboard
 
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -25,18 +28,24 @@ fun ProfileBoardRoot(
         viewModel.refresh()
     }
     val close: () -> Unit = {
-        if (!state.isSaving) {
+        if (!state.isSaving && !state.movieSearch.isSaving) {
             if (state.isEditingBoard) viewModel.onAction(ProfileBoardAction.CancelEditing)
             onClose()
         }
     }
     BackHandler(enabled = state.isEditingBoard || state.isSaving) {
-        if (!state.isSaving) viewModel.onAction(ProfileBoardAction.CancelEditing)
+        when {
+            state.isSaving || state.movieSearch.isSaving -> Unit
+            state.openTool != null -> viewModel.onAction(ProfileBoardAction.CloseBoardTool)
+            else -> viewModel.onAction(ProfileBoardAction.CancelEditing)
+        }
     }
     AppScaffold { padding ->
         ProfileBoardTilesContent(
             state = state,
-            contentPadding = padding,
+            modifier = Modifier.padding(bottom = padding.calculateBottomPadding())
+                .consumeWindowInsets(PaddingValues(bottom = padding.calculateBottomPadding())),
+            contentPadding = PaddingValues(top = padding.calculateTopPadding()),
             onBack = close,
             onEditProfile = onEditProfile,
             onRetry = viewModel::refresh,

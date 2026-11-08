@@ -101,3 +101,11 @@ contracts, setup, bounded cache/cooldown and publication limits are documented i
 [API_CONTRACTS](API_CONTRACTS.md#favorite-music-infrastructure-2026-11-06).
 Mock-provider tests and shared compilation are verified in [COMMANDS](COMMANDS.md);
 live Spotify access, production entitlement and deployed backend remain unverified.
+
+## TMDB film catalog (2026-11-07)
+
+Backend-only provider integration in `../crew-api-tmdb`, not a connected app/tool or
+mobile SDK. `TMDB_READ_ACCESS_TOKEN` configures the server; shared mobile Ktor calls
+Crew film endpoints through `MovieRepository`. No library/toolchain changes. Mock-provider
+and shared checks are recorded in [COMMANDS](COMMANDS.md); direct live search/detail access passed; deployment remains pending.
+Contract/configuration: [API_CONTRACTS](API_CONTRACTS.md#favorite-film--tmdb-2026-11-07).

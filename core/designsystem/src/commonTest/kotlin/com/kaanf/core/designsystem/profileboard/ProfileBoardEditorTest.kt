@@ -6,12 +6,24 @@ import com.kaanf.core.domain.model.profileboard.BoardQrTheme
 import com.kaanf.core.domain.model.profileboard.BoardStickerDesign
 import com.kaanf.core.domain.model.profileboard.BoardStickerPlacement
 import kotlin.test.Test
+import kotlin.test.assertFalse
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class ProfileBoardEditorTest {
+    @Test
+    fun editBoardEntersEditingWithoutOpeningAPanel() {
+        val editing = ProfileBoardEditor.reduce(
+            ProfileBoardState(canEdit = true, isLoading = false, isEditorSheetOpen = true, openTool = BoardTool.SONG),
+            ProfileBoardAction.EditBoard,
+        )
+        assertTrue(editing.isEditingBoard)
+        assertFalse(editing.isEditorSheetOpen)
+        assertNull(editing.openTool)
+    }
+
     @Test
     fun choosingAThemeGrowsTheQrToItsScanSafeMinimum() {
         val opened = ProfileBoardEditor.reduce(ProfileBoardState(isEditingBoard = true, isEditorSheetOpen = true,
@@ -24,12 +36,54 @@ class ProfileBoardEditorTest {
         assertEquals(BoardQrTheme.VAMPIRE.id, unknown.qrStyleId)
     }
 
+    private fun editingBoard() =
+        ProfileBoardEditor.reduce(ProfileBoardState(canEdit = true, isLoading = false), ProfileBoardAction.EditBoard)
+
     @Test
-    fun openingABoardToolKeepsTheBoardAndEditingStateUnchanged() {
-        val editing = ProfileBoardEditor.reduce(ProfileBoardState(canEdit = true, isLoading = false), ProfileBoardAction.EditBoard)
+    fun boardToolsOpenTheirSheetOnlyWhileEditing() {
+        val editing = editingBoard()
         BoardTool.entries.forEach { tool ->
-            assertEquals(editing, ProfileBoardEditor.reduce(editing, ProfileBoardAction.OpenBoardTool(tool)))
+            assertEquals(tool, ProfileBoardEditor.reduce(editing, ProfileBoardAction.OpenBoardTool(tool)).openTool)
         }
+        val viewing = ProfileBoardState(canEdit = true, isLoading = false)
+        assertEquals(viewing, ProfileBoardEditor.reduce(viewing, ProfileBoardAction.OpenBoardTool(BoardTool.SONG)))
+    }
+
+    @Test
+    fun leavingEditModeClosesTheOpenSheet() {
+        val open = ProfileBoardEditor.reduce(editingBoard(), ProfileBoardAction.OpenBoardTool(BoardTool.ASK))
+        assertNull(ProfileBoardEditor.reduce(open, ProfileBoardAction.CancelEditing).openTool)
+        assertNull(ProfileBoardEditor.reduce(open, ProfileBoardAction.FinishEditing).openTool)
+        assertNull(ProfileBoardEditor.reduce(open, ProfileBoardAction.CloseBoardTool).openTool)
+    }
+
+    @Test
+    fun qrSkinSheetPreviewsTheChosenStyleOnTheDraft() {
+        val open = ProfileBoardEditor.reduce(editingBoard().copy(isEditorSheetOpen = false),
+            ProfileBoardAction.OpenBoardTool(BoardTool.QR_SKIN))
+        assertEquals("dots", ProfileBoardEditor.reduce(open, ProfileBoardAction.SelectQrStyle("dots")).qrStyleId)
+    }
+
+    @Test
+    fun askMeIsTrimmedLimitedAndClearedWhenBlank() {
+        val open = ProfileBoardEditor.reduce(editingBoard(), ProfileBoardAction.OpenBoardTool(BoardTool.ASK))
+        val applied = ProfileBoardEditor.reduce(open, ProfileBoardAction.ApplyAskMe("  ${"a".repeat(80)}  "))
+        assertEquals(BoardTileLimits.ASK_ME_LENGTH, applied.askMe?.length)
+        assertNull(applied.openTool)
+        assertNull(ProfileBoardEditor.reduce(applied, ProfileBoardAction.ApplyAskMe("   ")).askMe)
+        assertNull(ProfileBoardEditor.reduce(applied, ProfileBoardAction.RemoveAskMe).askMe)
+    }
+
+    @Test
+    fun hobbiesAreDedupedTrimmedAndCappedAtFive() {
+        val applied = ProfileBoardEditor.reduce(editingBoard(), ProfileBoardAction.ApplyHobbies(
+            listOf(" Chess ", "chess", "", "Running", "Cooking", "Karaoke", "Pottery", "Cycling"),
+        ))
+        assertEquals(listOf("Chess", "Running", "Cooking", "Karaoke", "Pottery"), applied.hobbies)
+        assertEquals(listOf("Chess", "Cooking", "Karaoke", "Pottery"),
+            ProfileBoardEditor.reduce(applied, ProfileBoardAction.RemoveHobby("Running")).hobbies)
+        val viewing = applied.copy(isEditingBoard = false)
+        assertEquals(viewing, ProfileBoardEditor.reduce(viewing, ProfileBoardAction.RemoveHobby("Chess")))
     }
 
     private fun editingState(): ProfileBoardState = ProfileBoardState(
@@ -156,10 +210,10 @@ class ProfileBoardEditorTest {
     }
 
     @Test
-    fun editBoardOpensCategorizedSheetAndChoosingQrKeepsTheDraftOpen() {
+    fun editorSheetRequiresAnExplicitActionAndKeepsTheDraftOpen() {
         val mode = ProfileBoardEditor.reduce(ProfileBoardState(), ProfileBoardAction.EditBoard)
         assertTrue(mode.isEditingBoard)
-        assertTrue(mode.isEditorSheetOpen)
+        assertFalse(mode.isEditorSheetOpen)
         val opened = ProfileBoardEditor.reduce(mode, ProfileBoardAction.OpenBoardEditor)
         assertTrue(opened.isEditorSheetOpen)
         assertEquals(BoardEditorCategory.QR, opened.editorCategory)
@@ -226,7 +280,7 @@ class ProfileBoardEditorTest {
         val editing = ProfileBoardEditor.reduce(start, ProfileBoardAction.EditBoard)
         assertNull(editing.focusedStickerSlot)
         assertTrue(!editing.isQrFocused)
-        assertTrue(editing.isEditorSheetOpen)
+        assertFalse(editing.isEditorSheetOpen)
     }
 
     @Test
@@ -273,9 +327,10 @@ class ProfileBoardEditorTest {
     }
 
     @Test
-    fun longPressEntryOpensThePaletteAndFocusesThePressedObject() {
+    fun explicitlyOpeningThePaletteAllowsFocusingTheChosenObject() {
         val original = editingState().copy(isEditingBoard = false)
-        val opened = ProfileBoardEditor.reduce(original, ProfileBoardAction.EditBoard)
+        val editing = ProfileBoardEditor.reduce(original, ProfileBoardAction.EditBoard)
+        val opened = ProfileBoardEditor.reduce(editing, ProfileBoardAction.OpenBoardEditor)
         val qr = ProfileBoardEditor.reduce(opened, ProfileBoardAction.FocusQr)
         assertTrue(qr.isEditingBoard && qr.isEditorSheetOpen && qr.isQrFocused)
         assertNull(qr.focusedStickerSlot)
@@ -305,6 +360,19 @@ class ProfileBoardEditorTest {
         val moved = original.copy(stickers = original.stickers.map { it.copy(rotation = it.rotation + 5f) })
         assertTrue(!ProfileBoardEditor.hasSameContent(original, moved))
         assertTrue(ProfileBoardEditor.hasSameContent(original, moved.copy(stickers = original.stickers)))
+    }
+
+    @kotlin.test.Test
+    fun lovesOnlyEditsAreDetectedAndRemovalCanBeSaved() {
+        val baseline = ProfileBoardState(isEditingBoard = true)
+        val edited = ProfileBoardEditor.reduce(baseline, ProfileBoardAction.ApplyHobbies(listOf(" Kahve ", "kahve", "Film")))
+        kotlin.test.assertEquals(listOf("Kahve", "Film"), edited.hobbies)
+        kotlin.test.assertFalse(ProfileBoardEditor.hasSameContent(baseline, edited))
+        val removed = ProfileBoardEditor.reduce(edited, ProfileBoardAction.RemoveHobby("Film"))
+        kotlin.test.assertEquals(listOf("Kahve"), removed.hobbies)
+        kotlin.test.assertFalse(ProfileBoardEditor.hasSameContent(edited, removed))
+        kotlin.test.assertEquals(baseline.copy(isEditingBoard = false), ProfileBoardEditor.reduce(
+            baseline.copy(isEditingBoard = false), ProfileBoardAction.ApplyHobbies(listOf("Film"))))
     }
 
 }

@@ -109,6 +109,12 @@ private fun ScreenshotContent(scene: ScreenshotScene, fixtures: ScreenshotFixtur
                     },
                     isEditingBoard = scene == ScreenshotScene.BoardEditor,
                     isEditorSheetOpen = scene == ScreenshotScene.BoardEditor,
+                    // Synthetic tile content so the editor scene shows every filled pixel tile.
+                    favoriteTrack = if (scene == ScreenshotScene.BoardEditor) com.kaanf.core.domain.model.music.MusicTrack(
+                        "0000000000000000000000", "Midnight City", listOf("M83"), "https://open.spotify.com/",
+                    ) else null,
+                    askMe = if (scene == ScreenshotScene.BoardEditor) "Getting lost in a new city" else null,
+                    hobbies = if (scene == ScreenshotScene.BoardEditor) listOf("Bouldering", "Board games", "Chess") else emptyList(),
                     stickers = listOf(BoardStickerDesign.HIKING, BoardStickerDesign.GAMING,
                         BoardStickerDesign.MUSIC, BoardStickerDesign.COFFEE).mapIndexed { slot, design ->
                         val sticker = BoardStickerPlacement.create(slot, design)
