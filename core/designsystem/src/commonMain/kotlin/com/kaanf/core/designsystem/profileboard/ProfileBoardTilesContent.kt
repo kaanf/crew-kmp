@@ -90,6 +90,9 @@ fun ProfileBoardTilesContent(
     contentPadding: PaddingValues = PaddingValues(),
     onRetry: () -> Unit = {},
     onQrImageError: () -> Unit = {},
+    controls: (@Composable () -> Unit)? = null,
+    qrModifier: Modifier = Modifier,
+    footer: @Composable () -> Unit = {},
 ) {
     val canEdit = state.canEdit && !state.isLoading && !state.hasLoadError && !state.hasConflict
     val editing = state.isEditingBoard
@@ -114,7 +117,7 @@ fun ProfileBoardTilesContent(
     Box(modifier.fillMaxSize()) {
         BoardBackdrop(Modifier.matchParentSize())
         Column(Modifier.fillMaxSize().padding(top = contentPadding.calculateTopPadding())) {
-            ProfileBoardControls(
+            if (controls != null) controls() else ProfileBoardControls(
                 modifier = Modifier.padding(horizontal = 20.dp),
                 onClose = onBack,
                 onEditBoard = { onAction(if (editing) ProfileBoardAction.FinishEditing else ProfileBoardAction.EditBoard) },
@@ -158,7 +161,7 @@ fun ProfileBoardTilesContent(
                         .padding(horizontal = 12.dp, vertical = 14.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    BoardQr(state, editing, interactive, onQrImageError, editOnLongPress) { openTool(BoardTool.QR_SKIN) }
+                    BoardQr(state, editing, interactive, onQrImageError, editOnLongPress, qrModifier) { openTool(BoardTool.QR_SKIN) }
                     Spacer(Modifier.height(24.dp))
                     val track = state.favoriteTrack
                     if (track != null) BoardSongTile(
@@ -237,6 +240,7 @@ fun ProfileBoardTilesContent(
                         )
                     }
                 }
+                footer()
                 if (!editing && state.hasLoadError) {
                     TextButton(onClick = onRetry) { Text(stringResource(Res.string.profile_board_retry)) }
                 }
@@ -258,11 +262,12 @@ private fun BoardQr(
     enabled: Boolean,
     onQrImageError: () -> Unit,
     onLongClick: (() -> Unit)?,
+    qrModifier: Modifier,
     onChangeSkin: () -> Unit,
 ) {
     Box(contentAlignment = Alignment.BottomCenter) {
         Box(
-            modifier = Modifier.size(150.dp).clip(QrShape).background(AccessDefaults.Background)
+            modifier = qrModifier.size(150.dp).clip(QrShape).background(AccessDefaults.Background)
                 .border(1.dp, AccessDefaults.TextPrimary.copy(alpha = .14f), QrShape)
                 .boardTileClickable(enabled = enabled, onLongClick = onLongClick,
                     onClick = { if (editing) onChangeSkin() }),

@@ -209,3 +209,11 @@ Board tap follow-up: Spotify/TMDB external navigation was removed from filled
 tiles and the Loves doing heading removed. Android and shared iOS compilation
 passed with the same command above; `git diff --check` passed. Device interaction
 and visual checks were not run. Long-press editing remains wired.
+
+### Match QR profile tile board (2026-11-08)
+
+`./gradlew --console=plain :androidApp:compileDebugKotlin
+:composeApp:compileKotlinIosSimulatorArm64` passed for the shared Match QR tile
+board and profile-sized How to play controls. `git diff --check` passed.
+Device rendering, camera interaction, TalkBack/VoiceOver and the native Swift host
+were not exercised. Existing deprecation warnings remain.
