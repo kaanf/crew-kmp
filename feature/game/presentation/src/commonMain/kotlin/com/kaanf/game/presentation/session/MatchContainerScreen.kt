@@ -289,17 +289,7 @@ fun MatchContainerScreen(
                         onRightClick = { onAction(MatchSessionAction.OnRejectTask) },
                     )
 
-                    selectedTab == GameBottomTab.Play -> AppTopBar(
-                        state = AppTopBarState.Game(
-                            showQuestsAction = false,
-                            showPassportAction = false,
-                            questsBadge = state.questsClaimable,
-                            passportBadge = state.passportClaimable,
-                        ),
-                        onLeftClick = onQuestsClick,
-                        onPassportClick = onPassportClick,
-                        onRightClick = { onAction(MatchSessionAction.OnBackClick) },
-                    )
+                    selectedTab == GameBottomTab.Play -> Unit
 
                     // Leaderboard ve rulo aynı bar'ı paylaşır: çıkış solda, sağdaki ikon ikisi arasında geçiş.
                     selectedTab == GameBottomTab.Leaderboard -> AppTopBar(
@@ -446,8 +436,6 @@ private fun MatchPhaseContent(
         MatchPhase.Idle -> QrHomePhase(
             state = state,
             onAction = onAction,
-            onQuestsClick = onQuestsClick,
-            onPassportClick = onPassportClick,
             modifier = modifier
         )
 

@@ -17,7 +17,7 @@ file/node mapping is established. Do not replace current UI from an unapproved d
 | Sheets and dialogs | `core/designsystem/src/commonMain/kotlin/com/kaanf/core/designsystem/component/sheet/`, `core/designsystem/src/commonMain/kotlin/com/kaanf/core/designsystem/component/dialog/` |
 | Layout and snackbar | `core/designsystem/src/commonMain/kotlin/com/kaanf/core/designsystem/component/layout/`, `core/presentation/src/commonMain/kotlin/com/kaanf/core/presentation/snackbar/` |
 | Profile board / QR | `core/designsystem/src/commonMain/kotlin/com/kaanf/core/designsystem/profileboard/`, `core/domain/src/commonMain/kotlin/com/kaanf/core/domain/model/profileboard/` |
-| Owner tile board (inline editing controls) | `core/designsystem/src/commonMain/kotlin/com/kaanf/core/designsystem/profileboard/ProfileBoardTilesContent.kt`; the sticker canvas `ProfileBoardContent.kt` still renders the match QR home board |
+| Owner tile board (inline editing controls) | `core/designsystem/src/commonMain/kotlin/com/kaanf/core/designsystem/profileboard/ProfileBoardTilesContent.kt`; the match QR home also uses this tile board with viewing-only content and How to play controls |
 | Cover backdrop | `core/palette/src/commonMain/`, `core/palette/README.md` |
 | Navigation/transition ownership | `composeApp/src/commonMain/kotlin/com/kaanf/crew/navigation/NavigationRoot.kt`, feature graph implementations |
 
@@ -116,3 +116,12 @@ Tap and hold share a single recognizer, so holding does not also open a provider
 link or tool sheet; scrolling cancels recognition. The long-click accessibility
 action is labelled with the existing Edit board resource. Android and iOS retain
 their existing native feedback implementation; no new dependency is introduced.
+
+### Match QR tile board (2026-11-08)
+
+Match QR home reuses the profile tile board with the same 32 dp back and pill
+controls. How to play replaces Edit board, and settings is hidden. Board editing
+is disabled in this context. Saved song, film and Loves appear alongside the QR;
+Ask me remains local to the profile board screen. Score and camera-permission-aware
+Scan remain below the board. Quests and Passport shortcuts are hidden; their
+existing destinations remain available for future placement.

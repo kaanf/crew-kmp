@@ -11,6 +11,8 @@ import com.kaanf.game.domain.model.MatchScoreboardEntry
 
 @Immutable
 data class MatchSessionState(
+    val favoriteTrack: com.kaanf.core.domain.model.music.MusicTrack? = null,
+    val favoriteMovie: com.kaanf.core.domain.model.movie.Movie? = null,
     val phase: MatchPhase = MatchPhase.Idle,
     val connectionState: GameConnectionState = GameConnectionState.Connecting,
     // Lobi durumu da aynı session'da yaşar: etkinlik boyunca tek soket aboneliği var,

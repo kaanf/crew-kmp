@@ -91,6 +91,8 @@ class MatchSessionViewModel(
     private val logger: CrewLogger,
     savedStateHandle: SavedStateHandle,
     private val analytics: Analytics,
+    private val musicRepository: com.kaanf.core.domain.repository.MusicRepository,
+    private val movieRepository: com.kaanf.core.domain.repository.MovieRepository,
 ) : ViewModel() {
     private var lastStartedMatchId: String? = null
     private var lastCompletedMatchId: String? = null
@@ -116,6 +118,18 @@ class MatchSessionViewModel(
         )
 
     init {
+        viewModelScope.launch {
+            val market = androidx.compose.ui.text.intl.Locale.current.region.takeIf { it.length == 2 } ?: "US"
+            musicRepository.getFavorite(market).onSuccess { track ->
+                _state.update { it.copy(favoriteTrack = track) }
+            }
+        }
+        viewModelScope.launch {
+            val language = androidx.compose.ui.text.intl.Locale.current.language.takeIf { it.matches(Regex("[a-z]{2}")) } ?: "en"
+            movieRepository.getFavorite(language).onSuccess { movie ->
+                _state.update { it.copy(favoriteMovie = movie) }
+            }
+        }
         loadMyParticipant()
         observeCurrentUser()
         boardRepository.observeBoard().onEach { board ->

@@ -35,6 +35,8 @@ fun ProfileBoardControls(
     canEdit: Boolean = true,
     onCancel: () -> Unit = {},
     onSettings: () -> Unit = {},
+    actionLabel: String? = null,
+    showSettings: Boolean = true,
 ) {
     val pillColors = ButtonDefaults.buttonColors(
         containerColor = AccessDefaults.SurfaceElevated, contentColor = AccessDefaults.TextPrimary,
@@ -68,15 +70,15 @@ fun ProfileBoardControls(
             Button(onClick = onEditBoard, enabled = canEdit && !isSaving,
                 modifier = Modifier.height(32.dp), shape = RoundedCornerShape(50),
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp), colors = pillColors) {
-                if (!isEditing) {
+                if (!isEditing && actionLabel == null) {
                     Icon(painterResource(Res.drawable.ic_board_edit), null, modifier = Modifier.size(16.dp))
                     Spacer(Modifier.width(6.dp))
                 }
-                Text(stringResource(if (isSaving) Res.string.profile_board_saving
+                Text(actionLabel ?: stringResource(if (isSaving) Res.string.profile_board_saving
                     else if (isEditing) Res.string.profile_board_done else Res.string.profile_board_edit), style = pillText)
             }
             }
-            if (!isEditing) {
+            if (!isEditing && showSettings) {
                 IconButton(onClick = onSettings, enabled = !isSaving, modifier = Modifier.size(44.dp)) {
                     Icon(Icons.Default.Settings, stringResource(Res.string.profile_board_settings),
                         tint = AccessDefaults.TextPrimary, modifier = Modifier.size(22.dp))
