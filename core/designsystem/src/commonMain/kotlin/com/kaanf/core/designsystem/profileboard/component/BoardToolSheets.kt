@@ -462,4 +462,3 @@ private fun MovieRow(movie: Movie, selected: Boolean, onClick: () -> Unit) {
         SelectionDot(selected)
     }
 }
-

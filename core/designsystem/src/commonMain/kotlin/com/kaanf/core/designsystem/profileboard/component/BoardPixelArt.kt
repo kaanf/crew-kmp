@@ -115,4 +115,3 @@ internal val PixelSpotify: List<PixelRun> = listOf(
     PixelRun(4, 7, color = PixelInk), PixelRun(5, 6, 4, 1, PixelInk), PixelRun(9, 7, color = PixelInk),
     PixelRun(5, 10, color = PixelInk), PixelRun(6, 9, 3, 1, PixelInk), PixelRun(9, 10, color = PixelInk),
 )
-
