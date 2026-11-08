@@ -177,7 +177,7 @@ private fun CategoryPill(label: String, chosen: Boolean, onClick: () -> Unit) {
 }
 
 @Composable
-private fun PaletteTile(label: String, chosen: Boolean, onClick: () -> Unit, content: @Composable BoxScope.() -> Unit) {
+internal fun PaletteTile(label: String, chosen: Boolean, onClick: () -> Unit, content: @Composable BoxScope.() -> Unit) {
     val shape = RoundedCornerShape(20.dp)
     Box(Modifier.fillMaxWidth().aspectRatio(1f).clip(shape)
         .background(Color(0xFF181510))
@@ -203,7 +203,7 @@ private fun BoardEditorCategory.label(): String = stringResource(when (this) {
 })
 
 @Composable
-private fun BoardQrTheme.label(): String = stringResource(when (this) {
+internal fun BoardQrTheme.label(): String = stringResource(when (this) {
     BoardQrTheme.HAMSTER -> Res.string.profile_board_qr_theme_hamster
     BoardQrTheme.GINGERBREAD -> Res.string.profile_board_qr_theme_gingerbread
     BoardQrTheme.RED_PLUSH -> Res.string.profile_board_qr_theme_red_plush
@@ -219,7 +219,7 @@ internal fun BoardQrTheme.preview(): DrawableResource = when (this) {
 }
 
 @Composable
-private fun BoardQrStyle.label(): String = stringResource(when (this) {
+internal fun BoardQrStyle.label(): String = stringResource(when (this) {
     BoardQrStyle.ROUNDED -> Res.string.profile_board_qr_rounded
     BoardQrStyle.CLASSIC -> Res.string.profile_board_qr_classic
     BoardQrStyle.DOTS -> Res.string.profile_board_qr_dots

@@ -47,4 +47,19 @@ class ProfileBoardDtoTest {
         assertEquals(original, original.toDomain().toDto())
     }
 
+    @Test
+    fun lovesSurviveNetworkAndCacheRoundTripAndLegacyDefaultsToEmpty() {
+        val original = ProfileBoardDto(schemaVersion = 3, hobbies = listOf("Kahve", "🎮 Oyun"))
+        assertEquals(original, Json.decodeFromString<ProfileBoardDto>(Json.encodeToString(original.toDomain().toDto())))
+        assertEquals(emptyList(), Json.decodeFromString<ProfileBoardDto>("{}").toDomain().hobbies)
+        assertEquals(emptyList(), original.copy(hobbies = emptyList()).toDomain().toDto().hobbies)
+    }
+
+    @Test
+    fun clearingLovesExplicitlySendsEmptyArrayWithDefaultJsonSettings() {
+        val body = Json.encodeToString(ProfileBoardDto(hobbies = emptyList()))
+        val fields = Json.parseToJsonElement(body) as kotlinx.serialization.json.JsonObject
+        assertEquals(kotlinx.serialization.json.JsonArray(emptyList()), fields["hobbies"])
+    }
+
 }

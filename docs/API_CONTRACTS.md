@@ -20,7 +20,7 @@ Client source paths below are relative to this mobile repository.
 | Tickets / check-in | `feature/home/data/src/commonMain/kotlin/com/kaanf/home/data/repository/TicketRepositoryImpl.kt` | POST event tickets, GET my-ticket and POST check-in with entry code |
 | Match / tasks | `feature/game/data/src/commonMain/kotlin/com/kaanf/game/data/repository/MatchRepositoryImpl.kt` | Participant token, invites, ready/results, task offers/confirmation, snapshots and scoreboard |
 | Real-time events | `feature/game/data/src/commonMain/kotlin/com/kaanf/game/data/repository/EventConnectionClientImpl.kt` | Lifecycle-aware connection/reconnect and shared session refresh; no server protocol guarantee inferred |
-| Board / QR render | `core/data/src/commonMain/kotlin/com/kaanf/core/data/repository/ProfileBoardRepositoryImpl.kt`, `core/data/src/commonMain/kotlin/com/kaanf/core/data/dto/ProfileBoardDto.kt` | GET/PUT `/profile/board`, GET `/profile/board/qr`, revision-aware local caching and bounded render polling |
+| Board / QR render | `core/data/src/commonMain/kotlin/com/kaanf/core/data/repository/ProfileBoardRepositoryImpl.kt`, `core/data/src/commonMain/kotlin/com/kaanf/core/data/dto/ProfileBoardDto.kt` | GET/PUT `/profile/board`, GET `/profile/board/qr` (checks READY images in storage and automatically requeues confirmed missing files as PENDING; no separate recovery request), revision-aware local caching and bounded render polling |
 
 ## Backend source inspected
 
@@ -145,3 +145,58 @@ requested; no live Crew mutation was performed.
 Before first deployment, the unapplied favorite migration was renumbered from V33 to
 V46 during main/dev reconciliation because main already contained migrations V33–V45.
 Existing applied migrations were preserved.
+
+### QR status self-repair (2026-11-07)
+
+Opening the board refreshes its QR status. GET `/profile/board/qr` checks a READY
+image outside the database transaction; confirmed missing storage objects are
+requeued under a row lock and returned as PENDING. Mobile caches intermediate
+PENDING responses and polls until READY/FALLBACK. An image download failure may
+recheck this same GET once per failed URL. The separate POST recovery route and
+repository operation were removed before deployment. Storage errors other than
+confirmed missing objects remain failures and do not requeue the render.
+
+Deployment remains required: the inspected production deployment `7c16ed6` lacks
+this check. No production mutation/deployment is included in local verification.
+
+### Favorite film / TMDB (2026-11-07)
+
+Shared `MovieRepository` / `MovieRepositoryImpl` use the existing authenticated Crew
+Ktor client. GET `/movies/search` takes `q`, `language`, `page=1` and returns
+`{movies,nextPage}`. GET/PUT/DELETE `/profile/favorite-movie` read/save/remove the
+current user's choice; GET takes `language`, PUT sends `{movieId,language}`, DELETE
+returns 204. Movie metadata is `{id,title,releaseYear,posterUrl,tmdbUrl}` with nullable
+year/poster; only fixed TMDB website/image URLs are accepted. Input validation,
+nonadvancing-page rejection, error mapping and cancellation follow existing data helpers.
+
+Backend source is in `../crew-api-tmdb`, branch `feat/tmdb-movies`, based on `dev`.
+`TMDB_READ_ACCESS_TOKEN` stays on the server; mobile needs no token or TMDB SDK.
+Backend `V47__favorite_movie.sql` stores only a positive TMDB movie ID per user.
+Search excludes adult titles and save verifies details before a short DB transaction.
+Errors: `MOVIE_INVALID_REQUEST` (400), `MOVIE_NOT_FOUND` (404),
+`MOVIE_RATE_LIMITED` (429), `MOVIE_UNAVAILABLE` (503). Missing provider credentials
+return 503 for searches/details without breaking startup or removal. No offline writes
+or metadata fallback are added. Provider failure retains the saved ID.
+
+The API Read Access Token is configured in ignored backend environment files. A direct
+live TMDB search returned 20 results and film detail lookup succeeded. Production
+deployment, PostgreSQL migration execution, live Crew endpoint flow and runtime device
+flows remain unverified.
+
+## Profile board Loves (2026-11-07)
+
+Authenticated GET/PUT `/api/profile/board` now include `hobbies`, an ordered string
+array (default empty on reads). PUT accepts at most five distinct case-insensitive
+values, each 1–24 Kotlin UTF-16 characters, trimmed and without control characters.
+An omitted/null field preserves saved values for legacy clients; `[]` clears them.
+Existing revision conflicts and authenticated-account ownership apply. Schema versions
+1–3 remain supported; this is an additive field. No provider or new dependency is used.
+Mobile includes the list in board DTO/domain/cache and Done/Cancel editing behavior.
+Deploy the backend migration/API before relying on mobile persistence: older servers
+may ignore this field. Backend worktree: `../crew-api-loves`, `feat/profileboard-loves`,
+based on dev `0ceaca1`. V48 adds JSONB `profile_boards.hobbies` with an empty-array
+default and array/count constraint. Account deletion follows existing board ownership.
+
+The mobile `ProfileBoardDto.hobbies` field always encodes its default empty list.
+Without this per-field override, Kotlin serialization omits `[]` and the server
+correctly preserves the old selection under the legacy omission contract.

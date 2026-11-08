@@ -7,6 +7,7 @@ data class ProfileBoard(
     val stickers: List<BoardSticker> = emptyList(),
     val canEdit: Boolean = true,
     val qr: BoardQrPlacement = BoardQrPlacement(),
+    val hobbies: List<String> = emptyList(),
 )
 
 enum class BoardQrStyle(val id: String) {

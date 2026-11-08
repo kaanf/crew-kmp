@@ -98,16 +98,43 @@ class ProfileBoardRepositoryTest {
         assertNull(repository.observeQrRender().first())
     }
 
+    @Test
+    fun statusRefreshReplacesTheCachedImage() = runBlocking {
+        engine.response = """{"themeId":"vampire_v9","status":"READY","imageUrl":"https://cdn.test/lost.png"}"""
+        repository.syncQrRender()
+        engine.response = """{"themeId":"vampire_v9","status":"READY","imageUrl":"https://cdn.test/new.png"}"""
+        val result = repository.syncQrRender() as Result.Success
+        assertTrue(engine.requests.all { it == (HttpMethod.Get to "/api/profile/board/qr") })
+        assertEquals("https://cdn.test/new.png", result.data.imageUrl)
+        assertEquals("https://cdn.test/new.png", repository.observeQrRender().first()?.imageUrl)
+    }
+
+    @Test
+    fun pendingStatusIsPolledThroughGetUntilReplacementIsReady() = runBlocking {
+        engine.responses.add("""{"themeId":"vampire_v9","status":"PENDING"}""")
+        engine.response = """{"themeId":"vampire_v9","status":"READY","imageUrl":"https://cdn.test/replacement.png"}"""
+        val result = repository.syncQrRender() as Result.Success
+        assertEquals(BoardQrRenderStatus.READY, result.data.status)
+        assertEquals("https://cdn.test/replacement.png", repository.observeQrRender().first()?.imageUrl)
+        assertEquals(2, engine.requests.size)
+        assertTrue(engine.requests.all { it == (HttpMethod.Get to "/api/profile/board/qr") })
+    }
+
     private fun user(id: String) = User(id, "test@example.invalid", "Test", role = "User", status = "Active", isProfileComplete = true, hasVerifiedEmail = true)
 }
 
 @OptIn(InternalAPI::class)
 private class BoardEngine : HttpClientEngineBase("profile-board-fixture") {
     override val config = HttpClientEngineConfig()
+    val responses = ArrayDeque<String>()
     var response = "{}"
     var status = HttpStatusCode.OK
-    override suspend fun execute(data: HttpRequestData) = HttpResponseData(
-        status, GMTDate(), headersOf(HttpHeaders.ContentType, "application/json"),
-        HttpProtocolVersion.HTTP_1_1, ByteReadChannel(response), callContext(),
-    )
+    val requests = mutableListOf<Pair<HttpMethod, String>>()
+    override suspend fun execute(data: HttpRequestData): HttpResponseData {
+        requests += data.method to data.url.encodedPath
+        return HttpResponseData(
+            status, GMTDate(), headersOf(HttpHeaders.ContentType, "application/json"),
+            HttpProtocolVersion.HTTP_1_1, ByteReadChannel(responses.removeFirstOrNull() ?: response), callContext(),
+        )
+    }
 }

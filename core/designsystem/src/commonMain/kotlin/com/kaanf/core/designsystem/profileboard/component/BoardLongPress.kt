@@ -1,5 +1,7 @@
 package com.kaanf.core.designsystem.profileboard.component
 
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberUpdatedState
@@ -27,4 +29,23 @@ internal fun Modifier.boardEditOnLongPress(enabled: Boolean, onEdit: () -> Unit)
     }.semantics {
         onLongClick(label) { latestEdit.value(); true }
     }
+}
+
+/** Keeps taps and long presses in one recognizer so holding never triggers a tap. */
+@Composable
+internal fun Modifier.boardTileClickable(
+    enabled: Boolean = true,
+    onLongClick: (() -> Unit)? = null,
+    onClick: () -> Unit,
+): Modifier {
+    val impact = rememberImpactHaptics()
+    val label = stringResource(Res.string.profile_board_edit)
+    return this.combinedClickable(
+        enabled = enabled,
+        role = Role.Button,
+        onLongClickLabel = label,
+        hapticFeedbackEnabled = false,
+        onLongClick = onLongClick?.let { edit -> { impact.perform(); edit() } },
+        onClick = onClick,
+    )
 }

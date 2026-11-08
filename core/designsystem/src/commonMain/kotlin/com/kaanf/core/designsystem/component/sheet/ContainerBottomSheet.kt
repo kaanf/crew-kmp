@@ -15,6 +15,9 @@ import androidx.compose.material3.ModalBottomSheetProperties
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,10 +33,15 @@ fun ContainerBottomSheet(
     showDragHandle: Boolean = true,
     content: @Composable () -> Unit,
 ) {
+    // Keep the sheet state and its animation when dismissal is temporarily disabled.
+    val currentDismissible by rememberUpdatedState(dismissible)
+    val confirmValueChange: (SheetValue) -> Boolean = remember {
+        { target -> currentDismissible || target != SheetValue.Hidden }
+    }
     val sheetState =
         rememberModalBottomSheetState(
             skipPartiallyExpanded = true,
-            confirmValueChange = { target -> dismissible || target != SheetValue.Hidden },
+            confirmValueChange = confirmValueChange,
         )
 
     ModalBottomSheet(
@@ -45,7 +53,7 @@ fun ContainerBottomSheet(
         contentColor = AccessDefaults.TextPrimary,
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
         scrimColor = AccessDefaults.LoadingOverlayScrim,
-        dragHandle = { if (showDragHandle && dismissible) DragHandle() },
+        dragHandle = { if (showDragHandle) DragHandle() },
         properties = ModalBottomSheetProperties(shouldDismissOnBackPress = false),
     ) {
         SheetSystemBarsEffect()

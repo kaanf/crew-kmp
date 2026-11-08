@@ -112,3 +112,100 @@ succeeded; GET `/v1/search` with `q=Duman`, `type=track`, `market=TR`, `limit=10
 not a Crew endpoint/deployment or favorite-write test. No secrets/tokens were persisted
 in test reports or documentation. Production entitlement and quota guarantees remain
 unverified. Prior mock-provider/compile results above were not rerun for this check.
+
+### QR status self-repair verification (2026-11-07)
+
+`./gradlew --console=plain :androidApp:compileDebugKotlin
+:composeApp:compileKotlinIosSimulatorArm64 :core:data:iosSimulatorArm64Test
+:core:presentation:iosSimulatorArm64Test` passed after correcting a new test's
+expected route to include the configured `/api` prefix. Data tests cover GET-only
+replacement-image refresh and PENDING-to-READY polling. Presentation tests cover
+the root QR monitor.
+
+Backend worktree `../crew-api-qr-fix`: `./gradlew --console=plain test --tests
+'*QrRenderStatusServiceTest' --tests '*ProfileBoardPersistenceTest' --tests
+'*QrRenderWorkerTest'` passed (13 tests). Covers authenticated-account controller
+routing, missing/existing storage objects, storage errors, requeue state and render
+worker requests. H2 does not validate PostgreSQL locking. No deploy, production
+repair, device UI rerun or iOS host build was performed.
+
+### TMDB film integration verification (2026-11-07)
+
+Mobile `feat/profileboard`; backend isolated worktree `../crew-api-tmdb`, branch
+`feat/tmdb-movies`, based on dev `e580025`. Existing unrelated mobile edits preserved.
+
+- `./gradlew --console=plain :core:data:iosSimulatorArm64Test :core:designsystem:iosSimulatorArm64Test :androidApp:compileDebugKotlin :composeApp:compileKotlinIosSimulatorArm64`:
+  passed; 54 data tests (8 new movie tests) and 34 design-system tests, no failures,
+  errors or skips. Android and shared iOS source compilation passed.
+- Backend checked-in Gradle 9.2.1 wrapper: `./gradlew --console=plain test --tests '*TmdbMovieCatalogTest' --tests '*FavoriteMovieServiceTest' --tests '*FavoriteMoviePersistenceTest'`:
+  passed; 11 provider/service/H2/API security tests. Earlier verification also passed
+  under the mobile wrapper's Gradle 9.1.0; final backend evidence uses its own wrapper.
+- A one-off Python HTTPS check loaded only `TMDB_READ_ACCESS_TOKEN` from ignored local
+  backend configuration without displaying it. Live search (`Interstellar`, `tr`, page 1)
+  returned 20 results and detail lookup verified the same ID/title/date/poster.
+
+Initial mobile compilation caught incorrect copied song types and a shadowed page
+parameter; these were corrected before the passing checks. No test was weakened.
+H2 does not execute Flyway. PostgreSQL migration, live Crew endpoint integration,
+physical-device/emulator UI, iOS host build/link, deployment and commercial entitlement
+are not verified by these checks. No commit, push or deployment performed.
+
+## Profile board Loves verification (2026-11-07)
+
+Mobile `feat/profileboard` (existing uncommitted work preserved):
+`./gradlew --console=plain :core:data:iosSimulatorArm64Test :core:designsystem:iosSimulatorArm64Test :androidApp:compileDebugKotlin :composeApp:compileKotlinIosSimulatorArm64`
+passed: 55 data and 35 design-system tests, zero failures, and both source compilations.
+Backend `../crew-api-loves`, `feat/profileboard-loves` from dev `0ceaca1`:
+`./gradlew --console=plain test --tests '*ProfileBoardValidationTest' --tests '*ProfileBoardPersistenceTest'`
+passed: 22 tests, zero failures, including authenticated API writes, legacy omission,
+invalid selections, persistence, clear, revision conflicts and account isolation.
+H2 uses Hibernate DDL; PostgreSQL/Flyway execution, device UI and iOS host linking
+were not run. No deployment, commit or push performed. Existing Compose/Skiko and
+backend deprecation warnings remain outside this change.
+
+### Loves clear serialization regression (2026-11-07)
+
+The new `clearingLovesExplicitlySendsEmptyArrayWithDefaultJsonSettings` test failed
+before the fix: default JSON omitted hobbies. After per-field `EncodeDefault`,
+`./gradlew --console=plain :core:data:iosSimulatorArm64Test :androidApp:compileDebugKotlin :composeApp:compileKotlinIosSimulatorArm64`
+passed. The test verifies explicit `hobbies: []` under the production default-omission
+settings. Device UI and live authenticated clear were not run; no backend change needed.
+
+### Profile board credits and film sheet correction (2026-11-08)
+
+`./gradlew --console=plain :androidApp:compileDebugKotlin
+:composeApp:compileKotlinIosSimulatorArm64 :core:designsystem:iosSimulatorArm64Test`
+passed. Credits now open from Settings; dismissal changes preserve the shared sheet
+state, and film writes no longer trigger QR loading. Initial compilation caught
+internal cross-module resource access; the dialog was moved into the design-system
+module before the successful run. Device interaction, sheet animation, screen readers
+and the Swift host build were not exercised; compilation/tests do not verify runtime
+smoothness. Existing unrelated working-tree changes were preserved.
+
+### Tile long press and haptic feedback (2026-11-08)
+
+`./gradlew --console=plain :androidApp:compileDebugKotlin
+:composeApp:compileKotlinIosSimulatorArm64` passed after adding tile long-press
+editing through the existing ImpactHaptics adapter. `git diff --check` passed.
+Physical haptic feedback, touch/scroll arbitration, TalkBack/VoiceOver and Swift
+host linking were not exercised. No new SDK or platform adapter was added.
+
+### Profile board film card refinement (2026-11-08)
+
+`./gradlew --console=plain :androidApp:compileDebugKotlin
+:composeApp:compileKotlinIosSimulatorArm64` passed for the film-strip poster card,
+song play-icon removal and Ask-me tail removal. `git diff --check` passed.
+No device visual review, accessibility run or iOS host build was performed.
+
+Film card follow-up: the standard layered pixel sticker frame is restored around
+a full-area poster and dark bottom caption. Android and shared iOS source compilation
+passed again with the same command above; device visual inspection remains not run.
+
+Film frame follow-up: distinct coral accent and matching stepped content clipping
+compiled successfully for Android and shared iOS with the same command above.
+`git diff --check` passed. Device rendering remains unverified.
+
+Board tap follow-up: Spotify/TMDB external navigation was removed from filled
+tiles and the Loves doing heading removed. Android and shared iOS compilation
+passed with the same command above; `git diff --check` passed. Device interaction
+and visual checks were not run. Long-press editing remains wired.

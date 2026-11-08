@@ -93,3 +93,21 @@ service and H2/API-security tests. H2 tests verify current-account-only favorite
 preserved profile fields, Crew auth and missing-provider configuration behavior. They
 use Hibernate DDL and do not validate the PostgreSQL Flyway migration. Commands and
 runtime/provider limitations are in [COMMANDS](COMMANDS.md#favorite-music-infrastructure-verification-2026-11-06).
+
+## TMDB film coverage (2026-11-07)
+
+`MovieRepositoryTest` covers URL-encoded query/language/page, validation without network
+calls, absent favorites, save/delete routes, provider failures, unsafe movie/poster URLs,
+nonadvancing pagination and cancellation. Eight new tests pass within the 54-test data
+suite on iOS simulator; 34 design-system tests pass including Film sheet opening only
+in edit mode. Backend adds 11 passing provider/service/H2/security tests. Direct live
+TMDB search/detail also passed; see [COMMANDS](COMMANDS.md#tmdb-film-integration-verification-2026-11-07).
+Device UI, PostgreSQL migration and a live authenticated Crew save flow are not verified.
+
+## Profile board Loves coverage (2026-11-07)
+
+Board tests cover text/count/duplicate validation, persisted ordered selections,
+legacy omission, explicit clearing, authenticated API use, account isolation and
+revision conflicts. Mobile DTO tests cover cache/network round trips and legacy
+empty defaults; editor tests detect Loves-only modifications and enforce edit mode.
+Passing commands and PostgreSQL/device limitations are recorded in [COMMANDS](COMMANDS.md).

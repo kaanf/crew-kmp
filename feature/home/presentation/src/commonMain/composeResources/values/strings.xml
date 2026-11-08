@@ -144,4 +144,7 @@
     <string name="profile_board_conflict">Your board changed on another device. Reload to get the saved version.</string>
     <string name="profile_board_unsupported">Update the app to edit this board.</string>
     <string name="profile_board_qr_image_error">Couldn’t load your QR image. Your regular QR is still available.</string>
+    <string name="profile_board_song_save_error">Couldn’t update your song. Try again.</string>
+    <string name="profile_board_movie_save_error">Your film could not be saved. Please try again.</string>
+    <string name="profile_credits">Credits</string>
 </resources>
